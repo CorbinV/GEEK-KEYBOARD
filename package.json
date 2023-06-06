@@ -86,7 +86,7 @@
     "@amap/amap-jsapi-types": "0.0.13",
     "@iconify/json": "2.2.73",
     "@iconify/vue": "4.1.1",
-    "@soybeanjs/cli": "0.5.0",
+    "@soybeanjs/cli": "0.5.3",
     "@soybeanjs/vite-plugin-vue-page-route": "0.0.5",
     "@types/bmapgl": "0.0.7",
     "@types/crypto-js": "4.1.1",
@@ -126,5 +126,5 @@
     "commit-msg": "pnpm soy git-commit-verify",
     "pre-commit": "pnpm typecheck && pnpm soy lint-staged"
   },
-  "github-token": "REDACTED_GITHUB_TOKEN_3"
+  "github-token": "REDACTED_GITHUB_TOKEN_2"
 }
