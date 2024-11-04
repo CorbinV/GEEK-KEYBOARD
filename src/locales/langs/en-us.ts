@@ -143,11 +143,17 @@ const local: App.I18n.Schema = {
     500: 'Server Error',
     'iframe-page': 'Iframe',
     home: 'Home',
-    'user-center': 'User Center'
+    'user-center': 'User Center',
     // exception: 'Exception',
     // exception_403: '403',
     // exception_404: '404',
     // exception_500: '500'
+    'base-key': 'Base Key',
+    'super-key': 'Super Key',
+    'rapid-trigger': 'Rapid Trigger',
+    marco: 'Marco',
+    light: 'Light',
+    settings: 'Setting'
   },
   page: {
     login: {

@@ -143,7 +143,13 @@ const local: App.I18n.Schema = {
     500: '服务器错误',
     'iframe-page': '外链页面',
     home: '首页',
-    'user-center': '个人中心'
+    'user-center': '个人中心',
+    'base-key': '键值',
+    'super-key': '超级键',
+    'rapid-trigger': '快速触发',
+    marco: '宏编辑',
+    light: '灯效',
+    settings: '设置'
     // exception: '异常页',
     // exception_403: '403',
     // exception_404: '404',

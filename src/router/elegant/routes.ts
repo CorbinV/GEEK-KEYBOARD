@@ -40,6 +40,16 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
+    name: 'base-key',
+    path: '/base-key',
+    component: 'layout.base$view.base-key',
+    meta: {
+      title: 'base-key',
+      i18nKey: 'route.base-key',
+      order: 11
+    }
+  },
+  {
     name: 'home',
     path: '/home',
     component: 'layout.base$view.home',
@@ -64,6 +74,16 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
+    name: 'light',
+    path: '/light',
+    component: 'layout.base$view.light',
+    meta: {
+      title: 'light',
+      i18nKey: 'route.light',
+      order: 41
+    }
+  },
+  {
     name: 'login',
     path: '/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?',
     component: 'layout.blank$view.login',
@@ -73,6 +93,46 @@ export const generatedRoutes: GeneratedRoute[] = [
       i18nKey: 'route.login',
       constant: true,
       hideInMenu: true
+    }
+  },
+  {
+    name: 'marco',
+    path: '/marco',
+    component: 'layout.base$view.marco',
+    meta: {
+      title: 'marco',
+      i18nKey: 'route.marco',
+      order: 31
+    }
+  },
+  {
+    name: 'rapid-trigger',
+    path: '/rapid-trigger',
+    component: 'layout.base$view.rapid-trigger',
+    meta: {
+      title: 'rapid-trigger',
+      i18nKey: 'route.rapid-trigger',
+      order: 21
+    }
+  },
+  {
+    name: 'settings',
+    path: '/settings',
+    component: 'layout.base$view.settings',
+    meta: {
+      title: 'settings',
+      i18nKey: 'route.settings',
+      order: 61
+    }
+  },
+  {
+    name: 'super-key',
+    path: '/super-key',
+    component: 'layout.base$view.super-key',
+    meta: {
+      title: 'super-key',
+      i18nKey: 'route.super-key',
+      order: 21
     }
   },
   {

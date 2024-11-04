@@ -20,6 +20,12 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   500: () => import("@/views/_builtin/500/index.vue"),
   "iframe-page": () => import("@/views/_builtin/iframe-page/[url].vue"),
   login: () => import("@/views/_builtin/login/index.vue"),
+  "base-key": () => import("@/views/base-key/index.vue"),
   home: () => import("@/views/home/index.vue"),
+  light: () => import("@/views/light/index.vue"),
+  marco: () => import("@/views/marco/index.vue"),
+  "rapid-trigger": () => import("@/views/rapid-trigger/index.vue"),
+  settings: () => import("@/views/settings/index.vue"),
+  "super-key": () => import("@/views/super-key/index.vue"),
   "user-center": () => import("@/views/user-center/index.vue"),
 };
