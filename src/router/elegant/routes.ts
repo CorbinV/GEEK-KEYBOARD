@@ -46,6 +46,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'base-key',
       i18nKey: 'route.base-key',
+      localIcon: 'menu',
       order: 11
     }
   },
@@ -56,7 +57,8 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'home',
       i18nKey: 'route.home',
-      icon: 'mdi:monitor-dashboard',
+      localIcon: 'menu',
+      hideInMenu: true,
       order: 1
     }
   },
@@ -80,6 +82,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'light',
       i18nKey: 'route.light',
+      localIcon: 'light-change',
       order: 41
     }
   },
@@ -102,6 +105,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'marco',
       i18nKey: 'route.marco',
+      localIcon: 'link-points',
       order: 31
     }
   },
@@ -112,6 +116,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'rapid-trigger',
       i18nKey: 'route.rapid-trigger',
+      localIcon: 'dashboard',
       order: 21
     }
   },
@@ -122,6 +127,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'settings',
       i18nKey: 'route.settings',
+      localIcon: 'setting',
       order: 61
     }
   },
@@ -132,6 +138,7 @@ export const generatedRoutes: GeneratedRoute[] = [
     meta: {
       title: 'super-key',
       i18nKey: 'route.super-key',
+      localIcon: 'key-code',
       order: 21
     }
   },
