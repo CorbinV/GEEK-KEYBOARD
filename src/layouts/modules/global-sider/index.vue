@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useAppStore } from '~/src/store/modules/app';
 import { useThemeStore } from '~/src/store/modules/theme';
 import { useRouteStore } from '~/src/store/modules/route';
 import GlobalLogo from '../global-logo/index.vue';
@@ -12,7 +11,6 @@ defineOptions({
   name: 'GlobalSider'
 });
 
-const appStore = useAppStore();
 const themeStore = useThemeStore();
 const routeStore = useRouteStore();
 
@@ -24,16 +22,12 @@ const showLogo = computed(() => !isVerticalMix.value && !isHorizontalMix.value);
 
 <template>
   <DarkModeContainer class="size-full flex-col-stretch shadow-sider" :inverted="darkMenu">
-    <GlobalLogo
-      v-if="showLogo"
-      :show-title="!appStore.siderCollapse"
-      :style="{ height: themeStore.header.height + 'px' }"
-    />
+    <GlobalLogo v-if="showLogo" :show-title="false" :style="{ height: themeStore.header.height + 'px' }" />
     <VerticalMixMenu v-if="isVerticalMix">
       <GlobalLogo :show-title="false" :style="{ height: themeStore.header.height + 'px' }" />
     </VerticalMixMenu>
     <HorizontalMixMenu v-else-if="isHorizontalMix" />
-    <VerticalMenu v-else :dark-theme="darkMenu" :menus="routeStore.menus" />
+    <VerticalMenu v-else :dark-theme="darkMenu" :menus="routeStore.menus" class="mt-4" />
   </DarkModeContainer>
 </template>
 

@@ -42,7 +42,7 @@ export const themeSettings: App.Theme.ThemeSetting = {
     mixCollapsedWidth: 64,
     mixChildMenuWidth: 200,
     control: {
-      visible: true,
+      visible: false,
       default: 'expand'
     }
   },
