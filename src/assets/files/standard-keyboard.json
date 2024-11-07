@@ -642,33 +642,33 @@
     "code": 99
   },
   {
-    "key": "mousefir",
+    "key": "MOUSE_SIDDOWN",
     "coords": [3057, 647, 3163, 756],
     "alt": "mousefir",
-    "code": -1
+    "code": 244
   },
   {
-    "key": "mouseFour",
+    "key": "MOUSE_SIDUP",
     "coords": [3060, 527, 3163, 639],
     "alt": "mouseFour",
-    "code": -1
+    "code": 243
   },
   {
-    "key": "mouseThir",
+    "key": "MOUSE_MID",
     "coords": [3053, 407, 3159, 516],
     "alt": "mouseThir",
-    "code": -1
+    "code": 242
   },
   {
-    "key": "mouseSed",
+    "key": "MOUSE_RIGHT",
     "coords": [3057, 286, 3163, 396],
     "alt": "mouseSed",
-    "code": -1
+    "code": 241
   },
   {
-    "key": "mouseFir",
-    "coords": [3056, 167, 3163, 276],
+    "key": "MOUSE_LEFT",
+    "coords": [3059, 171, 3158, 272],
     "alt": "mouseFir",
-    "code": -1
+    "code": 240
   }
 ]
