@@ -1,0 +1,674 @@
+[
+  {
+    "key": "ESC",
+    "coords": [19, 19, 121, 122],
+    "alt": "Esc",
+    "code": 41
+  },
+  {
+    "key": "F1",
+    "coords": [247, 18, 355, 124],
+    "alt": "F1",
+    "code": 58
+  },
+  {
+    "key": "F2",
+    "coords": [362, 16, 471, 124],
+    "alt": "F2",
+    "code": 59
+  },
+  {
+    "key": "F3",
+    "coords": [483, 16, 586, 119],
+    "alt": "F3",
+    "code": 60
+  },
+  {
+    "key": "F4",
+    "coords": [595, 18, 707, 121],
+    "alt": "F4",
+    "code": 61
+  },
+  {
+    "key": "F5",
+    "coords": [824, 15, 933, 125],
+    "alt": "F5",
+    "code": 62
+  },
+  {
+    "key": "F6",
+    "coords": [942, 18, 1051, 122],
+    "alt": "F6",
+    "code": 63
+  },
+  {
+    "key": "F7",
+    "coords": [1062, 21, 1166, 125],
+    "alt": "F7",
+    "code": 64
+  },
+  {
+    "key": "F8",
+    "coords": [1175, 21, 1281, 125],
+    "alt": "F8",
+    "code": 65
+  },
+  {
+    "key": "F9",
+    "coords": [1405, 21, 1512, 122],
+    "alt": "F9",
+    "code": 66
+  },
+  {
+    "key": "F10",
+    "coords": [1523, 21, 1624, 122],
+    "alt": "F10",
+    "code": 67
+  },
+  {
+    "key": "F11",
+    "coords": [1635, 18, 1745, 122],
+    "alt": "F11",
+    "code": 68
+  },
+  {
+    "key": "F12",
+    "coords": [1753, 18, 1857, 122],
+    "alt": "F12",
+    "code": 69
+  },
+  {
+    "key": "SYSRQ",
+    "coords": [1981, 18, 2087, 122],
+    "alt": "PrscrnsysRq",
+    "code": 70
+  },
+  {
+    "key": "SCROLLLOCK",
+    "coords": [2107, 18, 2208, 124],
+    "alt": "ScrollLock",
+    "code": 71
+  },
+  {
+    "key": "PAUSE",
+    "coords": [2233, 21, 2334, 122],
+    "alt": "PauseBreak",
+    "code": 72
+  },
+  {
+    "key": "FN1",
+    "coords": [2458, 20, 2562, 127],
+    "alt": "FN1",
+    "code": -1
+  },
+  {
+    "key": "FN2",
+    "coords": [2581, 15, 2685, 124],
+    "alt": "FN2",
+    "code": -1
+  },
+  {
+    "key": "FN3",
+    "coords": [2705, 20, 2809, 124],
+    "alt": "FN3",
+    "code": -1
+  },
+  {
+    "key": "GRAVE",
+    "coords": [18, 169, 125, 279],
+    "alt": "~",
+    "code": 53
+  },
+  {
+    "key": "1",
+    "coords": [142, 167, 254, 276],
+    "alt": "!",
+    "code": 30
+  },
+  {
+    "key": "2",
+    "coords": [268, 170, 372, 276],
+    "alt": "@",
+    "code": 31
+  },
+  {
+    "key": "3",
+    "coords": [389, 170, 493, 276],
+    "alt": "#",
+    "code": 32
+  },
+  {
+    "key": "4",
+    "coords": [515, 172, 624, 273],
+    "alt": "￥",
+    "code": 33
+  },
+  {
+    "key": "5",
+    "coords": [639, 172, 745, 276],
+    "alt": "%",
+    "code": 34
+  },
+  {
+    "key": "6",
+    "coords": [765, 170, 869, 279],
+    "alt": "^",
+    "code": 35
+  },
+  {
+    "key": "7",
+    "coords": [886, 172, 995, 279],
+    "alt": "&",
+    "code": 36
+  },
+  {
+    "key": "8",
+    "coords": [1006, 170, 1116, 277],
+    "alt": "*",
+    "code": 37
+  },
+  {
+    "key": "9",
+    "coords": [1135, 167, 1242, 274],
+    "alt": "(",
+    "code": 38
+  },
+  {
+    "key": "0",
+    "coords": [1259, 167, 1366, 279],
+    "alt": ")",
+    "code": 39
+  },
+  {
+    "key": "MINUS",
+    "coords": [1383, 167, 1489, 279],
+    "alt": "_",
+    "code": 45
+  },
+  {
+    "key": "EQUAL",
+    "coords": [1506, 170, 1613, 274],
+    "alt": "=",
+    "code": 46
+  },
+  {
+    "key": "BACKSPACE",
+    "coords": [1627, 167, 1859, 275],
+    "alt": "BackSpace",
+    "code": 42
+  },
+  {
+    "key": "INSERT",
+    "coords": [1981, 172, 2090, 273],
+    "alt": "Insert",
+    "code": 73
+  },
+  {
+    "key": "HOME",
+    "coords": [2101, 168, 2211, 272],
+    "alt": "Home",
+    "code": 74
+  },
+  {
+    "key": "PAGEUP",
+    "coords": [2225, 167, 2337, 274],
+    "alt": "PgUp",
+    "code": 75
+  },
+  {
+    "key": "NUMLOCK",
+    "coords": [2455, 172, 2562, 273],
+    "alt": "NUMLock",
+    "code": 83
+  },
+  {
+    "key": "NUM_SLASH",
+    "coords": [2584, 169, 2685, 276],
+    "alt": "/",
+    "code": 84
+  },
+  {
+    "key": "NUM_ASTERISK",
+    "coords": [2705, 167, 2812, 279],
+    "alt": "*",
+    "code": 85
+  },
+  {
+    "key": "NUM_MINUS",
+    "coords": [2823, 170, 2932, 274],
+    "alt": "-",
+    "code": 86
+  },
+  {
+    "key": "TAB",
+    "coords": [22, 289, 181, 397],
+    "alt": "Tab",
+    "code": 43
+  },
+  {
+    "key": "Q",
+    "coords": [203, 292, 306, 395],
+    "alt": "Q",
+    "code": 20
+  },
+  {
+    "key": "W",
+    "coords": [323, 286, 432, 395],
+    "alt": "W",
+    "code": 26
+  },
+  {
+    "key": "E",
+    "coords": [449, 290, 558, 392],
+    "alt": "E",
+    "code": 8
+  },
+  {
+    "key": "R",
+    "coords": [575, 286, 681, 396],
+    "alt": "R",
+    "code": 21
+  },
+  {
+    "key": "T",
+    "coords": [695, 290, 804, 392],
+    "alt": "T",
+    "code": 23
+  },
+  {
+    "key": "Y",
+    "coords": [821, 286, 927, 392],
+    "alt": "Y",
+    "code": 28
+  },
+  {
+    "key": "U",
+    "coords": [941, 286, 1053, 396],
+    "alt": "U",
+    "code": 24
+  },
+  {
+    "key": "I",
+    "coords": [1067, 286, 1176, 396],
+    "alt": "I",
+    "code": 12
+  },
+  {
+    "key": "O",
+    "coords": [1190, 290, 1302, 396],
+    "alt": "O",
+    "code": 18
+  },
+  {
+    "key": "P",
+    "coords": [1316, 290, 1422, 392],
+    "alt": "P",
+    "code": 19
+  },
+  {
+    "key": "LEFTBRACE",
+    "coords": [1442, 286, 1548, 392],
+    "alt": "{",
+    "code": 47
+  },
+  {
+    "key": "RIGHTBRACE",
+    "coords": [1565, 290, 1671, 392],
+    "alt": "}",
+    "code": 48
+  },
+  {
+    "key": "BACKSLASH",
+    "coords": [1688, 290, 1859, 392],
+    "alt": "\\",
+    "code": 49
+  },
+  {
+    "key": "DELETE",
+    "coords": [1978, 286, 2084, 396],
+    "alt": "Delete",
+    "code": 76
+  },
+  {
+    "key": "END",
+    "coords": [2101, 286, 2210, 396],
+    "alt": "End",
+    "code": 77
+  },
+  {
+    "key": "PAGEDOWN",
+    "coords": [2227, 286, 2330, 392],
+    "alt": "PgDn",
+    "code": 78
+  },
+  {
+    "key": "NUM_7",
+    "coords": [2456, 286, 2562, 396],
+    "alt": "7",
+    "code": 95
+  },
+  {
+    "key": "NUM_8",
+    "coords": [2579, 286, 2685, 396],
+    "alt": "8",
+    "code": 96
+  },
+  {
+    "key": "NUM_9",
+    "coords": [2702, 286, 2808, 396],
+    "alt": "9",
+    "code": 97
+  },
+  {
+    "key": "NUM_PLUS",
+    "coords": [2821, 286, 2937, 515],
+    "alt": "+",
+    "code": 87
+  },
+  {
+    "key": "CAPSLOCK",
+    "coords": [16, 406, 248, 515],
+    "alt": "CapsLock",
+    "code": 57
+  },
+  {
+    "key": "A",
+    "coords": [258, 409, 371, 515],
+    "alt": "A",
+    "code": 4
+  },
+  {
+    "key": "S",
+    "coords": [388, 409, 494, 515],
+    "alt": "S",
+    "code": 22
+  },
+  {
+    "key": "D",
+    "coords": [511, 409, 620, 515],
+    "alt": "D",
+    "code": 7
+  },
+  {
+    "key": "F",
+    "coords": [630, 406, 743, 515],
+    "alt": "F",
+    "code": 9
+  },
+  {
+    "key": "G",
+    "coords": [756, 406, 866, 515],
+    "alt": "G",
+    "code": 10
+  },
+  {
+    "key": "H",
+    "coords": [888, 409, 992, 513],
+    "alt": "H",
+    "code": 11
+  },
+  {
+    "key": "J",
+    "coords": [1005, 411, 1115, 520],
+    "alt": "J",
+    "code": 13
+  },
+  {
+    "key": "K",
+    "coords": [1132, 407, 1234, 516],
+    "alt": "K",
+    "code": 14
+  },
+  {
+    "key": "L",
+    "coords": [1251, 407, 1364, 516],
+    "alt": "L",
+    "code": 15
+  },
+  {
+    "key": "SEMICOLON",
+    "coords": [1378, 407, 1487, 516],
+    "alt": ":",
+    "code": 51
+  },
+  {
+    "key": "APOSTROPHE",
+    "coords": [1504, 411, 1610, 516],
+    "alt": "&quot;",
+    "code": 52
+  },
+  {
+    "key": "ENTER",
+    "coords": [1623, 411, 1859, 520],
+    "alt": "Enter",
+    "code": 40
+  },
+  {
+    "key": "NUM_4",
+    "coords": [2459, 411, 2565, 516],
+    "alt": "4",
+    "code": 92
+  },
+  {
+    "key": "NUM_5",
+    "coords": [2579, 411, 2685, 520],
+    "alt": "5",
+    "code": 93
+  },
+  {
+    "key": "NUM_6",
+    "coords": [2705, 411, 2808, 516],
+    "alt": "6",
+    "code": 94
+  },
+  {
+    "key": "LEFTSHIFT",
+    "coords": [12, 527, 309, 639],
+    "alt": "Shift",
+    "code": 225
+  },
+  {
+    "key": "Z",
+    "coords": [326, 530, 436, 636],
+    "alt": "Z",
+    "code": 29
+  },
+  {
+    "key": "X",
+    "coords": [449, 530, 558, 636],
+    "alt": "X",
+    "code": 27
+  },
+  {
+    "key": "C",
+    "coords": [572, 530, 681, 636],
+    "alt": "C",
+    "code": 6
+  },
+  {
+    "key": "V",
+    "coords": [698, 530, 804, 636],
+    "alt": "V",
+    "code": 25
+  },
+  {
+    "key": "B",
+    "coords": [818, 525, 930, 637],
+    "alt": "B",
+    "code": 5
+  },
+  {
+    "key": "N",
+    "coords": [947, 527, 1053, 640],
+    "alt": "N",
+    "code": 17
+  },
+  {
+    "key": "M",
+    "coords": [1070, 530, 1176, 636],
+    "alt": "M",
+    "code": 16
+  },
+  {
+    "key": "COMMA",
+    "coords": [1193, 530, 1302, 633],
+    "alt": ",",
+    "code": 54
+  },
+  {
+    "key": "DOT",
+    "coords": [1313, 525, 1425, 634],
+    "alt": "。",
+    "code": 55
+  },
+  {
+    "key": "SLASH",
+    "coords": [1436, 529, 1548, 635],
+    "alt": "、",
+    "code": 56
+  },
+  {
+    "key": "RIGHTSHIFT",
+    "coords": [1569, 525, 1859, 637],
+    "alt": "ShirftL",
+    "code": 229
+  },
+  {
+    "key": "UP",
+    "coords": [2098, 529, 2214, 642],
+    "alt": "Up",
+    "code": 82
+  },
+  {
+    "key": "NUM_1",
+    "coords": [2453, 525, 2562, 631],
+    "alt": "1",
+    "code": 89
+  },
+  {
+    "key": "NUM_2",
+    "coords": [2579, 528, 2685, 634],
+    "alt": "2",
+    "code": 90
+  },
+  {
+    "key": "NUM_3",
+    "coords": [2695, 526, 2811, 635],
+    "alt": "3",
+    "code": 91
+  },
+  {
+    "key": "NUM_ENTER",
+    "coords": [2821, 525, 2934, 757],
+    "alt": "NUM_Enter",
+    "code": 88
+  },
+  {
+    "key": "LEFTCTRL",
+    "coords": [16, 649, 149, 758],
+    "alt": "Ctrl",
+    "code": 224
+  },
+  {
+    "key": "LEFTWIN",
+    "coords": [162, 648, 299, 760],
+    "alt": "Win",
+    "code": 227
+  },
+  {
+    "key": "LEFTALT",
+    "coords": [313, 648, 446, 758],
+    "alt": "Ait",
+    "code": 226
+  },
+  {
+    "key": "SPACE",
+    "coords": [1268, 757, 463, 648],
+    "alt": "Space",
+    "code": 44
+  },
+  {
+    "key": "RIGHTALT",
+    "coords": [1285, 645, 1415, 758],
+    "alt": "Ait2",
+    "code": 230
+  },
+  {
+    "key": "RIGHTWIN",
+    "coords": [1429, 645, 1562, 754],
+    "alt": "Win",
+    "code": 231
+  },
+  {
+    "key": "MENU",
+    "coords": [1579, 646, 1709, 755],
+    "alt": "Menu",
+    "code": 118
+  },
+  {
+    "key": "RIGHTCTRL",
+    "coords": [1726, 648, 1862, 754],
+    "alt": "Ctrl2",
+    "code": 228
+  },
+  {
+    "key": "LEFT",
+    "coords": [1978, 644, 2087, 757],
+    "alt": "Left",
+    "code": 80
+  },
+  {
+    "key": "DOWN",
+    "coords": [2101, 645, 2210, 758],
+    "alt": "Down",
+    "code": 81
+  },
+  {
+    "key": "RIGHT",
+    "coords": [2227, 647, 2333, 760],
+    "alt": "right",
+    "code": 79
+  },
+  {
+    "key": "NUM_0",
+    "coords": [2456, 646, 2688, 758],
+    "alt": "0",
+    "code": 98
+  },
+  {
+    "key": "NUM_DOT",
+    "coords": [2702, 650, 2811, 759],
+    "alt": "Del",
+    "code": 99
+  },
+  {
+    "key": "mousefir",
+    "coords": [3057, 647, 3163, 756],
+    "alt": "mousefir",
+    "code": -1
+  },
+  {
+    "key": "mouseFour",
+    "coords": [3060, 527, 3163, 639],
+    "alt": "mouseFour",
+    "code": -1
+  },
+  {
+    "key": "mouseThir",
+    "coords": [3053, 407, 3159, 516],
+    "alt": "mouseThir",
+    "code": -1
+  },
+  {
+    "key": "mouseSed",
+    "coords": [3057, 286, 3163, 396],
+    "alt": "mouseSed",
+    "code": -1
+  },
+  {
+    "key": "mouseFir",
+    "coords": [3056, 167, 3163, 276],
+    "alt": "mouseFir",
+    "code": -1
+  }
+]
