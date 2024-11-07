@@ -21,7 +21,11 @@ const showLogo = computed(() => !isVerticalMix.value && !isHorizontalMix.value);
 </script>
 
 <template>
-  <DarkModeContainer class="size-full flex-col-stretch shadow-sider" :inverted="darkMenu">
+  <DarkModeContainer
+    class="size-full flex-col-stretch shadow-sider"
+    :inverted="darkMenu"
+    style="background-color: #222226"
+  >
     <GlobalLogo v-if="showLogo" :show-title="false" :style="{ height: themeStore.header.height + 'px' }" />
     <VerticalMixMenu v-if="isVerticalMix">
       <GlobalLogo :show-title="false" :style="{ height: themeStore.header.height + 'px' }" />

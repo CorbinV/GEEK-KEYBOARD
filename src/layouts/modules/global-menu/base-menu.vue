@@ -8,7 +8,7 @@ import { useAppStore } from '@/store/modules/app';
 import { useThemeStore } from '@/store/modules/theme';
 import { useRouteStore } from '@/store/modules/route';
 import { useRouterPush } from '@/hooks/common/router';
-
+type MenuThemeOverrides = NonNullable<MenuProps['themeOverrides']>;
 defineOptions({
   name: 'BaseMenu'
 });
@@ -18,7 +18,9 @@ interface Props {
   mode?: MenuProps['mode'];
   menus: App.Global.Menu[];
 }
-
+const x: MenuThemeOverrides = {
+  fontSize: '16px'
+};
 const props = withDefaults(defineProps<Props>(), {
   mode: 'vertical'
 });
@@ -75,6 +77,7 @@ watch(
   <SimpleScrollbar>
     <NMenu
       v-model:expanded-keys="expandedKeys"
+      :theme-overrides="x"
       :mode="mode"
       :value="selectedKey"
       :collapsed="siderCollapse"

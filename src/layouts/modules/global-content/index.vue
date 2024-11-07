@@ -39,6 +39,7 @@ const transitionName = computed(() => (themeStore.page.animate ? themeStore.page
           :key="route.path"
           :class="{ 'p-16px': showPadding }"
           class="flex-grow bg-layout transition-300"
+          style="background-color: #19191d; color: #ffffff"
         />
       </KeepAlive>
     </Transition>
