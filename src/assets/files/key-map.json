@@ -1,0 +1,881 @@
+[
+  {
+    "type": 0,
+    "code": {
+      "4": {
+        "type": "str",
+        "icon": "",
+        "label": "A"
+      },
+      "5": {
+        "type": "str",
+        "icon": "",
+        "label": "B"
+      },
+      "6": {
+        "type": "str",
+        "icon": "",
+        "label": "C"
+      },
+      "7": {
+        "type": "str",
+        "icon": "",
+        "label": "D"
+      },
+      "8": {
+        "type": "str",
+        "icon": "",
+        "label": "E"
+      },
+      "9": {
+        "type": "str",
+        "icon": "",
+        "label": "F"
+      },
+      "10": {
+        "type": "str",
+        "icon": "",
+        "label": "G"
+      },
+      "11": {
+        "type": "str",
+        "icon": "",
+        "label": "H"
+      },
+      "12": {
+        "type": "str",
+        "icon": "",
+        "label": "I"
+      },
+      "13": {
+        "type": "str",
+        "icon": "",
+        "label": "J"
+      },
+      "14": {
+        "type": "str",
+        "icon": "",
+        "label": "K"
+      },
+      "15": {
+        "type": "str",
+        "icon": "",
+        "label": "L"
+      },
+      "16": {
+        "type": "str",
+        "icon": "",
+        "label": "M"
+      },
+      "17": {
+        "type": "str",
+        "icon": "",
+        "label": "N"
+      },
+      "18": {
+        "type": "str",
+        "icon": "",
+        "label": "O"
+      },
+      "19": {
+        "type": "str",
+        "icon": "",
+        "label": "P"
+      },
+      "20": {
+        "type": "str",
+        "icon": "",
+        "label": "Q"
+      },
+      "21": {
+        "type": "str",
+        "icon": "",
+        "label": "R"
+      },
+      "22": {
+        "type": "str",
+        "icon": "",
+        "label": "S"
+      },
+      "23": {
+        "type": "str",
+        "icon": "",
+        "label": "T"
+      },
+      "24": {
+        "type": "str",
+        "icon": "",
+        "label": "U"
+      },
+      "25": {
+        "type": "str",
+        "icon": "",
+        "label": "V"
+      },
+      "26": {
+        "type": "str",
+        "icon": "",
+        "label": "W"
+      },
+      "27": {
+        "type": "str",
+        "icon": "",
+        "label": "X"
+      },
+      "28": {
+        "type": "str",
+        "icon": "",
+        "label": "Y"
+      },
+      "29": {
+        "type": "str",
+        "icon": "",
+        "label": "Z"
+      },
+      "30": {
+        "type": "str",
+        "icon": "",
+        "label": "!1"
+      },
+      "31": {
+        "type": "str",
+        "icon": "",
+        "label": "@2"
+      },
+      "32": {
+        "type": "str",
+        "icon": "",
+        "label": "#3"
+      },
+      "33": {
+        "type": "str",
+        "icon": "",
+        "label": "$4"
+      },
+      "34": {
+        "type": "str",
+        "icon": "",
+        "label": "%5"
+      },
+      "35": {
+        "type": "str",
+        "icon": "",
+        "label": "^6"
+      },
+      "36": {
+        "type": "str",
+        "icon": "",
+        "label": "&7"
+      },
+      "37": {
+        "type": "str",
+        "icon": "",
+        "label": "*8"
+      },
+      "38": {
+        "type": "str",
+        "icon": "",
+        "label": "(9"
+      },
+      "39": {
+        "type": "str",
+        "icon": "",
+        "label": ")0"
+      },
+      "40": {
+        "type": "str",
+        "icon": "",
+        "label": "Enter"
+      },
+      "41": {
+        "type": "str",
+        "icon": "",
+        "label": "Esc"
+      },
+      "42": {
+        "type": "str",
+        "icon": "",
+        "label": "Back Space"
+      },
+      "43": {
+        "type": "str",
+        "icon": "",
+        "label": "Tab"
+      },
+      "44": {
+        "type": "str",
+        "icon": "",
+        "label": "-"
+      },
+      "45": {
+        "type": "str",
+        "icon": "",
+        "label": "_-"
+      },
+      "46": {
+        "type": "str",
+        "icon": "",
+        "label": "=+"
+      },
+      "47": {
+        "type": "str",
+        "icon": "",
+        "label": "{["
+      },
+      "48": {
+        "type": "str",
+        "icon": "",
+        "label": "}]"
+      },
+      "49": {
+        "type": "str",
+        "icon": "",
+        "label": "\\|"
+      },
+      "51": {
+        "type": "str",
+        "icon": "",
+        "label": ";:"
+      },
+      "52": {
+        "type": "str",
+        "icon": "",
+        "label": "'\""
+      },
+      "53": {
+        "type": "str",
+        "icon": "",
+        "label": "~."
+      },
+      "54": {
+        "type": "str",
+        "icon": "",
+        "label": ",<"
+      },
+      "55": {
+        "type": "str",
+        "icon": "",
+        "label": ".>"
+      },
+      "56": {
+        "type": "str",
+        "icon": "",
+        "label": "/?"
+      },
+      "57": {
+        "type": "str",
+        "icon": "",
+        "label": "Caps Lock"
+      },
+      "58": {
+        "type": "str",
+        "icon": "",
+        "label": "F1"
+      },
+      "59": {
+        "type": "str",
+        "icon": "",
+        "label": "F2"
+      },
+      "60": {
+        "type": "str",
+        "icon": "",
+        "label": "F3"
+      },
+      "61": {
+        "type": "str",
+        "icon": "",
+        "label": "F4"
+      },
+      "62": {
+        "type": "str",
+        "icon": "",
+        "label": "F5"
+      },
+      "63": {
+        "type": "str",
+        "icon": "",
+        "label": "F6"
+      },
+      "64": {
+        "type": "str",
+        "icon": "",
+        "label": "F7"
+      },
+      "65": {
+        "type": "str",
+        "icon": "",
+        "label": "F8"
+      },
+      "66": {
+        "type": "str",
+        "icon": "",
+        "label": "F9"
+      },
+      "67": {
+        "type": "str",
+        "icon": "",
+        "label": "F10"
+      },
+      "68": {
+        "type": "str",
+        "icon": "",
+        "label": "F11"
+      },
+      "69": {
+        "type": "str",
+        "icon": "",
+        "label": "F12"
+      },
+      "70": {
+        "type": "str",
+        "icon": "",
+        "label": "Prcsrn sysrq"
+      },
+      "71": {
+        "type": "str",
+        "icon": "",
+        "label": "Scroll Lock"
+      },
+      "72": {
+        "type": "str",
+        "icon": "",
+        "label": "Pause Break"
+      },
+      "73": {
+        "type": "str",
+        "icon": "",
+        "label": "Insert"
+      },
+      "74": {
+        "type": "str",
+        "icon": "",
+        "label": "Home"
+      },
+      "75": {
+        "type": "str",
+        "icon": "",
+        "label": "Pg Up"
+      },
+      "76": {
+        "type": "str",
+        "icon": "",
+        "label": "Delete"
+      },
+      "77": {
+        "type": "str",
+        "icon": "",
+        "label": "End"
+      },
+      "78": {
+        "type": "str",
+        "icon": "",
+        "label": "Pg Dn"
+      },
+      "79": {
+        "type": "str",
+        "icon": "",
+        "label": "right"
+      },
+      "80": {
+        "type": "str",
+        "icon": "",
+        "label": "Left"
+      },
+      "81": {
+        "type": "str",
+        "icon": "",
+        "label": "Down"
+      },
+      "82": {
+        "type": "str",
+        "icon": "",
+        "label": "Up"
+      },
+      "83": {
+        "type": "str",
+        "icon": "",
+        "label": "Num Lock"
+      },
+      "84": {
+        "type": "str",
+        "icon": "",
+        "label": "/"
+      },
+      "85": {
+        "type": "str",
+        "icon": "",
+        "label": "*"
+      },
+      "86": {
+        "type": "str",
+        "icon": "",
+        "label": "-"
+      },
+      "87": {
+        "type": "str",
+        "icon": "",
+        "label": "+"
+      },
+      "88": {
+        "type": "str",
+        "icon": "",
+        "label": "NUM_Enter"
+      },
+      "89": {
+        "type": "str",
+        "icon": "",
+        "label": "1"
+      },
+      "90": {
+        "type": "str",
+        "icon": "",
+        "label": "2"
+      },
+      "91": {
+        "type": "str",
+        "icon": "",
+        "label": "3"
+      },
+      "92": {
+        "type": "str",
+        "icon": "",
+        "label": "4"
+      },
+      "93": {
+        "type": "str",
+        "icon": "",
+        "label": "5"
+      },
+      "94": {
+        "type": "str",
+        "icon": "",
+        "label": "6"
+      },
+      "95": {
+        "type": "str",
+        "icon": "",
+        "label": "7"
+      },
+      "96": {
+        "type": "str",
+        "icon": "",
+        "label": "8"
+      },
+      "97": {
+        "type": "str",
+        "icon": "",
+        "label": "9"
+      },
+      "98": {
+        "type": "str",
+        "icon": "",
+        "label": "0"
+      },
+      "99": {
+        "type": "str",
+        "icon": "",
+        "label": "Del"
+      },
+      "118": {
+        "type": "str",
+        "icon": "",
+        "label": "Menu"
+      },
+      "224": {
+        "type": "str",
+        "icon": "",
+        "label": "Ctrl"
+      },
+      "225": {
+        "type": "str",
+        "icon": "",
+        "label": "Shift"
+      },
+      "226": {
+        "type": "str",
+        "icon": "",
+        "label": "Alt"
+      },
+      "227": {
+        "type": "str",
+        "icon": "",
+        "label": "Win"
+      },
+      "228": {
+        "type": "str",
+        "icon": "",
+        "label": "Ctrl"
+      },
+      "229": {
+        "type": "str",
+        "icon": "",
+        "label": "Shirft"
+      },
+      "230": {
+        "type": "str",
+        "icon": "",
+        "label": "Alt"
+      },
+      "231": {
+        "type": "str",
+        "icon": "",
+        "label": "Win"
+      },
+      "240": {
+        "type": "str",
+        "icon": "",
+        "label": "mouseFir"
+      },
+      "241": {
+        "type": "str",
+        "icon": "",
+        "label": "mouseSed"
+      },
+      "242": {
+        "type": "str",
+        "icon": "",
+        "label": "mouseThir"
+      },
+      "243": {
+        "type": "str",
+        "icon": "",
+        "label": "mouseFour"
+      },
+      "244": {
+        "type": "str",
+        "icon": "",
+        "label": "mousefir"
+      },
+      "-1": {
+        "type": "str",
+        "icon": "",
+        "label": "FN3"
+      }
+    }
+  },
+  {
+    "type": 1,
+    "code": {
+      "0": {
+        "type": "icon",
+        "icon": "light-down",
+        "label": ""
+      },
+      "1": {
+        "type": "icon",
+        "icon": "light-up",
+        "label": ""
+      },
+      "2": {
+        "type": "icon",
+        "icon": "save",
+        "label": ""
+      },
+      "3": {
+        "type": "icon",
+        "icon": "select-all",
+        "label": ""
+      },
+      "4": {
+        "type": "icon",
+        "icon": "select-all",
+        "label": ""
+      },
+      "5": {
+        "type": "icon",
+        "icon": "close-window",
+        "label": ""
+      },
+      "6": {
+        "type": "icon",
+        "icon": "open-window",
+        "label": ""
+      },
+      "7": {
+        "type": "icon",
+        "icon": "delete",
+        "label": ""
+      },
+      "8": {
+        "type": "icon",
+        "icon": "feedback",
+        "label": ""
+      },
+      "9": {
+        "type": "icon",
+        "icon": "copy",
+        "label": ""
+      },
+      "10": {
+        "type": "icon",
+        "icon": "paste",
+        "label": ""
+      },
+      "11": {
+        "type": "icon",
+        "icon": "record",
+        "label": ""
+      },
+      "12": {
+        "type": "icon",
+        "icon": "calculator",
+        "label": ""
+      },
+      "13": {
+        "type": "icon",
+        "icon": "restore",
+        "label": ""
+      },
+      "14": {
+        "type": "icon",
+        "icon": "my-computer",
+        "label": ""
+      },
+      "15": {
+        "type": "icon",
+        "icon": "screenshot",
+        "label": ""
+      },
+      "16": {
+        "type": "icon",
+        "icon": "open-xbox",
+        "label": ""
+      },
+      "17": {
+        "type": "icon",
+        "icon": "task-manager",
+        "label": ""
+      },
+      "18": {
+        "type": "icon",
+        "icon": "open-folder",
+        "label": ""
+      },
+      "19": {
+        "type": "icon",
+        "icon": "to-desktop",
+        "label": ""
+      },
+      "20": {
+        "type": "icon",
+        "icon": "revoke",
+        "label": ""
+      },
+      "21": {
+        "type": "icon",
+        "icon": "new-folder",
+        "label": ""
+      },
+      "22": {
+        "type": "icon",
+        "icon": "minus",
+        "label": ""
+      },
+      "23": {
+        "type": "icon",
+        "icon": "find",
+        "label": ""
+      }
+    }
+  },
+  {
+    "type": 2,
+    "code": {
+      "0": {
+        "type": "icon",
+        "icon": "last",
+        "label": ""
+      },
+      "1": {
+        "type": "icon",
+        "icon": "next",
+        "label": ""
+      },
+      "2": {
+        "type": "icon",
+        "icon": "pause-play",
+        "label": ""
+      },
+      "3": {
+        "type": "icon",
+        "icon": "stop",
+        "label": ""
+      },
+      "4": {
+        "type": "icon",
+        "icon": "volume-up",
+        "label": ""
+      },
+      "5": {
+        "type": "icon",
+        "icon": "last",
+        "label": "volume-down"
+      },
+      "6": {
+        "type": "icon",
+        "icon": "volume-mute",
+        "label": ""
+      },
+      "7": {
+        "type": "icon",
+        "icon": "media",
+        "label": ""
+      },
+      "8": {
+        "type": "icon",
+        "icon": "home",
+        "label": ""
+      },
+      "9": {
+        "type": "icon",
+        "icon": "search",
+        "label": ""
+      },
+      "10": {
+        "type": "icon",
+        "icon": "page-pause",
+        "label": ""
+      },
+      "11": {
+        "type": "icon",
+        "icon": "email",
+        "label": ""
+      },
+      "12": {
+        "type": "icon",
+        "icon": "browser",
+        "label": ""
+      }
+    }
+  },
+  {
+    "type": 3,
+    "code": {}
+  },
+  {
+    "type": 4,
+    "code": {
+      "0": {
+        "type": "str",
+        "icon": "",
+        "label": "FN1"
+      },
+      "1": {
+        "type": "str",
+        "icon": "",
+        "label": "FN2"
+      },
+      "2": {
+        "type": "str",
+        "icon": "",
+        "label": "FN2"
+      },
+      "3": {
+        "type": "str",
+        "icon": "",
+        "label": "CFG1"
+      },
+      "4": {
+        "type": "str",
+        "icon": "",
+        "label": "CFG2"
+      },
+      "5": {
+        "type": "str",
+        "icon": "",
+        "label": "CFG3"
+      },
+      "6": {
+        "type": "mix",
+        "icon": "bluetooth",
+        "label": "1"
+      },
+      "7": {
+        "type": "mix",
+        "icon": "bluetooth",
+        "label": "2"
+      },
+      "8": {
+        "type": "mix",
+        "icon": "bluetooth",
+        "label": "3"
+      },
+      "9": {
+        "type": "mix",
+        "icon": "bluetooth",
+        "label": "4"
+      },
+      "10": {
+        "type": "mix",
+        "icon": "bluetooth",
+        "label": "5"
+      },
+      "11": {
+        "type": "mix",
+        "icon": "bluetooth",
+        "label": "6"
+      },
+      "12": {
+        "type": "icon",
+        "icon": "2.4G",
+        "label": ""
+      },
+      "13": {
+        "type": "icon",
+        "icon": "usb",
+        "label": ""
+      },
+      "14": {
+        "type": "icon",
+        "icon": "exchange",
+        "label": ""
+      },
+      "15": {
+        "type": "icon",
+        "icon": "power",
+        "label": ""
+      },
+      "16": {
+        "type": "str",
+        "icon": "",
+        "label": "Back light-"
+      },
+      "17": {
+        "type": "str",
+        "icon": "",
+        "label": "Back light+"
+      },
+      "18": {
+        "type": "str",
+        "icon": "",
+        "label": "Lock Win"
+      },
+      "19": {
+        "type": "str",
+        "icon": "",
+        "label": "Win Layer"
+      },
+      "20": {
+        "type": "icon",
+        "icon": "restore",
+        "label": ""
+      },
+      "21": {
+        "type": "str",
+        "icon": "",
+        "label": "LED Speed-"
+      },
+      "22": {
+        "type": "str",
+        "icon": "",
+        "label": "LED Speed+"
+      },
+      "23": {
+        "type": "str",
+        "icon": "",
+        "label": "LED Color"
+      }
+    }
+  }
+]
