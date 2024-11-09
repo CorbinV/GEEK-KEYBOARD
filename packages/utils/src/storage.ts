@@ -58,19 +58,32 @@ type LocalForage<T extends object> = Omit<typeof localforage, 'getItem' | 'setIt
 
   removeItem(key: keyof T, callback?: (err: any) => void): Promise<void>;
 };
-
 type LocalforageDriver = 'local' | 'indexedDB' | 'webSQL';
+type LocalforageOptions = {
+  name?: string;
+  storeName?: string;
+  // driver?: string | string[];
+  size?: number;
+  version?: number;
+  description?: string;
+};
 
-export function createLocalforage<T extends object>(driver: LocalforageDriver) {
+export function createLocalforage<T extends object>(driver: LocalforageDriver, options?: LocalforageOptions) {
   const driverMap: Record<LocalforageDriver, string> = {
     local: localforage.LOCALSTORAGE,
     indexedDB: localforage.INDEXEDDB,
     webSQL: localforage.WEBSQL
   };
-
-  localforage.config({
+  let ops = {
     driver: driverMap[driver]
-  });
+  };
+  if (driver === 'indexedDB' && options) {
+    ops = {
+      ...ops,
+      ...options
+    };
+  }
+  localforage.config(ops);
 
   return localforage as LocalForage<T>;
 }
