@@ -11,7 +11,8 @@ defineOptions({
 });
 
 const argShow = ref(true);
-const triggerPoint = ref(66);
+const showModal = ref(false);
+// const triggerPoint = ref(66);
 const rapidTriggerSiwtch = ref(true);
 const breakOptimization = ref(true);
 const pollingRateOptions = ref([
@@ -46,182 +47,159 @@ const shakelevel = ref([
     label: '高'
   }
 ]);
-
 function pollingRateSelect() {}
 function shakeSelect() {}
-function reset() {}
+function reset() {
+  console.log('sds');
+}
+
 function setAxosome() {}
 </script>
 
 <template>
-  <div class="ui-dispatch-box">
-    <div class="ui-title-btn">
-      <ElButton class="title-btn-one" type="primary" plain>全选</ElButton>
-      <ElButton class="title-btn-one" type="primary" plain>反选</ElButton>
-      <ElButton class="title-btn-one" type="primary" plain>清空</ElButton>
+  <div class="flex-raw flex gap-30px bg-[#171619] p-30px">
+    <div class="flex flex-col flex-1">
+      <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-20px">
+        <div class="flex-raw flex items-center">
+          <p class="vertical-bar"></p>
+          <p class="... text-lg">显示参数</p>
+        </div>
+
+        <NSwitch v-model:value="argShow"></NSwitch>
+      </div>
+      <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-20px pt-20px">
+        <div class="flex-raw flex items-center">
+          <p class="vertical-bar"></p>
+          <p class="... text-lg">轮询率</p>
+        </div>
+
+        <NDropdown
+          :options="pollingRateOptions"
+          class="h-40px w-100px"
+          placement="bottom-start"
+          trigger="click"
+          @select="pollingRateSelect"
+        >
+          <NButton class="h-40px w-100px bg-[#222227]">8K</NButton>
+        </NDropdown>
+      </div>
+
+      <div class="flex-raw flex items-center pt-20px">
+        <p class="vertical-bar"></p>
+        <p class="... text-lg">触发点</p>
+      </div>
+      <NSlider class="mt-20px"></NSlider>
+      <div class="flex-raw mt-70px flex place-content-center gap-100px pb-20px pt-20px">
+        <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">重置</button>
+        <button
+          class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
+          @click="setAxosome"
+        >
+          设置轴体
+        </button>
+      </div>
     </div>
 
-    <div class="dispatch-main">
-      <div class="dispatch-left">
-        <ul>
-          <li class="ui-li-one">
-            <div class="li-title">显示参数</div>
-            <NSpace>
-              <!-- 直接使用 v-model 绑定 active -->
-              <NSwitch v-model="argShow" value="{{argShow}}" />
-            </NSpace>
-          </li>
-
-          <li class="ui-li-one">
-            <div class="li-title">轮训率</div>
-            <!--
- <ElSelect v-model="value1" size="mini" placeholder="请选择">
-              <ElOption v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></ElOption>
-            </ElSelect>
--->
-            <NDropdown
-              :options="pollingRateOptions"
-              class="h-40px w-100px"
-              placement="bottom-start"
-              trigger="click"
-              @select="pollingRateSelect"
-            >
-              <NButton class="h-40px w-100px">8K</NButton>
-            </NDropdown>
-          </li>
-
-          <li class="ui-li-one flex-col">
-            <div class="li-title">触发点</div>
-            <div class="mt-20px">
-              <ElSlider v-model="triggerPoint"></ElSlider>
-              <NSlider show-tooltip />
-            </div>
-          </li>
-        </ul>
-
-        <div class="... mt70px text-center space-x-100px">
-          <NButton class="h-60px w-160px" type="primary" @click="reset">重置</NButton>
-          <NButton class="h-60px w-160px" type="primary" @click="setAxosome">设置轴体</NButton>
+    <div class="border-l-1px border-[#232327]"></div>
+    <div class="flex flex-col flex-1">
+      <div class="flex-raw flex justify-between pb-10px">
+        <div class="flex-raw flex items-center">
+          <p class="vertical-bar"></p>
+          <p class="... text-lg">开启快速触发</p>
         </div>
+
+        <NSwitch v-model:value="rapidTriggerSiwtch"></NSwitch>
       </div>
-      <div class="dispatch-right">
-        <ul>
-          <li class="ui-li-one">
-            <div class="title-one">
-              <div class="li-title">开启快速触发</div>
-              <div class="... mt10px text-14px text-[#999]">
-                通过设置触发行程，只需按压抬起一定程度即可反复触发按键，达到快速触发效果
-              </div>
-            </div>
+      <span class="... border-b-1px border-[#232327] pb-20px text-14px text-[#999]">
+        通过设置触发行程，只需按压抬起一定程度即可反复触发按键，达到快速触发效果
+      </span>
+      <div class="flex-raw flex items-center pt-20px">
+        <p class="vertical-bar"></p>
+        <p class="... text-lg">灵敏度</p>
+        <span class="... text-14px text-[#999]">（设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）</span>
+      </div>
+      <!-- <ElSlider v-model="triggerPoint" :tooltip="false"></ElSlider> -->
+      <NSlider class="pt20px"></NSlider>
+      <p
+        class="... mt10px border-b-1px border-[#232327] pb20px text-[#3C8DF4] underline underline-offset-4"
+        @click="showModal = true"
+      >
+        高级设置
+      </p>
 
-            <NSpace>
-              <!-- 直接使用 v-model 绑定 active -->
-              <NSwitch v-model="rapidTriggerSiwtch" />
-            </NSpace>
-          </li>
-          <li class="ui-li-one flex-col">
-            <div class="li-title">
-              灵敏度
-              <span class="... text-14px text-[#999]">
-                （设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）
-              </span>
-            </div>
-            <div class="mt-20px">
-              <ElSlider v-model="triggerPoint" :tooltip="false"></ElSlider>
-              <NSlider show-tooltip />
-              <p class="... mt20px text-[#3C8DF4] underline underline-offset-4">高级设置</p>
-            </div>
-          </li>
-          <li class="ui-li-one">
-            <div class="li-title">断触优化</div>
-            <NSpace>
-              <!-- 直接使用 v-model 绑定 active -->
+      <NModal v-model:show="showModal" style="width: 34%; height: 500px; background: #191b1d; border-radius: 10px">
+        <div class="model-bg flex flex-col items-center bg-green-4 p-30px text-[22px]">
+          <p>高级设置</p>
+          <div class="mt-20px w-100% flex flex-row justify-between text-[18px]">
+            <p>单独设置抬起按下灵敏度</p>
+            <NSwitch></NSwitch>
+          </div>
+          <p class="mt-40px w-100% text-[18px]">RT顶部死区</p>
+          <NSlider class="mt-20px"></NSlider>
 
-              <NSwitch v-model="breakOptimization" />
-            </NSpace>
-          </li>
-          <li class="ui-li-one">
-            <div class="li-title">防抖等级</div>
-            <NDropdown
-              :options="shakelevel"
-              class="h-40px w-100px"
-              placement="bottom-start"
-              trigger="click"
-              @select="shakeSelect"
+          <p class="mt-20px w-100% text-[18px]">RT底部死区</p>
+          <NSlider class="mt-20px"></NSlider>
+
+          <div class="mt-30px flex flex-row justify-center gap-70px">
+            <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">取消</button>
+            <button
+              class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
+              @click="showModal = false"
             >
-              <NButton class="h-40px w-100px">低</NButton>
-            </NDropdown>
-          </li>
-        </ul>
+              确定
+            </button>
+          </div>
+        </div>
+      </NModal>
+      <div class="flex-raw flex justify-between border-b-1px border-[#232327] pb-20px pt-20px">
+        <div class="flex-raw flex items-center">
+          <p class="vertical-bar"></p>
+          <p class="... text-lg">断触优化</p>
+        </div>
+
+        <NSwitch v-model:value="breakOptimization"></NSwitch>
+      </div>
+      <div class="flex-raw flex justify-between pt-20px">
+        <div class="flex-raw flex items-center">
+          <p class="vertical-bar"></p>
+          <p class="... text-lg">防抖等级</p>
+        </div>
+
+        <NDropdown
+          :options="shakelevel"
+          class="h-40px w-100px"
+          placement="bottom-start"
+          trigger="click"
+          @select="shakeSelect"
+        >
+          <NButton class="h-40px w-100px bg-[#222227]">低</NButton>
+        </NDropdown>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.ui-dispatch-box {
-  background-color: #000;
-}
-.dispatch-main {
-  display: flex;
-}
-.dispatch-left {
-  border-right: 1px solid #18171a;
-}
-.dispatch-left,
-.dispatch-right {
-  flex: 1;
-  padding: 0 30px;
-}
-.ui-li-one {
-  font-size: 16px;
-  color: #fff;
-  display: flex;
-  justify-content: space-between;
-  padding: 20px 20px;
-  border-bottom: 1px solid #18171a;
-  box-sizing: border-box;
-}
-.ui-li-two {
-  flex-direction: column;
+.vertical-bar {
+  width: 4px;
+  height: 18px;
+  margin-right: 10px;
+  background-color: #3c8df4; /* 按钮文字颜色 */
 }
 
-.li-title {
-  position: relative;
-  text-align: left;
+.hollow-btn {
+  background-color: transparent;
+  color: #3c8df4; /* 按钮文字颜色 */
+  border: 1px solid #3c8df4; /* 边框颜色 */
+  border-radius: 8px; /* 圆角边框 */
+  padding: 10px 20px;
   font-size: 18px;
-  &::before {
-    content: '';
-    position: absolute;
-    width: 4px;
-    height: 16px;
-    background-color: #2c5c9b;
-    left: -10px;
-    top: 3px;
-  }
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
-
-.title-one {
-  text-align: left;
-}
-
-.ui-left-btn {
-  margin-top: 40px;
-  margin-bottom: 40px;
-}
-
-.ui-btn {
-  margin-left: 60px;
-  width: 160px;
-}
-
-.ui-title-btn {
-  padding: 20px 0;
-  border-bottom: 1px solid #18171a;
-  margin-bottom: 30px;
-}
-.title-btn-one {
-  width: 90px;
-  margin-right: 35px;
+.hollow-btn:hover {
+  background-color: #3c8df4; /* 悬停时的背景颜色 */
+  color: white; /* 悬停时文字颜色 */
 }
 </style>
