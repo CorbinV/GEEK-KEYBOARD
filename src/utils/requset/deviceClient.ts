@@ -35,7 +35,7 @@ export class UsbTransfor {
       });
     });
   }
-  async send<T = any>(opstions: SendOps, cfg: SendCfg = { waitResponse: true }): Promise<T | undefined> {
+  async send<T = any>(opstions: SendOps, cfg: SendCfg = { waitResponse: true }): Promise<T> {
     // optimize: transform options and config to request
     const sendOps = JSON.parse(JSON.stringify(opstions));
     const { code, data } = await this.request<T>({
