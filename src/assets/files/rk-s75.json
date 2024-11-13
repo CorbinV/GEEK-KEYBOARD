@@ -2,9 +2,9 @@
   "layout": {
     "base": {
       "width": 50,
-      "height": 50,
-      "gap": 8,
-      "sGap": 14
+      "height": 48,
+      "gap": 6,
+      "sGap": 15
     },
     "keys": [
       {
