@@ -14,9 +14,9 @@ export type KeySmartCfg = {
   super: number[];
   mt: number[];
 };
-export type LeyerKeysConfig = {
+export type LayerKeysConfig = {
   config: number;
-  level: number;
+  layer: number;
   name: string;
   def: KeyDefaultCfg;
   keys: KeyCfgMap;

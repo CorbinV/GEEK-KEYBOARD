@@ -3,7 +3,7 @@ export const getBasicKey = {
   code: 0,
   data: {
     config: 1,
-    level: 1,
+    layer: 1,
     name: '默认（0）',
     def: {
       tary: [10, 10, 10, 1, 1]
