@@ -29,7 +29,7 @@ function useLayout(kbCfg: any) {
       width: `${kw}px`,
       height: `${kh}px`,
       left: `${offset + base.sGap * gap}px`,
-      top: `${kh * row + (row + 1) * 8}px`
+      top: `${kh * row + (row + 1) * base.gap}px`
     };
     kbCfg.value.offsetList[row] = offset + kw + base.gap;
   }
