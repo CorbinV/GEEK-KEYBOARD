@@ -7,6 +7,7 @@ interface KeyboardKeyProps {
   keyId: string;
   selected?: boolean;
   keyDetail?: any;
+  idx: number;
 }
 const props = defineProps<KeyboardKeyProps>();
 const keyInfo = ref();
@@ -66,14 +67,17 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
   <NTooltip trigger="hover" :disabled="true">
     <template #trigger>
       <div
-        class="inline-box absolute h-50px w-50px border-0 rounded-md bg-[#222227] text-#999999 hover:cursor-pointer"
+        class="inline-box base-light-bg text-c-primary absolute box-border h-50px w-50px border border-1 rounded-md hover:cursor-pointer"
         :style="keyStyle"
         :class="[
+          isLightColor ? 'border-#2c2c3c' : 'border-#222227',
           {
-            'bg-[#2c2c3c]': isLightColor
+            'bg-[#2c2c3c]': isLightColor,
+            '!border-[#3C8DF4]': selected
           }
         ]"
         :data-id="keyId"
+        :data-idx="idx"
       >
         <div class="h-full w-full flex flex-col items-center justify-center break-words">
           <template v-if="KeyView.type === 'mix'">
