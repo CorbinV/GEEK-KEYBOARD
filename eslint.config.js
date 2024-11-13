@@ -24,7 +24,9 @@ export default defineConfig(
         {
           enforceForClassFields: false
         }
-      ]
+      ],
+      'no-bitwise': 'warn',
+      'no-plusplus': 'warn'
     }
   }
 );
