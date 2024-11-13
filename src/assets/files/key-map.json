@@ -523,29 +523,29 @@
         "label": "Win"
       },
       "240": {
-        "type": "str",
+        "type": "icon",
         "icon": "",
-        "label": "mouseFir"
+        "label": "mouse-left"
       },
       "241": {
-        "type": "str",
+        "type": "icon",
         "icon": "",
-        "label": "mouseSed"
+        "label": "mouse-right"
       },
       "242": {
-        "type": "str",
+        "type": "icon",
         "icon": "",
-        "label": "mouseThir"
+        "label": "mouse-mid"
       },
       "243": {
-        "type": "str",
+        "type": "icon",
         "icon": "",
-        "label": "mouseFour"
+        "label": "mouse-x1"
       },
       "244": {
-        "type": "str",
+        "type": "icon",
         "icon": "",
-        "label": "mousefir"
+        "label": "mouse-x2"
       },
       "-1": {
         "type": "str",
@@ -579,102 +579,97 @@
       },
       "4": {
         "type": "icon",
-        "icon": "select-all",
+        "icon": "close-window",
         "label": ""
       },
       "5": {
         "type": "icon",
-        "icon": "close-window",
+        "icon": "open-window",
         "label": ""
       },
       "6": {
         "type": "icon",
-        "icon": "open-window",
+        "icon": "delete",
         "label": ""
       },
       "7": {
         "type": "icon",
-        "icon": "delete",
+        "icon": "feedback",
         "label": ""
       },
       "8": {
         "type": "icon",
-        "icon": "feedback",
+        "icon": "copy",
         "label": ""
       },
       "9": {
         "type": "icon",
-        "icon": "copy",
+        "icon": "paste",
         "label": ""
       },
       "10": {
         "type": "icon",
-        "icon": "paste",
+        "icon": "record",
         "label": ""
       },
       "11": {
         "type": "icon",
-        "icon": "record",
+        "icon": "calculator",
         "label": ""
       },
       "12": {
         "type": "icon",
-        "icon": "calculator",
+        "icon": "restore",
         "label": ""
       },
       "13": {
         "type": "icon",
-        "icon": "restore",
+        "icon": "my-computer",
         "label": ""
       },
       "14": {
         "type": "icon",
-        "icon": "my-computer",
+        "icon": "screenshot",
         "label": ""
       },
       "15": {
         "type": "icon",
-        "icon": "screenshot",
+        "icon": "xbox",
         "label": ""
       },
       "16": {
         "type": "icon",
-        "icon": "open-xbox",
+        "icon": "task-manager",
         "label": ""
       },
       "17": {
         "type": "icon",
-        "icon": "task-manager",
+        "icon": "open-folder",
         "label": ""
       },
       "18": {
         "type": "icon",
-        "icon": "open-folder",
+        "icon": "to-desktop",
         "label": ""
       },
       "19": {
         "type": "icon",
-        "icon": "to-desktop",
+        "icon": "revoke",
         "label": ""
       },
       "20": {
         "type": "icon",
-        "icon": "revoke",
+        "icon": "new-folder",
         "label": ""
       },
       "21": {
         "type": "icon",
-        "icon": "new-folder",
+        "icon": "minus",
         "label": ""
       },
       "22": {
         "type": "icon",
-        "icon": "minus",
-        "label": ""
-      },
-      "23": {
-        "type": "icon",
-        "icon": "find",
+        "icon": "search",
         "label": ""
       }
     }
@@ -699,7 +694,7 @@
       },
       "3": {
         "type": "icon",
-        "icon": "stop",
+        "icon": "abort-play",
         "label": ""
       },
       "4": {
@@ -734,15 +729,35 @@
       },
       "10": {
         "type": "icon",
-        "icon": "page-pause",
+        "icon": "refresh",
         "label": ""
       },
       "11": {
         "type": "icon",
-        "icon": "email",
+        "icon": "favorites",
         "label": ""
       },
       "12": {
+        "type": "icon",
+        "icon": "page-forward",
+        "label": ""
+      },
+      "13": {
+        "type": "icon",
+        "icon": "page-back",
+        "label": ""
+      },
+      "14": {
+        "type": "icon",
+        "icon": "page-pause",
+        "label": ""
+      },
+      "15": {
+        "type": "icon",
+        "icon": "email",
+        "label": ""
+      },
+      "16": {
         "type": "icon",
         "icon": "browser",
         "label": ""
@@ -818,7 +833,7 @@
       },
       "12": {
         "type": "icon",
-        "icon": "2.4G",
+        "icon": "ble-adapter",
         "label": ""
       },
       "13": {
@@ -858,7 +873,7 @@
       },
       "20": {
         "type": "icon",
-        "icon": "restore",
+        "icon": "reset",
         "label": ""
       },
       "21": {

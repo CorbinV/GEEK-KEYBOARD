@@ -3,6 +3,9 @@ import { computed, toRefs } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import KeyboardKey from './keyboard-key.vue';
 
+const emit = defineEmits<{
+  (e: 'update:keyId', keyId: number): void;
+}>();
 const keyboardStore = useKeyboardStore();
 const { kbCfg } = toRefs(keyboardStore);
 
@@ -10,11 +13,13 @@ const layoutList = computed(() => {
   return Object.keys(kbCfg.value.data).filter((k: string) => k !== 'base');
 });
 
-function handleKeyClick(e) {
-  const targetElement = e.target.closest('[data-id]');
-  if (targetElement) {
-    // do something
-    // console.log(targetElement.dataset.id);
+function handleKeyClick(e: MouseEvent) {
+  const targetElement = (e.target as Element).closest('[data-id]');
+  if (targetElement && targetElement instanceof HTMLElement) {
+    const key = targetElement.dataset.id;
+    if (key !== undefined) {
+      emit('update:keyId', Number(key));
+    }
   }
 }
 // feat: support keyboard change

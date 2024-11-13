@@ -18,7 +18,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         [key: string]: any;
       };
       offsetList: number[];
-    }>({ data: {}, offsetList: [] });
+      keyMap: any;
+    }>({ data: {}, offsetList: [], keyMap: {} });
     const { bool: hasConfig } = useBoolean(kbStg.get('hasConfig') === 'Y');
 
     const getAllConfig = async () => {
@@ -55,6 +56,12 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
 
       return data;
     };
+    const initKeyMap = () => {
+      import('@/assets/files/key-map.json').then(res => {
+        kbCfg.keyMap = res.default;
+      });
+    };
+    initKeyMap();
     return { initKeyboardData, kbCfg };
   }
   const { initKeyboardData, kbCfg } = useConfigData();

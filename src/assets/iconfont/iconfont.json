@@ -1,0 +1,450 @@
+{
+  "id": "4741999",
+  "name": "zkm-keyboard",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "42419625",
+      "name": "tab=切换语言",
+      "font_class": "a-tabqiehuanyuyan",
+      "unicode": "e72e",
+      "unicode_decimal": 59182
+    },
+    {
+      "icon_id": "42419627",
+      "name": "tab=退出",
+      "font_class": "a-tabtuichu",
+      "unicode": "e72d",
+      "unicode_decimal": 59181
+    },
+    {
+      "icon_id": "42419628",
+      "name": "tab=我的",
+      "font_class": "a-tabwode",
+      "unicode": "e733",
+      "unicode_decimal": 59187
+    },
+    {
+      "icon_id": "42419758",
+      "name": "鼠标=中键",
+      "font_class": "mouse-mid",
+      "unicode": "e737",
+      "unicode_decimal": 59191
+    },
+    {
+      "icon_id": "42419759",
+      "name": "鼠标=右键",
+      "font_class": "mouse-right",
+      "unicode": "e738",
+      "unicode_decimal": 59192
+    },
+    {
+      "icon_id": "42419760",
+      "name": "鼠标=左键",
+      "font_class": "mouse-left",
+      "unicode": "e739",
+      "unicode_decimal": 59193
+    },
+    {
+      "icon_id": "42419761",
+      "name": "鼠标=侧上",
+      "font_class": "mouse-x1",
+      "unicode": "e73a",
+      "unicode_decimal": 59194
+    },
+    {
+      "icon_id": "42419762",
+      "name": "鼠标=侧下",
+      "font_class": "mouse-x2",
+      "unicode": "e73b",
+      "unicode_decimal": 59195
+    },
+    {
+      "icon_id": "42418784",
+      "name": "view-stack",
+      "font_class": "view-stack",
+      "unicode": "e6eb",
+      "unicode_decimal": 59115
+    },
+    {
+      "icon_id": "42418782",
+      "name": "图标=新建文件夹",
+      "font_class": "new-folder",
+      "unicode": "e6ec",
+      "unicode_decimal": 59116
+    },
+    {
+      "icon_id": "42418783",
+      "name": "图标=网页后退",
+      "font_class": "page-back",
+      "unicode": "e6ed",
+      "unicode_decimal": 59117
+    },
+    {
+      "icon_id": "42418767",
+      "name": "图标=还原",
+      "font_class": "restore",
+      "unicode": "e6e9",
+      "unicode_decimal": 59113
+    },
+    {
+      "icon_id": "42418781",
+      "name": "图标=亮度-",
+      "font_class": "light-down",
+      "unicode": "e6ea",
+      "unicode_decimal": 59114
+    },
+    {
+      "icon_id": "42418774",
+      "name": "图标=浏览器新",
+      "font_class": "browser",
+      "unicode": "e6ee",
+      "unicode_decimal": 59118
+    },
+    {
+      "icon_id": "42418779",
+      "name": "图标=亮度减少",
+      "font_class": "light-down-minus",
+      "unicode": "e6ef",
+      "unicode_decimal": 59119
+    },
+    {
+      "icon_id": "42418777",
+      "name": "图标=下一首",
+      "font_class": "next",
+      "unicode": "e6f0",
+      "unicode_decimal": 59120
+    },
+    {
+      "icon_id": "42418780",
+      "name": "图标=音量+",
+      "font_class": "volume-up",
+      "unicode": "e6f1",
+      "unicode_decimal": 59121
+    },
+    {
+      "icon_id": "42418778",
+      "name": "图标=USB",
+      "font_class": "usb",
+      "unicode": "e6f2",
+      "unicode_decimal": 59122
+    },
+    {
+      "icon_id": "42418748",
+      "name": "图标=打开任务管理器",
+      "font_class": "task-manager",
+      "unicode": "e6e8",
+      "unicode_decimal": 59112
+    },
+    {
+      "icon_id": "42418776",
+      "name": "图标=启动媒体",
+      "font_class": "media",
+      "unicode": "e6f3",
+      "unicode_decimal": 59123
+    },
+    {
+      "icon_id": "42418760",
+      "name": "图标=播放暂停",
+      "font_class": "abort-play",
+      "unicode": "e6f4",
+      "unicode_decimal": 59124
+    },
+    {
+      "icon_id": "42418775",
+      "name": "图标=重置",
+      "font_class": "reset",
+      "unicode": "e6f5",
+      "unicode_decimal": 59125
+    },
+    {
+      "icon_id": "42418749",
+      "name": "图标=计算器",
+      "font_class": "calculator",
+      "unicode": "e6f6",
+      "unicode_decimal": 59126
+    },
+    {
+      "icon_id": "42418772",
+      "name": "图标=音量-",
+      "font_class": "volume-down",
+      "unicode": "e6f7",
+      "unicode_decimal": 59127
+    },
+    {
+      "icon_id": "42418773",
+      "name": "图标=浏览器",
+      "font_class": "compass",
+      "unicode": "e6f8",
+      "unicode_decimal": 59128
+    },
+    {
+      "icon_id": "42418742",
+      "name": "图标=灯效切换",
+      "font_class": "exchange",
+      "unicode": "e6f9",
+      "unicode_decimal": 59129
+    },
+    {
+      "icon_id": "42418770",
+      "name": "图标=粘贴",
+      "font_class": "paste",
+      "unicode": "e6fa",
+      "unicode_decimal": 59130
+    },
+    {
+      "icon_id": "42418771",
+      "name": "图标=网页停止",
+      "font_class": "page-pause",
+      "unicode": "e6fb",
+      "unicode_decimal": 59131
+    },
+    {
+      "icon_id": "42418769",
+      "name": "图标=我的电脑",
+      "font_class": "my-computer",
+      "unicode": "e6fc",
+      "unicode_decimal": 59132
+    },
+    {
+      "icon_id": "42418768",
+      "name": "图标=停止",
+      "font_class": "stop",
+      "unicode": "e6fd",
+      "unicode_decimal": 59133
+    },
+    {
+      "icon_id": "42418757",
+      "name": "图标=截图",
+      "font_class": "screenshot",
+      "unicode": "e6fe",
+      "unicode_decimal": 59134
+    },
+    {
+      "icon_id": "42418766",
+      "name": "图标=邮件",
+      "font_class": "email",
+      "unicode": "e6ff",
+      "unicode_decimal": 59135
+    },
+    {
+      "icon_id": "42418761",
+      "name": "图标=删除",
+      "font_class": "delete",
+      "unicode": "e700",
+      "unicode_decimal": 59136
+    },
+    {
+      "icon_id": "42418763",
+      "name": "图标=锁定",
+      "font_class": "lock",
+      "unicode": "e701",
+      "unicode_decimal": 59137
+    },
+    {
+      "icon_id": "42418741",
+      "name": "图标=恢复出厂设置",
+      "font_class": "a-tubiaohuifuchuchangshezhi",
+      "unicode": "e702",
+      "unicode_decimal": 59138
+    },
+    {
+      "icon_id": "42418765",
+      "name": "图标=音乐播放器",
+      "font_class": "music-player",
+      "unicode": "e703",
+      "unicode_decimal": 59139
+    },
+    {
+      "icon_id": "42418762",
+      "name": "图标=最小化",
+      "font_class": "minus",
+      "unicode": "e704",
+      "unicode_decimal": 59140
+    },
+    {
+      "icon_id": "42418759",
+      "name": "图标=剪切",
+      "font_class": "cut",
+      "unicode": "e706",
+      "unicode_decimal": 59142
+    },
+    {
+      "icon_id": "42418764",
+      "name": "图标=刷新",
+      "font_class": "refresh",
+      "unicode": "e707",
+      "unicode_decimal": 59143
+    },
+    {
+      "icon_id": "42418755",
+      "name": "图标=网页前进",
+      "font_class": "page-forward",
+      "unicode": "e708",
+      "unicode_decimal": 59144
+    },
+    {
+      "icon_id": "42418734",
+      "name": "图标=2.4g",
+      "font_class": "ble-adapter",
+      "unicode": "e709",
+      "unicode_decimal": 59145
+    },
+    {
+      "icon_id": "42418758",
+      "name": "图标=上一首",
+      "font_class": "last",
+      "unicode": "e70a",
+      "unicode_decimal": 59146
+    },
+    {
+      "icon_id": "42418753",
+      "name": "图标=收藏夹",
+      "font_class": "favorites",
+      "unicode": "e70b",
+      "unicode_decimal": 59147
+    },
+    {
+      "icon_id": "42418745",
+      "name": "图标=录制",
+      "font_class": "record",
+      "unicode": "e70c",
+      "unicode_decimal": 59148
+    },
+    {
+      "icon_id": "42418750",
+      "name": "图标=打开Xbox",
+      "font_class": "xbox",
+      "unicode": "e70d",
+      "unicode_decimal": 59149
+    },
+    {
+      "icon_id": "42418754",
+      "name": "图标=亮度增加",
+      "font_class": "light-up-plus",
+      "unicode": "e70e",
+      "unicode_decimal": 59150
+    },
+    {
+      "icon_id": "42418743",
+      "name": "图标=复制",
+      "font_class": "copy",
+      "unicode": "e70f",
+      "unicode_decimal": 59151
+    },
+    {
+      "icon_id": "42418751",
+      "name": "图标=亮度+",
+      "font_class": "light-up",
+      "unicode": "e710",
+      "unicode_decimal": 59152
+    },
+    {
+      "icon_id": "42418738",
+      "name": "图标=打开窗口",
+      "font_class": "open-window",
+      "unicode": "e711",
+      "unicode_decimal": 59153
+    },
+    {
+      "icon_id": "42418746",
+      "name": "图标=蓝牙",
+      "font_class": "bluetooth",
+      "unicode": "e712",
+      "unicode_decimal": 59154
+    },
+    {
+      "icon_id": "42418752",
+      "name": "图标=全选",
+      "font_class": "select-all",
+      "unicode": "e713",
+      "unicode_decimal": 59155
+    },
+    {
+      "icon_id": "42418744",
+      "name": "图标=开关接触唤醒",
+      "font_class": "power",
+      "unicode": "e714",
+      "unicode_decimal": 59156
+    },
+    {
+      "icon_id": "42418740",
+      "name": "图标=关闭窗口",
+      "font_class": "close-window",
+      "unicode": "e715",
+      "unicode_decimal": 59157
+    },
+    {
+      "icon_id": "42418747",
+      "name": "图标=静音",
+      "font_class": "volume-mute",
+      "unicode": "e716",
+      "unicode_decimal": 59158
+    },
+    {
+      "icon_id": "42418737",
+      "name": "图标=打开桌面",
+      "font_class": "to-desktop",
+      "unicode": "e717",
+      "unicode_decimal": 59159
+    },
+    {
+      "icon_id": "42418735",
+      "name": "图标=打开文件夹",
+      "font_class": "open-folder",
+      "unicode": "e718",
+      "unicode_decimal": 59160
+    },
+    {
+      "icon_id": "42418739",
+      "name": "图标=反馈",
+      "font_class": "feedback",
+      "unicode": "e719",
+      "unicode_decimal": 59161
+    },
+    {
+      "icon_id": "42418736",
+      "name": "图标=保存",
+      "font_class": "save",
+      "unicode": "e71a",
+      "unicode_decimal": 59162
+    },
+    {
+      "icon_id": "42418732",
+      "name": "图标=查找",
+      "font_class": "search",
+      "unicode": "e71b",
+      "unicode_decimal": 59163
+    },
+    {
+      "icon_id": "42418731",
+      "name": "图标=播放",
+      "font_class": "pause-play",
+      "unicode": "e71c",
+      "unicode_decimal": 59164
+    },
+    {
+      "icon_id": "42418733",
+      "name": "图标=撤销",
+      "font_class": "revoke",
+      "unicode": "e71d",
+      "unicode_decimal": 59165
+    },
+    {
+      "icon_id": "42419314",
+      "name": "mac按键=背光-",
+      "font_class": "backlight-down",
+      "unicode": "e71f",
+      "unicode_decimal": 59167
+    },
+    {
+      "icon_id": "42419307",
+      "name": "mac按键=背光+",
+      "font_class": "backlight-up",
+      "unicode": "e723",
+      "unicode_decimal": 59171
+    }
+  ]
+}

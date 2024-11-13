@@ -18,7 +18,13 @@ export default defineConfig(
           ignores: ['/^icon-/']
         }
       ],
-      'unocss/order-attributify': 'off'
+      'unocss/order-attributify': 'off',
+      'class-methods-use-this': [
+        'warn',
+        {
+          enforceForClassFields: false
+        }
+      ]
     }
   }
 );

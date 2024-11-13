@@ -1,0 +1,267 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4741999 */
+  src: url('iconfont.woff2?t=1731380712947') format('woff2'),
+       url('iconfont.woff?t=1731380712947') format('woff'),
+       url('iconfont.ttf?t=1731380712947') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-a-tabqiehuanyuyan:before {
+  content: "\e72e";
+}
+
+.icon-a-tabtuichu:before {
+  content: "\e72d";
+}
+
+.icon-a-tabwode:before {
+  content: "\e733";
+}
+
+.icon-mouse-mid:before {
+  content: "\e737";
+}
+
+.icon-mouse-right:before {
+  content: "\e738";
+}
+
+.icon-mouse-left:before {
+  content: "\e739";
+}
+
+.icon-mouse-x1:before {
+  content: "\e73a";
+}
+
+.icon-mouse-x2:before {
+  content: "\e73b";
+}
+
+.icon-view-stack:before {
+  content: "\e6eb";
+}
+
+.icon-new-folder:before {
+  content: "\e6ec";
+}
+
+.icon-page-back:before {
+  content: "\e6ed";
+}
+
+.icon-restore:before {
+  content: "\e6e9";
+}
+
+.icon-light-down:before {
+  content: "\e6ea";
+}
+
+.icon-browser:before {
+  content: "\e6ee";
+}
+
+.icon-light-down-minus:before {
+  content: "\e6ef";
+}
+
+.icon-next:before {
+  content: "\e6f0";
+}
+
+.icon-volume-up:before {
+  content: "\e6f1";
+}
+
+.icon-usb:before {
+  content: "\e6f2";
+}
+
+.icon-task-manager:before {
+  content: "\e6e8";
+}
+
+.icon-media:before {
+  content: "\e6f3";
+}
+
+.icon-abort-play:before {
+  content: "\e6f4";
+}
+
+.icon-reset:before {
+  content: "\e6f5";
+}
+
+.icon-calculator:before {
+  content: "\e6f6";
+}
+
+.icon-volume-down:before {
+  content: "\e6f7";
+}
+
+.icon-compass:before {
+  content: "\e6f8";
+}
+
+.icon-exchange:before {
+  content: "\e6f9";
+}
+
+.icon-paste:before {
+  content: "\e6fa";
+}
+
+.icon-page-pause:before {
+  content: "\e6fb";
+}
+
+.icon-my-computer:before {
+  content: "\e6fc";
+}
+
+.icon-stop:before {
+  content: "\e6fd";
+}
+
+.icon-screenshot:before {
+  content: "\e6fe";
+}
+
+.icon-email:before {
+  content: "\e6ff";
+}
+
+.icon-delete:before {
+  content: "\e700";
+}
+
+.icon-lock:before {
+  content: "\e701";
+}
+
+.icon-a-tubiaohuifuchuchangshezhi:before {
+  content: "\e702";
+}
+
+.icon-music-player:before {
+  content: "\e703";
+}
+
+.icon-minus:before {
+  content: "\e704";
+}
+
+.icon-cut:before {
+  content: "\e706";
+}
+
+.icon-refresh:before {
+  content: "\e707";
+}
+
+.icon-page-forward:before {
+  content: "\e708";
+}
+
+.icon-ble-adapter:before {
+  content: "\e709";
+}
+
+.icon-last:before {
+  content: "\e70a";
+}
+
+.icon-favorites:before {
+  content: "\e70b";
+}
+
+.icon-record:before {
+  content: "\e70c";
+}
+
+.icon-xbox:before {
+  content: "\e70d";
+}
+
+.icon-light-up-plus:before {
+  content: "\e70e";
+}
+
+.icon-copy:before {
+  content: "\e70f";
+}
+
+.icon-light-up:before {
+  content: "\e710";
+}
+
+.icon-open-window:before {
+  content: "\e711";
+}
+
+.icon-bluetooth:before {
+  content: "\e712";
+}
+
+.icon-select-all:before {
+  content: "\e713";
+}
+
+.icon-power:before {
+  content: "\e714";
+}
+
+.icon-close-window:before {
+  content: "\e715";
+}
+
+.icon-volume-mute:before {
+  content: "\e716";
+}
+
+.icon-to-desktop:before {
+  content: "\e717";
+}
+
+.icon-open-folder:before {
+  content: "\e718";
+}
+
+.icon-feedback:before {
+  content: "\e719";
+}
+
+.icon-save:before {
+  content: "\e71a";
+}
+
+.icon-search:before {
+  content: "\e71b";
+}
+
+.icon-pause-play:before {
+  content: "\e71c";
+}
+
+.icon-revoke:before {
+  content: "\e71d";
+}
+
+.icon-backlight-down:before {
+  content: "\e71f";
+}
+
+.icon-backlight-up:before {
+  content: "\e723";
+}
+
