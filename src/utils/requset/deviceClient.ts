@@ -15,15 +15,23 @@ export type RespOps<T = any> = {
   data: T;
 };
 const useMock: boolean = import.meta.env?.VITE_USE_MOCK === 'Y';
+/** @notice: just handle export mock data */
+function getAllMock() {
+  const modules = import.meta.glob('@/service/data/**/*.ts', { eager: true });
+  const res: any = {};
+  Object.entries(modules).forEach(([_, module]) => {
+    Object.assign(res, module);
+  });
+  return res;
+}
+const mockData = useMock ? getAllMock() : {};
 
 export class UsbTransfor {
   request<T = any>(config: MessageConfig): Promise<RespOps<T>> {
     if (useMock) {
       return new Promise(resolve => {
-        import('@/service/data/key-cfg').then((res: any) => {
-          const data = res[config.name];
-          resolve(data);
-        });
+        const data = mockData[config.name];
+        resolve(data);
       });
     }
     // feat: use device to send data
@@ -35,7 +43,7 @@ export class UsbTransfor {
       });
     });
   }
-  async send<T = any>(opstions: SendOps, cfg: SendCfg = { waitResponse: true }): Promise<T | undefined> {
+  async send<T = any>(opstions: SendOps, cfg: SendCfg = { waitResponse: true }): Promise<T> {
     // optimize: transform options and config to request
     const sendOps = JSON.parse(JSON.stringify(opstions));
     const { code, data } = await this.request<T>({

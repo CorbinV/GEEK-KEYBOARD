@@ -23,7 +23,11 @@ export default defineConfig<Theme>({
     }
   },
   shortcuts: {
-    'card-wrapper': 'rd-8px shadow-sm'
+    'card-wrapper': 'rd-8px shadow-sm',
+    'low-layer-bg': 'bg-#16161d',
+    'text-c-hl': 'text-#3C8DF4',
+    'text-c-primary': 'text-#999999',
+    'text-c-second': 'text-#666666'
   },
   transformers: [transformerDirectives(), transformerVariantGroup()],
   presets: [presetUno({ dark: 'class' }), presetWebTemplate()]
