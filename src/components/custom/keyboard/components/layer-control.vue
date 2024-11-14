@@ -35,8 +35,8 @@ function handleClick(e: MouseEvent) {
       v-for="layerInfo in layerList"
       :key="`l-${layerInfo.layer}`"
       :data-layer="layerInfo.layer"
-      class="layer-control--item w-full inline-flex rounded-md bg-#232327 py-2 hover:cursor-pointer"
-      :class="[{ 'layer-control--item__active': layerInfo.layer === localLayer }]"
+      class="layer-control--item text-c-second w-full inline-flex rounded-md bg-#232327 py-2 hover:cursor-pointer"
+      :class="[{ 'layer-control--item__active text-white': layerInfo.layer === localLayer }]"
     >
       <span class="w-full text-center">{{ layerInfo.label }}</span>
     </div>
