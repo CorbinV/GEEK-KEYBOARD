@@ -15,15 +15,23 @@ export type RespOps<T = any> = {
   data: T;
 };
 const useMock: boolean = import.meta.env?.VITE_USE_MOCK === 'Y';
+/** @notice: just handle export mock data */
+function getAllMock() {
+  const modules = import.meta.glob('@/service/data/**/*.ts', { eager: true });
+  const res: any = {};
+  Object.entries(modules).forEach(([_, module]) => {
+    Object.assign(res, module);
+  });
+  return res;
+}
+const mockData = useMock ? getAllMock() : {};
 
 export class UsbTransfor {
   request<T = any>(config: MessageConfig): Promise<RespOps<T>> {
     if (useMock) {
       return new Promise(resolve => {
-        import('@/service/data/key-cfg').then((res: any) => {
-          const data = res[config.name];
-          resolve(data);
-        });
+        const data = mockData[config.name];
+        resolve(data);
       });
     }
     // feat: use device to send data
