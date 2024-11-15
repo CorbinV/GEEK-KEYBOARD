@@ -81,7 +81,9 @@ function useKeySelectAndNotify() {
       detail.keyId = clickedKey.value.keyId;
       selectedDetail.value = detail;
     }
-    setTimeout(injResetSelectedInfo);
+    if (injSelectedInfo.value?.type >= 0) {
+      setTimeout(injResetSelectedInfo);
+    }
   }
   watchEffect(() => {
     updateSelectrdInfo(injSelectedInfo.value);
