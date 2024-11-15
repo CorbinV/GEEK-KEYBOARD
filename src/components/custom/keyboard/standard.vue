@@ -46,6 +46,7 @@ defineExpose({});
         :coords="area.coords"
         :data-key="area.key"
         :data-code="area.code"
+        class="hover:cursor-pointer"
       />
     </map>
   </div>
