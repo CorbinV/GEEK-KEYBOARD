@@ -375,7 +375,7 @@
       "79": {
         "type": "str",
         "icon": "",
-        "label": "right"
+        "label": "Right"
       },
       "80": {
         "type": "str",
@@ -420,7 +420,7 @@
       "88": {
         "type": "str",
         "icon": "",
-        "label": "NUM_Enter"
+        "label": "Enter"
       },
       "89": {
         "type": "str",
@@ -524,28 +524,28 @@
       },
       "240": {
         "type": "icon",
-        "icon": "",
-        "label": "mouse-left"
+        "icon": "mouse-left",
+        "label": ""
       },
       "241": {
         "type": "icon",
-        "icon": "",
-        "label": "mouse-right"
+        "icon": "mouse-right",
+        "label": ""
       },
       "242": {
         "type": "icon",
-        "icon": "",
-        "label": "mouse-mid"
+        "icon": "mouse-mid",
+        "label": ""
       },
       "243": {
         "type": "icon",
-        "icon": "",
-        "label": "mouse-x1"
+        "icon": "mouse-x1",
+        "label": ""
       },
       "244": {
         "type": "icon",
-        "icon": "",
-        "label": "mouse-x2"
+        "icon": "mouse-x2",
+        "label": ""
       },
       "-1": {
         "type": "str",
@@ -802,91 +802,101 @@
         "label": "CFG3"
       },
       "6": {
-        "type": "mix",
-        "icon": "bluetooth",
-        "label": "1"
+        "type": "str",
+        "icon": "",
+        "label": "CFG4"
       },
       "7": {
-        "type": "mix",
-        "icon": "bluetooth",
-        "label": "2"
+        "type": "str",
+        "icon": "",
+        "label": "CFG5"
       },
       "8": {
         "type": "mix",
         "icon": "bluetooth",
-        "label": "3"
+        "label": "1"
       },
       "9": {
         "type": "mix",
         "icon": "bluetooth",
-        "label": "4"
+        "label": "2"
       },
       "10": {
         "type": "mix",
         "icon": "bluetooth",
-        "label": "5"
+        "label": "3"
       },
       "11": {
         "type": "mix",
         "icon": "bluetooth",
-        "label": "6"
+        "label": "4"
       },
       "12": {
+        "type": "mix",
+        "icon": "bluetooth",
+        "label": "5"
+      },
+      "13": {
         "type": "icon",
         "icon": "ble-adapter",
         "label": ""
       },
-      "13": {
+      "14": {
         "type": "icon",
         "icon": "usb",
         "label": ""
       },
-      "14": {
+      "15": {
         "type": "icon",
         "icon": "exchange",
         "label": ""
       },
-      "15": {
+      "16": {
         "type": "icon",
         "icon": "power",
         "label": ""
       },
-      "16": {
+      "17": {
         "type": "str",
         "icon": "",
         "label": "Back light-"
       },
-      "17": {
+      "18": {
         "type": "str",
         "icon": "",
         "label": "Back light+"
       },
-      "18": {
+      "19": {
         "type": "str",
         "icon": "",
         "label": "Lock Win"
       },
-      "19": {
+      "20": {
         "type": "str",
         "icon": "",
         "label": "Win Layer"
       },
-      "20": {
+      "21": {
+        "type": "str",
+        "icon": "",
+        "label": "Mac Layer"
+      },
+      "22": {
         "type": "icon",
         "icon": "reset",
         "label": ""
       },
-      "21": {
+      "23": {
         "type": "str",
         "icon": "",
         "label": "LED Speed-"
       },
-      "22": {
+      "24": {
         "type": "str",
         "icon": "",
         "label": "LED Speed+"
       },
-      "23": {
+      "25": {
         "type": "str",
         "icon": "",
         "label": "LED Color"
