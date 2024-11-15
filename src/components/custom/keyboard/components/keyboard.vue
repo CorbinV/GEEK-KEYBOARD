@@ -50,7 +50,7 @@ function handleKeyClick(e: MouseEvent) {
 </script>
 
 <template>
-  <div class="low-layer-bg relative" @click="handleKeyClick">
+  <div class="low-layer-bg relative h-360px w-941px rounded-md" @click="handleKeyClick">
     <KeyboardKey
       v-for="(key, idx) in layoutList"
       :key="key"

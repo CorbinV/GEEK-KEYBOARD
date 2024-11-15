@@ -32,11 +32,9 @@ function handleSelectKey(data: { keyId: string; idx: number }) {
 <template>
   <div class="flex flex-row items-end justify-center gap-x-4">
     <LayerControl v-model:layer="currentLayer" :layer-list="layerList"></LayerControl>
-    <div class="h-360px h-full w-941px flex">
-      <Keyboard :layer="currentLayer" class="kb-control" @update:key-id="handleSelectKey" />
-      <div class="second-view flex flex-1 items-center justify-center text-2xl font-bold">
-        <p>The screen is too small to display.</p>
-      </div>
+    <Keyboard :layer="currentLayer" class="kb-control" @update:key-id="handleSelectKey" />
+    <div class="second-view flex flex-1 items-center justify-center text-2xl font-bold">
+      <p>The screen is too small to display.</p>
     </div>
     <KeyControl :key-id="selectedKey" />
   </div>
