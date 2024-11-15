@@ -8,6 +8,7 @@ interface KeyboardKeyProps {
   selected?: boolean;
   keyDetail?: any;
   idx: number;
+  disabled?: boolean;
 }
 const props = defineProps<KeyboardKeyProps>();
 const keyInfo = ref();
@@ -78,8 +79,16 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
         ]"
         :data-id="keyId"
         :data-idx="idx"
+        :data-disabled="disabled"
       >
-        <div class="h-full w-full flex flex-col items-center justify-center break-words">
+        <div
+          class="h-full w-full flex flex-col items-center justify-center break-words"
+          :class="[
+            {
+              'cursor-not-allowed': disabled
+            }
+          ]"
+        >
           <template v-if="KeyView.type === 'mix'">
             <span class="inline-flex flex-row items-center justify-center">
               <i class="iconfont" :class="`icon-${KeyView.icon}`"></i>
