@@ -20,18 +20,16 @@ export const getBasicKey = {
         tary: [10, 10, 10, 1, 1]
       }
     },
-    smart: [
-      {
-        name: 'ESC',
+    smart: {
+      ESC: {
         super: [5, 1],
         mt: [6, 1]
       },
-      {
-        name: 'A',
+      A: {
         super: [5, 1],
         mt: [6, 1]
       }
-    ],
+    },
     disable: ['ESC', 'A']
   }
 };
