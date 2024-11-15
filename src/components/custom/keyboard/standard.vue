@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import imageSrc from '@/assets/img/standard-keyboard.png';
 import { useImageMapAdjuster } from '@/hooks/business/useImageMapAdjuster';
 import originalAreas from '@/assets/files/standard-keyboard.json';
+import { KeyTypeEnum } from '@/enum/keyType';
 const emit = defineEmits(['key-clicked']);
 const { areasList, adjustAreasFn } = useImageMapAdjuster({
   enableDebounce: true,
@@ -20,6 +21,7 @@ function handleKeyClicked(e: Event) {
   const code = Number(target.dataset.code);
   if (keyId) {
     emit('key-clicked', {
+      type: KeyTypeEnum.Normal,
       keyId,
       code
     });
