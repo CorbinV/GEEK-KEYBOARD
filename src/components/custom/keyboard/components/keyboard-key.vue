@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, toRefs, watchEffect } from 'vue';
+import { inject, onMounted, reactive, ref, toRefs, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyCfg } from '@/api/modules/keyboard';
 
@@ -10,7 +10,9 @@ interface KeyboardKeyProps {
   idx: number;
   disabled?: boolean;
 }
+
 const props = defineProps<KeyboardKeyProps>();
+
 const keyInfo = ref();
 const keyStyle = ref({});
 function useLayout(kbCfg: any) {
@@ -41,20 +43,36 @@ const KeyView = reactive({
   icon: '',
   type: 'str'
 });
+function updateKeyView(data: any) {
+  if (!data) {
+    return;
+  }
+  KeyView.label = data.label;
+  KeyView.icon = data.icon;
+  KeyView.type = data.type;
+}
 onMounted(async () => {
   const keyboardStore = useKeyboardStore();
   const { kbCfg } = toRefs(keyboardStore);
+  const injectSelectedDetail = inject('selectedDetail') as any;
   useLayout(kbCfg);
   function updateKeyCfg(data: KeyCfg) {
     const { code, type } = data;
     const info = kbCfg.value.keyMap[type]?.code?.[code];
-    if (info) {
-      KeyView.label = info.label;
-      KeyView.icon = info.icon;
-      KeyView.type = info.type;
+    updateKeyView(info);
+  }
+  function updateKeyViewBySelectedDetail() {
+    if (!props.selected) {
+      return;
+    }
+    if (props.keyId === injectSelectedDetail.value.keyId) {
+      updateKeyView(injectSelectedDetail.value);
     }
   }
   watchEffect(() => {
+    if (injectSelectedDetail.value) {
+      updateKeyViewBySelectedDetail();
+    }
     if (props.keyDetail) {
       updateKeyCfg(props.keyDetail);
     }
@@ -68,7 +86,7 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
   <NTooltip trigger="hover" :disabled="true">
     <template #trigger>
       <div
-        class="inline-box base-light-bg text-c-primary absolute box-border h-50px w-50px border border-1 rounded-md hover:cursor-pointer"
+        class="inline-box absolute box-border h-50px w-50px border border-1 rounded-md base-light-bg text-c-primary hover:cursor-pointer"
         :style="keyStyle"
         :class="[
           isLightColor ? 'border-#2c2c3c' : 'border-#222227',
