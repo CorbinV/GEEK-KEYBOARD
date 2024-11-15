@@ -16,11 +16,13 @@ const onImageLoad = () => {
 };
 function handleKeyClicked(e: Event) {
   const target = e.target as HTMLElement;
-  const key = target.dataset.key;
-  const code = target.dataset.code;
-  console.log('key:', key, 'code:', code);
-  if (key) {
-    emit('key-clicked', [key, code]);
+  const keyId = target.dataset.key;
+  const code = Number(target.dataset.code);
+  if (keyId) {
+    emit('key-clicked', {
+      keyId,
+      code
+    });
   }
 }
 defineExpose({});
