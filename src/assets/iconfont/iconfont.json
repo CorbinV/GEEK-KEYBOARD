@@ -6,6 +6,55 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "42465051",
+      "name": "抬起",
+      "font_class": "triangle-up",
+      "unicode": "e73c",
+      "unicode_decimal": 59196
+    },
+    {
+      "icon_id": "42465052",
+      "name": "编辑",
+      "font_class": "edit",
+      "unicode": "e73d",
+      "unicode_decimal": 59197
+    },
+    {
+      "icon_id": "42465053",
+      "name": "更多",
+      "font_class": "direction-down",
+      "unicode": "e73e",
+      "unicode_decimal": 59198
+    },
+    {
+      "icon_id": "42465054",
+      "name": "添加",
+      "font_class": "add",
+      "unicode": "e73f",
+      "unicode_decimal": 59199
+    },
+    {
+      "icon_id": "42465055",
+      "name": "按下",
+      "font_class": "triangle-down",
+      "unicode": "e740",
+      "unicode_decimal": 59200
+    },
+    {
+      "icon_id": "42465856",
+      "name": "图标=未选中",
+      "font_class": "unselected",
+      "unicode": "e741",
+      "unicode_decimal": 59201
+    },
+    {
+      "icon_id": "42465857",
+      "name": "图标=选中",
+      "font_class": "selected",
+      "unicode": "e742",
+      "unicode_decimal": 59202
+    },
+    {
       "icon_id": "42419625",
       "name": "tab=切换语言",
       "font_class": "a-tabqiehuanyuyan",
@@ -15,7 +64,7 @@
     {
       "icon_id": "42419627",
       "name": "tab=退出",
-      "font_class": "a-tabtuichu",
+      "font_class": "exit",
       "unicode": "e72d",
       "unicode_decimal": 59181
     },
