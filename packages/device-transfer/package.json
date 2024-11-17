@@ -1,0 +1,19 @@
+{
+  "name": "@sa/device-transfer",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["./src/*"]
+    }
+  },
+  "dependencies": {
+    "@sa/packetize": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/w3c-web-hid": "^1.0.6"
+  }
+}
