@@ -1,13 +1,12 @@
-const decoder = new TextDecoder();
-const encoder = new TextEncoder();
-
 // 将字符串转为 Uint8Array
 export function jsonToArray(data: string): Uint8Array {
+  const encoder = new TextEncoder();
   return encoder.encode(data);
 }
 
 // 将 Uint8Array 转为字符串
 export function arrayToJson(data: Uint8Array): string {
+  const decoder = new TextDecoder();
   return decoder.decode(data);
 }
 
@@ -26,13 +25,13 @@ export function depacketize(data: Uint8Array): Uint8Array | undefined {
   if (data.length < 4) return undefined;
   switch (data[0]) {
     case 0xa5:
-      return data.slice(2, -1);
+      return data.slice(2, data[1] - 1);
     case 0xa4:
       if (data[2] > 0x80) {
         arr = [];
       }
-      appendData(data.slice(3, -1));
-      return data[2] === 1 ? new Uint8Array(arr) : undefined;
+      appendData(data.slice(3, data[1] - 1));
+      return data[2] === 0 ? new Uint8Array(arr) : undefined;
     default:
       return undefined;
   }
@@ -63,7 +62,7 @@ export function packetize(data: Uint8Array, mtu: number = 48): Uint8Array[] {
       const packageBuffer = new Uint8Array(packageLength);
       packageBuffer[0] = header;
       packageBuffer[1] = packageLength;
-      packageBuffer[2] = count - i;
+      packageBuffer[2] = count - i - 1;
       if (i === 0) {
         packageBuffer[2] += 0x80;
       }
