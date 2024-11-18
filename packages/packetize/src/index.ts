@@ -25,13 +25,13 @@ export function depacketize(data: Uint8Array): Uint8Array | undefined {
   if (data.length < 4) return undefined;
   switch (data[0]) {
     case 0xa5:
-      return data.slice(2, data[1] - 1);
+      return data.slice(3, data[1] - 1);
     case 0xa4:
       if (data[2] > 0x80) {
         arr = [];
       }
-      appendData(data.slice(3, data[1] - 1));
-      return data[2] === 0 ? new Uint8Array(arr) : undefined;
+      appendData(data.slice(4, data[1] - 1));
+      return data[2] === 1 ? new Uint8Array(arr) : undefined;
     default:
       return undefined;
   }
@@ -42,31 +42,33 @@ export function packetize(data: Uint8Array, mtu: number = 48): Uint8Array[] {
   const packages: Uint8Array[] = [];
   if (data.length <= mtu) {
     const header = 0xa5;
-    const packageLength = data.length + 3;
+    const packageLength = data.length + 4;
     const packageBuffer = new Uint8Array(packageLength);
     packageBuffer[0] = header;
     packageBuffer[1] = packageLength;
-    packageBuffer.set(data, 2);
+    packageBuffer[2] = 0xcc;
+    packageBuffer.set(data, 3);
     const checksum = packageBuffer.reduce((a, b) => a + b, 0) & 0xff;
     packageBuffer[packageLength - 1] = checksum;
     packages.push(packageBuffer);
   } else {
     const header = 0xa4;
-    const maxDataSize = mtu - 4;
+    const maxDataSize = mtu - 5;
     const count = Math.ceil(data.length / maxDataSize);
     for (let i = 0; i < count; i++) {
       const start = i * maxDataSize;
       const end = Math.min(start + maxDataSize, data.length);
       const packageData = data.slice(start, end);
-      const packageLength = packageData.length + 4;
+      const packageLength = packageData.length + 5;
       const packageBuffer = new Uint8Array(packageLength);
       packageBuffer[0] = header;
       packageBuffer[1] = packageLength;
-      packageBuffer[2] = count - i - 1;
+      packageBuffer[2] = count - i;
       if (i === 0) {
         packageBuffer[2] += 0x80;
       }
-      packageBuffer.set(packageData, 3);
+      packageBuffer[3] = 0xcc;
+      packageBuffer.set(packageData, 4);
       const checksum = packageBuffer.reduce((a, b) => a + b, 0) & 0xff;
       packageBuffer[packageLength - 1] = checksum;
       packages.push(packageBuffer);
