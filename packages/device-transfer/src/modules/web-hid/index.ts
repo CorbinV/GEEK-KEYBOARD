@@ -28,18 +28,23 @@ export class HIDProtocolController extends EventTarget {
   async connect(filters: FilterType) {
     const { usagePage, ...rest } = filters;
     try {
-      const devices = await navigator.hid.requestDevice({
-        filters: [rest]
-      });
-      if (devices.length === 0) {
-        throw new Error('No device selected');
-      }
-      const device =
-        usagePage &&
-        devices.find(dev => {
-          return dev.collections.some(coll => coll.usagePage === usagePage);
+      let device: HIDDevice | undefined;
+      const pairedDevice = await this.pairedDeviceByFilter(filters);
+      if (pairedDevice) {
+        device = pairedDevice;
+      } else {
+        const devices = await navigator.hid.requestDevice({
+          filters: [rest]
         });
-      this.device = device || devices[0];
+        if (devices.length === 0) {
+          throw new Error('No device selected');
+        }
+        device = usagePage
+          ? devices.find(dev => dev.collections.some(coll => coll.usagePage === usagePage))
+          : undefined;
+        device ||= devices[0];
+      }
+      this.device = device;
       await this.device.open();
       this.connected = true;
 
@@ -52,7 +57,17 @@ export class HIDProtocolController extends EventTarget {
       throw error;
     }
   }
-
+  async pairedDeviceByFilter(filters: FilterType) {
+    const deviceList = await navigator.hid.getDevices();
+    const device = deviceList.find(dev => {
+      const baseCondition = [dev.productId === filters.productId, dev.vendorId === filters.vendorId];
+      if (baseCondition.includes(false)) {
+        return false;
+      }
+      return dev.collections.some(coll => coll.usagePage === filters.usagePage);
+    });
+    return device;
+  }
   async send(data: any): Promise<HIDResponse> {
     if (!this.connected || !this.device) {
       throw new Error('Device not connected');
