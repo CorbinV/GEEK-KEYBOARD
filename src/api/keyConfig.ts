@@ -1,4 +1,4 @@
-import requestClient from '@/utils/requset/deviceClient';
+import requestClient from './config';
 import type { KeyInfo, LayerKeysConfig } from './modules/keyboard';
 /**
  * @param data.layer keyboard layer
