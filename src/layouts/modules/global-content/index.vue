@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAppStore } from '@/store/modules/app';
 import { useThemeStore } from '@/store/modules/theme';
 import { useRouteStore } from '@/store/modules/route';
-
 defineOptions({
   name: 'GlobalContent'
 });
@@ -12,7 +12,8 @@ interface Props {
   /** Show padding for content */
   showPadding?: boolean;
 }
-
+const proute = useRoute();
+const key = computed(() => proute.path + Math.random());
 withDefaults(defineProps<Props>(), {
   showPadding: true
 });
@@ -25,7 +26,7 @@ const transitionName = computed(() => (themeStore.page.animate ? themeStore.page
 </script>
 
 <template>
-  <RouterView v-slot="{ Component, route }">
+  <RouterView v-slot="{ Component, route }" :key="key">
     <Transition
       :name="transitionName"
       mode="out-in"
