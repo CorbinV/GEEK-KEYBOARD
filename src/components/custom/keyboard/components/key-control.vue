@@ -2,10 +2,10 @@
 import { computed, reactive, toRefs, watchEffect } from 'vue';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-import { getKeyInfo, restoreKeyConfig, setKeyInfo } from '@/api/keyConfig';
+import { useCommonStore } from '@/store/modules/common';
 
 const keyboardStore = useKeyboardStore();
-
+const commonStore = useCommonStore();
 type KeyControlProps = {
   keyId?: string;
 };
@@ -41,23 +41,16 @@ function updateKeyInfo(data: KeyInfo) {
 // optimize: add a notification to show the result
 watchEffect(async () => {
   if (props.keyId === '') return;
-  const data = await getKeyInfo({
-    key: props.keyId
-  });
+  const data = await commonStore.getTargetKeyInfo(props.keyId);
   updateKeyInfo(data);
 });
 async function handleResetKey() {
-  const data = await restoreKeyConfig({
-    key: props.keyId
-  });
+  const data = await commonStore.restoreTargetKeyInfoById(props.keyId);
   updateKeyInfo(data);
   // optimize: add a notification to show the result
 }
 async function handleDisableKey() {
-  await setKeyInfo({
-    key: props.keyId,
-    enable: 0
-  });
+  await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 });
   // optimize: add a notification to show the result
 }
 
