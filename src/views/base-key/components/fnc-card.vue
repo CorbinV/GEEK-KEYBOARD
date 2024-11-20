@@ -17,7 +17,7 @@ withDefaults(
 <template>
   <div class="w-20 flex flex-col gap-y-6 hover:cursor-pointer" :data-code="code">
     <div
-      class="higth-light-bg h-20 w-full inline-flex items-center justify-center border-1 border-#3C3933 rounded-md text-c-primary"
+      class="h-20 w-full inline-flex items-center justify-center border-1 border-#3C3933 rounded-md higth-light-bg text-c-primary"
     >
       <p v-if="type === 'str'" class="text-center text-lg">
         {{ label || '-' }}

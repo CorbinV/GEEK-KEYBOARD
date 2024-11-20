@@ -65,9 +65,9 @@ async function handleDisableKey() {
 </script>
 
 <template>
-  <div class="low-layer-bg flex flex-col gap-y-4 p-2">
+  <div class="flex flex-col gap-y-4 low-layer-bg p-2">
     <h1 class="text-center text-base">按键信息</h1>
-    <div class="text-c-primary flex flex-col">
+    <div class="flex flex-col text-c-primary">
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>默认{{ keyId || '/' }}</span>
         <span>
