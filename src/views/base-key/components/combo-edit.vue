@@ -1,0 +1,145 @@
+<script setup lang="ts">
+import type { TabsProps } from 'naive-ui';
+import { reactive, ref, toRefs, watchEffect } from 'vue';
+import { useKeyboardStore } from '@/store/modules/keyboard';
+import { KeyTypeEnum } from '@/enum/keyType';
+import BaseKey from '@/components/custom/keyboard/components/base-key.vue';
+import { createComboGroup } from '@/api/combo';
+import { StandardKeyboard } from '@/components/custom/keyboard';
+import ModuleTemplate from './module-template.vue';
+const emit = defineEmits(['update:visible']);
+
+const keyboardStore = useKeyboardStore();
+const { kbCfg } = toRefs(keyboardStore);
+const props = defineProps<{
+  groupLength: number;
+  visible: boolean;
+}>();
+type TabsPropsThemeOverrides = NonNullable<TabsProps['themeOverrides']>;
+const tabsThemeOverrides: TabsPropsThemeOverrides = {};
+function useDialogController() {
+  const control = reactive({
+    visible: true,
+    content: []
+  });
+
+  const baseKeyList = ref([]);
+  watchEffect(() => {
+    control.visible = props.visible;
+  });
+  return {
+    dialogControl: control,
+    baseKeyList,
+    openDialog: () => {
+      control.visible = true;
+    },
+    closeDialog: () => {
+      control.visible = false;
+      emit('update:visible', false);
+    },
+    resetContent: () => {
+      control.content = [];
+    }
+  };
+}
+const { dialogControl, closeDialog } = useDialogController();
+const selectedKeyInfo = reactive<any>({
+  idx: 0,
+  list: [{}]
+});
+function handleKeyClicked(e: MouseEvent) {
+  const targetElement = (e.target as Element).closest('[data-idx]');
+  if (targetElement && targetElement instanceof HTMLElement) {
+    const idx = targetElement.dataset.idx;
+    selectedKeyInfo.idx = Number(idx);
+    if (!selectedKeyInfo.list[selectedKeyInfo.idx]) {
+      selectedKeyInfo.list[selectedKeyInfo.idx] = {
+        base: {},
+        detail: []
+      };
+    }
+  }
+}
+function handleFncClicked({ code, type }: { code: number; type: KeyTypeEnum }) {
+  const codeMap = kbCfg.value.keyMap[type].code;
+  const data = codeMap[`${code}`];
+  selectedKeyInfo.list[selectedKeyInfo.idx].base = { code, type };
+  selectedKeyInfo.list[selectedKeyInfo.idx].detail = data;
+}
+async function handleDialogComfirm() {
+  const sendData = {
+    type: KeyTypeEnum.Combo,
+    code: props.groupLength,
+    keys: selectedKeyInfo.list.map((item: any) => item.base)
+  };
+  try {
+    await createComboGroup(sendData);
+
+    closeDialog();
+    window.$message!.success('创建成功');
+  } catch (error) {
+    window.$message!.error('创建失败');
+    console.error(error);
+  }
+}
+</script>
+
+<template>
+  <NModal
+    v-model:show="dialogControl.visible"
+    preset="card"
+    :closable="false"
+    :title="undefined"
+    class="w-90% !h-80vh !bg-#191b1d"
+    content-class="bg-#191b1d"
+    size="large"
+  >
+    <template #header>
+      <div class="text-center text-xl">组合按键 {{ groupLength }}</div>
+    </template>
+    <template #default>
+      <div class="flex flex-col">
+        <NDivider class="!mt-0" />
+
+        <div class="flex flex-col gap-y-5">
+          <p class="text-center text-base text-c-second">请选择多个按键进行组合</p>
+          <div class="flex flex-row justify-center gap-x-12" @click="handleKeyClicked">
+            <div
+              v-for="(_, idx) in new Array(4)"
+              :key="`d-groups-${idx}`"
+              class="flex flex-col gap-y-2"
+              :data-idx="idx"
+            >
+              <BaseKey
+                :base="selectedKeyInfo.list?.[idx]?.base"
+                :detail="selectedKeyInfo.list?.[idx]?.detail"
+                :selected="selectedKeyInfo.idx === idx"
+              ></BaseKey>
+              <div class="text-center text-c-second">{{ idx }}</div>
+            </div>
+          </div>
+        </div>
+        <!-- tabs -->
+        <div>
+          <NTabs :theme-overrides="tabsThemeOverrides" tab-class="asdasf !text-xl">
+            <NTabPane name="Keyboard" tab="基础">
+              <StandardKeyboard @key-clicked="handleFncClicked" />
+            </NTabPane>
+            <NTabPane name="System" tab="系统">
+              <ModuleTemplate :type="KeyTypeEnum.System" @key-clicked="handleFncClicked" />
+            </NTabPane>
+            <NTabPane name="Media" tab="媒体">
+              <ModuleTemplate :type="KeyTypeEnum.Media" @key-clicked="handleFncClicked" />
+            </NTabPane>
+          </NTabs>
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex items-center justify-center gap-x-8">
+        <NButton class="h-4rem w-12rem text-base" type="primary" ghost @click="closeDialog">取消</NButton>
+        <NButton class="h-4rem w-12rem text-lg text-white" type="primary" @click="handleDialogComfirm">确定</NButton>
+      </div>
+    </template>
+  </NModal>
+</template>
