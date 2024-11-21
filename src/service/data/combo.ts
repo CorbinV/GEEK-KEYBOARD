@@ -10,6 +10,14 @@ export const getShortcuts = {
       {
         type: 3,
         code: 5
+      },
+      {
+        type: 3,
+        code: 6
+      },
+      {
+        type: 3,
+        code: 7
       }
     ]
   }
@@ -28,6 +36,14 @@ export const getShortcut = {
       {
         type: 0,
         code: 5
+      },
+      {
+        type: 0,
+        code: 6
+      },
+      {
+        type: 0,
+        code: 7
       }
     ]
   }

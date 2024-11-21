@@ -37,7 +37,7 @@ export const getKeyInfo = {
   name: 'getKeyInfo',
   code: 0,
   data: {
-    id: 'A',
+    key: 'A',
     type: 0,
     code: 4,
     enable: 1,
@@ -50,7 +50,7 @@ export const resetKeyInfo = {
   name: 'resetKeyInfo',
   code: 0,
   data: {
-    id: 'A',
+    key: 'A',
     type: 0,
     code: 4,
     tary: [10, 10, 10, 1, 1],
