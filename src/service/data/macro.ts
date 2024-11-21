@@ -46,3 +46,47 @@ export const getMacros = {
     ]
   }
 };
+
+export const getMacro = {
+  name: 'getMacro',
+  code: 0,
+  data: {
+    attr: {
+      type: 6,
+      code: 1,
+      name: '一键换装',
+      trigger: 0,
+      triggerDelay: 1,
+      loop: 1,
+      delay: [1, 5],
+      stopType: 0
+    },
+    keys: [
+      {
+        index: 0,
+        code: [2, 3],
+        time: 0
+      },
+      {
+        index: 1,
+        code: [2],
+        time: 3
+      },
+      {
+        index: 2,
+        code: [],
+        time: 5
+      },
+      {
+        index: 3,
+        code: [4],
+        time: 7
+      },
+      {
+        index: 4,
+        code: [4, 5],
+        time: 9
+      }
+    ]
+  }
+};

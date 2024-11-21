@@ -1,56 +1,276 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
-import { getMacros } from '@/api/macroApi';
-import type { Macro } from '@/api/modules/macro';
+import { nextTick, onMounted, reactive, ref } from 'vue';
+import type { TabsInst } from 'naive-ui';
+import { getMacroCfg, getMacros } from '@/api/macroApi';
+import type { Macro, MacroAttr } from '@/api/modules/macro';
+import type { UIKey } from './macroHelper';
+import actions from './macroHelper';
+import { MacroType } from './macroType';
 
+// 宏列表
 const macros = reactive<{ macro: Macro[] }>({ macro: [] });
-const showModal = ref(true);
+// 宏配置
+let uiKey: UIKey[] = reactive([]);
+// 宏弹窗
+const showModal = ref(false);
+// 宏重命名弹窗
+const showRenameModal = ref(false);
+// 宏列表编辑索引
+const listEditIndex = ref(-1);
+// 宏重命名
+const inputReName = ref('');
+// 宏录制状态
+const recordStatus = ref(false);
+// 触发方式
+const trigger = ref(MacroType.TriggerOptionKey.Down);
+// 随机延迟开关
+const randomDelay = ref(false);
+// 显示时间
+const allTimeRadioValue = ref<string | null>(MacroType.AllTime.Show);
+// 宏按键编辑
+const isEdit = ref(false);
+// 宏名称
+const inputName = ref('');
+// 宏按下触发延迟
+const inputDelayTime = ref(1);
+// 宏循环次数
+const inputLoop = ref(1);
+// 停止方式
+const stopType = ref(MacroType.QuitOptionKey.Normal);
+// 宏延迟时间区间
+const inputDelayTimeStart = ref(0);
+const inputDelayTimeEnd = ref(0);
+// 宏修改全部时间
+const inputTime = ref(null);
+// 选中uikey
+const selectKey = ref({ type: -1, code: -1, value: -1 });
+// 选中索引
+const selectIndex = ref(-1);
+// tab ref
+const tabsInstRef = ref<TabsInst | null>(null);
+// tab index
+const tabIndex = ref(MacroType.KeyStatusTabs.Down);
+// 宏修改时间
+const inputKeyTime = ref(null);
 
 onMounted(() => {
-  test();
+  initData();
 });
-async function test() {
-  const data = await getMacros();
-  macros.macro = data.macro.slice(0, -1);
+
+// 初始化数据
+async function initData() {
+  const macrosList = await getMacros();
+  macros.macro = macrosList.macro.slice(0, 8);
 }
 
-enum MenuOptionKey {
-  Edit,
-  ReName,
-  Delete
+// 宏属性
+function initAttr() {
+  const macroAttr = actions.getMacroAttr();
+  inputName.value = macroAttr.name;
+  trigger.value = macroAttr.trigger;
+  inputDelayTime.value = macroAttr.triggerDelay;
+  inputLoop.value = macroAttr.loop;
+  stopType.value = macroAttr.stopType;
+  inputDelayTimeStart.value = macroAttr.delay[0];
+  inputDelayTimeEnd.value = macroAttr.delay[1];
 }
 
-const options = [
-  { label: '编辑', key: MenuOptionKey.Edit },
-  { type: 'divider' },
-  { label: '重命名', key: MenuOptionKey.ReName },
-  { type: 'divider' },
-  { label: '删除', key: MenuOptionKey.Delete }
-];
-
-function handleSelect(key: string | number, item: Macro) {
+// 宏列表操作菜单
+function handleMacrosMenu(key: string | number, item: Macro) {
   console.log(key, item);
+  listEditIndex.value = macros.macro.indexOf(item);
   switch (key) {
-    case MenuOptionKey.Edit: {
-      console.log(`edit ${item} `);
-      showModal.value = true;
+    case MacroType.MenuOptionKey.Edit: {
+      handleMacroEdit(item);
       break;
     }
-    case MenuOptionKey.ReName: {
-      console.log(`rename ${item}`);
-      const index = macros.macro.indexOf(item);
-      macros.macro[index].name = 'test';
+    case MacroType.MenuOptionKey.ReName: {
+      handleReName();
       break;
     }
 
-    case MenuOptionKey.Delete: {
-      macros.macro.splice(macros.macro.indexOf(item), 1);
+    case MacroType.MenuOptionKey.Delete: {
+      handleMacroDelete();
       break;
     }
 
     default:
       break;
   }
+}
+
+// 编辑宏
+async function handleMacroEdit(item: Macro) {
+  const macroCfg = await getMacroCfg({ type: item.type, code: item.code });
+  actions.initMacroCfg(macroCfg);
+  initAttr();
+  uiKey = actions.getUIKey();
+  showModal.value = true;
+}
+// 重命名
+function handleReName() {
+  inputReName.value = '';
+  showRenameModal.value = true;
+}
+
+// 重命名保存
+function handleReNameSave() {
+  if (inputReName.value === '' || listEditIndex.value === -1) return;
+  macros.macro[listEditIndex.value].name = inputReName.value;
+  showRenameModal.value = false;
+}
+
+// 删除宏
+function handleMacroDelete() {
+  if (listEditIndex.value === -1) return;
+  macros.macro.splice(listEditIndex.value, 1);
+}
+
+// 触发方式
+function handleTrigger(value: number) {
+  trigger.value = value;
+  inputDelayTime.value = 0;
+}
+
+// 停止方式
+function handleStopType(value: number) {
+  stopType.value = value;
+}
+
+// 随机延迟
+function handleRandomDelay(value: boolean) {
+  randomDelay.value = value;
+}
+
+// 修改全部时间
+function handleAllTime() {
+  if (inputTime.value === null) return;
+  actions.updateAllTime(Number(inputTime.value));
+}
+
+// 显示时间
+function handleRadio() {
+  if (allTimeRadioValue.value === MacroType.AllTime.Show) {
+    allTimeRadioValue.value = MacroType.AllTime.Hide;
+  } else {
+    allTimeRadioValue.value = MacroType.AllTime.Show;
+  }
+}
+
+// 选中编辑
+function selectItem(item: UIKey, index: number) {
+  if (recordStatus.value) return;
+  selectKey.value = item;
+  if (selectIndex.value === index) {
+    selectIndex.value = -1;
+  } else {
+    selectIndex.value = index;
+    if (item.type === 1) {
+      tabIndex.value = MacroType.KeyStatusTabs.Down;
+      nextTick(() => tabsInstRef.value?.syncBarPosition());
+    } else if (item.type === 2) {
+      tabIndex.value = MacroType.KeyStatusTabs.Up;
+      nextTick(() => tabsInstRef.value?.syncBarPosition());
+    }
+  }
+}
+
+// 修改按键按下、抬起
+function handleKeyEventTabs(value: string | number) {
+  actions.updateKey(selectIndex.value, value === MacroType.KeyStatusTabs.Down ? 1 : 2);
+}
+
+// 删除选中
+function handleDelete() {
+  actions.deleteUIKey(selectIndex.value);
+}
+
+// 插入时间0
+function handleInsertTime() {
+  actions.insertUIKey(selectIndex.value, { type: 3, code: 0, value: 0 });
+}
+
+// 插入按键0
+function handleInsertKey() {
+  actions.insertUIKey(selectIndex.value, { type: 1, code: 0, value: 0 });
+}
+
+// 重置
+function handleReset() {
+  console.log('reset');
+  pauseRecord();
+  actions.resetUIKey();
+}
+
+// 录制控制
+function handleRecord() {
+  console.log('record');
+  if (recordStatus.value) {
+    pauseRecord();
+  } else {
+    startRecord();
+    actions.recordUIKey();
+  }
+}
+
+// 开始录制
+function startRecord() {
+  recordStatus.value = true;
+  console.log('startRecord');
+
+  const frames = [
+    { index: 0, code: [2, 3], time: 0 },
+    { index: 1, code: [2], time: 3 },
+    { index: 2, code: [], time: 5 },
+    { index: 3, code: [4], time: 7 },
+    { index: 4, code: [4, 5], time: 9 }
+  ];
+
+  frames.forEach((item, index) => {
+    setTimeout(() => {
+      actions.addFrame(item);
+    }, 1000 * index);
+  });
+}
+
+// 暂停录制
+function pauseRecord() {
+  recordStatus.value = false;
+  console.log('pauseRecord');
+  actions.pauseRecord();
+}
+
+// 取消
+function handleCancel() {
+  console.log('cancel');
+  pauseRecord();
+  showModal.value = false;
+}
+
+// 宏属性
+function saveMacroAttr() {
+  if (trigger.value !== MacroType.TriggerOptionKey.Delay) {
+    inputDelayTime.value = 0;
+  }
+  const macroAttr: MacroAttr = {
+    type: 6,
+    code: 0,
+    name: inputName.value,
+    trigger: trigger.value,
+    triggerDelay: inputDelayTime.value,
+    loop: inputLoop.value,
+    delay: [inputDelayTimeStart.value, inputDelayTimeEnd.value],
+    stopType: stopType.value
+  };
+  actions.saveMacroAttr(macroAttr);
+}
+
+// 保存
+function handleSave() {
+  console.log('handleSave');
+  pauseRecord();
+  saveMacroAttr();
+  actions.saveUIKey();
 }
 </script>
 
@@ -62,7 +282,7 @@ function handleSelect(key: string | number, item: Macro) {
       v-if="macros.macro.length < 8"
       class="h-25 flex flex-col items-center justify-center gap-2.5 border border border-[#3c8df4] rounded-lg border-dashed text-base text-[#3C8DF4] font-normal"
     >
-      <i class="iconfont icon-mouse-mid" style="color: #3c8df4"></i>
+      <i class="iconfont icon-add" style="color: #3c8df4"></i>
       <span class="text-[#3C8DF4]">添加宏按键</span>
     </div>
 
@@ -73,44 +293,156 @@ function handleSelect(key: string | number, item: Macro) {
       </div>
       <div class="flex basis-1/3 items-center justify-between rounded-b-lg bg-[#222227] px-4">
         <span class="text-sm text-[#999999] font-medium">M{{ item.code + 1 }}</span>
-        <NDropdown trigger="hover" :options="options" @select="key => handleSelect(key, item)">
-          <i class="iconfont icon-mouse-mid" style="color: #999999"></i>
+        <NDropdown trigger="hover" :options="MacroType.MacrosOps" @select="key => handleMacrosMenu(key, item)">
+          <i class="iconfont icon-add" style="color: #999999"></i>
         </NDropdown>
       </div>
     </div>
+
+    <!-- reName modal -->
+    <NModal v-model:show="showRenameModal" :mask-closable="false">
+      <div class="rounded-log flex flex-col items-center justify-center gap-7 bg-[#191B1D] p-7 text-center">
+        <span>重命名</span>
+        <NInput v-model:value="inputReName" type="text" size="large" placeholder="最长六个字符" maxlength="6" />
+        <div>
+          <button
+            class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
+            @click="showRenameModal = false"
+          >
+            取消
+          </button>
+          <button class="ml-7 h-15 w-42 rounded bg-[#3c8df4]" @click="handleReNameSave">保存</button>
+        </div>
+      </div>
+    </NModal>
 
     <!-- modal -->
     <NModal v-model:show="showModal" :mask-closable="false">
       <div class="h-[90vh] w-4/5 flex flex-col rounded-lg bg-[#191B1D] p-7">
         <!-- header -->
-        <div class="flex flex-col basis-3/19 items-center justify-center">
-          <div>
-            <span>宏编辑编编辑</span>
-            <i class="iconfont icon-mouse-mid" style="color: #3c8df4"></i>
+        <div class="flex-col flex-none items-center justify-center">
+          <!-- header-top -->
+          <div class="flex text-center">
+            <NInput
+              v-model:value="inputName"
+              type="text"
+              size="medium"
+              style="width: 132px"
+              placeholder="宏编辑编编辑"
+              :disabled="!isEdit"
+              maxlength="6"
+            />
+            <i class="iconfont icon-edit ml-3" style="color: #ffffff" @click="isEdit = !isEdit"></i>
           </div>
-          <div class="mt-5 w-full flex items-center justify-between">
-            <div class="flex items-center">
+          <div class="mt-5 w-full flex flex-wrap items-center justify-between">
+            <!-- header-left -->
+            <div class="flex flex-wrap items-center text-center">
               <span class="text-[#999999]">触发</span>
-              <div class="ml-3 h-12 w-45 flex items-center justify-center rounded bg-[#222227]">
-                <span class="text-[#999999]">按下延迟触发</span>
-              </div>
-              <input type="text" class="ml-2 h-12 w-17 rounded bg-[#222227] text-center" placeholder="0s" />
+              <NSelect
+                v-model:value="trigger"
+                class="ml-3 w-45"
+                size="large"
+                :options="MacroType.TriggerOps"
+                @update:value="handleTrigger"
+              ></NSelect>
+              <NInputNumber
+                v-if="trigger === MacroType.TriggerOptionKey.Delay"
+                v-model:value="inputDelayTime"
+                style="width: 70px"
+                type="text"
+                size="large"
+                class="ml-2"
+                :update-value-on-input="false"
+                placeholder="0s"
+                maxlength="3"
+                :min="0"
+                :precision="0"
+                :show-button="false"
+              />
               <span class="ml-5 text-[#999999]">循环</span>
-              <input type="text" class="ml-2 h-12 w-17 rounded bg-[#222227] text-center" placeholder="1" />
+              <NInputNumber
+                v-model:value="inputLoop"
+                style="width: 70px"
+                type="text"
+                size="large"
+                :update-value-on-input="false"
+                class="ml-2"
+                placeholder="1"
+                maxlength="3"
+                :min="1"
+                :precision="0"
+                :show-button="false"
+              />
               <span class="ml-4 ml-4 text-[#999999]">停止</span>
-              <div class="ml-3 h-12 w-45 flex items-center justify-center rounded bg-[#222227]">
-                <span class="text-[#999999]">执行完停止</span>
-              </div>
+              <NSelect
+                v-model:value="stopType"
+                class="ml-3 w-45"
+                size="large"
+                :options="MacroType.QuitOps"
+                @update:value="handleStopType"
+              ></NSelect>
               <span class="ml-4 text-[#999999]">随机延迟</span>
-              <input type="text" class="ml-2 h-12 w-17 rounded bg-[#222227] text-center" placeholder="1ms" />
-              <div class="mx-3 w-3 border-b border-b-[#232327]"></div>
-              <input type="text" class="h-12 w-17 rounded bg-[#222227] text-center" placeholder="1ms" />
+              <NSwitch v-model:value="randomDelay" @update:value="handleRandomDelay" />
+              <NInputNumber
+                v-if="randomDelay"
+                v-model:value="inputDelayTimeStart"
+                style="width: 70px"
+                type="text"
+                size="large"
+                class="ml-2"
+                :update-value-on-input="false"
+                :min="0"
+                placeholder="0s"
+                maxlength="3"
+                :precision="0"
+                :show-button="false"
+              />
+              <div v-if="randomDelay" class="mx-3 w-3 border-b border-b-[#232327]"></div>
+              <NInputNumber
+                v-if="randomDelay"
+                v-model:value="inputDelayTimeEnd"
+                style="width: 70px"
+                type="text"
+                size="large"
+                :update-value-on-input="false"
+                :min="0"
+                class="ml-2"
+                placeholder="0s"
+                maxlength="3"
+                :precision="0"
+                :show-button="false"
+              />
             </div>
-            <div>
+            <!-- header-right -->
+            <div class="flex items-center text-center">
               <span class="text-[#999999]">修改全部时间</span>
-              <input type="text" class="ml-2 h-12 w-17 rounded bg-[#222227] text-center" placeholder="0ms" />
-              <button class="ml-5 h-10 w-30 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]">生效</button>
-              <span class="ml-5 text-[#999999]">显示时间间隔</span>
+              <NInputNumber
+                v-model:value="inputTime"
+                style="width: 70px"
+                type="text"
+                size="large"
+                class="ml-2"
+                :update-value-on-input="false"
+                placeholder="0s"
+                maxlength="3"
+                :min="0"
+                :precision="0"
+                :show-button="false"
+              />
+              <button
+                class="text-[#3C8DF4 ml-5 h-10 w-30 border border-[#3c8df4] rounded bg-transparent"
+                @click="handleAllTime"
+              >
+                生效
+              </button>
+              <NRadio
+                :checked="allTimeRadioValue === MacroType.AllTime.Show"
+                :value="MacroType.AllTime.Show"
+                class="ml-5"
+                @click="handleRadio"
+              >
+                <span class="ml-2 text-[#999999]">显示时间</span>
+              </NRadio>
             </div>
           </div>
         </div>
@@ -118,55 +450,133 @@ function handleSelect(key: string | number, item: Macro) {
         <div class="my-7 w-full border-b border-b-[#232327]"></div>
 
         <!-- contont -->
-        <div class="flex flex-col basis-14/19">
+        <div class="h-150 flex-col overflow-auto">
           <!-- content list -->
-          <div class="w-full flex grow gap-3 rounded bg-[#171619] p-4">
-            <div class="size-15 flex flex-col items-center justify-center rounded bg-[#222227]">
-              <div>G</div>
-              <i class="iconfont icon-mouse-mid" style="color: #3c8df4"></i>
-            </div>
-            <div class="size-15 flex flex-col items-center justify-center rounded bg-[#222227]">
-              <div>G</div>
-              <i class="iconfont icon-mouse-mid" style="color: #3c8df4"></i>
-            </div>
-          </div>
-          <div class="my-7 w-full border-b border-b-[#232327]"></div>
-          <!-- content edit -->
-          <div class="h-12 flex items-center justify-between">
-            <div class="flex items-center">
-              <span class="text-[#999999]">按键信息</span>
-              <div class="ml-3 mr-5 h-12 w-45 flex items-center justify-center rounded bg-[#222227]">
-                <span class="text-[#3c8df4]">G</span>
+          <div class="grid grid-cols-18 w-full grow gap-3 rounded bg-[#171619] p-4">
+            <template v-for="(item, index) in uiKey" :key="index">
+              <div
+                v-if="item.type === 1"
+                class="point size-15 flex flex-col items-center justify-center rounded bg-[#222227]"
+                :class="[selectIndex === index ? 'border-2 border-blue-500' : '']"
+                @click="selectItem(item, index)"
+              >
+                <span class="text-5 text-[##999999]">{{ item.code }}</span>
+                <i class="iconfont icon-triangle-down" style="color: #999999"></i>
               </div>
-              <span>按下抬起</span>
-              <button class="ml-5 h-10 w-30 border border-[#FF4242] rounded bg-transparent text-[#FF4242]">删除</button>
-            </div>
-            <div class="flex items-center">
-              <span class="text-[#999999]">向后插入</span>
-              <button class="ml-3 h-10 w-30 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]">时间</button>
-              <button class="ml-2.5 h-10 w-30 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]">
-                按键
-              </button>
-            </div>
+              <div
+                v-else-if="item.type === 2"
+                class="point size-15 flex flex-col items-center justify-center rounded bg-[#222227]"
+                :class="[selectIndex === index ? 'border-2 border-blue-500' : '']"
+                @click="selectItem(item, index)"
+              >
+                <span class="text-5 text-[##999999]">{{ item.code }}</span>
+                <i class="iconfont icon-triangle-up" style="color: #999999"></i>
+              </div>
+              <div
+                v-else-if="allTimeRadioValue === MacroType.AllTime.Show"
+                class="point size-15 flex flex-col items-center justify-center rounded bg-[#222227]"
+                :class="[selectIndex === index ? 'border-2 border-blue-500' : '']"
+                @click="selectItem(item, index)"
+              >
+                <span class="text-5 text-[##999999]">{{ item.value }}</span>
+                <div class="w-11 border-b border-b-[#999999]"></div>
+                <span class="text-5 text-[##999999]">ms</span>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div v-if="selectIndex != -1" class="my-7 w-full border-b border-b-[#232327]"></div>
+        <!-- content edit -->
+        <div v-if="selectIndex != -1" class="h-12 flex items-center justify-between">
+          <div class="flex items-center text-center">
+            <span v-if="selectKey.type !== 3" class="w-18 text-[#999999]">按键信息</span>
+            <span v-if="selectKey.type === 3" class="w-18 text-[#999999]">时间</span>
+            <NInput
+              v-if="selectKey.type !== 3"
+              v-model:value="inputName"
+              type="text"
+              size="large"
+              style="width: 180px"
+              :placeholder="selectKey.type !== 3 ? String(selectKey.code) : String(selectKey.value)"
+              :disabled="selectKey.type !== 3"
+              maxlength="6"
+            />
+            <NInputNumber
+              v-if="selectKey.type === 3"
+              v-model:value="inputKeyTime"
+              style="width: 180px"
+              size="large"
+              placeholder="0s"
+              maxlength="3"
+              :update-value-on-input="false"
+              :min="1"
+              :precision="0"
+              :show-button="false"
+            />
+
+            <NTabs
+              v-if="selectKey.type !== 3"
+              v-model:value="tabIndex"
+              ref="tabsInstRef"
+              type="segment"
+              style="width: 120px"
+              animated
+              class="ml-5"
+              @update:value="handleKeyEventTabs"
+            >
+              <NTab :name="MacroType.KeyStatusTabs.Down" />
+              <NTab :name="MacroType.KeyStatusTabs.Up" />
+            </NTabs>
+
+            <button
+              class="ml-5 h-10 w-30 border border-[#FF4242] rounded bg-transparent text-[#FF4242]"
+              @click="handleDelete"
+            >
+              删除
+            </button>
+          </div>
+          <div class="flex items-center">
+            <span class="text-[#999999]">向后插入</span>
+            <button
+              v-if="selectKey.type !== 3 && selectIndex !== uiKey.length - 1"
+              class="ml-3 h-10 w-30 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
+              @click="handleInsertTime"
+            >
+              时间
+            </button>
+            <button
+              class="ml-2.5 h-10 w-30 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
+              @click="handleInsertKey"
+            >
+              按键
+            </button>
           </div>
         </div>
 
         <div class="my-7 w-full border-b border-b-[#232327]"></div>
         <!-- footer -->
-        <div class="flex flex-col basis-2/19">
+        <div class="flex-col flex-none">
           <div class="flex justify-between">
             <div class="flex gap-7">
-              <button class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]">重置</button>
-              <button class="h-15 w-42 rounded bg-[#3c8df4]">开始录制</button>
+              <button
+                class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
+                @click="handleReset"
+              >
+                重置
+              </button>
+              <button class="h-15 w-42 rounded bg-[#3c8df4]" @click="handleRecord">
+                {{ !recordStatus ? '开始录制' : '暂停' }}
+              </button>
             </div>
             <div class="flex gap-7">
               <button
                 class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
-                @click="showModal = false"
+                @click="handleCancel"
               >
                 取消
               </button>
-              <button class="h-15 w-42 rounded bg-[#3c8df4]">保存</button>
+              <button class="h-15 w-42 rounded bg-[#3c8df4]" @click="handleSave">保存</button>
             </div>
           </div>
         </div>
@@ -175,4 +585,13 @@ function handleSelect(key: string | number, item: Macro) {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.n-tabs-tab--active {
+  color: #ffffff !important;
+  background: #3c8df4 !important;
+}
+
+.point {
+  cursor: pointer;
+}
+</style>
