@@ -1,22 +1,40 @@
 <script setup lang="ts">
-defineProps<{
-  base: {
-    code: number;
-    name: string;
-  };
-  comboKeyList: {
-    type: string;
-    icon: string;
-    label: string;
-  }[];
-}>();
+import { computed } from 'vue';
+const props = withDefaults(
+  defineProps<{
+    base: {
+      code: number;
+      name: string;
+    };
+    comboKeyList?: {
+      type: string;
+      icon: string;
+      label: string;
+    }[];
+    codePreffix?: string;
+  }>(),
+  {
+    comboKeyList: [] as any,
+    codePreffix: ''
+  }
+);
+const hasComboKey = computed(() => props.comboKeyList.length);
 </script>
 
 <template>
-  <div class="w-360px flex-col inline-flex">
-    <div class="flex flex-row gap-x-2 rounded-t-md higth-light-bg px-5 py-4">
-      <div class="w-6rem flex items-center text-c-primary">{{ base.name }}</div>
-      <div class="flex flex-row gap-x-2">
+  <div class="h-full min-w-120px flex-col inline-flex">
+    <div
+      class="flex flex-1 flex-row gap-x-2 rounded-t-md higth-light-bg px-5 py-4"
+      :class="[
+        {
+          'justify-center items-center': !hasComboKey
+        }
+      ]"
+    >
+      <div class="flex items-center text-c-primary" :class="`${!hasComboKey ? 'text-center' : 'w-6rem'}`">
+        {{ base.name }}
+      </div>
+      <div v-if="hasComboKey" class="flex flex-row gap-x-2">
         <div
           v-for="comboKey in comboKeyList"
           :key="`${base.code}-${comboKey.icon}-${comboKey.label}`"
@@ -38,7 +56,7 @@ defineProps<{
       </div>
     </div>
     <div class="flex flex-row items-center justify-between rounded-b-md base-light-bg px-5 py-1">
-      <span class="text-c-primary">{{ base.code }}</span>
+      <span class="text-c-primary">{{ codePreffix + base.code }}</span>
       <div>
         <slot name="menu"></slot>
       </div>
