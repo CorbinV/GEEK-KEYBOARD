@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { provide, readonly } from 'vue';
+import { provide, readonly, ref } from 'vue';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
+import { useCommonStore } from '@/store/modules/common';
 import Dynamic from './dynamic.vue';
 type SelectedInfo = {
   type: number;
@@ -12,21 +13,34 @@ const [selectedInfo, resetSelectedInfo] = useResttableRefFn<SelectedInfo>(() => 
   code: 0,
   keyId: ''
 }));
+const currentKeyFromKeyboard = ref({
+  keyId: ''
+});
 function handleKeyEmit(data: { keyId: string; code: number; type: number }) {
   selectedInfo.value = {
     type: data.type || 0,
     code: data.code,
     keyId: data.keyId
   };
+  if (currentKeyFromKeyboard.value.keyId) {
+    useCommonStore().setTargetKeyInfoById(data.keyId, {
+      type: data.type,
+      code: data.code
+    });
+    // optimize: add some notify to show the key config has been changed
+  }
 }
 provide('selectedInfo', readonly(selectedInfo));
 provide('resetSelectedInfo', resetSelectedInfo);
+function handleKeyboardKeySelected(keyId: string) {
+  currentKeyFromKeyboard.value.keyId = keyId;
+}
 </script>
 
 <template>
   <div class="mx-auto my-0 max-w-1600px flex items-center">
     <div class="flex flex-col flex-1">
-      <Dynamic />
+      <Dynamic @change:key-id="handleKeyboardKeySelected" />
       <div v-if="$slots.keyboardBottom" class="card-header">
         <slot name="keyboardBottom"></slot>
       </div>

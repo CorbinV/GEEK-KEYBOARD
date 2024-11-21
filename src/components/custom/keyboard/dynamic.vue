@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import KeyControl from './components/key-control.vue';
 import LayerControl from './components/layer-control.vue';
 import Keyboard from './components/keyboard.vue';
+const emit = defineEmits(['change:key-id']);
 const layerList = [
   {
     layer: 0,
@@ -26,6 +27,7 @@ const selectedKey = ref('');
 function handleSelectKey(data: { keyId: string; idx: number }) {
   const { keyId } = data;
   selectedKey.value = keyId;
+  emit('change:key-id', keyId);
 }
 </script>
 
