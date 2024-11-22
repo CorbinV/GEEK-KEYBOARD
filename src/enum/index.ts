@@ -4,5 +4,6 @@ export enum SetupStoreId {
   Auth = 'auth-store',
   Route = 'route-store',
   Tab = 'tab-store',
-  Keyboard = 'keyboard-store'
+  Keyboard = 'keyboard-store',
+  Common = 'common-store'
 }
