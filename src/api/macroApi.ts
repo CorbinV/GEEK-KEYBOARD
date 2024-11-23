@@ -13,3 +13,24 @@ export function getMacroCfg(data: { type: number; code: number }) {
     data
   });
 }
+
+export function setMacroName(data: { type: number; code: number; name: string }) {
+  return requestClient.send({
+    name: 'setMacroName',
+    data
+  });
+}
+
+export function delMacro(data: { code: number }) {
+  return requestClient.send({
+    name: 'delMacro',
+    data
+  });
+}
+
+export function setMacro(data: MacroCfg) {
+  return requestClient.send({
+    name: 'setMacro',
+    data
+  });
+}

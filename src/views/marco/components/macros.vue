@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, reactive, ref } from 'vue';
 import type { TabsInst } from 'naive-ui';
-import { getMacroCfg, getMacros } from '@/api/macroApi';
+import { delMacro, getMacroCfg, getMacros, setMacro, setMacroName } from '@/api/macroApi';
 import type { Macro, MacroAttr } from '@/api/modules/macro';
 import type { UIKey } from './macroHelper';
 import actions from './macroHelper';
@@ -9,6 +9,10 @@ import { MacroType } from './macroType';
 
 // 宏列表
 const macros = reactive<{ macro: Macro[] }>({ macro: [] });
+// 添加或编辑的宏
+let macro: Macro = { type: 6, code: -1, name: '' };
+// 0-添加 1-编辑
+let editType = 0;
 // 宏配置
 let uiKey: UIKey[] = reactive([]);
 // 宏弹窗
@@ -46,6 +50,8 @@ const inputTime = ref(null);
 const selectKey = ref({ type: -1, code: -1, value: -1 });
 // 选中索引
 const selectIndex = ref(-1);
+// 选中的按键名称
+const selectName = ref('');
 // tab ref
 const tabsInstRef = ref<TabsInst | null>(null);
 // tab index
@@ -53,7 +59,7 @@ const tabIndex = ref(MacroType.KeyStatusTabs.Down);
 // 宏修改时间
 const inputKeyTime = ref(null);
 
-onMounted(() => {
+onMounted(async () => {
   initData();
 });
 
@@ -63,8 +69,8 @@ async function initData() {
   macros.macro = macrosList.macro.slice(0, 8);
 }
 
-// 宏属性
-function initAttr() {
+// 刷新UI
+function updateUI() {
   const macroAttr = actions.getMacroAttr();
   inputName.value = macroAttr.name;
   trigger.value = macroAttr.trigger;
@@ -73,11 +79,11 @@ function initAttr() {
   stopType.value = macroAttr.stopType;
   inputDelayTimeStart.value = macroAttr.delay[0];
   inputDelayTimeEnd.value = macroAttr.delay[1];
+  uiKey = actions.getUIKey();
 }
 
 // 宏列表操作菜单
 function handleMacrosMenu(key: string | number, item: Macro) {
-  console.log(key, item);
   listEditIndex.value = macros.macro.indexOf(item);
   switch (key) {
     case MacroType.MenuOptionKey.Edit: {
@@ -99,12 +105,35 @@ function handleMacrosMenu(key: string | number, item: Macro) {
   }
 }
 
+// 添加宏按键
+function handleNewMacro() {
+  editType = 0;
+  let index = 0;
+  for (const item of macros.macro) {
+    if (item.code === index) {
+      index++;
+    } else {
+      break;
+    }
+  }
+  listEditIndex.value = index;
+  macro = {
+    type: 6,
+    code: listEditIndex.value,
+    name: `M${listEditIndex.value + 1}`
+  };
+  actions.newMacroAttr(macro);
+  updateUI();
+  showModal.value = true;
+}
+
 // 编辑宏
 async function handleMacroEdit(item: Macro) {
+  editType = 1;
+  macro = item;
   const macroCfg = await getMacroCfg({ type: item.type, code: item.code });
   actions.initMacroCfg(macroCfg);
-  initAttr();
-  uiKey = actions.getUIKey();
+  updateUI();
   showModal.value = true;
 }
 // 重命名
@@ -114,15 +143,19 @@ function handleReName() {
 }
 
 // 重命名保存
-function handleReNameSave() {
+async function handleReNameSave() {
   if (inputReName.value === '' || listEditIndex.value === -1) return;
+  await setMacroName({ type: macro.type, code: macros.macro[listEditIndex.value].code, name: inputReName.value });
+  // 等待响应后再更新数据
   macros.macro[listEditIndex.value].name = inputReName.value;
   showRenameModal.value = false;
 }
 
 // 删除宏
-function handleMacroDelete() {
+async function handleMacroDelete() {
   if (listEditIndex.value === -1) return;
+  await delMacro({ code: macros.macro[listEditIndex.value].code });
+  // 等待响应后再更新数据
   macros.macro.splice(listEditIndex.value, 1);
 }
 
@@ -161,6 +194,7 @@ function handleRadio() {
 function selectItem(item: UIKey, index: number) {
   if (recordStatus.value) return;
   selectKey.value = item;
+  selectName.value = String(item.code);
   if (selectIndex.value === index) {
     selectIndex.value = -1;
   } else {
@@ -197,14 +231,12 @@ function handleInsertKey() {
 
 // 重置
 function handleReset() {
-  console.log('reset');
   pauseRecord();
   actions.resetUIKey();
 }
 
 // 录制控制
 function handleRecord() {
-  console.log('record');
   if (recordStatus.value) {
     pauseRecord();
   } else {
@@ -216,7 +248,6 @@ function handleRecord() {
 // 开始录制
 function startRecord() {
   recordStatus.value = true;
-  console.log('startRecord');
 
   const frames = [
     { index: 0, code: [2, 3], time: 0 },
@@ -236,13 +267,11 @@ function startRecord() {
 // 暂停录制
 function pauseRecord() {
   recordStatus.value = false;
-  console.log('pauseRecord');
   actions.pauseRecord();
 }
 
 // 取消
 function handleCancel() {
-  console.log('cancel');
   pauseRecord();
   showModal.value = false;
 }
@@ -252,9 +281,10 @@ function saveMacroAttr() {
   if (trigger.value !== MacroType.TriggerOptionKey.Delay) {
     inputDelayTime.value = 0;
   }
+  macro.name = inputName.value;
   const macroAttr: MacroAttr = {
-    type: 6,
-    code: 0,
+    type: macro.type,
+    code: macro.code,
     name: inputName.value,
     trigger: trigger.value,
     triggerDelay: inputDelayTime.value,
@@ -262,15 +292,21 @@ function saveMacroAttr() {
     delay: [inputDelayTimeStart.value, inputDelayTimeEnd.value],
     stopType: stopType.value
   };
-  actions.saveMacroAttr(macroAttr);
+  actions.setMacroAttr(macroAttr);
 }
 
 // 保存
-function handleSave() {
+async function handleSave() {
   console.log('handleSave');
   pauseRecord();
   saveMacroAttr();
-  actions.saveUIKey();
+  const result = actions.saveUIKey();
+  if (result) {
+    await setMacro({ attr: result.attr, keys: result.keys });
+    // 等待响应后再更新数据
+    macros.macro.splice(listEditIndex.value, editType, macro);
+  }
+  showModal.value = false;
 }
 </script>
 
@@ -281,6 +317,7 @@ function handleSave() {
     <div
       v-if="macros.macro.length < 8"
       class="h-25 flex flex-col items-center justify-center gap-2.5 border border border-[#3c8df4] rounded-lg border-dashed text-base text-[#3C8DF4] font-normal"
+      @click="handleNewMacro"
     >
       <i class="iconfont icon-add" style="color: #3c8df4"></i>
       <span class="text-[#3C8DF4]">添加宏按键</span>
@@ -294,7 +331,9 @@ function handleSave() {
       <div class="flex basis-1/3 items-center justify-between rounded-b-lg bg-[#222227] px-4">
         <span class="text-sm text-[#999999] font-medium">M{{ item.code + 1 }}</span>
         <NDropdown trigger="hover" :options="MacroType.MacrosOps" @select="key => handleMacrosMenu(key, item)">
-          <i class="iconfont icon-add" style="color: #999999"></i>
+          <div class="size-5 flex items-center justify-center rounded bg-[#1E1E22]">
+            <SvgIcon icon="tabler:dots" />
+          </div>
         </NDropdown>
       </div>
     </div>
@@ -494,7 +533,7 @@ function handleSave() {
             <span v-if="selectKey.type === 3" class="w-18 text-[#999999]">时间</span>
             <NInput
               v-if="selectKey.type !== 3"
-              v-model:value="inputName"
+              v-model:value="selectName"
               type="text"
               size="large"
               style="width: 180px"
@@ -517,8 +556,8 @@ function handleSave() {
 
             <NTabs
               v-if="selectKey.type !== 3"
-              v-model:value="tabIndex"
               ref="tabsInstRef"
+              v-model:value="tabIndex"
               type="segment"
               style="width: 120px"
               animated

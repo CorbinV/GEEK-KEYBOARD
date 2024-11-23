@@ -1,5 +1,5 @@
 import { reactive } from 'vue';
-import type { MacroAttr, MacroCfg, MacroKey } from '@/api/modules/macro';
+import type { Macro, MacroAttr, MacroCfg, MacroKey } from '@/api/modules/macro';
 
 // 定义接口和枚举
 export interface MacroFrame {
@@ -17,19 +17,33 @@ export interface UIKey {
 // 变量
 let lastFrame: MacroFrame = { index: -1, time: 0, code: [] };
 const uiKey: UIKey[] = reactive([]);
-let macroAttr: MacroAttr = reactive({
+let macroAttr: MacroAttr = {
   type: 6,
-  code: 0,
+  code: -1,
   name: '',
   trigger: 0,
   triggerDelay: 0,
   loop: 1,
   delay: [0, 0],
   stopType: 0
-});
+};
 
 // 方法
 const actions = {
+  // 新建一个空的MacroAttr
+  newMacroAttr(macro: Macro) {
+    actions.resetUIKey();
+    macroAttr = {
+      type: 6,
+      code: macro.code,
+      name: macro.name,
+      trigger: 0,
+      triggerDelay: 0,
+      loop: 1,
+      delay: [0, 0],
+      stopType: 0
+    };
+  },
   // 初始化数据
   initMacroCfg(macroCfg: MacroCfg) {
     this.resetUIKey();
@@ -136,8 +150,8 @@ const actions = {
   pauseRecord() {},
 
   // 保存当前UIKey数组
-  saveUIKey() {
-    if (uiKey.length === 0) return;
+  saveUIKey(): MacroCfg | undefined {
+    if (uiKey.length === 0) return undefined;
 
     const macroKey: MacroKey[] = [];
     const code: number[] = [];
@@ -165,6 +179,7 @@ const actions = {
     };
 
     console.log('保存配置', JSON.stringify(macroCfg));
+    return macroCfg;
   },
 
   // 处理UIKey的类型变化
@@ -176,7 +191,12 @@ const actions = {
       if (index !== -1) code.splice(index, 1);
     }
   },
-  saveMacroAttr(attr: MacroAttr) {
+  // 获取macroAttr
+  getMacroAttr() {
+    return macroAttr;
+  },
+  // 设置macroAttr
+  setMacroAttr(attr: MacroAttr) {
     macroAttr = attr;
   },
 
@@ -188,11 +208,6 @@ const actions = {
   // 获取uiKey数组
   getUIKey() {
     return uiKey;
-  },
-
-  // 获取macroAttr
-  getMacroAttr() {
-    return macroAttr;
   }
 };
 
