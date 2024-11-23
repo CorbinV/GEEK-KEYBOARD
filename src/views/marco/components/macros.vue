@@ -308,6 +308,12 @@ async function handleSave() {
   }
   showModal.value = false;
 }
+
+const emit = defineEmits(['key-clicked']);
+
+function handleListItem(item: Macro) {
+  emit('key-clicked', { code: item.code, type: item.type });
+}
 </script>
 
 <template>
@@ -325,7 +331,7 @@ async function handleSave() {
 
     <!-- item -->
     <div v-for="item in macros.macro" :key="item.code" class="h-25 flex flex-col">
-      <div class="flex basis-2/3 items-center justify-center rounded-t-lg bg-[#131313]">
+      <div class="flex basis-2/3 items-center justify-center rounded-t-lg bg-[#131313]" @click="handleListItem(item)">
         <span class="text-sm text-[#999999] font-medium">{{ item.name }}</span>
       </div>
       <div class="flex basis-1/3 items-center justify-between rounded-b-lg bg-[#222227] px-4">

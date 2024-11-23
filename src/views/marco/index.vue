@@ -18,7 +18,7 @@ import Macros from './components/macros.vue';
   <div>
     <KeyboardContainer>
       <template #default="{ handleKeyEmit }">
-        <Macros :type="KeyTypeEnum.Marco" @key-clicked="handleKeyEmit"></Macros>
+        <Macros :type="KeyTypeEnum.Marco" @key-clicked="handleKeyEmit" />
       </template>
     </KeyboardContainer>
   </div>

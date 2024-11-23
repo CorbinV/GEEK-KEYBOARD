@@ -65,7 +65,7 @@ function useKeySelectAndNotify() {
             detail = { label: `D${code}`, icon: '', type: 'str' };
             break;
           case KeyTypeEnum.Marco:
-            detail = { label: `M${code}`, icon: '', type: 'str' };
+            detail = { label: `M${code + 1}`, icon: '', type: 'str' };
             break;
           default:
             break;
