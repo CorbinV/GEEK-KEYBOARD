@@ -7,6 +7,12 @@ import type { UIKey } from './macroHelper';
 import actions from './macroHelper';
 import { MacroType } from './macroType';
 
+const emit = defineEmits(['key-clicked']);
+const props = defineProps<{ edit: boolean }>();
+function handleListItem(item: Macro) {
+  emit('key-clicked', { code: item.code, type: item.type });
+}
+
 // 宏列表
 const macros = reactive<{ macro: Macro[] }>({ macro: [] });
 // 添加或编辑的宏
@@ -66,7 +72,7 @@ onMounted(async () => {
 // 初始化数据
 async function initData() {
   const macrosList = await getMacros();
-  macros.macro = macrosList.macro.slice(0, 8);
+  macros.macro = macrosList.macro.slice(0, 7);
 }
 
 // 刷新UI
@@ -308,12 +314,6 @@ async function handleSave() {
   }
   showModal.value = false;
 }
-
-const emit = defineEmits(['key-clicked']);
-
-function handleListItem(item: Macro) {
-  emit('key-clicked', { code: item.code, type: item.type });
-}
 </script>
 
 <template>
@@ -321,7 +321,7 @@ function handleListItem(item: Macro) {
   <div class="grid grid-cols-4 gap-4 p-7">
     <!-- add -->
     <div
-      v-if="macros.macro.length < 8"
+      v-if="props.edit && macros.macro.length < 8"
       class="h-25 flex flex-col items-center justify-center gap-2.5 border border border-[#3c8df4] rounded-lg border-dashed text-base text-[#3C8DF4] font-normal"
       @click="handleNewMacro"
     >
@@ -336,7 +336,12 @@ function handleListItem(item: Macro) {
       </div>
       <div class="flex basis-1/3 items-center justify-between rounded-b-lg bg-[#222227] px-4">
         <span class="text-sm text-[#999999] font-medium">M{{ item.code + 1 }}</span>
-        <NDropdown trigger="hover" :options="MacroType.MacrosOps" @select="key => handleMacrosMenu(key, item)">
+        <NDropdown
+          v-if="props.edit"
+          trigger="hover"
+          :options="MacroType.MacrosOps"
+          @select="key => handleMacrosMenu(key, item)"
+        >
           <div class="size-5 flex items-center justify-center rounded bg-[#1E1E22]">
             <SvgIcon icon="tabler:dots" />
           </div>

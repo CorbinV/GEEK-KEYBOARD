@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { KeyboardContainer, StandardKeyboard } from '@/components/custom/keyboard/index';
 import { KeyTypeEnum } from '@/enum/keyType';
+import Macros from '../marco/components/macros.vue';
 import ModuleTemplate from './components/module-template.vue';
 </script>
 
@@ -20,6 +21,9 @@ import ModuleTemplate from './components/module-template.vue';
           </NTabPane>
           <NTabPane name="special" tab="特殊">
             <ModuleTemplate :type="KeyTypeEnum.Special" @key-clicked="handleKeyEmit" />
+          </NTabPane>
+          <NTabPane name="macro" tab="宏按键">
+            <Macros :edit="false" @key-clicked="handleKeyEmit" />
           </NTabPane>
         </NTabs>
       </template>
