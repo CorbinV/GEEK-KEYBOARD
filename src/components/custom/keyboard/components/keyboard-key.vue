@@ -92,7 +92,8 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
           isLightColor ? 'border-#2c2c3c' : 'border-#222227',
           {
             'bg-[#2c2c3c]': isLightColor,
-            '!border-[#3C8DF4]': selected
+            '!border-[#3C8DF4]': selected,
+            '!text-[#3C8DF4]': selected
           }
         ]"
         :data-id="keyId"
