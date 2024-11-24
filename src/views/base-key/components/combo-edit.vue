@@ -15,6 +15,7 @@ const { kbCfg } = toRefs(keyboardStore);
 const props = defineProps<{
   groupLength: number;
   visible: boolean;
+  fncGenerateCode: () => number;
 }>();
 
 type TabsPropsThemeOverrides = NonNullable<TabsProps['themeOverrides']>;
@@ -68,7 +69,7 @@ function handleFncClicked({ code, type }: { code: number; type: KeyTypeEnum }) {
 async function handleDialogComfirm() {
   const sendData = {
     type: KeyTypeEnum.Combo,
-    code: props.groupLength + 1,
+    code: props.fncGenerateCode(),
     keys: selectedKeyInfo.value.list.map((item: any) => item.base)
   };
   try {

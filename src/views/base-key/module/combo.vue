@@ -50,6 +50,15 @@ function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeE
     type
   });
 }
+function generateGroupCode() {
+  if (comboGroupList.value.length === 0) return 1;
+  const usedCodes = new Set(comboGroupList.value.map((group: { code: number }) => group.code));
+  let newCode = 1;
+  while (usedCodes.has(newCode)) {
+    newCode++;
+  }
+  return newCode;
+}
 </script>
 
 <template>
@@ -72,6 +81,7 @@ function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeE
       <ComboEdit
         v-model:visible="editVisible"
         :group-length="comboGroupList.length"
+        :fnc-generate-code="generateGroupCode"
         @create-group="handleGroupCreated"
       />
     </div>
