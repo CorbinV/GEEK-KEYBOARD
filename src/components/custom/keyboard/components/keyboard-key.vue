@@ -9,8 +9,11 @@ interface KeyboardKeyProps {
   keyDetail?: any;
   idx: number;
   disabled?: boolean;
+  kbLength?: number;
 }
-
+const emit = defineEmits<{
+  (e: 'lastKeyMounted', preload: null): void;
+}>();
 const props = defineProps<KeyboardKeyProps>();
 
 const keyInfo = ref();
@@ -77,6 +80,10 @@ onMounted(async () => {
       updateKeyCfg(props.keyDetail);
     }
   });
+  if (props.kbLength !== undefined && props.kbLength === props.idx + 1) {
+    console.log(212312312);
+    emit('lastKeyMounted', null);
+  }
 });
 
 const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].includes(props.keyId);

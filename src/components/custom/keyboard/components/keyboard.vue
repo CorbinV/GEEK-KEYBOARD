@@ -112,6 +112,9 @@ function handleKeyClick(e: MouseEvent) {
     }
   }
 }
+function handleLastKeyMounted() {
+  kbCfg.value.offsetList = [];
+}
 </script>
 
 <template>
@@ -121,10 +124,12 @@ function handleKeyClick(e: MouseEvent) {
       :key="key"
       :key-id="key"
       :idx="idx"
+      :kb-length="layoutList.length"
       :selected="clickedKey.idx === idx"
       :key-detail="layerData[layer]?.keys[key]"
       :disabled="layerData[layer]?.disable.includes(key)"
       :smart="layerData[layer]?.smart[key]"
+      @last-key-mounted="handleLastKeyMounted"
     />
   </div>
 </template>
