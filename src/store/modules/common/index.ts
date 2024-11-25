@@ -4,12 +4,8 @@ import { useEventListener } from '@vueuse/core';
 import { SetupStoreId } from '@/enum';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { getKeyInfo, restoreKeyConfig, setKeyInfo } from '@/api/keyConfig';
-
-export const useCommonStore = defineStore(SetupStoreId.Common, () => {
-  const scope = effectScope();
+function useKeyInfo() {
   const KeyConfigMap = reactive<{ [key: string]: KeyInfo | null }>({});
-
-  async function init() {}
   async function fetchTargetKeyInfo(key: string) {
     const keyInfo = await getKeyInfo({ key });
     KeyConfigMap[key] = keyInfo;
@@ -42,6 +38,19 @@ export const useCommonStore = defineStore(SetupStoreId.Common, () => {
     KeyConfigMap[key] = data;
     return KeyConfigMap[key];
   }
+  return {
+    KeyConfigMap,
+    fetchTargetKeyInfo,
+    getTargetKeyInfo,
+    restoreTargetKeyInfoById,
+    setTargetKeyInfoById
+  };
+}
+export const useCommonStore = defineStore(SetupStoreId.Common, () => {
+  const scope = effectScope();
+  const { KeyConfigMap, ...restFnc } = useKeyInfo();
+  async function init() {}
+
   // watch store
   scope.run(() => {});
 
@@ -56,10 +65,7 @@ export const useCommonStore = defineStore(SetupStoreId.Common, () => {
   init();
 
   return {
-    fetchTargetKeyInfo,
-    getTargetKeyInfo,
-    restoreTargetKeyInfoById,
-    setTargetKeyInfoById,
+    ...restFnc,
     KeyConfigMap
   };
 });
