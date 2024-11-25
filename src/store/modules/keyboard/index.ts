@@ -56,15 +56,28 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
 
       return data;
     };
+
+    const getKeyDetail = ({ code, type }: BaseKey) => {
+      console.log('getKeyDetail', JSON.parse(JSON.stringify(kbCfg.keyMap)));
+      const codeMap = kbCfg.keyMap[type]?.code;
+      if (!codeMap) {
+        throw new Error('get key detail info failed, beause no code map');
+      }
+      const codeDetail = codeMap[code];
+      if (!codeDetail) {
+        throw new Error('get key detail info failed, beause no code detail');
+      }
+      return codeDetail;
+    };
     const initKeyMap = () => {
       import('@/assets/files/key-map.json').then(res => {
         kbCfg.keyMap = res.default;
       });
     };
     initKeyMap();
-    return { initKeyboardData, kbCfg };
+    return { initKeyboardData, kbCfg, getKeyDetail };
   }
-  const { initKeyboardData, kbCfg } = useConfigData();
+  const { initKeyboardData, kbCfg, getKeyDetail } = useConfigData();
   async function init() {
     await initKeyboardData();
   }
@@ -85,5 +98,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   return {
     kbCfg,
     initKeyboardData
+    getKeyDetail
   };
 });
