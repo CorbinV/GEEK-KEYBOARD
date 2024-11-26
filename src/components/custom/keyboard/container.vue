@@ -38,8 +38,8 @@ function handleKeyboardKeySelected(keyId: string) {
 </script>
 
 <template>
-  <div class="mx-auto my-0 max-w-1600px flex items-center">
-    <div class="flex flex-col flex-1">
+  <div class="mx-auto my-0 h-full max-w-1600px flex items-center">
+    <div class="h-full flex flex-col flex-1">
       <Dynamic @change:key-id="handleKeyboardKeySelected" />
       <div v-if="$slots.keyboardBottom" class="card-header">
         <slot name="keyboardBottom"></slot>
