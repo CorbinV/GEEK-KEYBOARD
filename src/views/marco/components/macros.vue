@@ -3,9 +3,11 @@ import { nextTick, onMounted, reactive, ref } from 'vue';
 import type { TabsInst } from 'naive-ui';
 import { delMacro, getMacroCfg, getMacros, setMacro, setMacroName } from '@/api/macroApi';
 import type { Macro, MacroAttr } from '@/api/modules/macro';
-import type { UIKey } from './macroHelper';
-import actions from './macroHelper';
-import { MacroType } from './macroType';
+import { MacroType } from '../core/macroType';
+import type { UIKey } from '../core/macroHelper';
+import actions from '../core/macroHelper';
+import MacroList from './MacroList.vue';
+import RenameModal from './RenameModal.vue';
 
 const emit = defineEmits(['key-clicked']);
 const props = defineProps<{ edit: boolean }>();
@@ -144,14 +146,21 @@ async function handleMacroEdit(item: Macro) {
 }
 // 重命名
 function handleReName() {
+  console.log('handleReName');
   inputReName.value = '';
   showRenameModal.value = true;
 }
 
 // 重命名保存
-async function handleReNameSave() {
-  if (inputReName.value === '' || listEditIndex.value === -1) return;
-  await setMacroName({ type: macro.type, code: macros.macro[listEditIndex.value].code, name: inputReName.value });
+async function handleReNameSave(data: { index: number; name: string }) {
+  if (data.name === '' || data.index === -1) return;
+  listEditIndex.value = data.index;
+  inputReName.value = data.name;
+  try {
+    await setMacroName({ type: macro.type, code: macros.macro[listEditIndex.value].code, name: inputReName.value });
+  } catch (error) {
+    console.log('error', error);
+  }
   // 等待响应后再更新数据
   macros.macro[listEditIndex.value].name = inputReName.value;
   showRenameModal.value = false;
@@ -160,7 +169,11 @@ async function handleReNameSave() {
 // 删除宏
 async function handleMacroDelete() {
   if (listEditIndex.value === -1) return;
-  await delMacro({ code: macros.macro[listEditIndex.value].code });
+  try {
+    await delMacro({ code: macros.macro[listEditIndex.value].code });
+  } catch (error) {
+    console.log('error', error);
+  }
   // 等待响应后再更新数据
   macros.macro.splice(listEditIndex.value, 1);
 }
@@ -317,55 +330,23 @@ async function handleSave() {
 </script>
 
 <template>
-  <!-- list -->
+  <MacroList
+    :edit="props.edit"
+    :macros="macros"
+    @new-macro="handleNewMacro"
+    @list-item="handleListItem"
+    @macros-menu="handleMacrosMenu"
+  />
+
+  <RenameModal
+    :show="showRenameModal"
+    :list-edit-index="listEditIndex"
+    :macro="macro"
+    @update:show="showRenameModal = $event"
+    @rename="handleReNameSave"
+  />
+
   <div class="grid grid-cols-4 gap-4 p-7">
-    <!-- add -->
-    <div
-      v-if="props.edit && macros.macro.length < 8"
-      class="h-25 flex flex-col items-center justify-center gap-2.5 border border border-[#3c8df4] rounded-lg border-dashed text-base text-[#3C8DF4] font-normal"
-      @click="handleNewMacro"
-    >
-      <i class="iconfont icon-add" style="color: #3c8df4"></i>
-      <span class="text-[#3C8DF4]">添加宏按键</span>
-    </div>
-
-    <!-- item -->
-    <div v-for="item in macros.macro" :key="item.code" class="h-25 flex flex-col">
-      <div class="flex basis-2/3 items-center justify-center rounded-t-lg bg-[#131313]" @click="handleListItem(item)">
-        <span class="text-sm text-[#999999] font-medium">{{ item.name }}</span>
-      </div>
-      <div class="flex basis-1/3 items-center justify-between rounded-b-lg bg-[#222227] px-4">
-        <span class="text-sm text-[#999999] font-medium">M{{ item.code + 1 }}</span>
-        <NDropdown
-          v-if="props.edit"
-          trigger="hover"
-          :options="MacroType.MacrosOps"
-          @select="key => handleMacrosMenu(key, item)"
-        >
-          <div class="size-5 flex items-center justify-center rounded bg-[#1E1E22]">
-            <SvgIcon icon="tabler:dots" />
-          </div>
-        </NDropdown>
-      </div>
-    </div>
-
-    <!-- reName modal -->
-    <NModal v-model:show="showRenameModal" :mask-closable="false">
-      <div class="rounded-log flex flex-col items-center justify-center gap-7 bg-[#191B1D] p-7 text-center">
-        <span>重命名</span>
-        <NInput v-model:value="inputReName" type="text" size="large" placeholder="最长六个字符" maxlength="6" />
-        <div>
-          <button
-            class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
-            @click="showRenameModal = false"
-          >
-            取消
-          </button>
-          <button class="ml-7 h-15 w-42 rounded bg-[#3c8df4]" @click="handleReNameSave">保存</button>
-        </div>
-      </div>
-    </NModal>
-
     <!-- modal -->
     <NModal v-model:show="showModal" :mask-closable="false">
       <div class="h-[90vh] w-4/5 flex flex-col rounded-lg bg-[#191B1D] p-7">
