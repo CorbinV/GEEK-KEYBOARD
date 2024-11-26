@@ -10,6 +10,7 @@ type KeyboardProps = {
   module?: string; // device module
   layer?: number;
   config?: number;
+  as?: 'component' | 'template';
 };
 
 const injSelectedInfo = inject('selectedInfo') as any;
@@ -21,7 +22,8 @@ const emit = defineEmits<{
 const props = withDefaults(defineProps<KeyboardProps>(), {
   module: 'rk-s75',
   config: 0,
-  layer: 0
+  layer: 0,
+  as: 'template'
 });
 const keyboardStore = useKeyboardStore();
 const { kbCfg } = toRefs(keyboardStore);
@@ -125,7 +127,7 @@ function handleLastKeyMounted() {
       :key-id="key"
       :idx="idx"
       :kb-length="layoutList.length"
-      :selected="clickedKey.idx === idx"
+      :selected="as !== 'component' && clickedKey.idx === idx"
       :key-detail="layerData[layer]?.keys[key]"
       :disabled="layerData[layer]?.disable.includes(key)"
       :smart="layerData[layer]?.smart[key]"
