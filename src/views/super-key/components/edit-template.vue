@@ -17,6 +17,7 @@ const props = defineProps<{
   codeType: KeyTypeEnum;
   desc?: string;
   title?: string;
+  secondTitle?: string;
 }>();
 
 function useDialogController() {
@@ -122,13 +123,19 @@ function useTitle() {
     preset="card"
     :closable="false"
     :title="undefined"
+    :close-on-esc="false"
+    :mask-closable="false"
     class="h-80vh w-60% !bg-#191b1d"
     content-class="bg-#191b1d"
     size="large"
   >
     <template #header>
-      <div class="text-center text-xl">
-        {{ localTitle }}
+      <div class="flex flex-row justify-between text-xl">
+        <div></div>
+        <span>{{ localTitle }}</span>
+        <div>
+          <slot name="header-extra"></slot>
+        </div>
       </div>
     </template>
     <template #default>
@@ -136,6 +143,7 @@ function useTitle() {
         <NDivider class="!mt-0" />
 
         <div class="flex flex-col gap-y-6">
+          <h2 v-if="secondTitle" class="text-wihte text-center text-lg">{{ secondTitle }}</h2>
           <p class="text-center text-base text-c-second">{{ desc }}</p>
           <div class="flex flex-row justify-center gap-x-12">
             <div v-for="(_, idx) in new Array(2)" :key="`d-groups-${idx}`" class="flex flex-col gap-y-4">
@@ -147,6 +155,7 @@ function useTitle() {
               <div class="text-center text-c-second">{{ idx }}</div>
             </div>
           </div>
+          <slot name="extra"></slot>
         </div>
         <div class="flex flex-1 items-center justify-between">
           <div class="flex-1"></div>
