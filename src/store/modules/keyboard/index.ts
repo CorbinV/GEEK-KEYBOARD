@@ -1,11 +1,17 @@
-import { effectScope, onScopeDispose, reactive } from 'vue';
+import { effectScope, onScopeDispose, reactive, watchEffect } from 'vue';
 import { defineStore } from 'pinia';
 import { useEventListener } from '@vueuse/core';
 import { useBoolean } from '@sa/hooks';
 import { SetupStoreId } from '@/enum';
 import { kbStg, keyboardforage } from '@/utils/storage';
-
+import { useResttableRefFn } from '@/hooks/common/basicFnc';
+import { KeyTypeEnum } from '@/enum/keyType';
+import type { BaseKey } from '@/api/modules/combo';
 import keyMapJson from '@/assets/files/key-map.json';
+type CurrentSuperKeyType = Omit<
+  KeyTypeEnum,
+  KeyTypeEnum.Normal | KeyTypeEnum.System | KeyTypeEnum.Media | KeyTypeEnum.Combo | KeyTypeEnum.Special
+>;
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
 
@@ -59,7 +65,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     };
 
     const getKeyDetail = ({ code, type }: BaseKey) => {
-      console.log('getKeyDetail', JSON.parse(JSON.stringify(kbCfg.keyMap)));
       const codeMap = kbCfg.keyMap[type]?.code;
       if (!codeMap) {
         throw new Error('get key detail info failed, beause no code map');
@@ -81,6 +86,48 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     return { initKeyboardData, kbCfg, getKeyDetail };
   }
   const { initKeyboardData, kbCfg, getKeyDetail } = useConfigData();
+
+  function useRelatedSelectedKeys() {
+    const [selectedKeys, resetSelectedKeys] = useResttableRefFn<{
+      [key: string]: {
+        base: { code: number; type: number };
+        detail: any;
+        config: any;
+      };
+    }>(() => ({}));
+    const [selectedKeysTemp, resetSelectedKeysTemp] = useResttableRefFn<{
+      [key: string]: {
+        base: { code: number; type: number };
+        detail: any;
+        config: any;
+      };
+    }>(() => ({}));
+    const [allowMutipleSelect, resetAllowMutipleSelect] = useResttableRefFn(() => false);
+    function emitResetSelectedKeys(_: any) {
+      resetSelectedKeys();
+    }
+    watchEffect(() => {
+      // feat: when allow mutiple select value change, the selected keys should be reset
+      emitResetSelectedKeys(allowMutipleSelect.value);
+    });
+    return {
+      selectedKeys,
+      resetSelectedKeys,
+      allowMutipleSelect,
+      resetAllowMutipleSelect,
+      selectedKeysTemp,
+      resetSelectedKeysTemp
+    };
+  }
+  const { resetSelectedKeys, ...restRelatedSelectedData } = useRelatedSelectedKeys();
+  const [currentSuperKeyType, resetCurrentSuperKeyType] = useResttableRefFn<CurrentSuperKeyType>(
+    () => KeyTypeEnum.None
+  );
+  watchEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    currentSuperKeyType.value;
+    resetSelectedKeys();
+  });
   async function init() {
     await initKeyboardData();
   }
@@ -100,7 +147,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
 
   return {
     kbCfg,
-    initKeyboardData
-    getKeyDetail
+    initKeyboardData,
+    resetSelectedKeys,
+    currentSuperKeyType,
+    resetCurrentSuperKeyType,
+    getKeyDetail,
+    ...restRelatedSelectedData
   };
 });
