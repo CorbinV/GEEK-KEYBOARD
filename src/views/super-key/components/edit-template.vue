@@ -3,7 +3,7 @@ import { nextTick, onMounted, reactive, ref, toRefs, watch, watchEffect } from '
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import BaseKey from '@/components/custom/keyboard/components/base-key.vue';
-import { BaseKeyboard } from '@/components/custom/keyboard';
+import { BaseKeyboard, StandardKeyboard } from '@/components/custom/keyboard';
 import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 const emit = defineEmits(['update:visible', 'update:title', 'create-group']);
@@ -11,15 +11,21 @@ const emit = defineEmits(['update:visible', 'update:title', 'create-group']);
 const keyboardStore = useKeyboardStore();
 const { selectedKeys } = toRefs(keyboardStore);
 const getKeyDetail = keyboardStore.getKeyDetail;
-const props = defineProps<{
-  visible: boolean;
-  fncGenerateCode: () => number;
-  codeType: KeyTypeEnum;
-  desc?: string;
-  title?: string;
-  secondTitle?: string;
-}>();
-
+const props = withDefaults(
+  defineProps<{
+    visible: boolean;
+    fncGenerateCode: () => number;
+    codeType: KeyTypeEnum;
+    title: string;
+    desc: string;
+    secondTitle?: string;
+    keyboardType?: 'base' | 'standard';
+  }>(),
+  {
+    keyboardType: 'base',
+    secondTitle: ''
+  }
+);
 function useDialogController() {
   const control = reactive({
     visible: true
@@ -108,6 +114,9 @@ async function handleDialogComfirm() {
 function handleKeyClickedx(data: { type: KeyTypeEnum; code: number }) {
   handleFncClicked(data);
 }
+function handleStanderKbClicked(data: { type: KeyTypeEnum; code: number }) {
+  handleFncClicked(data);
+}
 function useTitle() {
   const title = ref<string>('');
   watchEffect(() => {
@@ -159,7 +168,8 @@ function useTitle() {
         </div>
         <div class="flex flex-1 items-center justify-between">
           <div class="flex-1"></div>
-          <BaseKeyboard as="component" @update:key-id="handleKeyClickedx" />
+          <BaseKeyboard v-if="keyboardType === 'base'" as="component" @update:key-id="handleKeyClickedx" />
+          <StandardKeyboard v-else @key-clicked="handleStanderKbClicked"></StandardKeyboard>
           <div class="flex-1"></div>
         </div>
       </div>
