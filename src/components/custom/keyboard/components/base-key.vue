@@ -23,7 +23,8 @@ const hasValue = computed(() => {
     :key="hasValue ? `${base!.code}-${detail!.icon}-${detail!.label}` : `${Math.random()}`"
     :class="[
       {
-        '!border-[#3C8DF4]': selected
+        '!border-[#3C8DF4]': selected,
+        'text-[#3C8DF4]': selected
       }
     ]"
     class="box-border h-50px w-50px inline-flex items-center justify-center break-words border border-1 border-#3c3933 rounded-md base-light-bg text-c-primary"
