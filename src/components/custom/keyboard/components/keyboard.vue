@@ -17,7 +17,7 @@ const injSelectedInfo = inject('selectedInfo') as any;
 const injResetSelectedInfo = inject('resetSelectedInfo') as any;
 
 const emit = defineEmits<{
-  (e: 'update:keyId', preload: { keyId: string; idx: number }): void;
+  (e: 'update:keyId', preload: { keyId: string; idx: number; code: number; type: KeyTypeEnum }): void;
 }>();
 const props = withDefaults(defineProps<KeyboardProps>(), {
   module: 'rk-s75',
@@ -106,7 +106,13 @@ function handleKeyClick(e: MouseEvent) {
     const disabled = targetElement.dataset.disabled === 'true';
     const idx = Number.parseInt(targetElement.dataset.idx || '-1', 10);
     if (keyId !== undefined && !disabled) {
-      emit('update:keyId', { keyId, idx });
+      const keyCfgInfo = toRaw(layerData[props.layer]?.keys[keyId!]);
+      const baseKey = {
+        code: keyCfgInfo.code,
+        type: keyCfgInfo.type
+      };
+      const keyDetail = keyboardStore.getKeyDetail(baseKey);
+      emit('update:keyId', { keyId, idx, ...keyCfgInfo });
       clickedKey.value = {
         idx,
         keyId
