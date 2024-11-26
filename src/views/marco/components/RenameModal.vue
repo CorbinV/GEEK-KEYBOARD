@@ -1,30 +1,33 @@
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref } from 'vue';
+import { computed, defineEmits, defineProps, ref, watchEffect } from 'vue';
 import { NInput, NModal } from 'naive-ui';
 import type { Macro } from '@/api/modules/macro';
 
 const props = defineProps<{
   show: boolean;
-  listEditIndex: number;
   macro: Macro;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void;
-  (e: 'rename', payload: { index: number; name: string }): void;
+  (e: 'rename', payload: { name: string }): void;
 }>();
 
-const showModal = computed(() => props.show);
 const inputReName = ref(props.macro.name || '');
 
+const showModal = computed(() => props.show);
+
+watchEffect(() => {
+  inputReName.value = props.macro.name?.trim()?.slice(0, 6) || '';
+});
+
 const handleCancel = () => {
-  inputReName.value = '';
   emit('update:show', false);
 };
 
 const handleSave = async () => {
-  if (inputReName.value === '' || props.listEditIndex === -1) return;
-  emit('rename', { index: props.listEditIndex, name: inputReName.value });
+  if (inputReName.value.trim() === '') return;
+  emit('rename', { name: inputReName.value.trim().slice(0, 6) });
   emit('update:show', false);
 };
 </script>

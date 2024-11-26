@@ -90,3 +90,12 @@ export const getMacro = {
     ]
   }
 };
+
+export const setMacroName = {
+  name: 'setMacroName',
+  data: {
+    name: '一键换装',
+    type: 6,
+    code: 0
+  }
+};

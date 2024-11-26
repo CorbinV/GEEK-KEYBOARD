@@ -1,5 +1,5 @@
 import { reactive } from 'vue';
-import type { Macro, MacroAttr, MacroCfg, MacroKey } from '@/api/modules/macro';
+import type { MacroAttr, MacroCfg, MacroKey, Macros } from '@/api/modules/macro';
 
 // 定义接口和枚举
 export interface MacroFrame {
@@ -30,24 +30,22 @@ let macroAttr: MacroAttr = {
 
 // 方法
 const actions = {
-  // 新建一个空的MacroAttr
-  newMacroAttr(macro: Macro) {
-    actions.resetUIKey();
-    macroAttr = {
-      type: 6,
-      code: macro.code,
-      name: macro.name,
-      trigger: 0,
-      triggerDelay: 0,
-      loop: 1,
-      delay: [0, 0],
-      stopType: 0
-    };
+  // 新增宏配置code
+  newMacroCode(macros: Macros) {
+    let index = 0;
+    for (const item of macros.macro) {
+      if (item.code === index) {
+        index++;
+      } else {
+        break;
+      }
+    }
+    return index;
   },
-  // 初始化数据
+  // 初始化宏配置
   initMacroCfg(macroCfg: MacroCfg) {
     this.resetUIKey();
-    macroAttr = macroCfg.attr;
+    this.setMacroAttr(macroCfg.attr);
     macroCfg.keys.forEach(item => {
       actions.addFrame(item);
     });
