@@ -5,6 +5,7 @@ import { useBoolean } from '@sa/hooks';
 import { SetupStoreId } from '@/enum';
 import { kbStg, keyboardforage } from '@/utils/storage';
 
+import keyMapJson from '@/assets/files/key-map.json';
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
 
@@ -70,9 +71,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       return codeDetail;
     };
     const initKeyMap = () => {
-      import('@/assets/files/key-map.json').then(res => {
-        kbCfg.keyMap = res.default;
-      });
+      kbCfg.keyMap = keyMapJson;
+      // optimize: dynammic import keyboard map
+      // import('@/assets/files/key-map.json').then(res => {
+      //   kbCfg.keyMap = res.default;
+      // });
     };
     initKeyMap();
     return { initKeyboardData, kbCfg, getKeyDetail };
