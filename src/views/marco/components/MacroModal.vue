@@ -39,7 +39,7 @@ const inputTime = ref(null);
 const allTimeRadioValue = ref<string | null>(MacroType.AllTime.Show);
 const isEdit = ref(false);
 let uiKey = reactive([] as UIKey[]);
-const selectKey = ref({ type: -1, code: -1, value: -1 });
+const selectKey = ref<UIKey>({ type: -1, code: -1, value: -1 });
 // 选中索引
 const selectIndex = ref(-1);
 const selectName = ref('');
@@ -104,7 +104,6 @@ function handleRadio() {
 function selectItem(item: UIKey, index: number) {
   if (recordStatus.value) return;
   selectKey.value = item;
-  selectName.value = String(item.code);
   if (selectIndex.value === index) {
     selectIndex.value = -1;
   } else {
@@ -153,13 +152,12 @@ function startRecord() {
   recordStatus.value = true;
 
   const frames = [
-    { index: 0, code: [2, 3], time: 0 },
-    { index: 1, code: [2], time: 3 },
+    { index: 0, code: [4, 5], time: 0 },
+    { index: 1, code: [4], time: 3 },
     { index: 2, code: [], time: 5 },
-    { index: 3, code: [4], time: 7 },
-    { index: 4, code: [4, 5], time: 9 }
+    { index: 3, code: [6], time: 7 },
+    { index: 4, code: [6, 7], time: 9 }
   ];
-
   frames.forEach((item, index) => {
     setTimeout(() => {
       actions.addFrame(item);
@@ -352,7 +350,7 @@ function handleSave() {
               :class="[selectIndex === index ? 'border-2 border-blue-500' : '']"
               @click="selectItem(item, index)"
             >
-              <span class="text-5 text-[##999999]">{{ item.code }}</span>
+              <span class="text-5 text-[##999999]">{{ item.value }}</span>
               <i class="iconfont icon-triangle-down" style="color: #999999"></i>
             </div>
             <div
@@ -361,7 +359,7 @@ function handleSave() {
               :class="[selectIndex === index ? 'border-2 border-blue-500' : '']"
               @click="selectItem(item, index)"
             >
-              <span class="text-5 text-[##999999]">{{ item.code }}</span>
+              <span class="text-5 text-[##999999]">{{ item.value }}</span>
               <i class="iconfont icon-triangle-up" style="color: #999999"></i>
             </div>
             <div
@@ -390,7 +388,7 @@ function handleSave() {
             type="text"
             size="large"
             style="width: 180px"
-            :placeholder="selectKey.type !== 3 ? String(selectKey.code) : String(selectKey.value)"
+            :placeholder="String(selectKey.value)"
             :disabled="selectKey.type !== 3"
             maxlength="6"
           />

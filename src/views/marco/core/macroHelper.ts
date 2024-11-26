@@ -1,5 +1,7 @@
-import { reactive } from 'vue';
+import { computed, reactive, toRefs } from 'vue';
 import type { MacroAttr, MacroCfg, MacroKey, Macros } from '@/api/modules/macro';
+
+import { useKeyboardStore } from '@/store/modules/keyboard';
 
 // 定义接口和枚举
 export interface MacroFrame {
@@ -11,7 +13,7 @@ export interface MacroFrame {
 export interface UIKey {
   type: number;
   code: number;
-  value: number;
+  value: number | string;
 }
 
 // 变量
@@ -27,6 +29,9 @@ let macroAttr: MacroAttr = {
   delay: [0, 0],
   stopType: 0
 };
+const keyboardStore = useKeyboardStore();
+const { kbCfg } = toRefs(keyboardStore);
+const codeMap = computed(() => kbCfg.value.keyMap[0].code);
 
 // 方法
 const actions = {
@@ -59,7 +64,14 @@ const actions = {
 
   // 添加一个UIKey到uiKey数组
   addKey(type: number, code: number, value: number) {
-    uiKey.push({ type, code, value });
+    if (type === 3) {
+      uiKey.push({ type, code, value });
+    } else {
+      const data = codeMap.value[code]?.label;
+      if (data) {
+        uiKey.push({ type, code, value: data });
+      }
+    }
   },
 
   // 更新指定索引位置的UIKey类型
@@ -162,7 +174,7 @@ const actions = {
       } else {
         macroKey.push({ index, code: [...code], time });
         index++;
-        time += item.value;
+        time += Number(item.value);
       }
 
       // 处理最后一个元素
