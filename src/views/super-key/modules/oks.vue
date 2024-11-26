@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, toRef } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -14,9 +14,14 @@ const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail } = keyboardStore;
+const selectedKeys = toRef(keyboardStore, 'selectedKeys');
 function handleAddClicked() {
   if (oksGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
+    return;
+  }
+  if (Object.keys(selectedKeys.value).length === 0) {
+    window.$message!.info('请选择按键');
     return;
   }
   editVisible.value = true;
