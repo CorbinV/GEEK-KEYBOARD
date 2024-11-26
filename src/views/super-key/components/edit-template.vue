@@ -9,7 +9,6 @@ import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 const emit = defineEmits(['update:visible', 'update:title', 'create-group']);
 
 const keyboardStore = useKeyboardStore();
-const { selectedKeys } = toRefs(keyboardStore);
 const getKeyDetail = keyboardStore.getKeyDetail;
 const props = withDefaults(
   defineProps<{
@@ -20,6 +19,7 @@ const props = withDefaults(
     desc: string;
     secondTitle?: string;
     keyboardType?: 'base' | 'standard';
+    needImportKey?: boolean;
   }>(),
   {
     keyboardType: 'base',
@@ -55,23 +55,28 @@ const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableReactiveFn<{
     detail: any;
   }[];
 }>(() => ({
-  idx: 1,
+  idx: props.needImportKey ? 1 : 0,
   list: []
 }));
 
 onMounted(() => {
-  watch(
-    () => Object.keys(selectedKeys.value).length,
-    (nLength, oLength) => {
-      // perf: reduce the number of times of watchEffect
-      if (nLength === 1 && oLength === 0) {
-        const keys = Object.keys(selectedKeys.value);
-        if (keys?.[0]) {
-          selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
+  console.log('onMounted', props.needImportKey);
+  if (props.needImportKey) {
+    const { selectedKeys } = toRefs(keyboardStore);
+
+    watch(
+      () => Object.keys(selectedKeys.value).length,
+      (nLength, oLength) => {
+        // perf: reduce the number of times of watchEffect
+        if (nLength === 1 && oLength === 0) {
+          const keys = Object.keys(selectedKeys.value);
+          if (keys?.[0]) {
+            selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
+          }
         }
       }
-    }
-  );
+    );
+  }
 });
 const [localTitle] = useTitle();
 
@@ -84,10 +89,17 @@ function handleFncClicked({ code, type }: { code: number; type: KeyTypeEnum }) {
     window.$message!.info('当前按键类型不支持');
     return;
   }
-  selectedKeyInfo.list[1] = {
-    base: { code, type },
-    detail: getKeyDetail({ code, type })
-  };
+  if (props.needImportKey) {
+    selectedKeyInfo.list[1] = {
+      base: { code, type },
+      detail: getKeyDetail({ code, type })
+    };
+  } else {
+    selectedKeyInfo.list[selectedKeyInfo.idx] = {
+      base: { code, type },
+      detail: getKeyDetail({ code, type })
+    };
+  }
 }
 async function handleDialogComfirm() {
   const sendData = {
@@ -116,6 +128,16 @@ function handleKeyClickedx(data: { type: KeyTypeEnum; code: number }) {
 }
 function handleStanderKbClicked(data: { type: KeyTypeEnum; code: number }) {
   handleFncClicked(data);
+}
+function handleBaseKeyClicked(e: MouseEvent) {
+  if (props.needImportKey) {
+    return;
+  }
+  const targetElement = (e.target as Element).closest('[data-idx]');
+  if (targetElement && targetElement instanceof HTMLElement) {
+    const idx = targetElement.dataset.idx;
+    selectedKeyInfo.idx = Number(idx);
+  }
 }
 function useTitle() {
   const title = ref<string>('');
@@ -155,13 +177,19 @@ function useTitle() {
           <h2 v-if="secondTitle" class="text-wihte text-center text-lg">{{ secondTitle }}</h2>
           <p class="text-center text-base text-c-second">{{ desc }}</p>
           <div class="flex flex-row justify-center gap-x-12">
-            <div v-for="(_, idx) in new Array(2)" :key="`d-groups-${idx}`" class="flex flex-col gap-y-4">
+            <div
+              v-for="(_, idx) in new Array(2)"
+              :key="`d-groups-${idx}`"
+              class="flex flex-col gap-y-4"
+              @click="handleBaseKeyClicked"
+            >
               <BaseKey
                 :base="selectedKeyInfo.list?.[idx]?.base"
                 :detail="selectedKeyInfo.list?.[idx]?.detail"
-                :selected="1 === idx"
+                :selected="selectedKeyInfo.idx === idx"
+                :data-idx="idx"
               ></BaseKey>
-              <div class="text-center text-c-second">{{ idx }}</div>
+              <div class="text-center text-c-second">{{ idx + 1 }}</div>
             </div>
           </div>
           <slot name="extra"></slot>
