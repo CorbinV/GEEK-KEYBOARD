@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, inject, provide, reactive, readonly, ref, toRefs, watchEffect } from 'vue';
+import { computed, inject, provide, reactive, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { getKeysCfgByLayer } from '@/api/keyConfig';
 import type { LayerKeysConfig } from '@/api/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
+import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import KeyboardKey from './keyboard-key.vue';
 
 type KeyboardProps = {
@@ -26,12 +27,13 @@ const props = withDefaults(defineProps<KeyboardProps>(), {
   as: 'template'
 });
 const keyboardStore = useKeyboardStore();
-const { kbCfg } = toRefs(keyboardStore);
+const kbCfg = toRef(keyboardStore, 'kbCfg');
 
 const layerData = reactive<any>({});
 function updateLayerData(data: LayerKeysConfig) {
   layerData[props.layer] = data;
 }
+
 watchEffect(async () => {
   const data = await getKeysCfgByLayer({
     config: props.config,
@@ -47,10 +49,10 @@ function useKeySelectAndNotify() {
     type: number;
     keyId: string;
   }>(null);
-  const clickedKey = ref({
+  const [clickedKey, resetClickedKey] = useResttableRefFn(() => ({
     idx: -1,
     keyId: ''
-  });
+  }));
   provide('selectedDetail', readonly(selectedDetail));
   function updateSelectrdInfo(data: any) {
     if (clickedKey.value.idx !== -1 && data.type !== -1) {
@@ -92,13 +94,15 @@ function useKeySelectAndNotify() {
   });
   return {
     clickedKey,
+    resetClickedKey,
     selectedDetail
   };
 }
-const { clickedKey } = useKeySelectAndNotify();
+const { clickedKey, resetClickedKey } = useKeySelectAndNotify();
 const layoutList = computed(() => {
   return Object.keys(kbCfg.value.data).filter((k: string) => k !== 'base');
 });
+const { storeSelectedKeys } = useStoreData();
 function handleKeyClick(e: MouseEvent) {
   const targetElement = (e.target as Element).closest('[data-id]');
   if (targetElement && targetElement instanceof HTMLElement) {
@@ -113,12 +117,41 @@ function handleKeyClick(e: MouseEvent) {
       };
       const keyDetail = keyboardStore.getKeyDetail(baseKey);
       emit('update:keyId', { keyId, idx, ...keyCfgInfo });
+      // perf: high coupling!
+      storeSelectedKeys.value = {
+        [keyId]: {
+          base: baseKey,
+          detail: keyDetail,
+          config: keyCfgInfo
+        }
+      };
+      // end
       clickedKey.value = {
         idx,
         keyId
       };
     }
   }
+}
+watch(
+  () => storeSelectedKeys.value,
+  nVal => {
+    if (!Object.keys(nVal).length) {
+      resetClickedKey();
+    }
+  }
+);
+function useStoreData() {
+  const selected = toRef(keyboardStore, 'selectedKeys');
+  // optimize: wait single/multiple selected
+  // if (props.as === 'template') {
+  //   selected = toRef(keyboardStore, 'selectedKeys');
+  // } else {
+  //   selected = toRef(keyboardStore, 'selectedKeysTemp');
+  // }
+  return {
+    storeSelectedKeys: selected
+  };
 }
 function handleLastKeyMounted() {
   kbCfg.value.offsetList = [];
