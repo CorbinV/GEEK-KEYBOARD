@@ -6,7 +6,7 @@ const props = withDefaults(
       code: number;
       name: string;
     };
-    comboKeyList?: {
+    keyList?: {
       type: string;
       icon: string;
       label: string;
@@ -14,11 +14,11 @@ const props = withDefaults(
     codePreffix?: string;
   }>(),
   {
-    comboKeyList: [] as any,
+    keyList: [] as any,
     codePreffix: ''
   }
 );
-const hasComboKey = computed(() => props.comboKeyList.length);
+const hasComboKey = computed(() => props.keyList.length);
 </script>
 
 <template>
@@ -36,7 +36,7 @@ const hasComboKey = computed(() => props.comboKeyList.length);
       </div>
       <div v-if="hasComboKey" class="flex flex-row gap-x-2">
         <div
-          v-for="comboKey in comboKeyList"
+          v-for="comboKey in keyList"
           :key="`${base.code}-${comboKey.icon}-${comboKey.label}`"
           class="box-border h-50px w-50px inline-flex items-center justify-center break-words border border-1 border-#3c3933 rounded-md base-light-bg text-c-primary"
         >
