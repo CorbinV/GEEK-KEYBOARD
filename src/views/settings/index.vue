@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { getKeyboardSetting } from '@/api/keyConfig-setting';
 
+async function getSet() {
+  const x = await getKeyboardSetting();
+  console.log(x);
+}
 const versionCode = ref('1.2.0');
 const fullKeyRolloverSwitch = ref(true);
 const wakeUpSwitch = ref(true);
@@ -30,6 +35,8 @@ const onWakeUpSwitchChange = (newValue: boolean) => {
   console.log('感应唤醒切换状态:', newValue);
   // 在这里可以添加逻辑，比如同步到服务器或其他操作
 };
+
+getSet();
 </script>
 
 <template>
@@ -90,16 +97,15 @@ const onWakeUpSwitchChange = (newValue: boolean) => {
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
+.hollow-btn:hover {
+  background-color: #3c8df4; /* 悬停时的背景颜色 */
+  color: white; /* 悬停时文字颜色 */
+}
 .li-title {
   position: relative;
   text-align: left;
   font-size: 18px;
   padding-left: 8px; /* 给文本留出空间避免和线条重叠 */
   box-shadow: -4px 3px 0 0 #3c8df4; /* 创建蓝色竖线 */
-}
-.hollow-btn:hover {
-  background-color: #3c8df4; /* 悬停时的背景颜色 */
-  color: white; /* 悬停时文字颜色 */
 }
 </style>
