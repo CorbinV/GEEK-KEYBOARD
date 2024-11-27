@@ -33,9 +33,9 @@ const inputLoop = ref(1);
 const stopType = ref(MacroType.QuitOptionKey.Normal);
 const randomDelay = ref(false);
 // 宏延迟时间区间
-const inputDelayTimeStart = ref(0);
-const inputDelayTimeEnd = ref(0);
-const inputTime = ref(null);
+const inputDelayTimeStart = ref(1);
+const inputDelayTimeEnd = ref(1);
+const inputTime = ref(0);
 const allTimeRadioValue = ref<string | null>(MacroType.AllTime.Show);
 const isEdit = ref(false);
 let uiKey = reactive([] as UIKey[]);
@@ -77,7 +77,7 @@ function updateUI() {
 
 function handleTrigger(value: number) {
   trigger.value = value;
-  inputDelayTime.value = 0;
+  inputDelayTime.value = 1;
 }
 
 function handleStopType(value: number) {
@@ -218,8 +218,7 @@ function handleSave() {
             type="text"
             size="medium"
             style="width: 132px"
-            placeholder="宏编辑编编辑"
-            :disabled="!isEdit"
+            :readonly="!isEdit"
             maxlength="6"
           />
           <i class="iconfont icon-edit ml-3" style="color: #ffffff" @click="isEdit = !isEdit"></i>
@@ -242,24 +241,24 @@ function handleSave() {
               type="text"
               size="large"
               class="ml-2"
-              :update-value-on-input="false"
-              placeholder="0s"
-              maxlength="3"
-              :min="0"
-              :precision="0"
+              :min="0.1"
+              :max="10.0"
+              :step="0.1"
+              :precision="1"
               :show-button="false"
-            />
+            >
+              <template #suffix>s</template>
+            </NInputNumber>
             <span class="ml-5 text-[#999999]">循环</span>
             <NInputNumber
               v-model:value="inputLoop"
               style="width: 70px"
               type="text"
               size="large"
-              :update-value-on-input="false"
               class="ml-2"
-              placeholder="1"
-              maxlength="3"
               :min="1"
+              :max="9999"
+              :step="1"
               :precision="0"
               :show-button="false"
             />
@@ -272,53 +271,55 @@ function handleSave() {
               @update:value="handleStopType"
             ></NSelect>
             <span class="ml-4 text-[#999999]">随机延迟</span>
-            <NSwitch v-model:value="randomDelay" @update:value="handleRandomDelay" />
+            <NSwitch v-model:value="randomDelay" class="ml-2" @update:value="handleRandomDelay" />
             <NInputNumber
               v-if="randomDelay"
               v-model:value="inputDelayTimeStart"
-              style="width: 70px"
+              style="width: 90px"
               type="text"
               size="large"
               class="ml-2"
-              :update-value-on-input="false"
-              :min="0"
-              placeholder="0s"
-              maxlength="3"
+              :min="1"
+              :max="2000"
+              :step="1"
               :precision="0"
               :show-button="false"
-            />
-            <div v-if="randomDelay" class="mx-3 w-3 border-b border-b-[#232327]"></div>
+            >
+              <template #suffix>ms</template>
+            </NInputNumber>
+            <div v-if="randomDelay" class="mx-3 w-3 border-b-2 border-b-[#999999]"></div>
             <NInputNumber
               v-if="randomDelay"
               v-model:value="inputDelayTimeEnd"
-              style="width: 70px"
+              style="width: 90px"
               type="text"
               size="large"
-              :update-value-on-input="false"
-              :min="0"
-              class="ml-2"
-              placeholder="0s"
-              maxlength="3"
+              :min="1"
+              :max="2000"
+              :step="1"
               :precision="0"
               :show-button="false"
-            />
+            >
+              <template #suffix>ms</template>
+            </NInputNumber>
           </div>
           <!-- header-right -->
           <div class="flex items-center text-center">
             <span class="text-[#999999]">修改全部时间</span>
             <NInputNumber
               v-model:value="inputTime"
-              style="width: 70px"
+              style="width: 90px"
               type="text"
               size="large"
               class="ml-2"
-              :update-value-on-input="false"
-              placeholder="0s"
-              maxlength="3"
               :min="0"
+              :max="6000"
+              :step="1"
               :precision="0"
               :show-button="false"
-            />
+            >
+              <template #suffix>ms</template>
+            </NInputNumber>
             <button
               class="text-[#3C8DF4 ml-5 h-10 w-30 border border-[#3c8df4] rounded bg-transparent"
               @click="handleAllTime"
@@ -397,13 +398,14 @@ function handleSave() {
             v-model:value="inputKeyTime"
             style="width: 180px"
             size="large"
-            placeholder="0s"
-            maxlength="3"
-            :update-value-on-input="false"
-            :min="1"
+            :min="0"
+            :max="6000"
+            :step="1"
             :precision="0"
             :show-button="false"
-          />
+          >
+            <template #suffix>ms</template>
+          </NInputNumber>
 
           <NTabs
             v-if="selectKey.type !== 3"

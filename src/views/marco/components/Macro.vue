@@ -74,9 +74,9 @@ function handleNewMacro() {
       code: macro.code,
       name: macro.name,
       trigger: 0,
-      triggerDelay: 0,
+      triggerDelay: 1,
       loop: 1,
-      delay: [0, 0],
+      delay: [1, 1],
       stopType: 0
     },
     keys: []
