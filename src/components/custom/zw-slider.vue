@@ -1,56 +1,122 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, defineEmits, defineProps, onMounted, onUnmounted, ref, watch } from 'vue';
 
-// defineOptions({
-//   name: 'AppSlider',
-//   components: {},
-//   data() {
-//     return {};
-//   },
+// 定义 props 和 emits
+const props = defineProps<{
+  modelValue: number; // 外部传入的 sliderValue
+}>();
 
-//   methods: {}
-// });
-// 定义滑块的数值
-const sliderValue = ref(10);
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number): void; // 更新外部值
+}>();
+
+// 内部的 sliderValue 绑定到外部的 modelValue
+const sliderValue = ref(props.modelValue);
+
+// 监听外部 modelValue 变化，更新内部值
+// 监听外部 modelValue 变化，更新内部值
+watch(
+  () => props.modelValue,
+  (newValue: number) => {
+    sliderValue.value = newValue;
+  }
+);
+
+// 是否正在滑动
+const isSliding = ref(false);
 
 // 计算滑块的百分比位置，用于定位百分比值的显示
-const sliderPosition = computed(() => sliderValue.value);
+const sliderPosition = computed(() => `${sliderValue.value}%`);
 
 // 动态计算背景色，已滑动部分为蓝色，未滑动部分为灰色
 const sliderBackground = computed(() => {
   return `linear-gradient(to right, #007bff ${sliderValue.value}%, #ddd ${sliderValue.value}%)`;
 });
 
-// 更新数值
+// 滑动前触发
+const startSliding = () => {
+  isSliding.value = true;
+  console.log('Sliding started');
+};
+
+// 滑动中触发
+const sliding = () => {
+  if (isSliding.value) {
+    emit('update:modelValue', sliderValue.value); // 触发更新外部值
+    console.log('Sliding in progress:', sliderValue.value);
+  }
+};
+
+// 滑动结束触发
+const stopSliding = () => {
+  if (isSliding.value) {
+    isSliding.value = false;
+    console.log('Sliding stopped at value:', sliderValue.value);
+  }
+};
+
+// 更新数值，确保值在 0 到 100 之间
 const updateValue = () => {
   sliderValue.value = Math.min(Math.max(sliderValue.value, 0), 100);
 };
+
+// 添加事件监听器到全局（鼠标松开时）
+onMounted(() => {
+  window.addEventListener('mousemove', sliding);
+  window.addEventListener('mouseup', stopSliding);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', sliding);
+  window.removeEventListener('mouseup', stopSliding);
+});
 </script>
 
 <template>
-  <div class="slider-container">
-    <input
-      v-model="sliderValue"
-      type="range"
-      min="0"
-      max="100"
-      :style="{ background: sliderBackground }"
-      @input="updateValue"
-    />
-    <span :style="{ left: sliderPosition + '%' }">{{ sliderValue }}%</span>
+  <div class="outer-container">
+    <div class="inner-container">
+      <div class="slider-container">
+        <!-- 滑块 -->
+        <input
+          v-model="sliderValue"
+          class="slider"
+          type="range"
+          min="0"
+          max="100"
+          :style="{ background: sliderBackground }"
+          @input="updateValue"
+          @mousedown="startSliding"
+        />
+        <!-- 显示滑块值，位置动态绑定 -->
+        <span class="slider-value" :style="{ left: sliderPosition }">{{ sliderValue }}%</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.slider-container {
-  position: relative;
-  width: 300px;
-  margin: 20px;
+/* 父父布局 */
+.outer-container {
+  width: 100%;
+  /* padding: 20px; */
+  box-sizing: border-box;
 }
 
+.inner-container {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 滑块容器 */
+.slider-container {
+  position: relative;
+  width: 100%; /* 确保容器占满父布局 */
+}
+
+/* 滑块样式 */
 input[type='range'] {
   -webkit-appearance: none;
-  width: 300px;
+  width: 100%; /* 确保滑块宽度占满父父布局 */
   height: 8px;
   background: #ddd;
   border-radius: 5px;
@@ -66,12 +132,21 @@ input[type='range']::-webkit-slider-thumb {
   background: #007bff;
   cursor: pointer;
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-span {
+/* 显示滑块值 */
+.slider-value {
   position: absolute;
   bottom: -25px;
   transform: translateX(-50%);
+  background: #007bff;
   color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: left 0.1s;
 }
 </style>
