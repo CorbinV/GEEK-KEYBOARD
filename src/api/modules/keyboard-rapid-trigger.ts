@@ -17,3 +17,7 @@ export type SetKeyPerf = {
 export type Calibration = {
   switch: boolean;
 };
+export type Rate = {
+  rate: [1000, 2000, 4000, 8000];
+  index: 0;
+};
