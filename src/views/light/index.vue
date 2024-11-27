@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import VerticalLayout from '@/views/light/components/color-vessel.vue';
+import ColorVessel from '@/views/light/components/color-vessel.vue';
+import { KeyboardContainer } from '@/components/custom/keyboard/index';
 
 // const allSelct = () => {
 //   console.log('2.4g接收器配对按钮被点击');
@@ -17,17 +18,18 @@ import VerticalLayout from '@/views/light/components/color-vessel.vue';
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col">
+  <!--
+ <div class="h-full w-full flex flex-col">
     <div class="h-420/1000 w-full border-b-2px border-[#232327] bg-green-400"></div>
 
-    <!--
- <div class="flex-raw flex- place-content-center gap-50px border-b-1px border-[#232327] rounded-md pb-20px pt-20px">
-      <button class="hollow-btn" @click="allSelct">全选</button>
-      <button class="hollow-btn" @click="invertSelect">反选</button>
-      <button class="hollow-btn" @click="clean">清空</button>
-    </div>
+    <ColorVessel class="mt-20px h-580/1000 w-full rounded-[10px]" />
+  </div>
 -->
-    <VerticalLayout class="mt-20px h-580/1000 w-full bg-red-400" />
+
+  <div>
+    <KeyboardContainer>
+      <template #default><ColorVessel class="mt-20px h-580/1000 w-full rounded-[10px]" /></template>
+    </KeyboardContainer>
   </div>
 </template>
 

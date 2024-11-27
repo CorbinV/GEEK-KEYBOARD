@@ -1,29 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import ZWColors from '@/views/light/components/zw-colors.vue';
 import Slider from '@/components/custom/zw-slider.vue';
 
 // 假设你有 15 个项目来填充三行五列的网格
-const items = ref([
-  '流光溢彩',
-  '静态',
-  '七彩呼吸',
-  '繁星点点',
-  '流沙',
-  '幻彩瀑布',
-  '幻彩瀑布',
-  '幻彩瀑布',
-  '幻彩瀑布',
-  '幻彩瀑布',
-  '幻彩瀑布',
-  '幻彩瀑布',
-  '幻彩瀑布'
-]);
+const items = ref(['流光溢彩', '静态']);
 // 选中的项，默认没有选中
 const selectedItem = ref<number | null>(null);
 
 const sleepTimeitems = ref(['5分钟', '10分钟', '15分钟', '20分钟', '30分钟', '永不']);
-
 const selectedSleepTime = ref<number | null>(null);
+const lightLevel = ref(10);
+const vLevel = ref(10);
 // 定义滑块的数值
 // const sliderValue = ref(10);
 // // 计算滑块的百分比位置，用于定位百分比值的显示
@@ -59,12 +47,12 @@ function selectSleepTimeItem(index: number) {
 
 <template>
   <div class="flex-raw flex gap-30px bg-[#171619] p-30px">
-    <div class="flex flex-col flex-1 bg-[#171619]">
+    <div class="flex flex-col flex-1">
       <div class="flex-raw flex items-center">
         <p class="vertical-bar"></p>
         <p class="... text-lg">模式选择</p>
       </div>
-      <div class="grid-container mb-1 mb-20px mt-20px">
+      <div class="grid-container grid mb-20px mt-20px gap-x-55px gap-y-30px">
         <div
           v-for="(item, index) in items"
           :key="index"
@@ -72,29 +60,28 @@ function selectSleepTimeItem(index: number) {
           :class="{ selected: selectedItem === index }"
           @click="selectItem(index)"
         >
-          <!-- 在这里渲染每个网格项的内容 -->
           {{ item }}
         </div>
       </div>
-      <div class="flex-raw mt-30px flex items-center">
-        <p class="vertical-bar"></p>
-        <p class="... text-lg">亮度</p>
-      </div>
-      <Slider></Slider>
-      <div class="flex-raw mt-30px flex items-center">
-        <p class="vertical-bar"></p>
-        <p class="... text-lg">速度</p>
-      </div>
-
-      <Slider></Slider>
     </div>
     <div class="border-l-1px border-[#232327]"></div>
     <div class="flex flex-col flex-1 bg-[#171619]">
-      <div class="flex-raw flex items-center">
+      <div class="flex-raw mt-20px flex items-center">
+        <p class="vertical-bar"></p>
+        <p class="... text-lg">亮度</p>
+      </div>
+      <Slider v-model="lightLevel"></Slider>
+      <div class="flex-raw mt-20px flex items-center">
+        <p class="vertical-bar"></p>
+        <p class="... text-lg">速度</p>
+      </div>
+      <Slider v-model="vLevel"></Slider>
+      <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
         <p class="... text-lg">灯光休眠</p>
       </div>
-      <div class="grid-container mb-1 mb-20px mt-20px">
+
+      <div class="grid-container grid mt-20px gap-x-55px gap-y-30px">
         <div
           v-for="(item, index) in sleepTimeitems"
           :key="index"
@@ -107,6 +94,10 @@ function selectSleepTimeItem(index: number) {
         </div>
       </div>
     </div>
+    <div class="border-l-1px border-[#232327]"></div>
+    <div class="flex-1">
+      <ZWColors class="w-200p h-100"></ZWColors>
+    </div>
   </div>
 </template>
 
@@ -117,13 +108,10 @@ function selectSleepTimeItem(index: number) {
   margin-right: 10px;
   background-color: #3c8df4; /* 按钮文字颜色 */
 }
-
 .grid-container {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5列 */
-  grid-template-rows: repeat(3, 40px); /* 3行，每行最大高度230px */
-  gap: 30px; /* 每个项目之间的间距 */
-  max-height: 180px; /* 总高度为三行的最大高度 */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(5, 40px);
+
   overflow-y: auto; /* 当内容超出时允许滚动 */
 }
 .grid-item {
