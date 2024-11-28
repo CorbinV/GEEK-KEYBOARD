@@ -3,6 +3,8 @@ import { toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import Oks from './modules/oks.vue';
+import Socd from './modules/socd.vue';
+import Rs from './modules/rs.vue';
 const keyboardStore = useKeyboardStore();
 const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
 allowMutipleSelect.value = false;
@@ -25,6 +27,12 @@ allowMutipleSelect.value = false;
         >
           <NTabPane name="oks" tab="OKS单键急停">
             <Oks @key-clicked="handleKeyEmit" />
+          </NTabPane>
+          <NTabPane name="socd" tab="SOCD">
+            <Socd @key-clicked="handleKeyEmit" />
+          </NTabPane>
+          <NTabPane name="rs" tab="RS">
+            <Rs @key-clicked="handleKeyEmit" />
           </NTabPane>
         </NTabs>
       </template>
