@@ -10,5 +10,6 @@ export enum KeyTypeEnum {
   SOCD,
   MT,
   TGL,
-  RS
+  RS,
+  None
 }

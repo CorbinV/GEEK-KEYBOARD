@@ -7,6 +7,7 @@ export type ComboBase = {
 export type BaseKey = {
   code: number;
   type: KeyTypeEnum;
+  key?: string;
 };
 
 export type ComboGoup = {
