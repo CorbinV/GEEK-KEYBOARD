@@ -88,16 +88,14 @@ function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEn
     window.$message!.info('当前按键类型不支持');
     return;
   }
+  const selectedData = {
+    base: { code, type, key: keyId },
+    detail: getKeyDetail({ code, type })
+  };
   if (props.needImportKey) {
-    selectedKeyInfo.list[1] = {
-      base: { code, type, key: keyId },
-      detail: getKeyDetail({ code, type })
-    };
+    selectedKeyInfo.list[1] = selectedData;
   } else {
-    selectedKeyInfo.list[selectedKeyInfo.idx] = {
-      base: { code, type },
-      detail: getKeyDetail({ code, type })
-    };
+    selectedKeyInfo.list[selectedKeyInfo.idx] = selectedData;
   }
 }
 async function handleDialogComfirm() {
