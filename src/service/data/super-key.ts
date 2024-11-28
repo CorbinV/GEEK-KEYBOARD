@@ -10,13 +10,13 @@ export const getOKSList = {
         name: '快速急停AD',
         keys: [
           {
-            key: 'A',
-            code: 4,
+            key: 'W',
+            code: 26,
             type: 0
           },
           {
-            key: '#3',
-            code: 32,
+            key: 'S',
+            code: 22,
             type: 0
           }
         ]
@@ -27,13 +27,13 @@ export const getOKSList = {
         name: '快速急停WS',
         keys: [
           {
-            key: 'B',
-            code: 5,
+            key: 'Q',
+            code: 20,
             type: 0
           },
           {
-            key: '$4',
-            code: 33,
+            key: 'A',
+            code: 4,
             type: 0
           }
         ]
@@ -60,13 +60,13 @@ export const getOKS = {
     name: '快速急停AD',
     keys: [
       {
-        key: 'A',
-        code: 4,
+        key: 'W',
+        code: 26,
         type: 0
       },
       {
-        key: '#3',
-        code: 32,
+        key: 'S',
+        code: 22,
         type: 0
       }
     ]
@@ -74,22 +74,7 @@ export const getOKS = {
 };
 export const setOKS = {
   name: 'setOKS',
-  data: {
-    code: 1,
-    name: '快速急停AD',
-    keys: [
-      {
-        key: 'A',
-        code: 4,
-        type: 0
-      },
-      {
-        key: '#3',
-        code: 32,
-        type: 0
-      }
-    ]
-  }
+  code: 0
 };
 
 // socd
@@ -99,7 +84,7 @@ export const getSOCDList = {
   data: {
     socd: [
       {
-        type: 7,
+        type: 8,
         code: 1,
         trigger: 1,
         name: 'SOCD1',
@@ -117,7 +102,7 @@ export const getSOCDList = {
         ]
       },
       {
-        type: 7,
+        type: 8,
         code: 2,
         trigger: 2,
         name: 'SOCD2',
@@ -171,24 +156,7 @@ export const getSOCD = {
 };
 export const setSOCD = {
   name: 'setSOCD',
-  data: {
-    type: 8,
-    code: 1,
-    trigger: 1,
-    name: 'SOCD1',
-    keys: [
-      {
-        key: 'B',
-        code: 5,
-        type: 0
-      },
-      {
-        key: 'C',
-        code: 6,
-        type: 0
-      }
-    ]
-  }
+  code: 0
 };
 
 // rs
@@ -198,7 +166,7 @@ export const getRSList = {
   data: {
     rs: [
       {
-        type: 7,
+        type: 11,
         code: 1,
         trigger: 1,
         name: 'RS1',
@@ -216,7 +184,7 @@ export const getRSList = {
         ]
       },
       {
-        type: 7,
+        type: 11,
         code: 2,
         trigger: 2,
         name: 'RS2',
@@ -270,22 +238,5 @@ export const getRS = {
 };
 export const setRS = {
   name: 'setRS',
-  data: {
-    type: 8,
-    code: 1,
-    trigger: 1,
-    name: 'RS1',
-    keys: [
-      {
-        key: 'H',
-        code: 11,
-        type: 0
-      },
-      {
-        key: 'I',
-        code: 12,
-        type: 0
-      }
-    ]
-  }
+  code: 0
 };
