@@ -113,7 +113,8 @@ function handleKeyClick(e: MouseEvent) {
       const keyCfgInfo = toRaw(layerData[props.layer]?.keys[keyId!]);
       const baseKey = {
         code: keyCfgInfo.code,
-        type: keyCfgInfo.type
+        type: keyCfgInfo.type,
+        key: keyId
       };
       const keyDetail = keyboardStore.getKeyDetail(baseKey);
       emit('update:keyId', { keyId, idx, ...keyCfgInfo });
