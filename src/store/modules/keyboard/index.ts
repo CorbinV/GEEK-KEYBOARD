@@ -12,6 +12,11 @@ type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
   KeyTypeEnum.Normal | KeyTypeEnum.System | KeyTypeEnum.Media | KeyTypeEnum.Combo | KeyTypeEnum.Special
 >;
+type CacheSuperKey = {
+  sp: KeyTypeEnum[];
+  mt: boolean;
+  dks: boolean;
+};
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
 
@@ -26,7 +31,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       };
       offsetList: number[];
       keyMap: any;
-    }>({ data: {}, offsetList: [], keyMap: {} });
+      superKeyMap: { [key: string]: CacheSuperKey };
+    }>({ data: {}, offsetList: [], keyMap: {}, superKeyMap: {} });
     const { bool: hasConfig } = useBoolean(kbStg.get('hasConfig') === 'Y');
 
     const getAllConfig = async () => {
@@ -64,7 +70,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       return data;
     };
 
-    const getKeyDetail = ({ code, type }: BaseKey) => {
+    const getKeyDetail = ({ code, type }: Omit<BaseKey, 'key'>) => {
       const codeMap = kbCfg.keyMap[type]?.code;
       if (!codeMap) {
         throw new Error('get key detail info failed, beause no code map');
@@ -82,10 +88,35 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       //   kbCfg.keyMap = res.default;
       // });
     };
+
+    const updateSuperKey = (keyId: string, { type }: { type: KeyTypeEnum }) => {
+      let superKey = kbCfg.superKeyMap[keyId];
+      if (!superKey) {
+        // init super key if not exist
+        superKey = {
+          sp: [],
+          mt: false,
+          dks: false
+        };
+      }
+      // update logic
+      const codition = [KeyTypeEnum.OKS, KeyTypeEnum.SOCD, KeyTypeEnum.TGL, KeyTypeEnum.RS];
+      if (codition.includes(type)) {
+        if (!superKey.sp.includes(type)) {
+          superKey.sp.push(type);
+        }
+      } else if (KeyTypeEnum.MT === type) {
+        superKey.mt = true;
+      } else if (KeyTypeEnum.DKS === type) {
+        // feat: wait to other handle
+        superKey.dks = true;
+      }
+      kbCfg.superKeyMap[keyId] = superKey;
+    };
     initKeyMap();
-    return { initKeyboardData, kbCfg, getKeyDetail };
+    return { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey };
   }
-  const { initKeyboardData, kbCfg, getKeyDetail } = useConfigData();
+  const { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey } = useConfigData();
 
   function useRelatedSelectedKeys() {
     const [selectedKeys, resetSelectedKeys] = useResttableRefFn<{
@@ -152,6 +183,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     currentSuperKeyType,
     resetCurrentSuperKeyType,
     getKeyDetail,
+    updateSuperKey,
     ...restRelatedSelectedData
   };
 });
