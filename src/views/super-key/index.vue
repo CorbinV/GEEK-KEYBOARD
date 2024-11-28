@@ -4,6 +4,8 @@ import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import Oks from './modules/oks.vue';
 import Socd from './modules/socd.vue';
+import MT from './modules/mt.vue';
+import TGL from './modules/tgl.vue';
 import Rs from './modules/rs.vue';
 const keyboardStore = useKeyboardStore();
 const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
@@ -31,6 +33,12 @@ onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
           </NTabPane>
           <NTabPane name="socd" tab="SOCD">
             <Socd @key-clicked="handleKeyEmit" />
+          </NTabPane>
+          <NTabPane name="mt" tab="MT">
+            <MT @key-clicked="handleKeyEmit" />
+          </NTabPane>
+          <NTabPane name="tgl" tab="TGL">
+            <TGL @key-clicked="handleKeyEmit" />
           </NTabPane>
           <NTabPane name="rs" tab="RS">
             <Rs @key-clicked="handleKeyEmit" />
