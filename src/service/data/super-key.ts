@@ -240,3 +240,167 @@ export const setRS = {
   name: 'setRS',
   code: 0
 };
+
+// mt
+export const getMTList = {
+  name: 'getMTList',
+  code: 0,
+  data: {
+    mt: [
+      {
+        type: 9,
+        code: 1,
+        trigger: 1,
+        name: 'MT1',
+        keys: [
+          {
+            key: 'J',
+            code: 13,
+            type: 0
+          },
+          {
+            key: 'K',
+            code: 14,
+            type: 0
+          }
+        ]
+      },
+      {
+        type: 9,
+        code: 2,
+        trigger: 2,
+        name: 'MT2',
+        keys: [
+          {
+            key: 'L',
+            code: 15,
+            type: 0
+          },
+          {
+            key: 'O',
+            code: 18,
+            type: 0
+          }
+        ]
+      }
+    ]
+  }
+};
+export const setMTName = {
+  name: 'setMTName',
+  data: {
+    code: 1,
+    name: 'MT1'
+  }
+};
+export const delMT = {
+  name: 'delMT',
+  code: 0
+};
+export const getMT = {
+  name: 'getMT',
+  code: 0,
+  data: {
+    code: 1,
+    name: 'MT1',
+    trigger: 1,
+    keys: [
+      {
+        key: 'J',
+        code: 13,
+        type: 0
+      },
+      {
+        key: 'K',
+        code: 14,
+        type: 0
+      }
+    ]
+  }
+};
+export const setMT = {
+  name: 'setMT',
+  code: 0
+};
+
+// tgl
+export const getTGLList = {
+  name: 'getTGLList',
+  code: 0,
+  data: {
+    tgl: [
+      {
+        type: 10,
+        code: 1,
+        trigger: 1,
+        name: 'TGL1',
+        keys: [
+          {
+            key: 'P',
+            code: 19,
+            type: 0
+          },
+          {
+            key: 'T',
+            code: 20,
+            type: 0
+          }
+        ]
+      },
+      {
+        type: 10,
+        code: 2,
+        trigger: 2,
+        name: 'TGL2',
+        keys: [
+          {
+            key: 'U',
+            code: 24,
+            type: 0
+          },
+          {
+            key: 'V',
+            code: 25,
+            type: 0
+          }
+        ]
+      }
+    ]
+  }
+};
+export const setTGLName = {
+  name: 'setTGLName',
+  data: {
+    code: 1,
+    name: 'TGL1'
+  }
+};
+export const delTGL = {
+  name: 'delTGL',
+  code: 0
+};
+export const getTGL = {
+  name: 'getTGL',
+  code: 0,
+  data: {
+    code: 1,
+    name: 'TGL1',
+    trigger: 1,
+    keys: [
+      {
+        key: 'P',
+        code: 19,
+        type: 0
+      },
+      {
+        key: 'T',
+        code: 20,
+        type: 0
+      }
+    ]
+  }
+};
+export const setTGL = {
+  name: 'setTGL',
+  code: 0
+};
