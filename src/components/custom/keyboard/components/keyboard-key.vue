@@ -2,9 +2,10 @@
 import { inject, onMounted, reactive, ref, toRaw, toRefs, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyCfg } from '@/api/modules/keyboard';
-import type { KeyTypeEnum } from '@/enum/keyType';
+import { KeyTypeEnum } from '@/enum/keyType';
 import { tranformKeyTypeToChar, tranformKeyTypeToColor } from '@/hooks/common/transform';
 import type { BaseKeyView } from '@/api/modules/combo';
+import { useResttableRefFn } from '@/hooks/common/basicFnc';
 
 interface KeyboardKeyProps {
   keyId: string;
@@ -90,16 +91,23 @@ onMounted(async () => {
     emit('lastKeyMounted', null);
   }
 });
-const spConfig = ref({
+const [spConfig, resetSpConfig] = useResttableRefFn(() => ({
   label: '',
   color: 'transparent'
-});
+}));
 function updateSpConfig(x: KeyboardKeyProps['sp']) {
-  if (!x?.includes(currentSuperKeyType.value as any)) {
+  const needReset = [
+    !x,
+    currentSuperKeyType.value === KeyTypeEnum.None,
+    !x?.includes(currentSuperKeyType.value as any)
+  ].some(r => r);
+  if (needReset) {
+    resetSpConfig();
     return;
   }
   const label = tranformKeyTypeToChar(currentSuperKeyType.value as any);
   const color = tranformKeyTypeToColor(currentSuperKeyType.value as any);
+  console.log('updateSpConfig', label, color);
   spConfig.value = {
     label,
     color
@@ -151,6 +159,13 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
           </template>
           <!-- base super function -->
           <div
+            v-if="mt?.type"
+            class="absolute bottom-1 left-1 h-4 w-4 rounded-full bg-#0e1eb4 text-center align-middle text-xs text-white"
+          >
+            <i v-if="mt?.type === 'icon'" class="iconfont text-10px" :class="`icon-${mt?.icon}`"></i>
+            <span v-else>{{ mt.label }}</span>
+          </div>
+          <div
             v-if="spConfig?.label"
             class="absolute bottom-1 right-1 h-4 w-4 rounded-full text-center align-middle text-xs text-white"
             :style="{
@@ -158,13 +173,6 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
             }"
           >
             {{ spConfig.label }}
-          </div>
-          <div
-            v-if="mt?.type"
-            class="absolute bottom-1 left-1 h-4 w-4 rounded-full bg-#0e1eb4 text-center align-middle text-xs text-white"
-          >
-            <i v-if="mt?.type === 'icon'" class="iconfont text-10px" :class="`icon-${mt?.icon}`"></i>
-            <span v-else>{{ mt.label }}</span>
           </div>
         </div>
       </div>
