@@ -6,7 +6,7 @@ import { SetupStoreId } from '@/enum';
 import { kbStg, keyboardforage } from '@/utils/storage';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { KeyTypeEnum } from '@/enum/keyType';
-import type { BaseKey } from '@/api/modules/combo';
+import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
 import keyMapJson from '@/assets/files/key-map.json';
 type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
@@ -14,7 +14,7 @@ type CurrentSuperKeyType = Omit<
 >;
 type CacheSuperKey = {
   sp: KeyTypeEnum[];
-  mt: boolean;
+  mt?: BaseKeyView;
   dks: boolean;
 };
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
@@ -88,26 +88,25 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       //   kbCfg.keyMap = res.default;
       // });
     };
-
-    const updateSuperKey = (keyId: string, { type }: { type: KeyTypeEnum }) => {
+    const updateSuperKey = (keyId: string, { moduleType, mtCfg }: { moduleType: KeyTypeEnum; mtCfg?: any }) => {
       let superKey = kbCfg.superKeyMap[keyId];
       if (!superKey) {
         // init super key if not exist
         superKey = {
           sp: [],
-          mt: false,
+          mt: undefined,
           dks: false
         };
       }
       // update logic
       const codition = [KeyTypeEnum.OKS, KeyTypeEnum.SOCD, KeyTypeEnum.TGL, KeyTypeEnum.RS];
-      if (codition.includes(type)) {
-        if (!superKey.sp.includes(type)) {
-          superKey.sp.push(type);
+      if (codition.includes(moduleType)) {
+        if (!superKey.sp.includes(moduleType)) {
+          superKey.sp.push(moduleType);
         }
-      } else if (KeyTypeEnum.MT === type) {
-        superKey.mt = true;
-      } else if (KeyTypeEnum.DKS === type) {
+      } else if (KeyTypeEnum.MT === moduleType) {
+        superKey.mt = mtCfg;
+      } else if (KeyTypeEnum.DKS === moduleType) {
         // feat: wait to other handle
         superKey.dks = true;
       }

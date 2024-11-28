@@ -172,6 +172,8 @@ function handleLastKeyMounted() {
       :disabled="layerData[layer]?.disable.includes(key)"
       :smart="layerData[layer]?.smart[key]"
       :sp="kbCfg.superKeyMap[key]?.sp"
+      :mt="kbCfg.superKeyMap[key]?.mt"
+      :dks="kbCfg.superKeyMap[key]?.dks"
       @last-key-mounted="handleLastKeyMounted"
     />
   </div>

@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { BaseKeyView } from '@/api/modules/combo';
 
 const props = defineProps<{
   base?: {
     code: number;
     type: number;
   };
-  detail?: {
-    icon: string;
-    label: string;
-    type: 'mix' | 'icon';
-  };
+  detail?: BaseKeyView;
   selected?: boolean;
 }>();
 const hasValue = computed(() => {

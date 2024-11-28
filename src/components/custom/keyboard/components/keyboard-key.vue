@@ -4,14 +4,17 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyCfg } from '@/api/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { tranformKeyTypeToChar, tranformKeyTypeToColor } from '@/hooks/common/transform';
+import type { BaseKeyView } from '@/api/modules/combo';
 
 interface KeyboardKeyProps {
   keyId: string;
   selected?: boolean;
-  keyDetail?: any;
   idx: number;
   disabled?: boolean;
+  keyDetail?: any;
   kbLength?: number;
+  mt?: BaseKeyView;
+  dks?: boolean;
   sp?: KeyTypeEnum[];
 }
 const emit = defineEmits<{
@@ -146,6 +149,7 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
           <template v-else>
             <span class="break-words text-center">{{ KeyView.label }}</span>
           </template>
+          <!-- base super function -->
           <div
             v-if="spConfig?.label"
             class="absolute bottom-1 right-1 h-4 w-4 rounded-full text-center align-middle text-xs text-white"
@@ -154,6 +158,13 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
             }"
           >
             {{ spConfig.label }}
+          </div>
+          <div
+            v-if="mt?.type"
+            class="absolute bottom-1 left-1 h-4 w-4 rounded-full bg-#0e1eb4 text-center align-middle text-xs text-white"
+          >
+            <i v-if="mt?.type === 'icon'" class="iconfont text-10px" :class="`icon-${mt?.icon}`"></i>
+            <span v-else>{{ mt.label }}</span>
           </div>
         </div>
       </div>
