@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref, toRef } from 'vue';
+import { NSelect } from 'naive-ui';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -7,14 +8,18 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import { addSOCD, deleteSOCDByCode, getSOCDList } from '@/api/super-key';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
+import { SOCDTriggerOps } from '../config';
 const socdGroupList = ref<any>([]);
 const editVisible = ref(false);
 const modalTitle = ref('SOCD');
 const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
-const { getKeyDetail } = keyboardStore;
-// const selectedKeys = toRef(keyboardStore, 'selectedKeys');
+const { getKeyDetail, updateSuperKey } = keyboardStore;
+const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType');
+currentSuperKeyType.value = KeyTypeEnum.SOCD;
+// 优先触发
+const trigger = ref<number>(0);
 function handleAddClicked() {
   if (socdGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
@@ -26,7 +31,7 @@ function handleAddClicked() {
   // }
   editVisible.value = true;
 }
-onMounted(async () => {
+async function updateGroupList() {
   const { socd } = await getSOCDList();
   socdGroupList.value = socd.map(item => {
     const { code, type, name } = item;
@@ -34,14 +39,17 @@ onMounted(async () => {
       base: { code, type, name },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
+        // function effect
+        updateSuperKey(keyBase.key!, { type });
         return res;
       })
     };
   });
-});
+}
+updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   try {
-    await addSOCD({ code, keys, name });
+    await addSOCD({ code, trigger: trigger.value, keys, name });
     socdGroupList.value.push({
       base: {
         code,
@@ -92,6 +100,11 @@ function generateGroupCode() {
   }
   return newCode;
 }
+
+function handleTrigger(value: number) {
+  trigger.value = value;
+  console.log('handleTrigger', value);
+}
 </script>
 
 <template>
@@ -123,8 +136,23 @@ function generateGroupCode() {
       v-model:title="modalTitle"
       :code-type="KeyTypeEnum.SOCD"
       :fnc-generate-code="generateGroupCode"
+      :need-import-key="false"
+      keyboard-type="standard"
       desc="请选择两个按键，当两个按键同时按下时，不会同时触发，将会按照您的设置，优先进行触发，松开后立即恢复另个一按键触发。"
       @create-group="handleGroupCreated"
-    ></EditTemplate>
+    >
+      <template #header-extra>
+        <div class="flex items-center">
+          <span class="text-4 text-[#999999]">优先触发</span>
+          <NSelect
+            v-model:value="trigger"
+            class="ml-3 w-45"
+            size="large"
+            :options="SOCDTriggerOps"
+            @update:value="handleTrigger"
+          ></NSelect>
+        </div>
+      </template>
+    </EditTemplate>
   </div>
 </template>

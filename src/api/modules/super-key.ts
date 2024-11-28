@@ -22,7 +22,9 @@ export type ResetSOCDName = {
   code: number;
   name: string;
 };
-export type SOCDBase = Omit<SOCDItem, 'type'>;
+export type SOCDBase = Omit<SOCDItem, 'type'> & {
+  trigger: number;
+};
 export type SOCDList = {
   socd: SOCDItem[];
 };
@@ -34,6 +36,7 @@ export type RSItem = BaseKey & {
 };
 export type ResetRSName = {
   code: number;
+  trigger: number;
   name: string;
 };
 export type RSBase = Omit<RSItem, 'type'>;
