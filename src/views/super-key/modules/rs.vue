@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref, toRef } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -13,8 +13,9 @@ const modalTitle = ref('灵动触发按键');
 const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
-const { getKeyDetail } = keyboardStore;
-// const selectedKeys = toRef(keyboardStore, 'selectedKeys');
+const { getKeyDetail, updateSuperKey } = keyboardStore;
+const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType');
+currentSuperKeyType.value = KeyTypeEnum.RS;
 function handleAddClicked() {
   if (rsGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
@@ -26,7 +27,7 @@ function handleAddClicked() {
   // }
   editVisible.value = true;
 }
-onMounted(async () => {
+async function updateGroupList() {
   const { rs } = await getRSList();
   rsGroupList.value = rs.map(item => {
     const { code, type, name } = item;
@@ -34,11 +35,14 @@ onMounted(async () => {
       base: { code, type, name },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
+        // function effect
+        updateSuperKey(keyBase.key!, { type });
         return res;
       })
     };
   });
-});
+}
+updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   try {
     await addRS({ code, keys, name });
@@ -123,6 +127,8 @@ function generateGroupCode() {
       v-model:title="modalTitle"
       :code-type="KeyTypeEnum.RS"
       :fnc-generate-code="generateGroupCode"
+      :need-import-key="false"
+      keyboard-type="standard"
       second-title="监控两个按键，当两个按键同事按下时，触发按压更深的按键"
       desc="*例：设置AB键为RS键，当A键按压比D键更深时，A键触发，抬起A键后，D键将恢复触发"
       @create-group="handleGroupCreated"
