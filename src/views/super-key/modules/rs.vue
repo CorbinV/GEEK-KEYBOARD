@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, toRef } from 'vue';
+import type { Ref } from 'vue';
+import { ref, toRaw, toRef } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -14,7 +15,7 @@ const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey } = keyboardStore;
-const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType');
+const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.RS;
 function handleAddClicked() {
   if (rsGroupList.value.length >= MAC_GORUP_CNT) {
@@ -27,6 +28,30 @@ function handleAddClicked() {
   // }
   editVisible.value = true;
 }
+function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
+  if (currentSuperKeyType.value === KeyTypeEnum.MT) {
+    const formatLable = (obj: any) => {
+      if (obj.type !== 'str') return obj;
+
+      const label = obj.label.trim() as string;
+
+      if (label.includes(' ')) {
+        const formatted = label
+          .split(' ')
+          .filter(word => word.length > 0)
+          .map(word => word[0])
+          .join('');
+        return { ...obj, label: formatted };
+      }
+      const formatted = label.length > 2 ? label.slice(0, 2) : label;
+      return { ...obj, label: formatted };
+    };
+    const mtCfg = formatLable(res);
+    updateSuperKey(key!, { moduleType, mtCfg });
+  } else {
+    updateSuperKey(key!, { moduleType });
+  }
+}
 async function updateGroupList() {
   const { rs } = await getRSList();
   rsGroupList.value = rs.map(item => {
@@ -35,8 +60,7 @@ async function updateGroupList() {
       base: { code, type, name },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-        // function effect
-        updateSuperKey(keyBase.key!, { type });
+        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
         return res;
       })
     };
