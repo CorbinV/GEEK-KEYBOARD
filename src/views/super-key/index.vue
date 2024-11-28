@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
+import { onUnmounted, toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import Oks from './modules/oks.vue';
@@ -8,6 +8,7 @@ import Rs from './modules/rs.vue';
 const keyboardStore = useKeyboardStore();
 const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
 allowMutipleSelect.value = false;
+onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
 </script>
 
 <template>
