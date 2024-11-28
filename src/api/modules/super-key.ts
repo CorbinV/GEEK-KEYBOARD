@@ -43,3 +43,35 @@ export type RSBase = Omit<RSItem, 'type'>;
 export type RSList = {
   rs: RSItem[];
 };
+
+// mt
+export type MTItem = BaseKey & {
+  name: string;
+  keys: BaseKey[];
+};
+export type ResetMTName = {
+  code: number;
+  trigger: number;
+  name: string;
+};
+export type MTBase = Omit<MTItem, 'type'> & {
+  time: number;
+};
+export type MTList = {
+  mt: MTItem[];
+};
+
+// tgl
+export type TGLItem = BaseKey & {
+  name: string;
+  keys: BaseKey[];
+};
+export type ResetTGLName = {
+  code: number;
+  trigger: number;
+  name: string;
+};
+export type TGLBase = Omit<TGLItem, 'type'>;
+export type TGLList = {
+  tgl: TGLItem[];
+};

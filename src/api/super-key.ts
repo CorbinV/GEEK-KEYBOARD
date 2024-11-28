@@ -1,14 +1,20 @@
 import requestClient from '@/utils/requset/deviceClient';
 import type {
+  MTBase,
+  MTList,
   OksBase,
   OksList,
   RSBase,
   RSList,
+  ResetMTName,
   ResetOksName,
   ResetRSName,
   ResetSOCDName,
+  ResetTGLName,
   SOCDBase,
-  SOCDList
+  SOCDList,
+  TGLBase,
+  TGLList
 } from './modules/super-key';
 import type { BaseKey } from './modules/combo';
 export function getOksList() {
@@ -99,6 +105,68 @@ export function getTargetRS(data: BaseKey) {
 export function addRS(data: RSBase) {
   return requestClient.send<never>({
     name: 'setRS',
+    data
+  });
+}
+
+// mt
+export function getMTList() {
+  return requestClient.send<MTList>({
+    name: 'getMTList'
+  });
+}
+export function resetMTName(data: ResetMTName) {
+  return requestClient.send<never>({
+    name: 'setMTName',
+    data
+  });
+}
+export function deleteMTByCode(data: { code: number }) {
+  return requestClient.send<never>({
+    name: 'delMT',
+    data
+  });
+}
+export function getTargetMT(data: BaseKey) {
+  return requestClient.send<never>({
+    name: 'getMT',
+    data
+  });
+}
+export function addMT(data: MTBase) {
+  return requestClient.send<never>({
+    name: 'setMT',
+    data
+  });
+}
+
+// tgl
+export function getTGLList() {
+  return requestClient.send<TGLList>({
+    name: 'getTGLList'
+  });
+}
+export function resetTGLName(data: ResetTGLName) {
+  return requestClient.send<never>({
+    name: 'setTGLName',
+    data
+  });
+}
+export function deleteTGLByCode(data: { code: number }) {
+  return requestClient.send<never>({
+    name: 'delTGL',
+    data
+  });
+}
+export function getTargetTGL(data: BaseKey) {
+  return requestClient.send<never>({
+    name: 'getTGL',
+    data
+  });
+}
+export function addTGL(data: TGLBase) {
+  return requestClient.send<never>({
+    name: 'setTGL',
     data
   });
 }
