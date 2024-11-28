@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref, toRef } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -13,8 +13,9 @@ const modalTitle = ref('单键急停');
 const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
-const { getKeyDetail } = keyboardStore;
-// const selectedKeys = toRef(keyboardStore, 'selectedKeys');
+const { getKeyDetail, updateSuperKey } = keyboardStore;
+const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType');
+currentSuperKeyType.value = KeyTypeEnum.OKS;
 function handleAddClicked() {
   if (oksGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
@@ -26,7 +27,7 @@ function handleAddClicked() {
   // }
   editVisible.value = true;
 }
-onMounted(async () => {
+async function updateGroupList() {
   const { oks } = await getOksList();
   oksGroupList.value = oks.map(item => {
     const { code, type, name } = item;
@@ -34,11 +35,14 @@ onMounted(async () => {
       base: { code, type, name },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
+        // function effect
+        updateSuperKey(keyBase.key!, { type });
         return res;
       })
     };
   });
-});
+}
+updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   try {
     await addOks({ code, keys, name });
@@ -123,7 +127,9 @@ function generateGroupCode() {
       v-model:title="modalTitle"
       :code-type="KeyTypeEnum.OKS"
       :fnc-generate-code="generateGroupCode"
-      desc="请选择两个按键，当其中一个按键被抬起时，立马触发一另一个按键，在一些游戏中实现单个按键的快速急停"
+      :need-import-key="false"
+      keyboard-type="standard"
+      desc="请选择两个按键，当其中一个按键被抬起时，立马触发一另一个按键，在一些游戏中实现单个按键 的快速急停"
       @create-group="handleGroupCreated"
     ></EditTemplate>
   </div>
