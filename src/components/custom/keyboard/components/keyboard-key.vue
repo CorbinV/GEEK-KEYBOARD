@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, reactive, ref, toRefs, watchEffect } from 'vue';
+import { inject, onMounted, reactive, ref, toRaw, toRefs, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyCfg } from '@/api/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
@@ -62,25 +62,26 @@ onMounted(async () => {
   const injectSelectedDetail = inject('selectedDetail') as any;
   useLayout(kbCfg);
   function updateKeyCfg(data: KeyCfg) {
+    if (!data) {
+      return;
+    }
     const { code, type } = data;
     const info = kbCfg.value.keyMap[type]?.code?.[code];
     updateKeyView(info);
   }
-  function updateKeyViewBySelectedDetail() {
+  function updateKeyViewBySelectedDetail(data: any) {
     if (!props.selected) {
       return;
     }
-    if (props.keyId === injectSelectedDetail.value.keyId) {
-      updateKeyView(injectSelectedDetail.value);
+    if (props.keyId === data?.keyId) {
+      updateKeyView(toRaw(data));
     }
   }
   watchEffect(() => {
-    if (injectSelectedDetail.value) {
-      updateKeyViewBySelectedDetail();
-    }
-    if (props.keyDetail) {
-      updateKeyCfg(props.keyDetail);
-    }
+    updateKeyViewBySelectedDetail(injectSelectedDetail.value);
+  });
+  watchEffect(() => {
+    updateKeyCfg(props.keyDetail);
   });
   if (props.kbLength !== undefined && props.kbLength === props.idx + 1) {
     emit('lastKeyMounted', null);
