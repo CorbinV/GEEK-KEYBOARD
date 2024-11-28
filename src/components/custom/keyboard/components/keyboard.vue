@@ -33,7 +33,6 @@ const layerData = reactive<any>({});
 function updateLayerData(data: LayerKeysConfig) {
   layerData[props.layer] = data;
 }
-
 watchEffect(async () => {
   const data = await getKeysCfgByLayer({
     config: props.config,
@@ -109,6 +108,7 @@ function handleKeyClick(e: MouseEvent) {
     const keyId = targetElement.dataset.id;
     const disabled = targetElement.dataset.disabled === 'true';
     const idx = Number.parseInt(targetElement.dataset.idx || '-1', 10);
+
     if (keyId !== undefined && !disabled) {
       const keyCfgInfo = toRaw(layerData[props.layer]?.keys[keyId!]);
       const baseKey = {
@@ -170,6 +170,7 @@ function handleLastKeyMounted() {
       :key-detail="layerData[layer]?.keys[key]"
       :disabled="layerData[layer]?.disable.includes(key)"
       :smart="layerData[layer]?.smart[key]"
+      :sp="kbCfg.superKeyMap[key]?.sp"
       @last-key-mounted="handleLastKeyMounted"
     />
   </div>
