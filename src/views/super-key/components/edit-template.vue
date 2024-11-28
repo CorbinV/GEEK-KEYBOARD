@@ -60,7 +60,6 @@ const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableReactiveFn<{
 }));
 
 onMounted(() => {
-  console.log('onMounted', props.needImportKey);
   if (props.needImportKey) {
     const { selectedKeys } = toRefs(keyboardStore);
 
@@ -80,7 +79,7 @@ onMounted(() => {
 });
 const [localTitle] = useTitle();
 
-function handleFncClicked({ code, type }: { code: number; type: KeyTypeEnum }) {
+function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEnum; keyId: string }) {
   if (code === undefined || type === undefined) {
     window.$message!.info('设备未返回，此按键无效');
     return;
@@ -91,7 +90,7 @@ function handleFncClicked({ code, type }: { code: number; type: KeyTypeEnum }) {
   }
   if (props.needImportKey) {
     selectedKeyInfo.list[1] = {
-      base: { code, type },
+      base: { code, type, key: keyId },
       detail: getKeyDetail({ code, type })
     };
   } else {
@@ -123,10 +122,10 @@ async function handleDialogComfirm() {
     console.error(error);
   }
 }
-function handleKeyClickedx(data: { type: KeyTypeEnum; code: number }) {
+function handleKeyClickedx(data: { type: KeyTypeEnum; code: number; keyId: string }) {
   handleFncClicked(data);
 }
-function handleStanderKbClicked(data: { type: KeyTypeEnum; code: number }) {
+function handleStanderKbClicked(data: { type: KeyTypeEnum; code: number; keyId: string }) {
   handleFncClicked(data);
 }
 function handleBaseKeyClicked(e: MouseEvent) {
