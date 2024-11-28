@@ -2,6 +2,8 @@
 import { inject, onMounted, reactive, ref, toRefs, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyCfg } from '@/api/modules/keyboard';
+import type { KeyTypeEnum } from '@/enum/keyType';
+import { tranformKeyTypeToChar, tranformKeyTypeToColor } from '@/hooks/common/transform';
 
 interface KeyboardKeyProps {
   keyId: string;
@@ -10,17 +12,19 @@ interface KeyboardKeyProps {
   idx: number;
   disabled?: boolean;
   kbLength?: number;
+  sp?: KeyTypeEnum[];
 }
 const emit = defineEmits<{
   (e: 'lastKeyMounted', preload: null): void;
 }>();
 const props = defineProps<KeyboardKeyProps>();
-
+const keyboardStore = useKeyboardStore();
+const { kbCfg, currentSuperKeyType } = toRefs(keyboardStore);
 const keyInfo = ref();
 const keyStyle = ref({});
-function useLayout(kbCfg: any) {
-  keyInfo.value = kbCfg.value.data?.[props.keyId];
-  const base = kbCfg.value.data?.base;
+function useLayout(cfg: any) {
+  keyInfo.value = cfg.value.data?.[props.keyId];
+  const base = cfg.value.data?.base;
   if (keyInfo.value) {
     const {
       width,
@@ -28,7 +32,7 @@ function useLayout(kbCfg: any) {
       gap = 0,
       pos: [row]
     } = keyInfo.value;
-    const offset = kbCfg.value.offsetList?.[row] || base.gap;
+    const offset = cfg.value.offsetList?.[row] || base.gap;
     const kw = width || base.width || 0;
     const kh = height || base.height || 0;
 
@@ -38,7 +42,7 @@ function useLayout(kbCfg: any) {
       left: `${offset + base.sGap * gap}px`,
       top: `${kh * row + (row + 1) * base.gap}px`
     };
-    kbCfg.value.offsetList[row] = offset + kw + base.gap;
+    cfg.value.offsetList[row] = offset + kw + base.gap;
   }
 }
 const KeyView = reactive({
@@ -55,8 +59,6 @@ function updateKeyView(data: any) {
   KeyView.type = data.type;
 }
 onMounted(async () => {
-  const keyboardStore = useKeyboardStore();
-  const { kbCfg } = toRefs(keyboardStore);
   const injectSelectedDetail = inject('selectedDetail') as any;
   useLayout(kbCfg);
   function updateKeyCfg(data: KeyCfg) {
@@ -81,11 +83,27 @@ onMounted(async () => {
     }
   });
   if (props.kbLength !== undefined && props.kbLength === props.idx + 1) {
-    console.log(212312312);
     emit('lastKeyMounted', null);
   }
 });
-
+const spConfig = ref({
+  label: '',
+  color: 'transparent'
+});
+function updateSpConfig(x: KeyboardKeyProps['sp']) {
+  if (!x?.includes(currentSuperKeyType.value as any)) {
+    return;
+  }
+  const label = tranformKeyTypeToChar(currentSuperKeyType.value as any);
+  const color = tranformKeyTypeToColor(currentSuperKeyType.value as any);
+  spConfig.value = {
+    label,
+    color
+  };
+}
+watchEffect(() => {
+  updateSpConfig(props.sp);
+});
 const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].includes(props.keyId);
 </script>
 
@@ -108,7 +126,7 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
         :data-disabled="disabled"
       >
         <div
-          class="h-full w-full flex flex-col items-center justify-center break-words"
+          class="relative h-full w-full flex flex-col items-center justify-center break-words"
           :class="[
             {
               'cursor-not-allowed': disabled
@@ -127,6 +145,15 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
           <template v-else>
             <span class="break-words text-center">{{ KeyView.label }}</span>
           </template>
+          <div
+            v-if="spConfig?.label"
+            class="absolute bottom-1 right-1 h-4 w-4 rounded-full text-center align-middle text-xs text-white"
+            :style="{
+              backgroundColor: spConfig.color
+            }"
+          >
+            {{ spConfig.label }}
+          </div>
         </div>
       </div>
     </template>
