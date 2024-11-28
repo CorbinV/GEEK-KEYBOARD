@@ -3,6 +3,11 @@ export type ComboBase = {
   type: number;
   code: number;
 };
+export type BaseKeyView = {
+  type: 'str' | 'icon' | 'mix';
+  icon: string;
+  label: string;
+};
 
 export type BaseKey = {
   code: number;
