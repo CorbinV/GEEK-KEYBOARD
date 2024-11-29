@@ -57,18 +57,36 @@ function useKeySelectAndNotify() {
     if (clickedKey.value.idx !== -1 && data.type !== -1) {
       // find keyDetail about label/icon/type
       const type = injSelectedInfo.value.type as KeyTypeEnum;
-      const code = injSelectedInfo.value.code as number;
+      const code = (injSelectedInfo.value.code as number) + 1;
       let detail: any = {};
-      if ([KeyTypeEnum.Combo, KeyTypeEnum.DKS, KeyTypeEnum.Marco].includes(type)) {
+
+      if (![KeyTypeEnum.None, KeyTypeEnum.Media, KeyTypeEnum.Normal, KeyTypeEnum.System].includes(type)) {
+        detail = {
+          icon: '',
+          type: 'str',
+          label: ''
+        };
         switch (type) {
           case KeyTypeEnum.Combo:
-            detail = { label: `C${code}`, icon: '', type: 'str' };
+            detail.label = `C${code}`;
             break;
           case KeyTypeEnum.DKS:
-            detail = { label: `D${code}`, icon: '', type: 'str' };
+            detail.label = `D${code}`;
             break;
           case KeyTypeEnum.Marco:
-            detail = { label: `M${code + 1}`, icon: '', type: 'str' };
+            detail.label = `M${code}`;
+            break;
+          case KeyTypeEnum.OKS:
+            detail.label = `O${code}`;
+            break;
+          case KeyTypeEnum.RS:
+            detail.label = `R${code}`;
+            break;
+          case KeyTypeEnum.SOCD:
+            detail.label = `S${code}`;
+            break;
+          case KeyTypeEnum.TGL:
+            detail.label = `T${code}`;
             break;
           default:
             break;
