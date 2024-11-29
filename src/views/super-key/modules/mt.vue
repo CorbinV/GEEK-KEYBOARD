@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { ref, toRaw, toRef } from 'vue';
+import { computed, ref, toRaw, toRef, toRefs } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -19,15 +19,21 @@ const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<K
 currentSuperKeyType.value = KeyTypeEnum.MT;
 // 按住时间
 const inputTime = ref(100);
+const { selectedKeys } = toRefs(keyboardStore);
+
+const isSelected = computed(() => {
+  return Object.keys(selectedKeys.value).length > 0;
+});
+
 function handleAddClicked() {
+  if (!isSelected.value) {
+    window.$message!.info('请先选择按键');
+    return;
+  }
   if (mtGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
     return;
   }
-  // if (Object.keys(selectedKeys.value).length === 0) {
-  //   window.$message!.info('请选择按键');
-  //   return;
-  // }
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
@@ -153,7 +159,7 @@ function generateGroupCode() {
       v-model:title="modalTitle"
       :code-type="KeyTypeEnum.MT"
       :fnc-generate-code="generateGroupCode"
-      :need-import-key="false"
+      :need-import-key="true"
       keyboard-type="standard"
       desc="设置单击按住，快速点击时触发1号键，按住触发2号键"
       @create-group="handleGroupCreated"
