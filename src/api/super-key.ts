@@ -1,11 +1,14 @@
 import requestClient from '@/utils/requset/deviceClient';
 import type {
+  DksItem,
+  DksList,
   MTBase,
   MTList,
   OksBase,
   OksList,
   RSBase,
   RSList,
+  ResetDksName,
   ResetMTName,
   ResetOksName,
   ResetRSName,
@@ -167,6 +170,37 @@ export function getTargetTGL(data: BaseKey) {
 export function addTGL(data: TGLBase) {
   return requestClient.send<never>({
     name: 'setTGL',
+    data
+  });
+}
+
+// DKS
+export function getDksList() {
+  return requestClient.send<DksList>({
+    name: 'getDKSList'
+  });
+}
+export function resetDksName(data: ResetDksName) {
+  return requestClient.send<never>({
+    name: 'setDKSName',
+    data
+  });
+}
+export function deleteDksByCode(data: { code: number }) {
+  return requestClient.send<never>({
+    name: 'delDKS',
+    data
+  });
+}
+export function getTargetDks(data: BaseKey) {
+  return requestClient.send<DksItem>({
+    name: 'getDKS',
+    data
+  });
+}
+export function addDks(data: DksItem) {
+  return requestClient.send<never>({
+    name: 'setDKS',
     data
   });
 }

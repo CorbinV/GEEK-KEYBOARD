@@ -1,3 +1,4 @@
+import type { KeyTypeEnum } from '@/enum/keyType';
 import type { BaseKey } from './combo';
 
 export type OksItem = BaseKey & {
@@ -74,4 +75,26 @@ export type ResetTGLName = {
 export type TGLBase = Omit<TGLItem, 'type'>;
 export type TGLList = {
   tgl: TGLItem[];
+};
+
+// dks
+export type ResetDksName = {
+  code: number;
+  name: string;
+};
+export type DksKey = {
+  code: number;
+  key: string;
+  range: number[]; // length = 3*2
+};
+export type DksItem = {
+  name: string;
+  type: KeyTypeEnum;
+  code: number;
+  simulation: 0 | 1;
+  range: number[]; // length = 4
+  keys: DksKey[];
+};
+export type DksList = {
+  shortcuts: DksItem[];
 };
