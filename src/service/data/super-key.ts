@@ -286,6 +286,7 @@ export const getMTList = {
     ]
   }
 };
+
 export const setMTName = {
   name: 'setMTName',
   data: {
@@ -318,6 +319,7 @@ export const getMT = {
     ]
   }
 };
+
 export const setMT = {
   name: 'setMT',
   code: 0
@@ -403,4 +405,85 @@ export const getTGL = {
 export const setTGL = {
   name: 'setTGL',
   code: 0
+};
+// dks
+export const getDKSList = {
+  name: 'getDKSList',
+  code: 0,
+  data: {
+    shortcuts: [
+      {
+        type: 5,
+        code: 4,
+        key: 'F',
+        name: 'DKS一',
+        simulation: 1,
+        range: [10, 20, 30, 10],
+        keys: [
+          {
+            code: 4,
+            key: 'A',
+            range: [0, 0, 1, 1, 2, 2, 3, 3]
+          },
+          {
+            code: 5,
+            key: 'B',
+            range: []
+          },
+          {
+            code: 6,
+            key: 'C',
+            range: []
+          },
+          {
+            code: 7,
+            key: 'D',
+            range: []
+          }
+        ]
+      }
+    ]
+  }
+};
+export const setDKSName = {
+  name: 'setDKSName',
+  code: 0
+};
+export const delDKS = {
+  name: 'delDKS',
+  code: 0
+};
+export const getDKS = {
+  name: 'getDKS',
+  code: 0,
+  data: {
+    type: 5,
+    code: 4,
+    key: 'F',
+    name: 'DKS一',
+    simulation: 1,
+    range: [10, 20, 30, 10],
+    keys: [
+      {
+        code: 4,
+        key: 'A',
+        range: [0, 0, 1, 1, 2, 2, 3, 3]
+      },
+      {
+        code: 5,
+        key: 'B',
+        range: []
+      },
+      {
+        code: 6,
+        key: 'C',
+        range: []
+      },
+      {
+        code: 7,
+        key: 'D',
+        range: []
+      }
+    ]
+  }
 };
