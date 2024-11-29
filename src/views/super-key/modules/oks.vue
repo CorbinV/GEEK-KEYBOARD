@@ -86,7 +86,7 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   }
 }
 
-function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.Combo } }) {
+function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.OKS } }) {
   const { code, type } = base;
   emit('key-clicked', {
     code,
@@ -132,6 +132,7 @@ function generateGroupCode() {
         :base="item.base"
         :key-list="item.keyList"
         code-preffix="O"
+        class="hover:cursor-pointer"
         @click="handleGroupItemClicked(item)"
       >
         <template #menu>
@@ -142,6 +143,7 @@ function generateGroupCode() {
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
+            @click.stop
           />
         </template>
       </BasicGroupItem>
