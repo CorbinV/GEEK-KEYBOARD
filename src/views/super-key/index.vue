@@ -11,6 +11,33 @@ const keyboardStore = useKeyboardStore();
 const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
 allowMutipleSelect.value = false;
 onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
+const paneList = [
+  {
+    name: 'oks',
+    label: 'OKS单键急停',
+    component: Oks
+  },
+  {
+    name: 'socd',
+    label: 'SOCD',
+    component: Socd
+  },
+  {
+    name: 'mt',
+    label: 'MT单击/按住',
+    component: MT
+  },
+  {
+    name: 'tgl',
+    label: 'TGL切换开关',
+    component: Socd
+  },
+  {
+    name: 'rs',
+    label: 'RS',
+    component: Rs
+  }
+];
 </script>
 
 <template>
@@ -20,28 +47,9 @@ onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
       <template #default="{ handleKeyEmit }">
         <!-- <div>点击测试按键</div> -->
 
-        <NTabs
-          default-value="oks"
-          size="large"
-          justify-content="space-evenly"
-          placement="bottom"
-          class="h-full"
-          pane-class="h-full"
-        >
-          <NTabPane name="oks" tab="OKS单键急停">
-            <Oks @key-clicked="handleKeyEmit" />
-          </NTabPane>
-          <NTabPane name="socd" tab="SOCD">
-            <Socd @key-clicked="handleKeyEmit" />
-          </NTabPane>
-          <NTabPane name="mt" tab="MT">
-            <MT @key-clicked="handleKeyEmit" />
-          </NTabPane>
-          <NTabPane name="tgl" tab="TGL">
-            <TGL @key-clicked="handleKeyEmit" />
-          </NTabPane>
-          <NTabPane name="rs" tab="RS">
-            <Rs @key-clicked="handleKeyEmit" />
+        <NTabs size="large" justify-content="space-evenly" placement="bottom" class="h-full" pane-class="h-full">
+          <NTabPane v-for="pane in paneList" :key="pane.name" :name="pane.name" :tab="pane.label">
+            <component :is="pane.component" @key-clicked="handleKeyEmit" />
           </NTabPane>
         </NTabs>
       </template>
