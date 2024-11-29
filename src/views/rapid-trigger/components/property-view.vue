@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { toRefs } from '@vueuse/core';
 import { getPerf } from '@/api/keyConfig-rapid-trigger';
 import type { SetKeyPerf } from '@/api/modules/keyboard-rapid-trigger';
 import CircleShow from '@/components/custom/circle-show.vue';
 import Slider from '@/components/custom/zw-slider.vue';
+import { useKeyboardStore } from '@/store/modules/keyboard';
 
 export type Opetion = { key: number; label: string };
 const argShow = ref(true);
 const showModal = ref(false);
 const lmdLock = ref(true);
+const selectedKey = ref<string[]>([]);
 const sliderValue = ref(33);
 // const triggerPoint = ref(66);
 const rateOption = ref();
@@ -19,6 +22,7 @@ const curRate = ref({ key: 0, label: '' });
 const curShake = ref({ key: 0, label: '' });
 // const curRate = ref({});
 const shakelayer = ['低', '中', '高'];
+const keyboardStore = useKeyboardStore();
 
 function rateSelect(key: number) {
   curRate.value = rateOption.value.find((item: Opetion) => item.key === key);
@@ -29,6 +33,28 @@ function shakeSelect(key: number) {
 
 function reset() {}
 function lock() {}
+
+const { selectedKeys } = toRefs(keyboardStore);
+watch(
+  () => selectedKeys.value,
+  (nLength, oLength) => {
+    Object.keys(selectedKeys.value).forEach(key => {
+      const val = selectedKeys.value[key];
+      console.log(selectedKeys.value);
+
+      if (val?.base) {
+        // const base = val.base.key;
+        // selectedKey.value.push('7');
+        // console.log(base);
+        console.log(nLength);
+        console.log(oLength);
+      } else {
+        selectedKey.value.length = 0;
+      }
+    });
+  }
+);
+
 // 滑动中事件处理
 const onSliding = (value: number) => {
   if (lmdLock.value) {
@@ -61,9 +87,9 @@ getPerf1();
 
 <template>
   <div>
-    <div class="flex-raw flex gap-30px bg-[#171619] p-30px">
+    <div class="flex-raw flex gap-30px bg-[#171619] p-20px">
       <div class="flex flex-col flex-1">
-        <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-20px">
+        <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
             <p class="... text-lg">显示参数</p>
@@ -71,7 +97,7 @@ getPerf1();
 
           <NSwitch v-model:value="argShow"></NSwitch>
         </div>
-        <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-20px pt-20px">
+        <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
             <p class="... text-lg">轮询率</p>
@@ -88,20 +114,20 @@ getPerf1();
           </NDropdown>
         </div>
 
-        <div class="flex-raw flex items-center pt-20px">
+        <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
           <p class="... text-lg">触发死区</p>
-          <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p>
+          <!-- <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p> -->
         </div>
 
-        <Slider v-model="sliderValue" class="mt-20px"></Slider>
-        <div class="flex-raw flex items-center pt-20px">
+        <Slider v-model="sliderValue" class="mt-10px"></Slider>
+        <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
           <p class="... text-lg">抬起死区</p>
-          <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p>
+          <!-- <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p> -->
         </div>
-        <Slider v-model="sliderValue" class="mt-20px"></Slider>
-        <div class="flex-raw mt-70px flex place-content-center gap-100px pb-20px pt-20px">
+        <Slider v-model="sliderValue" class="mt-10px"></Slider>
+        <div class="flex-raw mt-30px flex justify-between">
           <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">重置</button>
           <button
             class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
@@ -122,17 +148,15 @@ getPerf1();
 
           <NSwitch v-model:value="perf.quick"></NSwitch>
         </div>
-        <span class="... border-b-1px border-[#232327] pb-20px text-14px text-[#999]">
+        <span class="... border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
           通过设置触发行程，只需按压抬起一定程度即可反复触发按键，达到快速触发效果
         </span>
-        <div class="flex-raw flex items-center pt-20px">
+        <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
           <p class="... text-lg">触发（按下）灵敏度</p>
-          <span class="... text-14px text-[#999]">
-            （设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）
-          </span>
         </div>
-        <Slider v-model="sliderValue" class="pt20px" @sliding="onSliding"></Slider>
+        <span class="... text-14px text-[#999]">（设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）</span>
+        <Slider v-model="sliderValue" class="pt-10px" @sliding="onSliding"></Slider>
 
         <div class="mt-10px flex flex-row items-center justify-center gap-5">
           <div class="h-1px w-20% bg-[#ccc]"></div>
@@ -141,15 +165,15 @@ getPerf1();
           <div class="h-1px w-20% bg-[#ccc]"></div>
         </div>
 
-        <div class="flex-raw flex items-center pt-20px">
+        <div class="flex-raw flex items-center">
           <p class="vertical-bar"></p>
           <p class="... text-lg">抬起（重置）灵敏度</p>
-          <span class="... text-14px text-[#999]">
-            （设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）
-          </span>
         </div>
-        <Slider v-model="sliderValue" class="pt20px" @sliding="onSliding"></Slider>
-        <p class="... mt10px pb20px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">高级设置</p>
+        <span class="... text-14px text-[#999]">（设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）</span>
+        <Slider v-model="sliderValue" class="pt-10px" @sliding="onSliding"></Slider>
+        <p class="... mt-10px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
+          高级设置
+        </p>
 
         <NModal v-model:show="showModal" class="h-500px w-34% rounded-[10px] bg-[#191b1d]">
           <div class="model-bg flex flex-col items-center p-30px text-[22px]">
@@ -180,7 +204,7 @@ getPerf1();
       </div>
       <div class="border-l-1px border-[#232327]"></div>
       <div class="flex flex-col flex-1">
-        <div class="flex-raw flex justify-between border-b-1px border-[#232327] pb-20px">
+        <div class="flex-raw flex justify-between border-b-1px border-[#232327] pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
             <p class="... text-lg">断触优化</p>
@@ -188,7 +212,7 @@ getPerf1();
 
           <NSwitch v-model:value="perf.breakOptimize"></NSwitch>
         </div>
-        <div class="flex-raw back flex justify-between border-b-1px border-[#232327] pb-20px pt-20px">
+        <div class="flex-raw back flex justify-between border-b-1px border-[#232327] pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
             <p class="... text-lg">防抖等级</p>
@@ -204,7 +228,7 @@ getPerf1();
             <NButton class="h-40px w-100px bg-[#222227]">{{ curShake.label }}</NButton>
           </NDropdown>
         </div>
-        <div class="flex-raw flex justify-between pb-20px pt-20px">
+        <div class="flex-raw flex justify-between pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
             <p class="... text-lg">
@@ -228,6 +252,7 @@ getPerf1();
   --border-color: #232327;
   --text-color: #999999;
 }
+
 .vertical-bar {
   width: 4px;
   height: 18px;
