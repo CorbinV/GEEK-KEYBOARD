@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { ref, toRaw, toRef } from 'vue';
+import { computed, ref, toRaw, toRef, toRefs } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -17,15 +17,22 @@ const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.TGL;
+
+const { selectedKeys } = toRefs(keyboardStore);
+
+const isSelected = computed(() => {
+  return Object.keys(selectedKeys.value).length > 0;
+});
+
 function handleAddClicked() {
+  if (!isSelected.value) {
+    window.$message!.info('请先选择按键');
+    return;
+  }
   if (tglGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
     return;
   }
-  // if (Object.keys(selectedKeys.value).length === 0) {
-  //   window.$message!.info('请选择按键');
-  //   return;
-  // }
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
@@ -151,7 +158,7 @@ function generateGroupCode() {
       v-model:title="modalTitle"
       :code-type="KeyTypeEnum.TGL"
       :fnc-generate-code="generateGroupCode"
-      :need-import-key="false"
+      :need-import-key="true"
       keyboard-type="standard"
       desc="请设置需要开关持续触发的健值"
       @create-group="handleGroupCreated"
