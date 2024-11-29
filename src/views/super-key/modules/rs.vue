@@ -86,7 +86,7 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   }
 }
 
-function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.Combo } }) {
+function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.RS } }) {
   const { code, type } = base;
   emit('key-clicked', {
     code,
@@ -113,7 +113,7 @@ async function handleGroupItemRename(items: any, idx: number) {
 }
 function generateGroupCode() {
   if (rsGroupList.value.length === 0) return 1;
-  const usedCodes = new Set(rsGroupList.value.map((group: { code: number }) => group.code));
+  const usedCodes = new Set(rsGroupList.value.map((group: { base: { code: number } }) => group.base.code));
   let newCode = 1;
   while (usedCodes.has(newCode)) {
     newCode++;
@@ -132,6 +132,7 @@ function generateGroupCode() {
         :base="item.base"
         :key-list="item.keyList"
         code-preffix="R"
+        class="hover:cursor-pointer"
         @click="handleGroupItemClicked(item)"
       >
         <template #menu>
@@ -142,6 +143,7 @@ function generateGroupCode() {
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
+            @click.stop
           />
         </template>
       </BasicGroupItem>
