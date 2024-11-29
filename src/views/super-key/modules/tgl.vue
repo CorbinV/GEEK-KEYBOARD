@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { computed, ref, toRaw, toRef, toRefs } from 'vue';
+import { onMounted, ref, toRaw, toRef, toRefs, watch } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -19,14 +19,32 @@ const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<K
 currentSuperKeyType.value = KeyTypeEnum.TGL;
 
 const { selectedKeys } = toRefs(keyboardStore);
+const kbCfg = toRef(keyboardStore, 'kbCfg');
 
-const isSelected = computed(() => {
-  return Object.keys(selectedKeys.value).length > 0;
+let keyId = '';
+
+onMounted(() => {
+  watch(
+    () => selectedKeys.value,
+    newSelectedKeys => {
+      const keys = Object.keys(newSelectedKeys);
+      keyId = keys.length > 0 ? keys[0] : '';
+    }
+  );
 });
 
 function handleAddClicked() {
-  if (!isSelected.value) {
+  const superKey = kbCfg.value.superKeyMap[keyId];
+  if (!superKey) {
     window.$message!.info('请先选择按键');
+    return;
+  }
+  if (superKey.dks) {
+    window.$message!.info('该按键已绑定DKS功能');
+    return;
+  }
+  if (superKey.sp) {
+    window.$message!.info('该按键已绑定其它功能');
     return;
   }
   if (tglGroupList.value.length >= MAC_GORUP_CNT) {
