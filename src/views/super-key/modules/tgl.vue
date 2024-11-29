@@ -35,15 +35,15 @@ onMounted(() => {
 
 function handleAddClicked() {
   const superKey = kbCfg.value.superKeyMap[keyId];
-  if (!superKey) {
+  if (keyId === '') {
     window.$message!.info('请先选择按键');
     return;
   }
-  if (superKey.dks) {
+  if (superKey?.dks) {
     window.$message!.info('该按键已绑定DKS功能');
     return;
   }
-  if (superKey.sp) {
+  if (superKey?.sp) {
     window.$message!.info('该按键已绑定其它功能');
     return;
   }
