@@ -39,14 +39,34 @@ export const getBasicKey = {
         code: 9,
         tary: [10, 10, 10, 1, 1]
       },
-      S: {
+      G: {
         type: 0,
-        code: 22,
+        code: 10,
         tary: [10, 10, 10, 1, 1]
       },
-      W: {
+      H: {
         type: 0,
-        code: 26,
+        code: 11,
+        tary: [10, 10, 10, 1, 1]
+      },
+      I: {
+        type: 0,
+        code: 12,
+        tary: [10, 10, 10, 1, 1]
+      },
+      J: {
+        type: 0,
+        code: 13,
+        tary: [10, 10, 10, 1, 1]
+      },
+      K: {
+        type: 0,
+        code: 14,
+        tary: [10, 10, 10, 1, 1]
+      },
+      L: {
+        type: 0,
+        code: 15,
         tary: [10, 10, 10, 1, 1]
       },
       M: {
@@ -57,6 +77,489 @@ export const getBasicKey = {
       N: {
         type: 0,
         code: 17,
+        tary: [10, 10, 10, 1, 1]
+      },
+
+      O: {
+        type: 0,
+        code: 18,
+        tary: [10, 10, 10, 1, 1]
+      },
+      P: {
+        type: 0,
+        code: 19,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Q: {
+        type: 0,
+        code: 20,
+        tary: [10, 10, 10, 1, 1]
+      },
+      R: {
+        type: 0,
+        code: 21,
+        tary: [10, 10, 10, 1, 1]
+      },
+
+      S: {
+        type: 0,
+        code: 22,
+        tary: [10, 10, 10, 1, 1]
+      },
+
+      T: {
+        type: 0,
+        code: 23,
+        tary: [10, 10, 10, 1, 1]
+      },
+      U: {
+        type: 0,
+        code: 24,
+        tary: [10, 10, 10, 1, 1]
+      },
+      V: {
+        type: 0,
+        code: 25,
+        tary: [10, 10, 10, 1, 1]
+      },
+      W: {
+        type: 0,
+        code: 26,
+        tary: [10, 10, 10, 1, 1]
+      },
+      X: {
+        type: 0,
+        code: 27,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Y: {
+        type: 0,
+        code: 28,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Z: {
+        type: 0,
+        code: 28,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '!1': {
+        type: 0,
+        code: 30,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '@2': {
+        type: 0,
+        code: 31,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '#3': {
+        type: 0,
+        code: 32,
+        tary: [10, 10, 10, 1, 1]
+      },
+      $4: {
+        type: 0,
+        code: 33,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '%5': {
+        type: 0,
+        code: 34,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '^6': {
+        type: 0,
+        code: 35,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '&7': {
+        type: 0,
+        code: 36,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '*8': {
+        type: 0,
+        code: 37,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '(9': {
+        type: 0,
+        code: 38,
+        tary: [10, 10, 10, 1, 1]
+      },
+      ')0': {
+        type: 0,
+        code: 39,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Enter: {
+        type: 0,
+        code: 40,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Esc: {
+        type: 0,
+        code: 41,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Back Space': {
+        type: 0,
+        code: 42,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Tab: {
+        type: 0,
+        code: 43,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '-': {
+        type: 0,
+        code: 44,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '_-': {
+        type: 0,
+        code: 45,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '=+': {
+        type: 0,
+        code: 46,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '{[': {
+        type: 0,
+        code: 47,
+        tary: [10, 10, 10, 1, 1]
+      },
+      ']}': {
+        type: 0,
+        code: 48,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '\\|': {
+        type: 0,
+        code: 49,
+        tary: [10, 10, 10, 1, 1]
+      },
+      ';:': {
+        type: 0,
+        code: 51,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '\'"': {
+        type: 0,
+        code: 52,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '~.': {
+        type: 0,
+        code: 53,
+        tary: [10, 10, 10, 1, 1]
+      },
+      ',<': {
+        type: 0,
+        code: 54,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '.>': {
+        type: 0,
+        code: 55,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '/?': {
+        type: 0,
+        code: 56,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Caps Lock': {
+        type: 0,
+        code: 57,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F1: {
+        type: 0,
+        code: 58,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F2: {
+        type: 0,
+        code: 59,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F3: {
+        type: 0,
+        code: 60,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F4: {
+        type: 0,
+        code: 61,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F5: {
+        type: 0,
+        code: 62,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F6: {
+        type: 0,
+        code: 63,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F7: {
+        type: 0,
+        code: 64,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F8: {
+        type: 0,
+        code: 65,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F9: {
+        type: 0,
+        code: 66,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F10: {
+        type: 0,
+        code: 67,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F11: {
+        type: 0,
+        code: 68,
+        tary: [10, 10, 10, 1, 1]
+      },
+      F12: {
+        type: 0,
+        code: 69,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Prcsrn sysrq': {
+        type: 0,
+        code: 70,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Scroll Lock': {
+        type: 0,
+        code: 71,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Pause Break': {
+        type: 0,
+        code: 72,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Insert: {
+        type: 0,
+        code: 73,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Home: {
+        type: 0,
+        code: 74,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Pg Up': {
+        type: 0,
+        code: 75,
+        tary: [10, 10, 10, 1, 1]
+      },
+      // Delete: {
+      //   type: 0,
+      //   code: 76,
+      //   tary: [10, 10, 10, 1, 1]
+      // },
+      End: {
+        type: 0,
+        code: 77,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Pg Dn': {
+        type: 0,
+        code: 78,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Right: {
+        type: 0,
+        code: 79,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Left: {
+        type: 0,
+        code: 80,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Down: {
+        type: 0,
+        code: 81,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Up: {
+        type: 0,
+        code: 82,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Num Lock': {
+        type: 0,
+        code: 83,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '/': {
+        type: 0,
+        code: 84,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '*': {
+        type: 0,
+        code: 85,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '/-': {
+        type: 0,
+        code: 86,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '+': {
+        type: 0,
+        code: 87,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'Enter-nub': {
+        type: 0,
+        code: 88,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '1': {
+        type: 0,
+        code: 89,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '2': {
+        type: 0,
+        code: 90,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '3': {
+        type: 0,
+        code: 91,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '4': {
+        type: 0,
+        code: 92,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '5': {
+        type: 0,
+        code: 93,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '6': {
+        type: 0,
+        code: 94,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '7': {
+        type: 0,
+        code: 95,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '8': {
+        type: 0,
+        code: 96,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '9': {
+        type: 0,
+        code: 97,
+        tary: [10, 10, 10, 1, 1]
+      },
+      '0': {
+        type: 0,
+        code: 98,
+        tary: [10, 10, 10, 1, 1]
+      },
+      DELETE: {
+        type: 0,
+        code: 42,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Menu: {
+        type: 0,
+        code: 118,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Ctrl: {
+        type: 0,
+        code: 224,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Shift: {
+        type: 0,
+        code: 225,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Alt: {
+        type: 0,
+        code: 226,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Win: {
+        type: 0,
+        code: 227,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Ctrl_L: {
+        type: 0,
+        code: 228,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Shirft: {
+        type: 0,
+        code: 229,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Alt_L: {
+        type: 0,
+        code: 230,
+        tary: [10, 10, 10, 1, 1]
+      },
+      Win_L: {
+        type: 0,
+        code: 231,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'mouse-left': {
+        type: 0,
+        code: 240,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'mouse-right': {
+        type: 0,
+        code: 241,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'mouse-mid': {
+        type: 0,
+        code: 242,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'mouse-x1': {
+        type: 0,
+        code: 243,
+        tary: [10, 10, 10, 1, 1]
+      },
+      'mouse-x2': {
+        type: 0,
+        code: 244,
+        tary: [10, 10, 10, 1, 1]
+      },
+      FN3: {
+        type: 0,
+        code: -1,
         tary: [10, 10, 10, 1, 1]
       }
     },
