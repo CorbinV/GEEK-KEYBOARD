@@ -9,7 +9,7 @@ import ModuleTemplate from './components/module-template.vue';
   <div>
     <KeyboardContainer>
       <template #default="{ handleKeyEmit }">
-        <NTabs default-value="combo" size="large" justify-content="space-evenly" placement="bottom">
+        <NTabs default-value="basic" size="large" justify-content="space-evenly" placement="bottom">
           <NTabPane name="basic" tab="基础">
             <StandardKeyboard @key-clicked="data => handleKeyEmit({ ...data, type: 0 })" />
           </NTabPane>
