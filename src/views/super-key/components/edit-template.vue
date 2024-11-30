@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, reactive, ref, toRefs, watch, watchEffect } from 'vue';
+import { nextTick, onMounted, reactive, ref, toRef, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import BaseKey from '@/components/custom/keyboard/components/base-key.vue';
@@ -10,6 +10,9 @@ const emit = defineEmits(['update:visible', 'update:title', 'create-group']);
 
 const keyboardStore = useKeyboardStore();
 const getKeyDetail = keyboardStore.getKeyDetail;
+const { selectedKeys } = toRefs(keyboardStore);
+const kbCfg = toRef(keyboardStore, 'kbCfg');
+
 const props = withDefaults(
   defineProps<{
     visible: boolean;
@@ -61,17 +64,26 @@ const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableReactiveFn<{
 
 onMounted(() => {
   if (props.needImportKey) {
-    const { selectedKeys } = toRefs(keyboardStore);
-
+    // const { selectedKeys } = toRefs(keyboardStore);
+    // watch(
+    //   () => Object.keys(selectedKeys.value).length,
+    //   (nLength, oLength) => {
+    //     // perf: reduce the number of times of watchEffect
+    //     // if (nLength === 1 && oLength === 0) {
+    //     console.log('selectedKeys', nLength, oLength);
+    //     const keys = Object.keys(selectedKeys.value);
+    //     if (keys?.[0]) {
+    //       selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
+    //     }
+    //     // }
+    //   }
+    // );
     watch(
-      () => Object.keys(selectedKeys.value).length,
-      (nLength, oLength) => {
-        // perf: reduce the number of times of watchEffect
-        if (nLength === 1 && oLength === 0) {
-          const keys = Object.keys(selectedKeys.value);
-          if (keys?.[0]) {
-            selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
-          }
+      () => selectedKeys.value,
+      newSelectedKeys => {
+        const keys = Object.keys(newSelectedKeys);
+        if (keys?.[0]) {
+          selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
         }
       }
     );
@@ -98,7 +110,50 @@ function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEn
     selectedKeyInfo.list[selectedKeyInfo.idx] = selectedData;
   }
 }
+function showInfoMessage(message: string): void {
+  window.$message!.info(message);
+}
+const checkKeyBinding = (keyId: string, isMT: boolean = false): boolean => {
+  const key = kbCfg.value.superKeyMap[keyId];
+  if (!key) return false;
+  const isBound =
+    (isMT && (key?.dks || key?.sp.length > 0 || key?.mt !== undefined)) || (!isMT && (key?.dks || key?.sp.length > 0));
+  if (isBound) {
+    showInfoMessage('按键已绑定其它功能');
+  }
+  return isBound;
+};
+
+function checkKeyInput(keyId: string): boolean {
+  switch (props.codeType) {
+    case KeyTypeEnum.OKS:
+    case KeyTypeEnum.SOCD:
+    case KeyTypeEnum.RS:
+    case KeyTypeEnum.TGL:
+      return checkKeyBinding(keyId);
+    case KeyTypeEnum.MT:
+      return checkKeyBinding(keyId, true);
+    default:
+      return true;
+  }
+}
+
+function checkKeyComfirm() {
+  if (selectedKeyInfo.list.length < 2) {
+    window.$message!.info('请选择按键');
+    return true;
+  }
+  if (selectedKeyInfo.list[0].base.key === selectedKeyInfo.list[1].base.key) {
+    window.$message!.info('请选择不同的按键');
+    return true;
+  }
+  return checkKeyInput(selectedKeyInfo.list[0].base.key ?? '') && checkKeyInput(selectedKeyInfo.list[1].base.key ?? '');
+}
+
 async function handleDialogComfirm() {
+  if (checkKeyComfirm()) {
+    return;
+  }
   const sendData = {
     type: props.codeType,
     code: props.fncGenerateCode(),
@@ -121,9 +176,17 @@ async function handleDialogComfirm() {
   }
 }
 function handleKeyClickedx(data: { type: KeyTypeEnum; code: number; keyId: string }) {
+  console.log('handleKeyClickedx data', selectedKeyInfo.idx, data);
+  if (checkKeyInput(data.keyId)) {
+    return;
+  }
   handleFncClicked(data);
 }
 function handleStanderKbClicked(data: { type: KeyTypeEnum; code: number; keyId: string }) {
+  console.log('handleStanderKbClicked data', selectedKeyInfo.idx, data);
+  if (checkKeyInput(data.keyId)) {
+    return;
+  }
   handleFncClicked(data);
 }
 function handleBaseKeyClicked(e: MouseEvent) {
