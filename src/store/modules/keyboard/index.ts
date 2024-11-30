@@ -16,6 +16,7 @@ type CacheSuperKey = {
   sp: KeyTypeEnum[];
   mt?: BaseKeyView;
   dks: boolean;
+  combo: boolean;
 };
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
@@ -95,7 +96,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         superKey = {
           sp: [],
           mt: undefined,
-          dks: false
+          dks: false,
+          combo: false
         };
       }
       // update logic
@@ -109,13 +111,48 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       } else if (KeyTypeEnum.DKS === moduleType) {
         // feat: wait to other handle
         superKey.dks = true;
+      } else if (KeyTypeEnum.Combo === moduleType) {
+        superKey.combo = true;
+      }
+      kbCfg.superKeyMap[keyId] = superKey;
+    };
+    const removeSuperKey = (
+      keyId: string,
+      { moduleType, removeAll }: { moduleType: KeyTypeEnum; removeAll?: boolean }
+    ) => {
+      const superKey = kbCfg.superKeyMap[keyId];
+      if (!superKey) {
+        return;
+      }
+      if (removeAll) {
+        kbCfg.superKeyMap[keyId] = {
+          sp: [],
+          mt: undefined,
+          dks: false,
+          combo: false
+        };
+        return;
+      }
+      const codition = [KeyTypeEnum.OKS, KeyTypeEnum.SOCD, KeyTypeEnum.TGL, KeyTypeEnum.RS];
+      if (codition.includes(moduleType)) {
+        const idx = superKey.sp.indexOf(moduleType);
+        if (idx > -1) {
+          superKey.sp.splice(idx, 1);
+        }
+      } else if (KeyTypeEnum.MT === moduleType) {
+        superKey.mt = undefined;
+      } else if (KeyTypeEnum.DKS === moduleType) {
+        // feat: wait to other handle
+        superKey.dks = false;
+      } else if (KeyTypeEnum.Combo === moduleType) {
+        superKey.combo = false;
       }
       kbCfg.superKeyMap[keyId] = superKey;
     };
     initKeyMap();
-    return { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey };
+    return { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey };
   }
-  const { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey } = useConfigData();
+  const { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey } = useConfigData();
 
   function useRelatedSelectedKeys() {
     const [selectedKeys, resetSelectedKeys] = useResttableRefFn<{
@@ -183,6 +220,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     resetCurrentSuperKeyType,
     getKeyDetail,
     updateSuperKey,
+    removeSuperKey,
     ...restRelatedSelectedData
   };
 });
