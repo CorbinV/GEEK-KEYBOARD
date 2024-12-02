@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { onMounted, ref, toRaw, toRef, toRefs, watch } from 'vue';
+import { onMounted, reactive, ref, toRaw, toRef, toRefs, watch } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -19,6 +19,12 @@ const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<K
 currentSuperKeyType.value = KeyTypeEnum.MT;
 // 按住时间
 const inputTime = ref(100);
+const mtList = ref<any>([]);
+let editItem = reactive<{
+  base: { code: number; type: KeyTypeEnum; name: string };
+  keyList: any[];
+  keyBaseList: any[];
+}>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
 const { selectedKeys } = toRefs(keyboardStore);
 const kbCfg = toRef(keyboardStore, 'kbCfg');
 
@@ -52,6 +58,7 @@ function handleAddClicked() {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
     return;
   }
+  inputTime.value = 100;
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
@@ -80,6 +87,7 @@ function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
 }
 async function updateGroupList() {
   const { mt } = await getMTList();
+  mtList.value = mt;
   mtGroupList.value = mt.map(item => {
     const { code, type, name } = item;
     return {
@@ -88,6 +96,9 @@ async function updateGroupList() {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
         return res;
+      }),
+      keyBaseList: item.keys.map(keyBase => {
+        return keyBase;
       })
     };
   });
@@ -132,6 +143,9 @@ async function handleGroupItemDelete(item: { code: number }, idx: number) {
 async function handleGroupItemEdit(items: any, idx: number) {
   // feat: open edit modal(dialog), and transform data
   console.log('handleGroupItemEdit', items, idx);
+  editItem = items;
+  inputTime.value = mtList.value[idx].time;
+  editVisible.value = true;
 }
 async function handleGroupItemRename(items: any, idx: number) {
   // feat: rename group name
@@ -165,7 +179,7 @@ function generateGroupCode() {
           <GroupMenu
             :group-item="item"
             :idx="idx"
-            :enable-edit="false"
+            :enable-edit="true"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
@@ -182,6 +196,7 @@ function generateGroupCode() {
       :need-import-key="true"
       keyboard-type="standard"
       desc="设置单击按住，快速点击时触发1号键，按住触发2号键"
+      :edit-item="editItem"
       @create-group="handleGroupCreated"
     >
       <template #extra>
@@ -197,6 +212,7 @@ function generateGroupCode() {
             :step="1"
             :precision="0"
             :show-button="false"
+            placeholder=""
           ></NInputNumber>
           <span class="ml-3 text-4 text-[#999999]">ms</span>
         </div>
