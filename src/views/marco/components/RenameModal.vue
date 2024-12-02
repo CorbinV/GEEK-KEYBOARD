@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineEmits, defineProps, ref, watchEffect } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { NInput, NModal } from 'naive-ui';
 import type { Macro } from '@/api/modules/macro';
 
