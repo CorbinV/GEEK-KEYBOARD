@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { getKeyboardSetting } from '@/api/keyConfig-setting';
+import keyboardImg from '@/assets/img/keyboard_img.png';
 
 async function getSet() {
   const x = await getKeyboardSetting();
@@ -19,7 +20,7 @@ const onReceiverPairClick = () => {
   console.log('2.4g接收器配对按钮被点击');
   // 这里可以加入接收器配对的逻辑
 };
-
+function getVersion() {}
 const onFactoryResetClick = () => {
   console.log('恢复出厂设置按钮被点击');
   // 这里可以加入恢复出厂设置的逻辑
@@ -35,14 +36,14 @@ const onWakeUpSwitchChange = (newValue: boolean) => {
   console.log('感应唤醒切换状态:', newValue);
   // 在这里可以添加逻辑，比如同步到服务器或其他操作
 };
-
+getVersion();
 getSet();
 </script>
 
 <template>
   <!-- 引用 public 目录下的图片 -->
   <div class="h-full w-full flex flex-col items-center">
-    <img src="/images/keyboard_img.png" alt="Logo" class="mt-50px h-324px w-804px" />
+    <img :src="keyboardImg" alt="Logo" class="mt-50px h-324px w-804px" />
 
     <div class="mt-38px h-520px w-976px flex flex-col items-center rounded-md bg-[#171619] p-30px">
       <h1 class="text-[22px]">设备名称：NB999</h1>
