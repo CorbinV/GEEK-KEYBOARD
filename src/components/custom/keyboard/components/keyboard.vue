@@ -118,7 +118,7 @@ function useKeySelectAndNotify() {
 }
 const { clickedKey, resetClickedKey } = useKeySelectAndNotify();
 const layoutList = computed(() => {
-  const keys = kbCfg.value.data.keys();
+  const keys = kbCfg.value.layoutMap.keys();
   const arr = [];
   for (const key of keys) {
     if (key !== 'base') {
