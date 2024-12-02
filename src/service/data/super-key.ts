@@ -250,7 +250,7 @@ export const getMTList = {
       {
         type: 9,
         code: 1,
-        trigger: 1,
+        time: 100,
         name: 'MT1',
         keys: [
           {
@@ -268,7 +268,7 @@ export const getMTList = {
       {
         type: 9,
         code: 2,
-        trigger: 2,
+        time: 200,
         name: 'MT2',
         keys: [
           {
