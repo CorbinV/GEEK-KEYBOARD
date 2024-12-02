@@ -118,7 +118,14 @@ function useKeySelectAndNotify() {
 }
 const { clickedKey, resetClickedKey } = useKeySelectAndNotify();
 const layoutList = computed(() => {
-  return Object.keys(kbCfg.value.data).filter((k: string) => k !== 'base');
+  const keys = kbCfg.value.data.keys();
+  const arr = [];
+  for (const key of keys) {
+    if (key !== 'base') {
+      arr.push(key);
+    }
+  }
+  return arr;
 });
 const { storeSelectedKeys } = useStoreData();
 function handleKeyClick(e: MouseEvent) {

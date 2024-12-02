@@ -27,13 +27,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     //   'rs-s75': { data: {}, offsetList: [] }
     // });
     const kbCfg = reactive<{
-      data: {
-        [key: string]: any;
-      };
-      offsetList: number[];
+      data: Map<string, any>; // for keyboard layout
+      offsetList: number[]; // keyboard row offset
       keyMap: any;
       superKeyMap: { [key: string]: CacheSuperKey };
-    }>({ data: {}, offsetList: [], keyMap: {}, superKeyMap: {} });
+    }>({ data: new Map(), offsetList: [], keyMap: {}, superKeyMap: {} });
     const { bool: hasConfig } = useBoolean(kbStg.get('hasConfig') === 'Y');
 
     const getAllConfig = async () => {
@@ -45,29 +43,29 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     };
 
     const initKeyboardData = async (): Promise<any> => {
-      if (Object.keys(kbCfg.data).length > 0) {
+      if (kbCfg.data.size > 0) {
         return kbCfg.data;
       }
       if (!hasConfig.value) {
         // optimize: dynammic import keyboard config(by keyboard name)
         // const data = await import(`@/assets/files/${kbName}.json`);
         const data = await import('@/assets/files/rk-s75.json');
-        const keyMap: { [key: string]: any } = {};
         data.layout.keys.forEach(item => {
           keyboardforage.setItem(item.id, item);
-          keyMap[item.id] = item;
+          kbCfg.data.set(item.id, item);
         });
         keyboardforage.setItem('base', data.layout.base);
-        keyMap.base = data.layout.base;
+        kbCfg.data.set('base', data.layout.base);
         // update hasConfig value
         // setHasConfig(true);
         // kbStg.set('hasConfig', 'Y');
-        kbCfg.data = keyMap;
-        return keyMap;
+        return kbCfg.data;
       }
-      const data = await getAllConfig();
-      kbCfg.data = data;
 
+      const data = await getAllConfig();
+      data.forEach(() => {
+        // feat: todo
+      });
       return data;
     };
 

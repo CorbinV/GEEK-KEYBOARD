@@ -27,8 +27,8 @@ const { kbCfg, currentSuperKeyType } = toRefs(keyboardStore);
 const keyInfo = ref();
 const keyStyle = ref({});
 function useLayout(cfg: any) {
-  keyInfo.value = cfg.value.data?.[props.keyId];
-  const base = cfg.value.data?.base;
+  keyInfo.value = cfg.value.data.get(props.keyId);
+  const base = cfg.value.data.get('base');
   if (keyInfo.value) {
     const {
       width,
