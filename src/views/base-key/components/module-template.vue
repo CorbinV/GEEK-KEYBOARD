@@ -35,7 +35,7 @@ function handleItemClick(e: MouseEvent) {
 </script>
 
 <template>
-  <div class="mid-layer-bg flex flex-row flex-wrap gap-x-8 gap-y-12 px-8 py-12" @click="handleItemClick">
+  <div class="flex flex-row flex-wrap gap-x-8 gap-y-12 mid-layer-bg px-8 py-12" @click="handleItemClick">
     <FncCard
       v-for="item in list"
       :key="`${type}-${item.code}`"
