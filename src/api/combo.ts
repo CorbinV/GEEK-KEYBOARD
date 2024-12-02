@@ -17,3 +17,9 @@ export function createComboGroup(data: ComboGoup) {
     data
   });
 }
+export function deleteComboGroup(data: { code: number }) {
+  return requestClient.send<null>({
+    name: 'delShortcut',
+    data
+  });
+}

@@ -15,11 +15,9 @@ export type BaseKey = {
   key?: string;
 };
 
-export type ComboGoup = {
-  type: number;
-  code: number;
+export type ComboGoup = BaseKey & {
   keys: ComboBase[];
 };
 export type ComboList = {
-  shortcuts: ComboBase[];
+  shortcuts: BaseKey[];
 };
