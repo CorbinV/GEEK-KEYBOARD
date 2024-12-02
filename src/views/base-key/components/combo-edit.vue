@@ -1,23 +1,32 @@
 <script setup lang="ts">
 import type { TabsProps } from 'naive-ui';
-import { nextTick, reactive, toRefs, watchEffect } from 'vue';
+import { nextTick, reactive, ref, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import BaseKey from '@/components/custom/keyboard/components/base-key.vue';
-import { createComboGroup } from '@/api/combo';
 import { StandardKeyboard } from '@/components/custom/keyboard';
-import { useResttableRefFn } from '@/hooks/common/basicFnc';
+import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
+import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 import ModuleTemplate from './module-template.vue';
 const emit = defineEmits(['update:visible', 'create-group']);
 
 const keyboardStore = useKeyboardStore();
-const { kbCfg } = toRefs(keyboardStore);
 const props = defineProps<{
   groupLength: number;
   visible: boolean;
   fncGenerateCode: () => number;
 }>();
-
+const bindKeyId = ref('');
+const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableReactiveFn<{
+  idx: number;
+  list: {
+    base: BaseKeyType;
+    detail: any;
+  }[];
+}>(() => ({
+  idx: 0,
+  list: []
+}));
 type TabsPropsThemeOverrides = NonNullable<TabsProps['themeOverrides']>;
 const tabsThemeOverrides: TabsPropsThemeOverrides = {};
 
@@ -42,52 +51,57 @@ function useDialogController() {
 }
 const { dialogControl, closeDialog } = useDialogController();
 
-// event handler
-const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableRefFn<any>(() => ({
-  idx: 0,
-  list: [{}]
-}));
 function handleKeyClicked(e: MouseEvent) {
   const targetElement = (e.target as Element).closest('[data-idx]');
   if (targetElement && targetElement instanceof HTMLElement) {
     const idx = targetElement.dataset.idx;
-    selectedKeyInfo.value.idx = Number(idx);
-    if (!selectedKeyInfo.value.list[selectedKeyInfo.value.idx]) {
-      selectedKeyInfo.value.list[selectedKeyInfo.value.idx] = {
-        base: {},
+    selectedKeyInfo.idx = Number(idx);
+    if (!selectedKeyInfo.list[selectedKeyInfo.idx]) {
+      selectedKeyInfo.list[selectedKeyInfo.idx] = {
+        base: {} as any,
         detail: []
       };
     }
   }
 }
-function handleFncClicked({ code, type }: { code: number; type: KeyTypeEnum }) {
-  const codeMap = kbCfg.value.keyMap[type].code;
-  const data = codeMap[`${code}`];
-  selectedKeyInfo.value.list[selectedKeyInfo.value.idx].base = { code, type };
-  selectedKeyInfo.value.list[selectedKeyInfo.value.idx].detail = data;
+function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEnum; keyId: string }) {
+  const selectedData = {
+    base: { code, type, key: keyId },
+    detail: keyboardStore.getKeyDetail({ code, type })
+  };
+  selectedKeyInfo.list[selectedKeyInfo.idx] = selectedData;
 }
 async function handleDialogComfirm() {
+  const cpy = JSON.parse(JSON.stringify(selectedKeyInfo));
   const sendData = {
     type: KeyTypeEnum.Combo,
     code: props.fncGenerateCode(),
-    keys: selectedKeyInfo.value.list.map((item: any) => item.base)
+    key: bindKeyId.value,
+    keys: cpy.list.map((item: any) => item.base)
   };
-  try {
-    await createComboGroup(sendData);
-    emit('create-group', {
-      ...sendData,
-      detail: JSON.parse(JSON.stringify(selectedKeyInfo.value))
-    });
-    window.$message!.success('创建成功');
-    nextTick(() => {
-      resetSelectedKeyInfo();
-      closeDialog();
-    });
-  } catch (error) {
-    window.$message!.error('创建失败');
-    console.error(error);
-  }
+  emit('create-group', {
+    ...sendData,
+    listDetail: cpy
+  });
+  nextTick(() => {
+    resetSelectedKeyInfo();
+    closeDialog();
+  });
 }
+const { selectedKeys } = toRefs(keyboardStore);
+
+watch(
+  () => Object.keys(selectedKeys.value).length,
+  (nLength, oLength) => {
+    // perf: reduce the number of times of watchEffect
+    if (nLength === 1 && oLength === 0) {
+      const keys = Object.keys(selectedKeys.value);
+      if (keys?.[0]) {
+        bindKeyId.value = keys[0];
+      }
+    }
+  }
+);
 </script>
 
 <template>
@@ -96,7 +110,7 @@ async function handleDialogComfirm() {
     preset="card"
     :closable="false"
     :title="undefined"
-    class="w-90% !h-80vh !bg-#191b1d"
+    class="w-90% !h-86vh !bg-#191b1d"
     content-class="bg-#191b1d"
     size="large"
   >
