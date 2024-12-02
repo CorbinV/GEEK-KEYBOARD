@@ -8,6 +8,7 @@ const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
 type KeyControlProps = {
   keyId?: string;
+  keyLabel?: string;
 };
 const props = withDefaults(defineProps<KeyControlProps>(), {
   keyId: ''
@@ -62,7 +63,7 @@ async function handleDisableKey() {
     <h1 class="text-center text-base">按键信息</h1>
     <div class="flex flex-col text-c-primary">
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
-        <span>默认{{ keyId || '/' }}</span>
+        <span>默认{{ keyLabel || '/' }}</span>
         <span>
           当前
           <i v-if="showIcon" class=""></i>

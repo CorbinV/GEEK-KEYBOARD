@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import type { BaseKey } from '@/api/modules/combo';
+import { useKeyboardStore } from '@/store/modules/keyboard';
 import KeyControl from './components/key-control.vue';
 import LayerControl from './components/layer-control.vue';
 import Keyboard from './components/keyboard.vue';
 const emit = defineEmits(['change:key-id']);
+const { getKeyDetail } = useKeyboardStore();
 const layerList = [
   {
     layer: 0,
@@ -23,10 +26,16 @@ const layerList = [
   }
 ];
 const currentLayer = ref(0);
-const selectedKey = ref('');
-function handleSelectKey(data: { keyId: string; idx: number }) {
-  const { keyId } = data;
-  selectedKey.value = keyId;
+const selectedKey = ref({
+  keyId: '',
+  label: ''
+});
+function handleSelectKey(data: Omit<BaseKey, 'key'> & { idx: number; keyId: string }) {
+  const { keyId, type, code } = data;
+  selectedKey.value.keyId = keyId;
+  const { label } = getKeyDetail({ type, code });
+  selectedKey.value.label = label;
+
   emit('change:key-id', keyId);
 }
 </script>
@@ -38,7 +47,7 @@ function handleSelectKey(data: { keyId: string; idx: number }) {
     <div class="second-view flex flex-1 items-center justify-center text-2xl font-bold">
       <p>The screen is too small to display.</p>
     </div>
-    <KeyControl :key-id="selectedKey" />
+    <KeyControl :key-id="selectedKey.keyId" :key-label="selectedKey.label" />
   </div>
 </template>
 
@@ -48,6 +57,7 @@ function handleSelectKey(data: { keyId: string; idx: number }) {
     display: none;
   }
 }
+
 @media screen and (min-width: 1268px) {
   .second-view {
     display: none;
