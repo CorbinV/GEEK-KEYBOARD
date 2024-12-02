@@ -52,7 +52,7 @@ export type MTItem = BaseKey & {
 };
 export type ResetMTName = {
   code: number;
-  trigger: number;
+  time: number;
   name: string;
 };
 export type MTBase = Omit<MTItem, 'type'> & {
