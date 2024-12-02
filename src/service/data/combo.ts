@@ -52,3 +52,7 @@ export const addShortcut = {
   name: 'addShortcut',
   code: 0
 };
+export const deleteShortcut = {
+  name: 'delShortcut',
+  code: 0
+};
