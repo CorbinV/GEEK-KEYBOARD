@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { ref, toRaw, toRef } from 'vue';
+import { reactive, ref, toRaw, toRef } from 'vue';
 import { NSelect } from 'naive-ui';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
@@ -21,15 +21,19 @@ const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<K
 currentSuperKeyType.value = KeyTypeEnum.SOCD;
 // 优先触发
 const trigger = ref<number>(0);
+const socdList = ref<any>([]);
+let editItem = reactive<{
+  base: { code: number; type: KeyTypeEnum; name: string };
+  keyList: any[];
+  keyBaseList: any[];
+}>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
 function handleAddClicked() {
   if (socdGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
     return;
   }
-  // if (Object.keys(selectedKeys.value).length === 0) {
-  //   window.$message!.info('请选择按键');
-  //   return;
-  // }
+  editItem = { base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] };
+  trigger.value = 0;
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
@@ -58,6 +62,7 @@ function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
 }
 async function updateGroupList() {
   const { socd } = await getSOCDList();
+  socdList.value = socd;
   socdGroupList.value = socd.map(item => {
     const { code, type, name } = item;
     return {
@@ -66,6 +71,9 @@ async function updateGroupList() {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
         return res;
+      }),
+      keyBaseList: item.keys.map(keyBase => {
+        return keyBase;
       })
     };
   });
@@ -110,6 +118,9 @@ async function handleGroupItemDelete(item: { code: number }, idx: number) {
 async function handleGroupItemEdit(items: any, idx: number) {
   // feat: open edit modal(dialog), and transform data
   console.log('handleGroupItemEdit', items, idx);
+  editItem = items;
+  trigger.value = socdList.value[idx].trigger;
+  editVisible.value = true;
 }
 async function handleGroupItemRename(items: any, idx: number) {
   // feat: rename group name
@@ -148,7 +159,7 @@ function handleTrigger(value: number) {
           <GroupMenu
             :group-item="item"
             :idx="idx"
-            :enable-edit="false"
+            :enable-edit="true"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
@@ -165,6 +176,7 @@ function handleTrigger(value: number) {
       :need-import-key="false"
       keyboard-type="standard"
       desc="请选择两个按键，当两个按键同时按下时，不会同时触发，将会按照您的设置，优先进行触发，松开后立即恢复另个一按键触发。"
+      :edit-item="editItem"
       @create-group="handleGroupCreated"
     >
       <template #header-extra>
