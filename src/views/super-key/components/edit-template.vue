@@ -23,6 +23,11 @@ const props = withDefaults(
     secondTitle?: string;
     keyboardType?: 'base' | 'standard';
     needImportKey?: boolean;
+    editItem?: {
+      base: { code: number; type: KeyTypeEnum; name: string };
+      keyList: any[];
+      keyBaseList: any[];
+    };
   }>(),
   {
     keyboardType: 'base',
@@ -63,21 +68,23 @@ const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableReactiveFn<{
 }));
 
 onMounted(() => {
+  watch(
+    () => props.editItem,
+    editItem => {
+      if (editItem) {
+        const { keyBaseList: baseList, keyList: detailList } = editItem;
+        selectedKeyInfo.list = [];
+        baseList.forEach((item, index) => {
+          selectedKeyInfo.list.push({
+            base: item,
+            detail: detailList[index]
+          });
+        });
+      }
+    },
+    { immediate: true }
+  );
   if (props.needImportKey) {
-    // const { selectedKeys } = toRefs(keyboardStore);
-    // watch(
-    //   () => Object.keys(selectedKeys.value).length,
-    //   (nLength, oLength) => {
-    //     // perf: reduce the number of times of watchEffect
-    //     // if (nLength === 1 && oLength === 0) {
-    //     console.log('selectedKeys', nLength, oLength);
-    //     const keys = Object.keys(selectedKeys.value);
-    //     if (keys?.[0]) {
-    //       selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
-    //     }
-    //     // }
-    //   }
-    // );
     watch(
       () => selectedKeys.value,
       newSelectedKeys => {
