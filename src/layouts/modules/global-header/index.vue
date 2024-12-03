@@ -29,6 +29,7 @@ const appStore = useAppStore();
 const themeStore = useThemeStore();
 const routeStore = useRouteStore();
 const { menus } = useMixMenuContext();
+// const setModalShow = ref(true);
 
 const headerMenus = computed(() => {
   if (themeStore.layout.mode === 'horizontal') {
@@ -62,7 +63,17 @@ const headerMenus = computed(() => {
  <GlobalSearch />
       <FullScreen v-if="!appStore.isMobile" :full="isFullscreen" @click="toggle" />
 -->
+      <!-- <GlobalSetting /> -->
+
+      <!--
+ <ButtonIcon tooltip-placement="left">
+        <SvgIcon local-icon="setting" />
+      </ButtonIcon>
+-->
+
+      <GlobalSetting></GlobalSetting>
       <LangSwitch :lang="appStore.locale" :lang-options="appStore.localeOptions" @change-lang="appStore.changeLocale" />
+
       <!--
  <ThemeSchemaSwitch
         :theme-schema="themeStore.themeScheme"
