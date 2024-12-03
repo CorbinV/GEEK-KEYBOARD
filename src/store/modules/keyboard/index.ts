@@ -1,5 +1,5 @@
 import { effectScope, onScopeDispose, reactive, watchEffect } from 'vue';
-import { defineStore } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
 import { useEventListener } from '@vueuse/core';
 import { useBoolean } from '@sa/hooks';
 import { SetupStoreId } from '@/enum';
@@ -7,7 +7,10 @@ import { kbStg, keyboardforage } from '@/utils/storage';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { KeyTypeEnum } from '@/enum/keyType';
 import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
+import { getDeviceConfigAndLayer, getKeysCfgByLayer } from '@/api/keyConfig';
 import keyMapJson from '@/assets/files/key-map.json';
+import { formatLableSub3 } from '@/hooks/common/format';
+import { useDeviceStore } from '../device';
 type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
   KeyTypeEnum.Normal | KeyTypeEnum.System | KeyTypeEnum.Media | KeyTypeEnum.Combo | KeyTypeEnum.Special
@@ -31,10 +34,21 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       offsetList: number[]; // keyboard row offset
       keyMap: any;
       superKeyMap: { [key: string]: CacheSuperKey };
-    }>({ layoutMap: new Map(), offsetList: [], keyMap: {}, superKeyMap: {}, layerIdx: 0, layerList: [] });
+      layerIdx: number;
+      layerKeys: any;
+      layerList: any[];
+    }>({
+      layoutMap: new Map(),
+      offsetList: [],
+      keyMap: {},
+      superKeyMap: {},
+      layerIdx: 0,
+      layerList: [],
+      layerKeys: {}
+    });
     const { bool: hasConfig } = useBoolean(kbStg.get('hasConfig') === 'Y');
-
-    const getAllConfig = async () => {
+    // const boardConfigList = reactive<any[]>(Array.from({ length: 4 }));
+    const getConfigFormCache = async () => {
       const allData: { [key: string]: any } = {};
       await keyboardforage.iterate((v, k) => {
         allData[k] = v;
@@ -46,23 +60,29 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       if (kbCfg.layoutMap.size > 0) {
         return kbCfg.layoutMap;
       }
+      // get all config data from file
       if (!hasConfig.value) {
         // optimize: dynammic import keyboard config(by keyboard name)
         // const data = await import(`@/assets/files/${kbName}.json`);
         const data = await import('@/assets/files/rk-s75.json');
+        // const keyMap: { [key: string]: any } = {};
         data.layout.keys.forEach(item => {
           keyboardforage.setItem(item.id, item);
           kbCfg.layoutMap.set(item.id, item);
         });
         keyboardforage.setItem('base', data.layout.base);
+        // keyMap.base = data.layout.base;
         kbCfg.layoutMap.set('base', data.layout.base);
         // update hasConfig value
         // setHasConfig(true);
         // kbStg.set('hasConfig', 'Y');
+        // kbCfg.data = keyMap;
         return kbCfg.layoutMap;
       }
 
-      const data = await getAllConfig();
+      // get all config from forage(local cache)
+      const data = await getConfigFormCache();
+      // kbCfg.data = data;
       data.forEach(() => {
         // feat: todo
       });
@@ -87,16 +107,19 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       //   kbCfg.keyMap = res.default;
       // });
     };
+    const generateSuperKey = () => {
+      return {
+        sp: [] as KeyTypeEnum[],
+        mt: undefined,
+        dks: false,
+        combo: false
+      };
+    };
     const updateSuperKey = (keyId: string, { moduleType, mtCfg }: { moduleType: KeyTypeEnum; mtCfg?: any }) => {
       let superKey = kbCfg.superKeyMap[keyId];
       if (!superKey) {
         // init super key if not exist
-        superKey = {
-          sp: [],
-          mt: undefined,
-          dks: false,
-          combo: false
-        };
+        superKey = generateSuperKey();
       }
       // update logic
       const codition = [KeyTypeEnum.OKS, KeyTypeEnum.SOCD, KeyTypeEnum.TGL, KeyTypeEnum.RS];
@@ -123,12 +146,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         return;
       }
       if (removeAll) {
-        kbCfg.superKeyMap[keyId] = {
-          sp: [],
-          mt: undefined,
-          dks: false,
-          combo: false
-        };
+        kbCfg.superKeyMap[keyId] = generateSuperKey();
         return;
       }
       const codition = [KeyTypeEnum.OKS, KeyTypeEnum.SOCD, KeyTypeEnum.TGL, KeyTypeEnum.RS];
@@ -147,11 +165,108 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       }
       kbCfg.superKeyMap[keyId] = superKey;
     };
-    initKeyMap();
-    return { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey };
-  }
-  const { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey } = useConfigData();
+    const updateLayerKeys = async ({ config, layer }: { config: number; layer: number }) => {
+      if (kbCfg.layerList[layer]) {
+        kbCfg.superKeyMap = kbCfg.layerList[layer].superKeyMap;
+        kbCfg.layerKeys = kbCfg.layerList[layer].keys;
+        return kbCfg.layerKeys;
+      }
+      const data = await getKeysCfgByLayer({
+        config,
+        layer
+      });
+      const superKeyMap: any = {};
+      Object.keys(data.smart).forEach((key: any) => {
+        const superKey = generateSuperKey();
+        const { mt, super: superTuple } = data.smart[key];
+        if (mt?.length > 0) {
+          const detail = getKeyDetail({
+            code: mt[0],
+            type: mt[1]
+          });
+          superKey.mt = formatLableSub3(detail);
+        }
+        if (superTuple?.length > 0) {
+          superKey.sp.push(superTuple[0]);
+        }
+        superKeyMap[key] = superKey;
+      });
+      kbCfg.layerList[layer] = {
+        keys: data.keys,
+        superKeyMap
+      };
+      return kbCfg.layerKeys;
+    };
 
+    initKeyMap();
+    return { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey, updateLayerKeys };
+  }
+  const { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey, updateLayerKeys } = useConfigData();
+  function useDeviceInfo() {
+    const deviceStore = useDeviceStore();
+    const { isConnected } = storeToRefs(deviceStore);
+    const kbInfo = reactive({
+      configCount: 0,
+      configIndex: 0,
+      layerIndex: 0,
+      layerCount: 0,
+      isLoad: false
+    });
+    const updateAllLayerKeys = async (
+      { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
+      { finish = false, finishCb }: { skipIdx?: number; finish?: boolean; finishCb?: any }
+    ) => {
+      if (finish) {
+        if (finishCb instanceof Function) {
+          finishCb();
+        }
+        return;
+      }
+      await updateLayerKeys({
+        config: configIdx,
+        layer: fetchIdx
+      });
+      window.requestAnimationFrame(() =>
+        updateAllLayerKeys(
+          { fetchIdx: fetchIdx + 1, configIdx },
+          {
+            finish: fetchIdx === maxFetch,
+            finishCb
+          }
+        )
+      );
+    };
+    const doInit = () => {
+      watchEffect(async () => {
+        if (isConnected.value) {
+          kbInfo.isLoad = true;
+          const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
+          kbInfo.configCount = configCount;
+          kbInfo.configIndex = configIndex;
+          kbInfo.layerIndex = layerIndex;
+          kbInfo.layerCount = layerCount;
+
+          await new Promise(resolve => {
+            updateAllLayerKeys({ configIdx: configIndex, maxFetch: layerCount }, { finishCb: resolve });
+          });
+
+          updateLayerKeys({
+            config: configIndex,
+            layer: configIndex
+          });
+          kbInfo.isLoad = false;
+        } else {
+          console.log('device is disconnected');
+        }
+      });
+    };
+    return {
+      kbInfo,
+      initConfigAndLayer: doInit,
+      updateAllLayerKeys
+    };
+  }
+  const { kbInfo, initConfigAndLayer } = useDeviceInfo();
   function useRelatedSelectedKeys() {
     const [selectedKeys, resetSelectedKeys] = useResttableRefFn<{
       [key: string]: {
@@ -198,7 +313,9 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   }
 
   // watch store
-  scope.run(() => {});
+  scope.run(() => {
+    initConfigAndLayer();
+  });
 
   // cache mixSiderFixed
   useEventListener(window, 'beforeunload', () => {});
@@ -212,12 +329,14 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
 
   return {
     kbCfg,
+    kbInfo,
     initKeyboardData,
     resetSelectedKeys,
     currentSuperKeyType,
     resetCurrentSuperKeyType,
     getKeyDetail,
     updateSuperKey,
+    updateLayerKeys,
     removeSuperKey,
     ...restRelatedSelectedData
   };
