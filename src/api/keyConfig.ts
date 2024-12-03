@@ -1,5 +1,5 @@
 import requestClient from './config';
-import type { KeyInfo, LayerKeysConfig } from './modules/keyboard';
+import type { ConfigAndLayer, KeyInfo, LayerKeysConfig } from './modules/keyboard';
 /**
  * @param data.layer keyboard layer
  * @param data.config keyboard's config(onboard configuration or custom)
@@ -35,5 +35,22 @@ export function setKeyInfo(
   return requestClient.send<null>({
     name: 'setKeyInfo',
     data
+  });
+}
+export function getDeviceConfigAndLayer(): Promise<ConfigAndLayer> {
+  return new Promise((resolve, reject) => {
+    requestClient
+      .send<any>({
+        name: 'getBasicConfig'
+      })
+      .then(res => {
+        resolve({
+          configCount: res.config_count,
+          configIndex: res.config_index,
+          layerCount: res.layer_count,
+          layerIndex: res.layer_index
+        });
+      })
+      .catch(reject);
   });
 }

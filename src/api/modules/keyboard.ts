@@ -20,8 +20,14 @@ export type LayerKeysConfig = {
   name: string;
   def: KeyDefaultCfg;
   keys: KeyCfgMap;
-  smart: KeySmartCfg[];
+  smart: { [key: string]: KeySmartCfg };
   disable: string[];
+};
+export type ConfigAndLayer = {
+  configCount: number;
+  configIndex: number;
+  layerCount: number;
+  layerIndex: number;
 };
 export type KeyInfo = {
   id: string;

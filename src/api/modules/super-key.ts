@@ -88,7 +88,7 @@ export type DksKey = {
   range: number[]; // length = 3*2
 };
 export type DksItem = {
-  name: string;
+  name?: string;
   type: KeyTypeEnum;
   code: number;
   simulation: 0 | 1;
