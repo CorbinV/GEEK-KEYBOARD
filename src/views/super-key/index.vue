@@ -30,7 +30,7 @@ const paneList = [
   {
     name: 'tgl',
     label: 'TGL切换开关',
-    component: Socd
+    component: TGL
   },
   {
     name: 'rs',
