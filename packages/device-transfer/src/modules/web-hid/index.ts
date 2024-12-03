@@ -126,6 +126,9 @@ export class HIDProtocolController extends EventTarget {
       }
       // console.log('handleInput', message)
       const { name } = message;
+      if (!name) {
+        return;
+      }
       const matchingRequests = Array.from(this.messageQueue.entries()).find(([_, request]) => {
         return request.name === name;
       });
