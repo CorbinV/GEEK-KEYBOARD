@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { onMounted, ref, toRaw, toRef, toRefs, watch } from 'vue';
+import { onMounted, reactive, ref, toRaw, toRef, toRefs, watch } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -17,6 +17,11 @@ const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.TGL;
+let editItem = reactive<{
+  base: { code: number; type: KeyTypeEnum; name: string };
+  keyList: any[];
+  keyBaseList: any[];
+}>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
 
 const { selectedKeys } = toRefs(keyboardStore);
 const kbCfg = toRef(keyboardStore, 'kbCfg');
@@ -87,6 +92,9 @@ async function updateGroupList() {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
         return res;
+      }),
+      keyBaseList: item.keys.map(keyBase => {
+        return keyBase;
       })
     };
   });
@@ -131,6 +139,8 @@ async function handleGroupItemDelete(item: { code: number }, idx: number) {
 async function handleGroupItemEdit(items: any, idx: number) {
   // feat: open edit modal(dialog), and transform data
   console.log('handleGroupItemEdit', items, idx);
+  editItem = items;
+  editVisible.value = true;
 }
 async function handleGroupItemRename(items: any, idx: number) {
   // feat: rename group name
@@ -164,7 +174,7 @@ function generateGroupCode() {
           <GroupMenu
             :group-item="item"
             :idx="idx"
-            :enable-edit="false"
+            :enable-edit="true"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
@@ -181,6 +191,7 @@ function generateGroupCode() {
       :need-import-key="true"
       keyboard-type="standard"
       desc="请设置需要开关持续触发的健值"
+      :edit-item="editItem"
       @create-group="handleGroupCreated"
     ></EditTemplate>
   </div>
