@@ -37,7 +37,6 @@ export type RSItem = BaseKey & {
 };
 export type ResetRSName = {
   code: number;
-  trigger: number;
   name: string;
 };
 export type RSBase = Omit<RSItem, 'type'>;
@@ -52,7 +51,6 @@ export type MTItem = BaseKey & {
 };
 export type ResetMTName = {
   code: number;
-  time: number;
   name: string;
 };
 export type MTBase = Omit<MTItem, 'type'> & {
@@ -69,7 +67,6 @@ export type TGLItem = BaseKey & {
 };
 export type ResetTGLName = {
   code: number;
-  trigger: number;
   name: string;
 };
 export type TGLBase = Omit<TGLItem, 'type'>;

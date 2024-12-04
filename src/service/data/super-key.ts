@@ -43,10 +43,7 @@ export const getOKSList = {
 };
 export const setOKSName = {
   name: 'setOKSName',
-  data: {
-    code: 1,
-    name: '快速急停AD'
-  }
+  code: 0
 };
 export const delOKS = {
   name: 'delOKS',
@@ -124,10 +121,7 @@ export const getSOCDList = {
 };
 export const setSOCDName = {
   name: 'setSOCDName',
-  data: {
-    code: 1,
-    name: 'SOCD1'
-  }
+  code: 0
 };
 export const delSOCD = {
   name: 'delSOCD',
@@ -206,10 +200,7 @@ export const getRSList = {
 };
 export const setRSName = {
   name: 'setRSName',
-  data: {
-    code: 1,
-    name: 'RS1'
-  }
+  code: 0
 };
 export const delRS = {
   name: 'delRS',
@@ -289,10 +280,7 @@ export const getMTList = {
 
 export const setMTName = {
   name: 'setMTName',
-  data: {
-    code: 1,
-    name: 'MT1'
-  }
+  code: 0
 };
 export const delMT = {
   name: 'delMT',
@@ -372,10 +360,7 @@ export const getTGLList = {
 };
 export const setTGLName = {
   name: 'setTGLName',
-  data: {
-    code: 1,
-    name: 'TGL1'
-  }
+  code: 0
 };
 export const delTGL = {
   name: 'delTGL',
