@@ -14,6 +14,13 @@ const keyboardStore = useKeyboardStore();
 const props = defineProps<{
   groupLength: number;
   visible: boolean;
+  editItem?: {
+    idx: number;
+    list: {
+      base: BaseKeyType;
+      detail: any;
+    }[];
+  };
   fncGenerateCode: () => number;
 }>();
 const bindKeyId = ref('');
@@ -37,6 +44,13 @@ function useDialogController() {
 
   watchEffect(() => {
     control.visible = props.visible;
+    if (props.visible) {
+      if (props.editItem) {
+        const { idx, list } = props.editItem;
+        selectedKeyInfo.idx = idx;
+        selectedKeyInfo.list = list;
+      }
+    }
   });
   return {
     dialogControl: control,

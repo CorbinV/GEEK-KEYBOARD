@@ -1,22 +1,36 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { KeyTypeEnum } from '@/enum/keyType';
-import { createComboGroup, deleteComboGroup, getComboList } from '@/api/combo';
+import { createComboGroup, deleteComboGroup, getComboGroup, getComboList } from '@/api/combo';
 import { useKeyboardStore } from '@/store/modules/keyboard';
+import GroupMenu from '@/views/super-key/components/group-menu.vue';
+import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 import ComboEdit from '../components/combo-edit.vue';
+
 const keyboardStore = useKeyboardStore();
+const { getKeyDetail } = keyboardStore;
 const groupList = ref<any>([]);
 const editVisible = ref(false);
 const MAC_GORUP_CNT = 20;
 const emit = defineEmits(['key-clicked']);
+
+let editItem = reactive<{
+  idx: number;
+  list: {
+    base: BaseKeyType;
+    detail: any;
+  }[];
+}>({ idx: 0, list: [] });
+
 function handleAddClicked() {
   if (groupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
     return;
   }
   // opent edit modal(dialog)
+  editItem = { idx: 0, list: [] };
   editVisible.value = true;
 }
 
@@ -82,6 +96,22 @@ async function handleGroupItemDelete(items: any, idx: number) {
 async function handleGroupItemEdit(items: any, idx: number) {
   // feat: open edit modal(dialog), and transform data
   console.log('handleGroupItemEdit', items, idx);
+  try {
+    const ret = await getComboGroup({ code: items.base.code, type: items.base.type });
+    editItem.list = [];
+    ret.keys.forEach(key => {
+      const res = getKeyDetail({ code: key.code, type: key.type });
+      editItem.list.push({
+        base: { code: key.code, type: key.type, key: '' },
+        detail: res
+      });
+    });
+    editItem.idx = idx;
+    editVisible.value = true;
+  } catch (error) {
+    console.error('handleGroupItemEdit', error);
+    window.$message!.error('获取组合键信息失败, 请更新最新固件后重试');
+  }
 }
 function generateGroupCode() {
   if (groupList.value.length === 0) return 1;
@@ -113,7 +143,7 @@ function handleGroupItemRename(items: any, idx: number) {
           <GroupMenu
             :group-item="item"
             :idx="idx"
-            :enable-edit="false"
+            :enable-edit="true"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
@@ -125,6 +155,7 @@ function handleGroupItemRename(items: any, idx: number) {
       v-model:visible="editVisible"
       :group-length="groupList.length"
       :fnc-generate-code="generateGroupCode"
+      :edit-item="editItem"
       @create-group="handleGroupCreated"
     />
   </div>
