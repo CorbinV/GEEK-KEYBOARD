@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-
+import { description, version } from '@/../package.json';
 // import { ref } from 'vue';
 
 defineOptions({
   name: 'GlobalSetting'
 });
-const showModal = ref(true);
+const showModal = ref(false);
+console.log(version);
 </script>
 
 <template>
@@ -31,8 +32,8 @@ const showModal = ref(true);
             <p class="... text-18px">驱动版本</p>
           </div>
           <div class="flex-raw mt-20px flex items-center justify-between text-16px text-[#999]">
-            <p>版本信息：2024/11/6</p>
-            <p>版本号：1.0.1.2</p>
+            <p>版本信息：{{ description }}</p>
+            <p>版本号：{{ version }}</p>
           </div>
         </div>
 
