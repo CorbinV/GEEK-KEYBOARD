@@ -6,7 +6,8 @@ import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
-import { addSOCD, deleteSOCDByCode, getSOCDList } from '@/api/super-key';
+import { addSOCD, deleteSOCDByCode, getSOCDList, resetSOCDName } from '@/api/super-key';
+import RenameModal from '@/views/marco/components/RenameModal.vue';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 import { SOCDTriggerOps } from '../config';
@@ -27,6 +28,10 @@ let editItem = reactive<{
   keyList: any[];
   keyBaseList: any[];
 }>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
+
+const showRenameModal = ref(false);
+const renameIndex = ref(-1);
+
 function handleAddClicked() {
   if (socdGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
@@ -125,6 +130,9 @@ async function handleGroupItemEdit(items: any, idx: number) {
 async function handleGroupItemRename(items: any, idx: number) {
   // feat: rename group name
   console.log('handleGroupItemRename', items, idx);
+  editItem = items;
+  renameIndex.value = idx;
+  showRenameModal.value = true;
 }
 function generateGroupCode() {
   if (socdGroupList.value.length === 0) return 1;
@@ -139,6 +147,19 @@ function generateGroupCode() {
 function handleTrigger(value: number) {
   trigger.value = value;
   console.log('handleTrigger', value);
+}
+
+async function handleReNameSave(data: { name: string }) {
+  console.log('handleReNameSave', data.name);
+  if (data.name === '') return;
+  try {
+    await resetSOCDName({ code: editItem.base.code, name: data.name });
+    editItem.base.name = data.name;
+    showRenameModal.value = false;
+    socdGroupList.value[renameIndex.value].base.name = data.name;
+  } catch (error) {
+    console.log('error', error);
+  }
 }
 </script>
 
@@ -160,6 +181,7 @@ function handleTrigger(value: number) {
             :group-item="item"
             :idx="idx"
             :enable-edit="true"
+            :enable-rename="true"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
@@ -192,5 +214,12 @@ function handleTrigger(value: number) {
         </div>
       </template>
     </EditTemplate>
+    <RenameModal
+      :show="showRenameModal"
+      :list-edit-index="renameIndex"
+      :name="editItem.base.name"
+      @update:show="showRenameModal = $event"
+      @rename="handleReNameSave"
+    />
   </div>
 </template>
