@@ -3,6 +3,7 @@ import { KeyboardContainer, StandardKeyboard } from '@/components/custom/keyboar
 import { KeyTypeEnum } from '@/enum/keyType';
 import Macro from '../marco/components/Macro.vue';
 import ModuleTemplate from './components/module-template.vue';
+import Combo from './module/combo.vue';
 </script>
 
 <template>
@@ -18,6 +19,9 @@ import ModuleTemplate from './components/module-template.vue';
           </NTabPane>
           <NTabPane name="media" tab="媒体">
             <ModuleTemplate :type="KeyTypeEnum.Media" @key-clicked="handleKeyEmit" />
+          </NTabPane>
+          <NTabPane name="combo" tab="组合">
+            <Combo @key-clicked="handleKeyEmit" />
           </NTabPane>
           <NTabPane name="special" tab="特殊">
             <ModuleTemplate :type="KeyTypeEnum.Special" @key-clicked="handleKeyEmit" />
