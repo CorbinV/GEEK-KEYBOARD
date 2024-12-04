@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue';
 import { NInput, NModal } from 'naive-ui';
-import type { Macro } from '@/api/modules/macro';
 
 const props = defineProps<{
   show: boolean;
-  macro: Macro;
+  name: string;
 }>();
 
 const emit = defineEmits<{
@@ -13,12 +12,12 @@ const emit = defineEmits<{
   (e: 'rename', payload: { name: string }): void;
 }>();
 
-const inputReName = ref(props.macro.name || '');
+const inputReName = ref(props.name || '');
 
 const showModal = computed(() => props.show);
 
 watchEffect(() => {
-  inputReName.value = props.macro.name?.trim()?.slice(0, 6) || '';
+  inputReName.value = props.name?.trim()?.slice(0, 6) || '';
 });
 
 const handleCancel = () => {
