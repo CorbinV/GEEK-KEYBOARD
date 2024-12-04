@@ -5,7 +5,8 @@ import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
-import { addMT, deleteMTByCode, getMTList } from '@/api/super-key';
+import { addMT, deleteMTByCode, getMTList, resetMTName } from '@/api/super-key';
+import RenameModal from '@/views/marco/components/RenameModal.vue';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 const mtGroupList = ref<any>([]);
@@ -29,6 +30,8 @@ const { selectedKeys } = toRefs(keyboardStore);
 const kbCfg = toRef(keyboardStore, 'kbCfg');
 
 let keyId = '';
+const showRenameModal = ref(false);
+const renameIndex = ref(-1);
 
 onMounted(() => {
   watch(
@@ -150,6 +153,9 @@ async function handleGroupItemEdit(items: any, idx: number) {
 async function handleGroupItemRename(items: any, idx: number) {
   // feat: rename group name
   console.log('handleGroupItemRename', items, idx);
+  editItem = items;
+  renameIndex.value = idx;
+  showRenameModal.value = true;
 }
 function generateGroupCode() {
   if (mtGroupList.value.length === 0) return 1;
@@ -159,6 +165,18 @@ function generateGroupCode() {
     newCode++;
   }
   return newCode;
+}
+async function handleReNameSave(data: { name: string }) {
+  console.log('handleReNameSave', data.name);
+  if (data.name === '') return;
+  try {
+    await resetMTName({ code: editItem.base.code, name: data.name });
+    editItem.base.name = data.name;
+    showRenameModal.value = false;
+    mtGroupList.value[renameIndex.value].base.name = data.name;
+  } catch (error) {
+    console.log('error', error);
+  }
 }
 </script>
 
@@ -180,6 +198,7 @@ function generateGroupCode() {
             :group-item="item"
             :idx="idx"
             :enable-edit="true"
+            :enable-rename="true"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
@@ -218,5 +237,12 @@ function generateGroupCode() {
         </div>
       </template>
     </EditTemplate>
+    <RenameModal
+      :show="showRenameModal"
+      :list-edit-index="renameIndex"
+      :name="editItem.base.name"
+      @update:show="showRenameModal = $event"
+      @rename="handleReNameSave"
+    />
   </div>
 </template>
