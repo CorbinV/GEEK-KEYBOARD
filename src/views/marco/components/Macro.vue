@@ -148,8 +148,7 @@ async function handleSave() {
 
   <RenameModal
     :show="showRenameModal"
-    :list-edit-index="listEditIndex"
-    :macro="macro"
+    :name="macro.name"
     @update:show="showRenameModal = $event"
     @rename="handleReNameSave"
   />
