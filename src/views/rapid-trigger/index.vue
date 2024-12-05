@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import AdjustView from './components/adjust-view.vue';
 import PropertyView from './components/property-view.vue';
@@ -15,26 +16,35 @@ import PropertyView from './components/property-view.vue';
 //   console.log('clean');
 //   // 这里可以加入恢复出厂设置的逻辑
 // };
+
+const tabName = ref(0);
+function handleKeyEventTabs(value: string | number) {
+  tabName.value = Number(value);
+}
 </script>
 
 <template>
   <div>
     <KeyboardContainer>
       <template #default>
-        <NTabs default-value="basic" size="large" justify-content="space-evenly" placement="bottom">
-          <NTabPane name="basic" tab="性能">
-            <PropertyView></PropertyView>
-          </NTabPane>
-          <NTabPane name="system" tab="校准">
-            <AdjustView></AdjustView>
-          </NTabPane>
-        </NTabs>
+        <div class="h-full flex flex-col items-center">
+          <div class="flex-1">
+            <PropertyView v-if="tabName === 0"></PropertyView>
+            <AdjustView v-if="tabName === 1"></AdjustView>
+          </div>
+          <NTabs
+            v-model:value="tabName"
+            type="segment"
+            animated
+            style="width: 476px"
+            @update:value="handleKeyEventTabs"
+          >
+            <NTab name="0" tab="性能" />
+            <NTab name="1" tab="校准" />
+          </NTabs>
+        </div>
       </template>
     </KeyboardContainer>
-    <!--
- <AdjustView></AdjustView>
-    <PropertyView></PropertyView>
--->
   </div>
 </template>
 
