@@ -1,4 +1,6 @@
-const local: App.I18n.Schema = {
+import otherModules from './business/cn/zh-cn';
+
+const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
   system: {
     title: 'Web Template'
   },
@@ -252,7 +254,8 @@ const local: App.I18n.Schema = {
   },
   datatable: {
     itemCount: '共 {total} 条'
-  }
+  },
+  ...otherModules
 };
 
 export default local;

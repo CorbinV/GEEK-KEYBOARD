@@ -438,8 +438,7 @@ declare namespace App {
       datatable: {
         itemCount: string;
       };
-    };
-
+    } & BusinessLanguage.Schema;
     type GetI18nKey<T extends Record<string, unknown>, K extends keyof T = keyof T> = K extends string
       ? T[K] extends Record<string, unknown>
         ? `${K}.${GetI18nKey<T[K]>}`
@@ -462,7 +461,14 @@ declare namespace App {
       (key: I18nKey, named: Record<string, unknown>, defaultMsg: string): string;
     }
   }
-
+  namespace BusinessLanguage {
+    export type Schema = {
+      // remove current content
+      test: {
+        desc: string;
+      };
+    };
+  }
   /** Service namespace */
   namespace Service {
     /** Other baseURL key */

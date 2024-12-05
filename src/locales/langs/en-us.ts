@@ -1,3 +1,5 @@
+import otherModules from './business/en/en-us';
+
 const local: App.I18n.Schema = {
   system: {
     title: 'Web Template'
@@ -252,7 +254,8 @@ const local: App.I18n.Schema = {
   },
   datatable: {
     itemCount: 'Total {total} items'
-  }
+  },
+  ...otherModules
 };
 
 export default local;
