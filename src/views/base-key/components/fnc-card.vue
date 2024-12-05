@@ -15,7 +15,7 @@ withDefaults(
 </script>
 
 <template>
-  <div class="w-20 flex flex-col gap-y-6 hover:cursor-pointer" :data-code="code">
+  <div class="w-21 flex flex-col gap-y-6 hover:cursor-pointer" :data-code="code">
     <div
       class="h-20 w-full inline-flex items-center justify-center border-1 border-#3C3933 rounded-md higth-light-bg text-c-primary"
     >
