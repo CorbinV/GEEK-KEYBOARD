@@ -431,7 +431,7 @@ export const getDKSList = {
   }
 };
 export const setDKSName = {
-  name: 'setDKSName',
+  name: 'setDKS',
   code: 0
 };
 export const delDKS = {

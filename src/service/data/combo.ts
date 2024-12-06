@@ -5,19 +5,13 @@ export const getShortcuts = {
     shortcuts: [
       {
         type: 3,
+        key: 'A',
         code: 4
       },
       {
         type: 3,
+        key: 'C',
         code: 5
-      },
-      {
-        type: 3,
-        code: 6
-      },
-      {
-        type: 3,
-        code: 7
       }
     ]
   }
@@ -28,22 +22,17 @@ export const getShortcut = {
   data: {
     type: 3,
     code: 1,
+    key: 'A',
     keys: [
       {
         type: 0,
+        key: 'G',
         code: 4
       },
       {
         type: 0,
+        key: 'L',
         code: 5
-      },
-      {
-        type: 0,
-        code: 6
-      },
-      {
-        type: 0,
-        code: 7
       }
     ]
   }
