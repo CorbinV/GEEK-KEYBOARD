@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { nextTick, onMounted, reactive, ref, toRef, toRefs, watch, watchEffect } from 'vue';
+import { nextTick, onMounted, onUnmounted, reactive, ref, toRef, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { StandardKeyboard } from '@/components/custom/keyboard';
@@ -26,7 +26,6 @@ const props = withDefaults(
     needImportKey?: boolean;
   }>(),
   {
-    keyboardType: 'base',
     secondTitle: ''
   }
 );
@@ -93,6 +92,9 @@ function useDragControlData() {
     });
     return res;
   };
+  onUnmounted(() => {
+    dksStore.resetDksGroupList();
+  });
   return {
     dksGroupList,
     formatKeyRange
@@ -169,6 +171,9 @@ function useTitle() {
   });
   return [title];
 }
+onUnmounted(() => {
+  resetSelectedKeyInfo();
+});
 </script>
 
 <template>
