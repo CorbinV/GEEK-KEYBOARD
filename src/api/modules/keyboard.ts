@@ -15,6 +15,7 @@ export type KeySmartCfg = {
   mt: number[];
 };
 export type LayerKeysConfig = {
+  len: number;
   config: number;
   layer: number;
   name: string;

@@ -4,7 +4,7 @@ import type { ConfigAndLayer, KeyInfo, LayerKeysConfig } from './modules/keyboar
  * @param data.layer keyboard layer
  * @param data.config keyboard's config(onboard configuration or custom)
  */
-export function getKeysCfgByLayer(data: { config: number; layer: number }) {
+export function getKeysCfgByLayer(data: { config: number; layer: number; pageNo: number; pageSize: number }) {
   return requestClient.send<LayerKeysConfig>({
     name: 'getBasicKey',
     data

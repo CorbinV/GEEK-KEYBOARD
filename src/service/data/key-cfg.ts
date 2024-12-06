@@ -2,6 +2,7 @@ export const getBasicKey = {
   name: 'getBasicKey',
   code: 0,
   data: {
+    len: 75,
     config: 1,
     layer: 1,
     name: '默认（0）',
