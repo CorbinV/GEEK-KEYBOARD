@@ -10,6 +10,8 @@ import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
 import { getDeviceConfigAndLayer, getKeysCfgByLayer } from '@/api/keyConfig';
 import keyMapJson from '@/assets/files/key-map.json';
 import { formatLableSub3 } from '@/hooks/common/format';
+import type { LayerKeysConfig } from '@/api/modules/keyboard';
+import { logger } from '@/utils/log';
 import { useDeviceStore } from '../device';
 type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
@@ -166,15 +168,50 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       kbCfg.superKeyMap[keyId] = superKey;
     };
     const updateLayerKeys = async ({ config, layer }: { config: number; layer: number }) => {
+      logger('updateLayerKeys------', config, layer);
       if (kbCfg.layerList[layer]) {
         kbCfg.superKeyMap = kbCfg.layerList[layer].superKeyMap;
         kbCfg.layerKeys = kbCfg.layerList[layer].keys;
         return kbCfg.layerKeys;
       }
-      const data = await getKeysCfgByLayer({
-        config,
-        layer
-      });
+
+      let pageNo = 1;
+      const pageSize = 25;
+      let data: LayerKeysConfig = {
+        len: 0,
+        config: 0,
+        layer: 0,
+        name: '',
+        def: { tary: [] },
+        keys: {},
+        smart: {},
+        disable: []
+      };
+      const fetchData = async () => {
+        logger('fetchData pageNo', pageNo);
+        const result = await getKeysCfgByLayer({
+          config,
+          layer,
+          pageNo,
+          pageSize
+        });
+        logger('fetchData result', JSON.stringify(result));
+        if (pageNo === 1) {
+          data = { ...result };
+        } else {
+          data.keys = { ...data.keys, ...result.keys };
+          data.smart = { ...data.smart, ...result.smart };
+          data.disable = [...data.disable, ...result.disable];
+        }
+        if (pageNo * pageSize >= data.len) {
+          logger('fetch data end');
+          return;
+        }
+        pageNo += 1;
+        await fetchData();
+      };
+      await fetchData();
+      logger('fetchData', JSON.stringify(data));
       const superKeyMap: any = {};
       Object.keys(data.smart).forEach((key: any) => {
         const superKey = generateSuperKey();
@@ -193,7 +230,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       });
       kbCfg.layerList[layer] = {
         keys: data.keys,
-        superKeyMap
+        superKeyMap,
+        xxx: data
       };
       return kbCfg.layerKeys;
     };
@@ -210,7 +248,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       configIndex: 0,
       layerIndex: 0,
       layerCount: 0,
-      isLoad: false
+      isLoad: false,
+      mounted: false
     });
     const updateAllLayerKeys = async (
       { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
@@ -228,7 +267,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       });
       window.requestAnimationFrame(() =>
         updateAllLayerKeys(
-          { fetchIdx: fetchIdx + 1, configIdx },
+          { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
           {
             finish: fetchIdx === maxFetch,
             finishCb
@@ -255,8 +294,10 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
             layer: configIndex
           });
           kbInfo.isLoad = false;
+          kbInfo.mounted = true;
         } else {
-          console.log('device is disconnected');
+          kbInfo.mounted = false;
+          logger('device is disconnected');
         }
       });
     };
