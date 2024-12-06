@@ -4,6 +4,7 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import FncCard from '../components/fnc-card.vue';
 import { fncDescMap } from '../config';
+
 const props = defineProps<{
   type: KeyTypeEnum;
 }>();
@@ -11,7 +12,7 @@ const keyboardStore = useKeyboardStore();
 const { kbCfg } = toRefs(keyboardStore);
 const emit = defineEmits(['key-clicked']);
 const keyInfoMap = kbCfg.value.keyMap[props.type].code;
-const descList = fncDescMap[props.type as keyof typeof fncDescMap];
+const descList = fncDescMap[props.type as keyof typeof fncDescMap] as unknown as App.I18n.I18nKey;
 const list = Object.values(keyInfoMap).map((item: any, code) => {
   return {
     code,

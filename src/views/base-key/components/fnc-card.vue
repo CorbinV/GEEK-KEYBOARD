@@ -24,6 +24,6 @@ withDefaults(
       </p>
       <i v-else class="iconfont text-3xl" :class="`icon-${icon}`"></i>
     </div>
-    <p class="text-center text-c-second">{{ description }}</p>
+    <p class="text-center text-c-second">{{ $t(description) }}</p>
   </div>
 </template>

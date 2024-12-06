@@ -44,7 +44,7 @@ function handleKeyboardKeySelected(keyId: string) {
       <div v-if="$slots.keyboardBottom" class="card-header">
         <slot name="keyboardBottom"></slot>
       </div>
-      <div v-else class="mt-2 text-center text-c-second">选中键盘上按键后，再选中下方需要替换的键</div>
+      <div v-else class="mt-2 text-center text-c-second">{{ $t('baseKey.keyboard.keyboardHint') }}</div>
       <NDivider class="!my-2" />
       <div class="flex-1 overflow-clip">
         <slot :handle-key-emit="handleKeyEmit"></slot>

@@ -1,6 +1,6 @@
 import otherModules from './business/en/en-us';
 
-const local: App.I18n.Schema = {
+const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
   system: {
     title: 'Web Template'
   },

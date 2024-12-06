@@ -7,6 +7,7 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { addOks, deleteOksByCode, getOksList, resetOksName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
+import { $t } from '@/locales';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 const oksGroupList = ref<any>([]);
@@ -112,9 +113,9 @@ async function handleGroupItemDelete(item: { code: number }, idx: number) {
   try {
     await deleteOksByCode({ code: item.code });
     oksGroupList.value.splice(idx, 1);
-    window.$message!.success('删除成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
-    window.$message!.error('删除失败，请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.delFailPlsUpdate'));
     console.error(error);
   }
 }
@@ -158,7 +159,7 @@ async function handleReNameSave(data: { name: string }) {
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd icon="add" desc="添加单键急停按键" @click="handleAddClicked" />
+      <BasicGroupAdd icon="add" :desc="$t('supperKey.x1')" @click="handleAddClicked" />
       <BasicGroupItem
         v-for="(item, idx) in oksGroupList"
         :key="item.code"
@@ -189,7 +190,7 @@ async function handleReNameSave(data: { name: string }) {
       :fnc-generate-code="generateGroupCode"
       :need-import-key="false"
       keyboard-type="standard"
-      desc="请选择两个按键，当其中一个按键被抬起时，立马触发一另一个按键，在一些游戏中实现单个按键 的快速急停"
+      :desc="$t('supperKey.c6')"
       :edit-item="editItem"
       @create-group="handleGroupCreated"
     ></EditTemplate>

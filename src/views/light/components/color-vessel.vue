@@ -2,13 +2,21 @@
 import { ref } from 'vue';
 import ZWColors from '@/views/light/components/zw-colors.vue';
 import Slider from '@/components/custom/zw-slider.vue';
+import { $t } from '@/locales';
 
 // 假设你有 15 个项目来填充三行五列的网格
-const items = ref(['流光溢彩', '静态']);
+const items = ref([$t('light.q1'), $t('light.q2')]);
 // 选中的项，默认没有选中
 const selectedItem = ref<number | null>(null);
 
-const sleepTimeitems = ref(['5分钟', '10分钟', '15分钟', '20分钟', '30分钟', '永不']);
+const sleepTimeitems = ref([
+  $t('light.minute', { total: 5 }),
+  $t('light.minute', { total: 10 }),
+  $t('light.minute', { total: 15 }),
+  $t('light.minute', { total: 30 }),
+  $t('light.never'),
+  $t('light.interaction')
+]);
 const selectedSleepTime = ref<number | null>(null);
 const lightLevel = ref(10);
 const vLevel = ref(10);
@@ -50,7 +58,7 @@ function selectSleepTimeItem(index: number) {
     <div class="flex flex-col flex-1">
       <div class="flex-raw flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">模式选择</p>
+        <p class="... text-lg">{{ $t('light.modeSelect') }}</p>
       </div>
       <div class="grid-container grid mb-20px mt-20px gap-x-55px gap-y-30px">
         <div
@@ -68,17 +76,17 @@ function selectSleepTimeItem(index: number) {
     <div class="flex flex-col flex-1 bg-[#171619]">
       <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">亮度</p>
+        <p class="... text-lg">{{ $t('light.luminance') }}</p>
       </div>
       <Slider v-model="lightLevel"></Slider>
       <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">速度</p>
+        <p class="... text-lg">{{ $t('light.speend') }}</p>
       </div>
       <Slider v-model="vLevel"></Slider>
       <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">灯光休眠</p>
+        <p class="... text-lg">{{ $t('light.speend') }}</p>
       </div>
 
       <div class="grid-container grid mt-20px gap-x-55px gap-y-30px">

@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { getKeyboardSetting } from '@/api/keyConfig-setting';
 import keyboardImg from '@/assets/img/keyboard_img.png';
+// import RestoreFactoryModal from '@/views/settings/components/reset-modal.vue';
 
 async function getSet() {
   const x = await getKeyboardSetting();
@@ -46,42 +47,43 @@ getSet();
     <img :src="keyboardImg" alt="Logo" class="mt-50px h-324px w-804px" />
 
     <div class="mt-38px h-520px w-976px flex flex-col items-center rounded-md bg-[#171619] p-30px">
-      <h1 class="text-[22px]">设备名称：NB999</h1>
+      <h1 class="text-[22px]">{{ $t('setting.devName', { total: 'NB99' }) }}</h1>
       <!-- <div class="li-title">连接模式</div> -->
 
       <div class="h-66px w-full flex flex items-center justify-between border-b-1px border-[#232327] text-[18px]">
-        连接模式
+        {{ $t('setting.connectMode') }}
         <div>USB</div>
       </div>
 
       <div class="h-66px w-full flex items-center justify-between border-b-1px border-[#232327] text-[18px]">
-        全键无冲
+        {{ $t('setting.allKeyNot') }}
         <NSwitch v-model:value="fullKeyRolloverSwitch" @update:value="onFullKeyRolloverChange" />
       </div>
       <div class="h-110px w-full flex flex-col justify-between border-b-1px border-[#232327] pb-20px pt-20px">
         <div class="h-110px w-full flex justify-between text-[18px]">
-          感应唤醒
+          {{ $t('setting.wakeUp') }}
           <NSwitch v-model:value="wakeUpSwitch" onupdate @update:value="onWakeUpSwitchChange" />
         </div>
         <div class="text-[16px] text-[#999]">
-          电感轴可以感知双手是否离开键盘，从而进入低功耗模式，当双手靠近键盘时立即唤醒键盘，从而达到降低功耗，和极大的续航
+          {{ $t('setting.wakeUpHint') }}
         </div>
       </div>
       <div
         class="flex-raw h-110px w-full flex justify-between border-b-1px border-[#232327] pb-20px pt-20px text-[18px]"
       >
         <div class="flex flex-col">
-          <div>固件更新</div>
+          <div>{{ $t('setting.gjUpdate') }}</div>
           <p class="mt-20px text-[16px] text-[#999]">{{ versionCode }}</p>
         </div>
         <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
-          检查更新
+          {{ $t('setting.checkUpdate') }}
         </button>
       </div>
       <div class="flex-raw w-full flex justify-between rounded-md pb-20px pt-20px">
-        <button class="hollow-btn h-60px w-170px" @click="onReceiverPairClick">2.4g接收器配对</button>
-        <button class="hollow-btn h-60px w-170px" @click="onFactoryResetClick">恢复出厂设置</button>
+        <button class="hollow-btn h-60px w-170px" @click="onReceiverPairClick">{{ $t('setting.pair24') }}</button>
+        <button class="hollow-btn h-60px w-170px" @click="onFactoryResetClick">{{ $t('setting.restore') }}</button>
       </div>
+      <!-- <RestoreFactoryModal></RestoreFactoryModal> -->
     </div>
   </div>
 </template>

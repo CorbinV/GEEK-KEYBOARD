@@ -6,7 +6,7 @@ import type { SetKeyPerf } from '@/api/modules/keyboard-rapid-trigger';
 import CircleShow from '@/components/custom/circle-show.vue';
 import Slider from '@/components/custom/zw-slider.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-
+import { $t } from '@/locales';
 export type Opetion = { key: number; label: string };
 const argShow = ref(true);
 const showModal = ref(false);
@@ -92,7 +92,7 @@ getPerf1();
         <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">显示参数</p>
+            <p class="... text-lg">{{ $t('repidTrigger.showArg') }}</p>
           </div>
 
           <NSwitch v-model:value="argShow"></NSwitch>
@@ -100,7 +100,7 @@ getPerf1();
         <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">轮询率</p>
+            <p class="... text-lg">{{ $t('repidTrigger.pollingRate') }}</p>
           </div>
 
           <NDropdown
@@ -116,24 +116,24 @@ getPerf1();
 
         <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">触发死区</p>
+          <p class="... text-lg">{{ $t('repidTrigger.triggerDeadZone') }}</p>
           <!-- <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p> -->
         </div>
 
         <Slider v-model="sliderValue" class="mt-10px"></Slider>
         <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">抬起死区</p>
+          <p class="... text-lg">{{ $t('repidTrigger.liftDeadZone') }}</p>
           <!-- <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p> -->
         </div>
         <Slider v-model="sliderValue" class="mt-10px"></Slider>
         <div class="flex-raw mt-30px flex justify-between">
-          <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">重置</button>
+          <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
           <button
             class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
             @click="setAxosome"
           >
-            设置轴体
+            {{ $t('repidTrigger.switchType') }}
           </button>
         </div>
       </div>
@@ -143,19 +143,19 @@ getPerf1();
         <div class="flex-raw flex justify-between pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg text-#999999">开启快速触发</p>
+            <p class="... text-lg text-#999999">{{ $t('repidTrigger.fastTrigger') }}</p>
           </div>
 
           <NSwitch v-model:value="perf.quick"></NSwitch>
         </div>
         <span class="... border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
-          通过设置触发行程，只需按压抬起一定程度即可反复触发按键，达到快速触发效果
+          {{ $t('repidTrigger.fastTriggerDesc') }}
         </span>
         <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">触发（按下）灵敏度</p>
+          <p class="... text-lg">{{ $t('repidTrigger.pressSensitivity') }}</p>
         </div>
-        <span class="... text-14px text-[#999]">（设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）</span>
+        <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
         <Slider v-model="sliderValue" class="pt-10px" @sliding="onSliding"></Slider>
 
         <div class="mt-10px flex flex-row items-center justify-center gap-5">
@@ -167,36 +167,33 @@ getPerf1();
 
         <div class="flex-raw flex items-center">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">抬起（重置）灵敏度</p>
+          <p class="... text-lg">{{ $t('repidTrigger.liftSensitivity') }}</p>
         </div>
-        <span class="... text-14px text-[#999]">（设置过高的精度，可能回导致手指按压时，细微的晃动而被认定抬起）</span>
+        <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
         <Slider v-model="sliderValue" class="pt-10px" @sliding="onSliding"></Slider>
         <p class="... mt-10px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
-          高级设置
+          {{ $t('repidTrigger.advancedSettings') }}
         </p>
 
         <NModal v-model:show="showModal" class="h-500px w-34% rounded-[10px] bg-[#191b1d]">
           <div class="model-bg flex flex-col items-center p-30px text-[22px]">
-            <p>高级设置</p>
-            <!--
- <div class="mt-20px w-100% flex flex-row justify-between text-[18px]">
-              <p>单独设置抬起按下灵敏度</p>
-              <NSwitch></NSwitch>
-            </div>
--->
-            <p class="mt-40px w-100% text-[18px]">RT顶部死区</p>
+            <p>{{ $t('repidTrigger.advancedSettings') }}</p>
+
+            <p class="mt-40px w-100% text-[18px]">{{ $t('repidTrigger.rtTopDeadZone') }}</p>
             <Slider v-model="sliderValue" class="mt-20px"></Slider>
 
-            <p class="mt-20px w-100% text-[18px]">RT底部死区</p>
+            <p class="mt-20px w-100% text-[18px]">{{ $t('repidTrigger.rtBellowDeadZone') }}</p>
             <Slider v-model="sliderValue" class="mt-20px"></Slider>
 
             <div class="mt-30px flex flex-row justify-center gap-70px">
-              <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">取消</button>
+              <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
+                {{ $t('businessCommon.cancel') }}
+              </button>
               <button
                 class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
                 @click="showModal = false"
               >
-                确定
+                {{ $t('businessCommon.confirm1') }}
               </button>
             </div>
           </div>
@@ -207,7 +204,7 @@ getPerf1();
         <div class="flex-raw flex justify-between border-b-1px border-[#232327] pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">断触优化</p>
+            <p class="... text-lg">{{ $t('repidTrigger.debounceOptimization') }}</p>
           </div>
 
           <NSwitch v-model:value="perf.breakOptimize"></NSwitch>
@@ -215,7 +212,7 @@ getPerf1();
         <div class="flex-raw back flex justify-between border-b-1px border-[#232327] pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">防抖等级</p>
+            <p class="... text-lg">{{ $t('repidTrigger.debounceLevel') }}</p>
           </div>
 
           <NDropdown
@@ -232,8 +229,8 @@ getPerf1();
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
             <p class="... text-lg">
-              按键级数示意
-              <span class="text-[14px] text-[#999999]">（示意非精准显示，仅供参考）</span>
+              {{ $t('repidTrigger.keyLevelIllustration') }}
+              <span class="text-[14px] text-[#999999]">{{ $t('repidTrigger.keyLevelIllustration') }}</span>
             </p>
           </div>
         </div>

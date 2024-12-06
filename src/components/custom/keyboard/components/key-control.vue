@@ -60,12 +60,16 @@ async function handleDisableKey() {
 
 <template>
   <div class="flex flex-col gap-y-4 low-layer-bg p-2">
-    <h1 class="text-center text-base">按键信息</h1>
+    <h1 class="text-center text-base">{{ $t('macro.keyInfo') }}</h1>
     <div class="flex flex-col text-c-primary">
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
-        <span>默认{{ keyLabel || '/' }}</span>
         <span>
-          当前
+          {{ $t('baseKey.keyboard.admin1', { total: keyLabel }) }}
+          <!-- {{ $t('macro.keyInfo') }}默认{{ keyLabel || '/' }} -->
+        </span>
+        <span>
+          {{ $t('baseKey.keyboard.current') }}
+          {{ $t('baseKey.keyboard.admin1', { total: keyLabel }) }}
           <i v-if="showIcon" class=""></i>
           <span>
             {{ keyInfo.currentKey?.label }}
@@ -73,15 +77,15 @@ async function handleDisableKey() {
         </span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
-        <span>触发点</span>
+        <span>{{ $t('baseKey.keyboard.exeDot') }}</span>
         <span class="text-c-hl">{{ keyInfo.triggerPoint || '/' }}</span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
-        <span>RT触发</span>
+        <span>{{ $t('baseKey.keyboard.exeRt') }}</span>
         <span class="text-c-hl">{{ keyInfo.rtTrigger || '/' }}</span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
-        <span>RT重置</span>
+        <span>{{ $t('baseKey.keyboard.resetRt') }}</span>
         <span class="text-c-hl">{{ keyInfo.rtReset || '/' }}</span>
       </div>
       <!-- feat: finish the params -->
@@ -95,8 +99,10 @@ async function handleDisableKey() {
       -->
     </div>
     <div>
-      <NButton type="info" ghost size="small" class="mr-2" @click="handleDisableKey">禁用按键</NButton>
-      <NButton type="info" ghost size="small" @click="handleResetKey">恢复默认</NButton>
+      <NButton type="info" ghost size="small" class="mr-2" @click="handleDisableKey">
+        {{ $t('baseKey.keyboard.bandKey') }}
+      </NButton>
+      <NButton type="info" ghost size="small" @click="handleResetKey">{{ $t('baseKey.keyboard.recvoer') }}</NButton>
     </div>
   </div>
 </template>

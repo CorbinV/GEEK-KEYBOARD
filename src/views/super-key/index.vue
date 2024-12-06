@@ -69,12 +69,12 @@ const paneList = [
           </div>
 
           <NTabs v-model:value="tabName" type="segment" animated @update:value="handleKeyEventTabs">
-            <NTab :name="KeyTypeEnum.DKS" tab="DKS动态键程" />
-            <NTab :name="KeyTypeEnum.OKS" tab="OKS单键急停" />
+            <NTab :name="KeyTypeEnum.DKS" :tab="$t('supperKey.c1')" />
+            <NTab :name="KeyTypeEnum.OKS" :tab="$t('supperKey.c2')" />
             <NTab :name="KeyTypeEnum.SOCD" tab="SOCD" />
-            <NTab :name="KeyTypeEnum.MT" tab="MT单击/按住" />
-            <NTab :name="KeyTypeEnum.TGL" tab="TGL切换开关" />
-            <NTab :name="KeyTypeEnum.RS" tab="RS灵动触发" />
+            <NTab :name="KeyTypeEnum.MT" :tab="$t('supperKey.c3')" />
+            <NTab :name="KeyTypeEnum.TGL" :tab="$t('supperKey.c4')" />
+            <NTab :name="KeyTypeEnum.RS" :tab="$t('supperKey.c5')" />
           </NTabs>
         </div>
       </template>

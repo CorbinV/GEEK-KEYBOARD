@@ -5,7 +5,6 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import Macro from '../marco/components/Macro.vue';
 import ModuleTemplate from './components/module-template.vue';
 import Combo from './module/combo.vue';
-
 const tabName = ref(KeyTypeEnum.Normal);
 function handleKeyEventTabs(value: string | number) {
   tabName.value = Number(value);
@@ -42,12 +41,12 @@ function handleKeyEventTabs(value: string | number) {
           </div>
 
           <NTabs v-model:value="tabName" type="segment" animated @update:value="handleKeyEventTabs">
-            <NTab :name="KeyTypeEnum.Normal" tab="基础" />
-            <NTab :name="KeyTypeEnum.System" tab="系统" />
-            <NTab :name="KeyTypeEnum.Media" tab="媒体" />
-            <NTab :name="KeyTypeEnum.Combo" tab="组合" />
-            <NTab :name="KeyTypeEnum.Special" tab="特殊" />
-            <NTab :name="KeyTypeEnum.Marco" tab="宏按键" />
+            <NTab :name="KeyTypeEnum.Normal" :tab="$t('baseKey.tab.basic')" />
+            <NTab :name="KeyTypeEnum.System" :tab="$t('baseKey.tab.system')" />
+            <NTab :name="KeyTypeEnum.Media" :tab="$t('baseKey.tab.media')" />
+            <NTab :name="KeyTypeEnum.Combo" :tab="$t('baseKey.tab.combination')" />
+            <NTab :name="KeyTypeEnum.Special" :tab="$t('baseKey.tab.special')" />
+            <NTab :name="KeyTypeEnum.Marco" :tab="$t('baseKey.tab.macro')" />
           </NTabs>
         </div>
       </template>

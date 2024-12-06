@@ -8,6 +8,7 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { addSOCD, deleteSOCDByCode, getSOCDList, resetSOCDName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
+import { $t } from '@/locales';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 import { SOCDTriggerOps } from '../config';
@@ -114,9 +115,9 @@ async function handleGroupItemDelete(item: { code: number }, idx: number) {
   try {
     await deleteSOCDByCode({ code: item.code });
     socdGroupList.value.splice(idx, 1);
-    window.$message!.success('删除成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
-    window.$message!.error('删除失败，请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.delFailPlsUpdate'));
     console.error(error);
   }
 }

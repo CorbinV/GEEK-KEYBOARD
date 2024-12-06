@@ -1,3 +1,5 @@
+import { $t } from '@/locales';
+
 // 宏列表操作选项
 enum MenuOptionKey {
   Edit,
@@ -7,11 +9,11 @@ enum MenuOptionKey {
 
 // 宏列表操作选项
 const MacrosOps = [
-  { label: '编辑', key: MenuOptionKey.Edit },
+  { label: $t('businessCommon.edit'), key: MenuOptionKey.Edit },
   { type: 'divider' },
-  { label: '重命名', key: MenuOptionKey.ReName },
+  { label: $t('businessCommon.rename'), key: MenuOptionKey.ReName },
   { type: 'divider' },
-  { label: '删除', key: MenuOptionKey.Delete }
+  { label: $t('businessCommon.delete'), key: MenuOptionKey.Delete }
 ];
 
 // 宏触发选项
@@ -24,10 +26,10 @@ enum TriggerOptionKey {
 
 // 宏触发选项
 const TriggerOps = [
-  { label: '按下触发', value: TriggerOptionKey.Down },
+  { label: $t('macro.downExe'), value: TriggerOptionKey.Down },
   // { label: '按住触发', value: TriggerOptionKey.Keep },
-  { label: '按下延迟触发', value: TriggerOptionKey.Delay },
-  { label: '抬起触发', value: TriggerOptionKey.Up }
+  { label: $t('macro.downDelayExe'), value: TriggerOptionKey.Delay },
+  { label: $t('macro.downDelayExe'), value: TriggerOptionKey.Up }
 ];
 
 // 宏退出选项
@@ -38,8 +40,8 @@ enum QuitOptionKey {
 
 // 宏退出选项
 const QuitOps = [
-  { label: '执行完停止', value: QuitOptionKey.Normal },
-  { label: '再次按下停止', value: QuitOptionKey.Click }
+  { label: $t('macro.exeCompleStop'), value: QuitOptionKey.Normal },
+  { label: $t('macro.againDownStop'), value: QuitOptionKey.Click }
 ];
 
 // 显示所有时间

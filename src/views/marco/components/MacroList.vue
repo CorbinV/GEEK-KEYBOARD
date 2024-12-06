@@ -40,7 +40,7 @@ function handleMacrosMenu(key: string | number, item: Macro) {
       @click="handleNewMacro"
     >
       <i class="iconfont icon-add" style="color: #3c8df4"></i>
-      <span class="text-[#3C8DF4]">添加宏按键</span>
+      <span class="text-[#3C8DF4]">{{ $t('macro.addMacroKey') }}</span>
     </div>
 
     <!-- item -->

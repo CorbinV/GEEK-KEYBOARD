@@ -7,6 +7,7 @@ import { createComboGroup, deleteComboGroup, getComboGroup, getComboList } from 
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import GroupMenu from '@/views/super-key/components/group-menu.vue';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
+import { $t } from '@/locales';
 import ComboEdit from '../components/combo-edit.vue';
 
 const keyboardStore = useKeyboardStore();
@@ -87,10 +88,10 @@ async function handleGroupItemDelete(items: any, idx: number) {
     await deleteComboGroup({ code: items.code });
     groupList.value.splice(idx, 1);
     keyboardStore.removeSuperKey(items.key, { moduleType: KeyTypeEnum.Combo });
-    window.$message!.success('删除成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
     console.error('handleGroupItemDelete', error);
-    window.$message!.error('删除失败, 请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.delFailPlsUpdate'));
   }
 }
 async function handleGroupItemEdit(items: any, idx: number) {

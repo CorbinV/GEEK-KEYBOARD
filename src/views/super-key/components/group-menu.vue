@@ -40,14 +40,20 @@ function handleGroupItemRename() {
       <template v-if="fncEnable">
         <div class="text-[#999]">
           <template v-if="enableEdit">
-            <p class="cursor-pointer rounded text-center hover:text-[#3c8df4]" @click="handleGroupItemEdit">编辑</p>
+            <p class="cursor-pointer rounded text-center hover:text-[#3c8df4]" @click="handleGroupItemEdit">
+              {{ $t('businessCommon.edit') }}
+            </p>
             <NDivider class="!my-2" />
           </template>
           <template v-if="enableRename">
-            <p class="cursor-pointer rounded text-center hover:text-[#3c8df4]" @click="handleGroupItemRename">重命名</p>
+            <p class="cursor-pointer rounded text-center hover:text-[#3c8df4]" @click="handleGroupItemRename">
+              {{ $t('businessCommon.rename') }}
+            </p>
             <NDivider class="!my-2" />
           </template>
-          <p class="cursor-pointer rounded text-center hover:text-[#3c8df4]" @click="handleGroupItemDelete">删除</p>
+          <p class="cursor-pointer rounded text-center hover:text-[#3c8df4]" @click="handleGroupItemDelete">
+            {{ $t('businessCommon.delete') }}
+          </p>
         </div>
       </template>
       <p v-else class="text-[#999]">该功能暂未开放，敬请期待</p>

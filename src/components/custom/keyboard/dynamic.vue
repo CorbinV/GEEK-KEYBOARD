@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import type { BaseKey } from '@/api/modules/combo';
 import { useKeyboardStore } from '@/store/modules/keyboard';
+import { $t } from '@/locales';
 import KeyControl from './components/key-control.vue';
 import LayerControl from './components/layer-control.vue';
 import Keyboard from './components/keyboard.vue';
@@ -10,7 +11,7 @@ const { getKeyDetail } = useKeyboardStore();
 const layerList = [
   {
     layer: 0,
-    label: '默认（0）'
+    label: $t('baseKey.keyboard.admin1')
   },
   {
     layer: 1,

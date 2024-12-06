@@ -226,7 +226,7 @@ function handleSave() {
         <div class="mt-5 w-full flex flex-wrap items-center justify-between">
           <!-- header-left -->
           <div class="flex flex-wrap items-center text-center">
-            <span class="text-[#999999]">触发</span>
+            <span class="text-[#999999]">{{ $t('macro.exe') }}</span>
             <NSelect
               v-model:value="trigger"
               class="ml-3 w-45"
@@ -249,7 +249,7 @@ function handleSave() {
             >
               <template #suffix>s</template>
             </NInputNumber>
-            <span class="ml-5 text-[#999999]">循环</span>
+            <span class="ml-5 text-[#999999]">{{ $t('macro.loop') }}</span>
             <NInputNumber
               v-model:value="inputLoop"
               style="width: 70px"
@@ -262,7 +262,7 @@ function handleSave() {
               :precision="0"
               :show-button="false"
             />
-            <span class="ml-4 text-[#999999]">停止</span>
+            <span class="ml-4 text-[#999999]">{{ $t('macro.stop') }}</span>
             <NSelect
               v-model:value="stopType"
               class="ml-3 w-45"
@@ -270,7 +270,7 @@ function handleSave() {
               :options="MacroType.QuitOps"
               @update:value="handleStopType"
             ></NSelect>
-            <span class="ml-4 text-[#999999]">随机延迟</span>
+            <span class="ml-4 text-[#999999]">{{ $t('macro.randomDelay') }}</span>
             <NSwitch v-model:value="randomDelay" class="ml-2" @update:value="handleRandomDelay" />
             <NInputNumber
               v-if="randomDelay"
@@ -305,7 +305,7 @@ function handleSave() {
           </div>
           <!-- header-right -->
           <div class="flex items-center text-center">
-            <span class="text-[#999999]">修改全部时间</span>
+            <span class="text-[#999999]">{{ $t('macro.updateAllTime') }}</span>
             <NInputNumber
               v-model:value="inputTime"
               style="width: 90px"
@@ -324,7 +324,7 @@ function handleSave() {
               class="text-[#3C8DF4 ml-5 h-10 w-30 border border-[#3c8df4] rounded bg-transparent"
               @click="handleAllTime"
             >
-              生效
+              {{ $t('macro.enable') }}
             </button>
             <NRadio
               :checked="allTimeRadioValue === MacroType.AllTime.Show"
@@ -332,7 +332,7 @@ function handleSave() {
               class="ml-5"
               @click="handleRadio"
             >
-              <span class="ml-2 text-[#999999]">显示时间</span>
+              <span class="ml-2 text-[#999999]">{{ $t('macro.showTime') }}</span>
             </NRadio>
           </div>
         </div>
@@ -381,8 +381,8 @@ function handleSave() {
       <!-- content edit -->
       <div v-if="selectIndex != -1" class="h-12 flex items-center justify-between">
         <div class="flex items-center text-center">
-          <span v-if="selectKey.type !== 3" class="w-18 text-[#999999]">按键信息</span>
-          <span v-if="selectKey.type === 3" class="w-18 text-[#999999]">时间</span>
+          <span v-if="selectKey.type !== 3" class="w-18 text-[#999999]">{{ $t('macro.keyInfo') }}</span>
+          <span v-if="selectKey.type === 3" class="w-18 text-[#999999]">{{ $t('macro.time') }}</span>
           <NInput
             v-if="selectKey.type !== 3"
             v-model:value="selectName"
@@ -455,10 +455,10 @@ function handleSave() {
               class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
               @click="handleReset"
             >
-              重置
+              {{ $t('common.reset') }}
             </button>
             <button class="h-15 w-42 rounded bg-[#3c8df4]" @click="handleRecord">
-              {{ !recordStatus ? '开始录制' : '暂停' }}
+              {{ !recordStatus ? $t('macro.startRecord') : $t('macro.stop') }}
             </button>
           </div>
           <div class="flex gap-7">
@@ -466,9 +466,11 @@ function handleSave() {
               class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]"
               @click="handleCancel"
             >
-              取消
+              {{ $t('businessCommon.cancel') }}
             </button>
-            <button class="h-15 w-42 rounded bg-[#3c8df4]" @click="handleSave">保存</button>
+            <button class="h-15 w-42 rounded bg-[#3c8df4]" @click="handleSave">
+              {{ $t('businessCommon.save') }}
+            </button>
           </div>
         </div>
       </div>

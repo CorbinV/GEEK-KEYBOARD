@@ -93,13 +93,13 @@ onMounted(() => {
     <div class="flex-raw w-100% flex items-center justify-between gap-10px">
       <div class="flex-raw flex gap-10px">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">颜色</p>
+        <p class="... text-lg">{{ $t('light.color') }}</p>
         <p class="h-24px w-24px rounded-[4px]" :style="{ backgroundColor: selectedColor }"></p>
         <p class="h-36px place-content-center rd-sm rounded-[6px] bg-[#222227] pl-10px pr-10px">{{ rgbHex }}</p>
       </div>
       <div class="flex-raw flex gap-10px">
         <input type="radio" name="option" :checked="zc" @click="zc = !zc" />
-        <p class="... text-lg text-[#999999]">全彩</p>
+        <p class="... text-lg text-[#999999]">{{ $t('light.allColor') }}</p>
       </div>
     </div>
     <div class="mt-30px">

@@ -171,8 +171,12 @@ watch(
     </template>
     <template #footer>
       <div class="flex items-center justify-center gap-x-8">
-        <NButton class="h-4rem w-12rem text-base" type="primary" ghost @click="closeDialog">取消</NButton>
-        <NButton class="h-4rem w-12rem text-lg text-white" type="primary" @click="handleDialogComfirm">确定</NButton>
+        <NButton class="h-4rem w-12rem text-base" type="primary" ghost @click="closeDialog">
+          {{ $t('businessCommon.cancel') }}
+        </NButton>
+        <NButton class="h-4rem w-12rem text-lg text-white" type="primary" @click="handleDialogComfirm">
+          {{ $t('businessCommon.confirm1') }}
+        </NButton>
       </div>
     </template>
   </NModal>

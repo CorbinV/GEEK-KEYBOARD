@@ -23,31 +23,32 @@ getConfig();
     <div class="flex flex-col rounded-md bg-[#171619] p-30px">
       <!-- 修改标题的父容器，使用 flex 布局来居中 -->
       <div class="flex justify-center">
-        <p class="text-[22px]">电感轴双向实时自校准</p>
+        <p class="text-[22px]">{{ $t('repidTrigger.dgzsxsszjz') }}</p>
       </div>
 
       <div class="flex-raw mt-20px flex justify-between flex-content-start">
         <div class="flex-raw flex items-center">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">双向自校准</p>
+          <p class="... text-lg">{{ $t('repidTrigger.doubleAdjust') }}</p>
         </div>
         <NSwitch v-model:value="calibration.switch" @click="bothwayAdjust"></NSwitch>
       </div>
       <p class="... mt-20px text-[16px] text-[#999999]">
-        电感轴特效双向实时自校准，在不影响响应速度等性能前提条件下，电感轴可实现全天候MCU自校准。提高使用稳定性。
-        同时电感轴不易受到外界干扰，所以更容易长时间保持极高的精准度。
+        {{ $t('repidTrigger.doubleAdjustHint') }}
       </p>
 
       <div class="flex-raw mt-40px flex justify-between flex-content-start">
         <div class="flex-raw flex">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">手动校准</p>
+          <p class="... text-lg">{{ $t('repidTrigger.handAdjust') }}</p>
         </div>
-        <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]">开始校准</button>
+        <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]">
+          {{ $t('repidTrigger.startAdjust') }}
+        </button>
       </div>
 
       <p class="... text-[16px] text-[#999999]">
-        点击开始校准后，逐个按下需要的按键，按键变绿则为矫正成功。请勿过于用力按压！
+        {{ $t('repidTrigger.handAdjustHint') }}
       </p>
     </div>
   </div>
