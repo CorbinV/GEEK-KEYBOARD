@@ -15,7 +15,7 @@ export class HIDProtocolController extends EventTarget {
     super();
     this.options = {
       timeout: 5000,
-      retryAttempts: 3,
+      retryAttempts: 1,
       retryDelay: 1000,
       ...options
     };
@@ -132,14 +132,14 @@ export class HIDProtocolController extends EventTarget {
       const matchingRequests = Array.from(this.messageQueue.entries()).find(([_, request]) => {
         return request.name === name;
       });
-      const [_, requestInfo] = matchingRequests || [];
+      const [messageId, requestInfo] = matchingRequests || [];
       const callback = requestInfo?.callback;
       if (!callback) {
         console.log('not matchingRequests', name);
         return;
       }
       callback(message);
-      this.messageQueue.remove(message.messageId);
+      this.messageQueue.remove(messageId!);
       // }
 
       this.dispatchEvent(
