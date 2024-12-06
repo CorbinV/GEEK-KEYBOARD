@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { computed, inject, provide, reactive, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-import { getKeysCfgByLayer } from '@/api/keyConfig';
 import type { LayerKeysConfig } from '@/api/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import KeyboardKey from './keyboard-key.vue';
-
 type KeyboardProps = {
   module?: string; // device module
   layer?: number;
@@ -33,13 +31,16 @@ const layerData = reactive<any>({});
 function updateLayerData(data: LayerKeysConfig) {
   layerData[props.layer] = data;
 }
-watchEffect(async () => {
-  const data = await getKeysCfgByLayer({
-    config: props.config,
-    layer: props.layer
-  });
-  updateLayerData(data);
-});
+watch(
+  () => props.layer,
+  () => {
+    const data = kbCfg.value.layerList[props.layer];
+    updateLayerData(data.xxx);
+  },
+  {
+    immediate: true
+  }
+);
 
 function useKeySelectAndNotify() {
   const selectedDetail = ref<null | {
