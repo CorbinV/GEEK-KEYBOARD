@@ -3,6 +3,7 @@ import { onUnmounted, ref, toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
+import Dks from './modules/dks.vue';
 import Oks from './modules/oks.vue';
 import Socd from './modules/socd.vue';
 import MT from './modules/mt.vue';
@@ -20,6 +21,11 @@ function handleKeyEventTabs(value: string | number) {
 onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
 
 const paneList = [
+  {
+    name: KeyTypeEnum.DKS,
+    label: 'DKS动态键程',
+    component: Dks
+  },
   {
     name: KeyTypeEnum.OKS,
     label: 'OKS单键急停',
