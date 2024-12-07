@@ -58,7 +58,7 @@ function useKeySelectAndNotify() {
     if (clickedKey.value.idx !== -1 && data.type !== -1) {
       // find keyDetail about label/icon/type
       const type = injSelectedInfo.value.type as KeyTypeEnum;
-      let code = injSelectedInfo.value.code as number;
+      const code = injSelectedInfo.value.code as number;
       let detail: any = {};
 
       if (![KeyTypeEnum.None, KeyTypeEnum.Media, KeyTypeEnum.Normal, KeyTypeEnum.System].includes(type)) {
@@ -67,7 +67,6 @@ function useKeySelectAndNotify() {
           type: 'str',
           label: ''
         };
-        code += 1;
         switch (type) {
           case KeyTypeEnum.Combo:
             detail.label = `C${code}`;
