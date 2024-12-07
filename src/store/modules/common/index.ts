@@ -5,7 +5,9 @@ import { SetupStoreId } from '@/enum';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { getKeyInfo, restoreKeyConfig, setKeyInfo } from '@/api/keyConfig';
 function useKeyInfo() {
+  // key cache
   const KeyConfigMap = reactive<{ [key: string]: KeyInfo | null }>({});
+
   async function fetchTargetKeyInfo(key: string) {
     const keyInfo = await getKeyInfo({ key });
     KeyConfigMap[key] = keyInfo;
@@ -25,14 +27,27 @@ function useKeyInfo() {
     return KeyConfigMap[key];
   }
   async function setTargetKeyInfoById(key: string, data: Partial<KeyInfo>) {
-    await setKeyInfo({
-      key,
-      ...data
-    });
+    await setKeyInfo([
+      {
+        key,
+        ...data
+      }
+    ]);
     KeyConfigMap[key] = null;
     return KeyConfigMap[key];
   }
-
+  async function setKeyInfoByList(
+    data: Partial<KeyInfo> &
+      {
+        key: string;
+      }[]
+  ) {
+    await setKeyInfo(data);
+    data.forEach(item => {
+      const { key, ...rest } = item;
+      KeyConfigMap[key] = { ...(KeyConfigMap[key] || {}), ...rest } as any;
+    });
+  }
   async function restoreTargetKeyInfoById(key: string) {
     const data = await restoreKeyConfig({ key });
     KeyConfigMap[key] = data;
@@ -43,7 +58,8 @@ function useKeyInfo() {
     fetchTargetKeyInfo,
     getTargetKeyInfo,
     restoreTargetKeyInfoById,
-    setTargetKeyInfoById
+    setTargetKeyInfoById,
+    setKeyInfoByList
   };
 }
 export const useCommonStore = defineStore(SetupStoreId.Common, () => {
