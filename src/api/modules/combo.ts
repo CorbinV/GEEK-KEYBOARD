@@ -18,6 +18,9 @@ export type BaseKey = {
 export type ComboGoup = BaseKey & {
   keys: ComboBase[];
 };
+
+export type ComboItem = Omit<BaseKey, 'key'>;
+
 export type ComboList = {
-  shortcuts: BaseKey[];
+  shortcuts: ComboItem[];
 };
