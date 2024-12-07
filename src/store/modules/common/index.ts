@@ -27,12 +27,14 @@ function useKeyInfo() {
     return KeyConfigMap[key];
   }
   async function setTargetKeyInfoById(key: string, data: Partial<KeyInfo>) {
-    await setKeyInfo([
-      {
-        key,
-        ...data
-      }
-    ]);
+    await setKeyInfo({
+      keys: [
+        {
+          key,
+          ...data
+        }
+      ]
+    });
     KeyConfigMap[key] = null;
     return KeyConfigMap[key];
   }
@@ -42,7 +44,9 @@ function useKeyInfo() {
         key: string;
       }[]
   ) {
-    await setKeyInfo(data);
+    await setKeyInfo({
+      keys: data
+    });
     data.forEach(item => {
       const { key, ...rest } = item;
       KeyConfigMap[key] = { ...(KeyConfigMap[key] || {}), ...rest } as any;
