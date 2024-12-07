@@ -16,7 +16,7 @@ const [selectedInfo, resetSelectedInfo] = useResttableRefFn<SelectedInfo>(() => 
 const currentKeyFromKeyboard = ref({
   keyId: ''
 });
-function handleKeyEmit(data: { keyId: string; code: number; type: number }) {
+function handleKeyEmit(data: { keyId: string; code: number; type: number }, { toDevice = false }) {
   const keyId = currentKeyFromKeyboard.value.keyId;
   if (!keyId) {
     return;
@@ -26,6 +26,9 @@ function handleKeyEmit(data: { keyId: string; code: number; type: number }) {
     code: data.code,
     keyId: data.keyId
   };
+  if (!toDevice) {
+    return;
+  }
   if (currentKeyFromKeyboard.value.keyId) {
     useCommonStore().setTargetKeyInfoById(keyId, {
       type: data.type,
