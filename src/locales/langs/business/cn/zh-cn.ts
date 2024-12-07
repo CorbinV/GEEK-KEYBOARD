@@ -8,7 +8,16 @@ const lang: App.BusinessLanguage.Schema = {
     delete: '删除',
     save: '保存',
     delSuccess: '删除成功',
-    delFailPlsUpdate: '删除失败, 请更新最新固件后重试'
+
+    delFailPlsUpdate: '删除失败, 请更新最新固件后重试',
+    set: '设置',
+
+    addSuccess: '添加成功',
+    addFailPlsUpdate: '添加失败，请更新最新固件后重试',
+
+    addSwtich: '添加切换开关',
+    plsSetSwitchKeys: '请设置需要开关持续触发的健值',
+    switchSwitch: '切换开关'
   },
   baseKey: {
     keyboard: {
@@ -149,7 +158,14 @@ const lang: App.BusinessLanguage.Schema = {
     x6: '删除成功',
     x7: 'MT单击/按住',
     x8: 'TGL切换开关',
-    x9: '请先选择按键',
+    plsSelectKey: '请先选择按键',
+    keyBinedDKSFunc: '该按键已绑定DKS功能',
+    keyBinedOtherFunc: '该按键已绑定其它功能',
+    maxAddCombinKey: '最多只能添加{total}个组合键',
+    singleKeyStop: '单键急停',
+    addClickDown: '添加单击/按住',
+    setClickDowndown1down2: '设置单击按住，快速点击时触发1号键，按住触发2号键',
+    priorityExe: '优先触发',
 
     c1: 'DKS动态键程',
     c2: 'OKS单键急停',
@@ -207,13 +223,13 @@ const lang: App.BusinessLanguage.Schema = {
     pair24: '2.4g接收器配对'
   },
   global_Setting: {
-    q1: '版本号：{total}',
-    q2: '驱动版本',
-    q3: '版本信息：{total}',
-    q4: '联系我们',
-    q5: '更多产品',
-    q6: '官网： {total}',
-    q7: '公众号： {total}'
+    version: '版本号：{total}',
+    qdVersion: '驱动版本',
+    versionInfo: '版本信息：{total}',
+    contactUs: '联系我们',
+    moreProduct: '更多产品',
+    officialWeb: '官网：',
+    q7: '公众号：'
   }
 };
 export default lang;

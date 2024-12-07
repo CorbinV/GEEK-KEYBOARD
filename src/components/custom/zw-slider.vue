@@ -30,7 +30,7 @@ const sliderPosition = computed(() => `${sliderValue.value}%`);
 
 // 动态计算背景色，已滑动部分为蓝色，未滑动部分为灰色
 const sliderBackground = computed(() => {
-  return `linear-gradient(to right, #007bff ${sliderValue.value}%, #ddd ${sliderValue.value}%)`;
+  return `linear-gradient(to right, #007bff ${sliderValue.value}%, #ddd ${sliderValue.value}mm)`;
 });
 
 // 滑动前触发

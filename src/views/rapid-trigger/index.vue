@@ -39,8 +39,8 @@ function handleKeyEventTabs(value: string | number) {
             style="width: 476px"
             @update:value="handleKeyEventTabs"
           >
-            <NTab name="0" tab="性能" />
-            <NTab name="1" tab="校准" />
+            <NTab name="0" :tab="$t('repidTrigger.property')" />
+            <NTab name="1" :tab="$t('repidTrigger.adjust')" />
           </NTabs>
         </div>
       </template>

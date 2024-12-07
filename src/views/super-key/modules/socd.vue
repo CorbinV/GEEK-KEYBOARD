@@ -35,7 +35,7 @@ const renameIndex = ref(-1);
 
 function handleAddClicked() {
   if (socdGroupList.value.length >= MAC_GORUP_CNT) {
-    window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
+    window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAC_GORUP_CNT }));
     return;
   }
   editItem = { base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] };
@@ -97,9 +97,9 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
         return item.detail;
       })
     });
-    window.$message!.success('添加成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (e) {
-    window.$message!.error('添加失败，请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.addFailPlsUpdate'));
     console.error(e);
   }
 }
@@ -198,13 +198,13 @@ async function handleReNameSave(data: { name: string }) {
       :fnc-generate-code="generateGroupCode"
       :need-import-key="false"
       keyboard-type="standard"
-      desc="请选择两个按键，当两个按键同时按下时，不会同时触发，将会按照您的设置，优先进行触发，松开后立即恢复另个一按键触发。"
+      :desc="$t('repidTrigger.triggerDeadZone')"
       :edit-item="editItem"
       @create-group="handleGroupCreated"
     >
       <template #header-extra>
         <div class="flex items-center">
-          <span class="text-4 text-[#999999]">优先触发</span>
+          <span class="text-4 text-[#999999]">{{ $t('repidTrigger.priorityExe') }}</span>
           <NSelect
             v-model:value="trigger"
             class="ml-3 w-45"

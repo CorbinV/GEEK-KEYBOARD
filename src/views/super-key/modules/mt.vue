@@ -47,19 +47,19 @@ onMounted(() => {
 function handleAddClicked() {
   const superKey = kbCfg.value.superKeyMap[keyId];
   if (keyId === '') {
-    window.$message!.info('请先选择按键');
+    window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
   }
   if (superKey?.dks) {
-    window.$message!.info('该按键已绑定DKS功能');
+    window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
   }
   if (superKey?.sp) {
-    window.$message!.info('该按键已绑定其它功能');
+    window.$message!.info($t('supperKey.keyBinedOtherFunc'));
     return;
   }
   if (mtGroupList.value.length >= MAC_GORUP_CNT) {
-    window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
+    window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAC_GORUP_CNT }));
     return;
   }
   inputTime.value = 100;
@@ -120,9 +120,9 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
         return item.detail;
       })
     });
-    window.$message!.success('添加成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (e) {
-    window.$message!.error('添加失败，请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.addFailPlsUpdate'));
     console.error(e);
   }
 }
@@ -184,7 +184,7 @@ async function handleReNameSave(data: { name: string }) {
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd icon="add" desc="添加单击/按住" @click="handleAddClicked" />
+      <BasicGroupAdd icon="add" :desc="$t('supperKey.addClickDown')" @click="handleAddClicked" />
       <BasicGroupItem
         v-for="(item, idx) in mtGroupList"
         :key="item.code"
@@ -215,7 +215,7 @@ async function handleReNameSave(data: { name: string }) {
       :fnc-generate-code="generateGroupCode"
       :need-import-key="true"
       keyboard-type="standard"
-      desc="设置单击按住，快速点击时触发1号键，按住触发2号键"
+      :desc="$t('supperKey.setClickDowndown1down2')"
       :edit-item="editItem"
       @create-group="handleGroupCreated"
     >

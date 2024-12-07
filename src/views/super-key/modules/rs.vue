@@ -30,7 +30,7 @@ const renameIndex = ref(-1);
 
 function handleAddClicked() {
   if (rsGroupList.value.length >= MAC_GORUP_CNT) {
-    window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
+    window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAC_GORUP_CNT }));
     return;
   }
   // if (Object.keys(selectedKeys.value).length === 0) {
@@ -94,9 +94,9 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
         return item.detail;
       })
     });
-    window.$message!.success('添加成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (e) {
-    window.$message!.error('添加失败，请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.addFailPlsUpdate'));
     console.error(e);
   }
 }

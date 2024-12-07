@@ -29,7 +29,7 @@ const TriggerOps = [
   { label: $t('macro.downExe'), value: TriggerOptionKey.Down },
   // { label: '按住触发', value: TriggerOptionKey.Keep },
   { label: $t('macro.downDelayExe'), value: TriggerOptionKey.Delay },
-  { label: $t('macro.downDelayExe'), value: TriggerOptionKey.Up }
+  { label: $t('macro.updExe'), value: TriggerOptionKey.Up }
 ];
 
 // 宏退出选项

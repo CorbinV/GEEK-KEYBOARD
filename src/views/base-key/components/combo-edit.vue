@@ -134,9 +134,8 @@ watch(
     <template #default>
       <div class="flex flex-col">
         <NDivider class="!mt-0" />
-
         <div class="flex flex-col gap-y-5">
-          <p class="text-center text-base text-c-second">请选择多个按键进行组合</p>
+          <p class="text-center text-base text-c-second">{{ $t('baseKey.combination.plsSelctKeyComb') }}</p>
           <div class="flex flex-row justify-center gap-x-12" @click="handleKeyClicked">
             <div
               v-for="(_, idx) in new Array(4)"
@@ -156,13 +155,13 @@ watch(
         <!-- tabs -->
         <div>
           <NTabs :theme-overrides="tabsThemeOverrides" tab-class="asdasf !text-xl">
-            <NTabPane name="Keyboard" tab="基础">
+            <NTabPane name="Keyboard" :tab="$t('baseKey.tab.basic')">
               <StandardKeyboard @key-clicked="handleFncClicked" />
             </NTabPane>
-            <NTabPane name="System" tab="系统">
+            <NTabPane name="System" :tab="$t('baseKey.tab.system')">
               <ModuleTemplate :type="KeyTypeEnum.System" @key-clicked="handleFncClicked" />
             </NTabPane>
-            <NTabPane name="Media" tab="媒体">
+            <NTabPane name="Media" :tab="$t('baseKey.tab.media')">
               <ModuleTemplate :type="KeyTypeEnum.Media" @key-clicked="handleFncClicked" />
             </NTabPane>
           </NTabs>

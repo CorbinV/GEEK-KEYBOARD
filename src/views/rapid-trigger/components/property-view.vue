@@ -22,7 +22,7 @@ const perf = ref<SetKeyPerf>({ actDeadZone: [0, 0] } as SetKeyPerf);
 const curRate = ref({ key: 0, label: '' });
 const curShake = ref({ key: 0, label: '' });
 // const curRate = ref({});
-const shakelayer = ['低', '中', '高'];
+const shakelayer = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('repidTrigger.high')];
 const keyboardStore = useKeyboardStore();
 
 function rateSelect(key: number) {

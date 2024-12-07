@@ -18,7 +18,7 @@ console.log(version);
   <NModal v-model:show="showModal" class="h-550px w-34% rounded-[10px] bg-[#191b1d]">
     <div class="model-bg flex flex-col justify-between p-30px text-[22px]">
       <div class="flex flex-col">
-        <p class="w-100% text-center text-22px text-[#fff]">设置</p>
+        <p class="w-100% text-center text-22px text-[#fff]">{{ $t('businessCommon.set') }}</p>
         <!--
  <div class="flex-raw flex items-center">
           <p class="vertical-bar"></p>
@@ -29,26 +29,27 @@ console.log(version);
         <div class="item-style flex flex-col b-b-1px b-b-[#232327]">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-18px">驱动版本</p>
+            <p class="... text-18px">{{ $t('global_Setting.qdVersion') }}</p>
           </div>
           <div class="flex-raw mt-20px flex items-center justify-between text-16px text-[#999]">
-            <p>版本信息：{{ description }}</p>
-            <p>版本号：{{ version }}</p>
+            <p>{{ $t('global_Setting.versionInfo', { total: description }) }}</p>
+            <p>{{ $t('global_Setting.version', { total: version }) }}</p>
           </div>
         </div>
 
         <div class="item-style flex flex-col b-b-1px b-b-[#232327]">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-18px">联系我们</p>
+            <p class="... text-18px">{{ $t('global_Setting.contactUs') }}</p>
           </div>
           <div class="flex-raw mt-20px flex items-center justify-between text-16px">
             <p>
-              官网：
+              {{ $t('global_Setting.officialWeb') }}
               <span class="text-#3C8DF4">www.geekwontek.com</span>
             </p>
             <p>
-              公众号：
+              {{ $t('global_Setting.wechart') }}
+
               <span class="text-#3C8DF4">www.geekwontek.com</span>
             </p>
           </div>
@@ -57,15 +58,16 @@ console.log(version);
         <div class="item-style flex flex-col b-b-1px b-b-[#232327]">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">更多产品</p>
+            <p class="... text-lg">{{ $t('global_Setting.moreProduct') }}</p>
           </div>
           <div class="flex-raw mt-20px flex items-center justify-between text-16px">
             <p>
-              官网：
+              {{ $t('global_Setting.officialWeb') }}
               <span class="text-#3C8DF4">www.geekwontek.com</span>
             </p>
             <p>
-              公众号：
+              {{ $t('global_Setting.wechart') }}
+
               <span class="text-#3C8DF4">www.geekwontek.com</span>
             </p>
           </div>

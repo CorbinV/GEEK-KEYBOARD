@@ -2,17 +2,24 @@ const lang: App.BusinessLanguage.Schema = {
   businessCommon: {
     confirm1: 'confirm',
     cancel: 'cancel',
-    restoreFactoryHint: '您确定要恢复出厂设置吗？',
+    restoreFactoryHint: 'Are you sure you want to reset to factory settings?',
     rename: 'Rename',
     edit: 'Edit',
     delete: 'Delete',
     save: 'Save',
-    delSuccess: '删除成功',
-    delFailPlsUpdate: '删除失败, 请更新最新固件后重试'
+    delSuccess: '"Deleted Successfully',
+    addSuccess: 'Add Successfully',
+    delFailPlsUpdate: '"Deletion failed. Please update to the latest firmware and try again.',
+    set: 'Setting',
+    addFailPlsUpdate: '添加失败，请更新最新固件后重试',
+    addSwtich: '添加切换开关',
+
+    plsSetSwitchKeys: '请设置需要开关持续触发的健值',
+    switchSwitch: '切换开关'
   },
   baseKey: {
     keyboard: {
-      exeDot: 'Trigger Point',
+      exeDot: 'Actuation Point',
       exeRt: 'RT Trigger',
       resetRt: 'RT Reset',
       bandKey: 'Disable Button',
@@ -31,12 +38,12 @@ const lang: App.BusinessLanguage.Schema = {
       macro: 'Macro Keys'
     },
     combination: {
-      plsSelctKeyComb: '请选择多个按键进行组合',
-      addCombKey: '添加组合键'
+      plsSelctKeyComb: 'Please select multiple keys to combine.',
+      addCombKey: 'Add a key combination.'
     },
     system: {
-      screenBrightnessMinus: 'Screen Brightness-',
-      screenBrightnessPlus: 'Screen Brightness+',
+      screenBrightnessMinus: 'Screen Brightness Decrease',
+      screenBrightnessPlus: 'Screen Brightness Increase',
       save: 'Save',
       selectAll: 'Select All',
       closeWindow: 'Close Window',
@@ -94,17 +101,17 @@ const lang: App.BusinessLanguage.Schema = {
       bluetooth5: 'Bluetooth 5',
       twoPoint4G: '2.4G',
       USB: 'USB',
-      switchLightingEffect: 'Switch Lighting Effect',
+      switchLightingEffect: 'Toggle RGB Effect',
       toggleWakeOnContact: 'Toggle Wake on Contact',
-      backlightBrightnessMinus: 'Backlight Brightness-',
-      backlightBrightnessPlus: 'Backlight Brightness+',
+      backlightBrightnessMinus: 'Backlight Brightness Decrease',
+      backlightBrightnessPlus: 'Backlight Brightness Increase',
       lockWIN: 'Lock WIN',
       switchWinLayer: 'Switch to Win Layer',
       switchMacLayer: 'Switch to Mac Layer',
       resetToFactory: 'Reset to Factory Settings',
-      lightingSpeedMinus: 'Lighting Speed-',
-      lightingSpeedPlus: 'Lighting Speed+',
-      switchLightingColor: 'Switch Lighting Color'
+      lightingSpeedMinus: 'RGB Speed-',
+      lightingSpeedPlus: 'RGB Speed+',
+      switchLightingColor: 'Switch RGB Color'
     }
   },
   repidTrigger: {
@@ -114,15 +121,15 @@ const lang: App.BusinessLanguage.Schema = {
     liftDeadZone: 'Lift Dead Zone',
     reset: 'Reset',
     switchType: 'Set Switch Type',
-    fastTrigger: 'Enable Fast Trigger',
+    fastTrigger: 'Enable Rapid Trigger',
     fastTriggerDesc:
-      'By adjusting the actuation distance, the key can be repeatedly triggered with minimal pressing and lifting, achieving a fast trigger effect.',
+      'By adjusting the actuation travel, the button can be repeatedly triggered with minimal pressing and lifting, achieving Rapid Trigger effect.',
     pressSensitivity: 'Press Sensitivity',
     pressSensitivityDesc:
       '（Setting the precision too high may cause slight finger movements during pressing to be mistakenly detected as a key release.）',
     liftSensitivity: 'Lift (Reset) Sensitivity',
     advancedSettings: 'Advanced Settings',
-    debounceOptimization: 'Debounce Optimization',
+    debounceOptimization: 'Deactivation Optimization',
     debounceLevel: 'Debounce Level',
     low: 'Low',
     medium: 'Medium',
@@ -130,13 +137,13 @@ const lang: App.BusinessLanguage.Schema = {
     keyLevelIllustration: 'Key Level Illustration',
     illustrationNote: '（The illustration is approximate and for reference only.）',
 
-    dgzsxsszjz: 'Bidirectional Real-Time Self-Calibration of Inductive Switch',
-    doubleAdjust: 'Dual Calibration',
+    dgzsxsszjz: 'Bidirectional Real-Time Auto Calibration of Inductive Switch',
+    doubleAdjust: 'Dual Auto Calibration',
     doubleAdjustHint:
-      'The inductive switch features bidirectional real-time self-calibration, enabling all-weather MCU self-calibration without affecting response speed or other performance. This improves stability during use. Additionally, the inductive switch is less susceptible to external interference, making it easier to maintain high precision over extended periods.',
+      'The inductive switch features bidirectional real-time self-calibration, enabling all-weather MCU auto calibration without affecting response speed or other performance. This improves stability during use. Additionally, the inductive switch is less susceptible to external interference, making it easier to maintain high precision over extended periods.',
     handAdjust: 'Manual Calibration',
     handAdjustHint:
-      'After starting calibration, press the target keys one by one until they turn green. Do not press too hard!',
+      'After starting calibration, press the target keys one by one. When the keys turn green, it indicates that the key calibration is successful. Please do not press the button forcefully to calibrate',
     startAdjust: 'Start Calibration',
 
     property: 'Performance',
@@ -145,22 +152,29 @@ const lang: App.BusinessLanguage.Schema = {
     rtBellowDeadZone: 'RT Bottom Dead Zone'
   },
   supperKey: {
-    x1: 'Add Single-Key Snap Tap',
+    x1: 'Add Per Key emergency stop',
     x2: 'Edit',
     x3: 'Delete',
 
-    x5: 'Single-Key Snap Tap',
+    x5: 'Per Key emergency stop',
     x6: 'Deleted Successfully',
     x7: 'MT Click/Hold',
     x8: 'TGL Toggle Switch',
-    x9: 'Please select a key first',
+    plsSelectKey: 'Please select a key first',
+    keyBinedDKSFunc: '该按键已绑定DKS功能',
+    keyBinedOtherFunc: '该按键已绑定其它功能',
+    maxAddCombinKey: '最多只能添加{total}个组合键',
+    singleKeyStop: '单键急停',
+    addClickDown: 'add Click Down',
+    setClickDowndown1down2: '设置单击按住，快速点击时触发1号键，按住触发2号键',
+    priorityExe: '优先触发',
 
-    c1: 'DKS dynamic key ',
-    c2: 'OKS single key emergency stop ',
-    c3: 'MT click/hold ',
-    c4: 'TGL switch ',
+    c1: 'DKS dynamic key travel',
+    c2: 'OKS per key emergency stop ',
+    c3: 'MT single press/hold ',
+    c4: 'TGL Toggle Switch ',
     c5: 'RS smart trigger ',
-    c6: 'Please select two buttons, when one button is raised, immediately trigger the other button, in some games to achieve a single button quick emergency stop'
+    c6: 'Please select the first and second buttons, by binding it, the action of lifting the first button can stop the triggering of the first button and trigger the second button at the same time, enabling emergency stop with per key in some games.'
   },
   macro: {
     addMacroKey: 'Add Macro Key',
@@ -171,7 +185,7 @@ const lang: App.BusinessLanguage.Schema = {
     exeCompleStop: 'Stop After Execution',
     againDownStop: 'Stop on Re-Press',
     stop: 'Stop',
-    loop: 'Loop',
+    loop: 'Number of cycles',
     downDelayExe: 'Press Delay Trigger',
     exe: 'Trigger',
     keyInfo: 'Key Information',
@@ -200,7 +214,7 @@ const lang: App.BusinessLanguage.Schema = {
   setting: {
     devName: 'Device Name：{total}',
     connectMode: 'Connection Mode',
-    allKeyNot: 'N-Key Rollover',
+    allKeyNot: 'NKRO',
     wakeUp: 'Sensor Wake',
     wakeUpHint:
       'The inductive switch can detect whether both hands have left the keyboard, enabling it to enter a low-power mode. When the hands approach the keyboard, it wakes up instantly, reducing power consumption and significantly extending battery life.',
@@ -210,12 +224,12 @@ const lang: App.BusinessLanguage.Schema = {
     pair24: '2.4G Receiver Pairing'
   },
   global_Setting: {
-    q1: 'Version：{total}',
-    q2: 'Driver Version',
-    q3: 'Version Info：{total}',
-    q4: 'Contact Us',
-    q5: 'More Products',
-    q6: 'Official Website： {total}',
+    version: 'Version：{total}',
+    qdVersion: 'Driver Version',
+    versionInfo: 'Version Info：{total}',
+    contactUs: 'Contact Us',
+    moreProduct: 'More Products',
+    officialWeb: 'Official Website： {total}',
     q7: 'Official Account： {total}'
   }
 };

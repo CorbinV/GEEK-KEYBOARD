@@ -12,7 +12,7 @@ import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 const tglGroupList = ref<any>([]);
 const editVisible = ref(false);
-const modalTitle = ref('切换开关');
+const modalTitle = ref($t('businessCommon.switchSwitch'));
 const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
@@ -45,19 +45,19 @@ onMounted(() => {
 function handleAddClicked() {
   const superKey = kbCfg.value.superKeyMap[keyId];
   if (keyId === '') {
-    window.$message!.info('请先选择按键');
+    window.$message!.info($t('supperKey.plsSelectKey'));
     return;
   }
   if (superKey?.dks) {
-    window.$message!.info('该按键已绑定DKS功能');
+    window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
   }
   if (superKey?.sp) {
-    window.$message!.info('该按键已绑定其它功能');
+    window.$message!.info($t('supperKey.keyBinedOtherFunc'));
     return;
   }
   if (tglGroupList.value.length >= MAC_GORUP_CNT) {
-    window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
+    window.$message!.warning($t('supperKey.keyBinedOtherFunc', { total: MAC_GORUP_CNT }));
     return;
   }
   editVisible.value = true;
@@ -116,9 +116,9 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
         return item.detail;
       })
     });
-    window.$message!.success('添加成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (e) {
-    window.$message!.error('添加失败，请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.addFailPlsUpdate'));
     console.error(e);
   }
 }
@@ -179,7 +179,7 @@ async function handleReNameSave(data: { name: string }) {
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd icon="add" desc="添加切换开关" @click="handleAddClicked" />
+      <BasicGroupAdd icon="add" :desc="$t('businessCommon.addSwtich')" @click="handleAddClicked" />
       <BasicGroupItem
         v-for="(item, idx) in tglGroupList"
         :key="item.code"
@@ -210,7 +210,7 @@ async function handleReNameSave(data: { name: string }) {
       :fnc-generate-code="generateGroupCode"
       :need-import-key="true"
       keyboard-type="standard"
-      desc="请设置需要开关持续触发的健值"
+      :desc="$t('businessCommon.plsSetSwitchKeys')"
       :edit-item="editItem"
       @create-group="handleGroupCreated"
     ></EditTemplate>

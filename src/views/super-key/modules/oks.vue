@@ -12,7 +12,7 @@ import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 const oksGroupList = ref<any>([]);
 const editVisible = ref(false);
-const modalTitle = ref('单键急停');
+const modalTitle = ref($t('supperKey.singleKeyStop'));
 const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
@@ -95,9 +95,9 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
         return item.detail;
       })
     });
-    window.$message!.success('添加成功');
+    window.$message!.success($t('businessCommon.delSuccess'));
   } catch (e) {
-    window.$message!.error('添加失败，请更新最新固件后重试');
+    window.$message!.error($t('businessCommon.addFailPlsUpdate'));
     console.error(e);
   }
 }

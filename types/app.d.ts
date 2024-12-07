@@ -474,6 +474,12 @@ declare namespace App {
         save: string;
         delSuccess: string;
         delFailPlsUpdate: string;
+        addSuccess: string;
+        set: string;
+        addFailPlsUpdate: string;
+        addSwtich: string;
+        plsSetSwitchKeys: string;
+        switchSwitch: string;
       };
       baseKey: {
         keyboard: {
@@ -613,13 +619,21 @@ declare namespace App {
         x6: string;
         x7: string;
         x8: string;
-        x9: string;
+        plsSelectKey: string;
         c1: string;
         c2: string;
         c3: string;
         c4: string;
         c5: string;
         c6: string;
+        singleKeyStop: string;
+        addClickDown: string;
+        setClickDowndown1down2: string;
+        priorityExe: string;
+
+        keyBinedDKSFunc: string;
+        keyBinedOtherFunc: string;
+        maxAddCombinKey: string;
       };
       macro: {
         addMacroKey: string;
@@ -668,12 +682,12 @@ declare namespace App {
         pair24: string;
       };
       global_Setting: {
-        q1: string;
-        q2: string;
-        q3: string;
-        q4: string;
-        q5: string;
-        q6: string;
+        version: string;
+        qdVersion: string;
+        versionInfo: string;
+        contactUs: string;
+        moreProduct: string;
+        officialWeb: string;
         q7: string;
       };
     };

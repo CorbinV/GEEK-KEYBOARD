@@ -157,7 +157,7 @@ function handleGroupItemRename(items: any, idx: number) {
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd icon="add" desc="添加组合键" @click="handleAddClicked" />
+      <BasicGroupAdd icon="add" :desc="$t('baseKey.combination.addCombKey')" @click="handleAddClicked" />
       <BasicGroupItem
         v-for="(item, idx) in groupList"
         :key="item.id"
