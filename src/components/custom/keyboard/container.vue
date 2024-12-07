@@ -24,10 +24,10 @@ function handleKeyEmit(data: { keyId: string; code: number; type: number }) {
   selectedInfo.value = {
     type: data.type || 0,
     code: data.code,
-    keyId
+    keyId: data.keyId
   };
   if (currentKeyFromKeyboard.value.keyId) {
-    useCommonStore().setTargetKeyInfoById(data.keyId, {
+    useCommonStore().setTargetKeyInfoById(keyId, {
       type: data.type,
       code: data.code
     });
