@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { ref, toRaw, toRef } from 'vue';
+import { onUnmounted, ref, toRaw, toRef, watchEffect } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -10,7 +10,7 @@ import { formatLableSub3 } from '@/hooks/common/format';
 import DksEdit from '../components/dks-edit.vue';
 import GroupMenu from '../components/group-menu.vue';
 const oksGroupList = ref<any>([]);
-const editVisible = ref(true);
+const editVisible = ref(false);
 const modalTitle = ref('动态键程按键');
 const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
@@ -18,8 +18,44 @@ const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.DKS;
-const enableSimulate = ref<0 | 1>(0); // enbale simulate
-
+function useSimulate() {
+  const enableSimulate = ref<0 | 1>(0); // enbale simulate
+  const simulateStatus = ref<'0' | '1' | '2'>('0');
+  const simulateOps = [
+    {
+      label: '随机',
+      value: '1'
+    },
+    {
+      label: '固定',
+      value: '2'
+    }
+  ];
+  const simulateDelayTimes = ref({
+    v1: 0,
+    v2: 0
+  });
+  watchEffect(() => {
+    if (!enableSimulate.value) {
+      simulateStatus.value = '0';
+    } else {
+      simulateStatus.value = '1';
+    }
+  });
+  watchEffect(() => {
+    if (simulateStatus.value === '2' && simulateDelayTimes.value.v1) {
+      simulateDelayTimes.value.v2 = simulateDelayTimes.value.v1;
+    }
+  });
+  onUnmounted(() => (simulateDelayTimes.value = { v1: 0, v2: 0 }));
+  return {
+    enableSimulate,
+    simulateDelayTimes,
+    simulateStatus,
+    simulateOps
+  };
+}
+const { enableSimulate, simulateStatus, simulateOps, simulateDelayTimes } = useSimulate();
 function handleAddClicked() {
   if (oksGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个`);
@@ -58,16 +94,19 @@ async function updateGroupList() {
 }
 updateGroupList();
 async function handleGroupCreated({ code, keys, name, range, listDetail }: any) {
-  // console.log({ code, keys, name, range, simulation: toRaw(enableSimulate.value) });
+  const sendData = {
+    code,
+    keys,
+    name,
+    range,
+    simulation: Number.parseInt(simulateStatus.value, 10) as 0 | 1 | 2,
+    simulationRange:
+      Number.parseInt(simulateStatus.value, 10) > 0 ? [simulateDelayTimes.value.v1, simulateDelayTimes.value.v2] : [],
+    type: KeyTypeEnum.DKS
+  };
+  console.log(sendData);
   try {
-    await addDks({
-      code,
-      keys,
-      name,
-      range,
-      simulation: toRaw(enableSimulate.value),
-      type: KeyTypeEnum.DKS
-    });
+    await addDks(sendData);
     oksGroupList.value.push({
       base: {
         code,
@@ -158,8 +197,27 @@ function generateGroupCode() {
       @create-group="handleGroupCreated"
     >
       <template #header-extra>
-        <span class="mr-2 text-base text-[#999999]">开启仿真：</span>
-        <NSwitch v-model:value="enableSimulate" :checked-value="1" :unchecked-value="0" />
+        <div class="flex flex-row items-center text-base text-[#999999]">
+          <span class="mr-2">开启仿真：</span>
+          <div class="flex flex-row items-center gap-x-6">
+            <NSwitch v-model:value="enableSimulate" :checked-value="1" :unchecked-value="0" />
+            <div v-if="enableSimulate" class="flex flex-row items-center gap-x-4">
+              <span class="">触发:</span>
+              <NSelect v-model:value="simulateStatus" :options="simulateOps" style="width: 84px" />
+              <template v-if="enableSimulate">
+                <NInputNumber v-model:value="simulateDelayTimes.v1" style="width: 64px" :show-button="false">
+                  <template #suffix>ms</template>
+                </NInputNumber>
+                <template v-if="simulateStatus === '1'">
+                  <span>-</span>
+                  <NInputNumber v-model:value="simulateDelayTimes.v2" style="width: 64px" :show-button="false">
+                    <template #suffix>ms</template>
+                  </NInputNumber>
+                </template>
+              </template>
+            </div>
+          </div>
+        </div>
       </template>
     </DksEdit>
   </div>
