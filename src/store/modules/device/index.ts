@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, effectScope, onScopeDispose, ref } from 'vue';
 import { ConnectionManager } from '@/utils/requset/connectMannager';
 
 export const useDeviceStore = defineStore('device', () => {
+  const scope = effectScope();
+  const isTrueDevice: boolean = import.meta.env?.VITE_USE_CONNECT_DEVICE === 'Y';
   const connectionManager = ConnectionManager.getInstance();
   // base status
   const isConnected = ref(false);
@@ -18,7 +20,9 @@ export const useDeviceStore = defineStore('device', () => {
   async function connect(config: any) {
     try {
       connectionError.value = null;
-      await connectionManager.connectDevice(config);
+      if (isTrueDevice) {
+        await connectionManager.connectDevice(config);
+      }
       isConnected.value = true;
     } catch (error) {
       connectionError.value = error as Error;
@@ -30,14 +34,27 @@ export const useDeviceStore = defineStore('device', () => {
     return connectionManager.getDeviceClient();
   }
 
+  function init() {
+    if (!isTrueDevice) {
+      isConnected.value = true;
+    }
+  }
+  scope.run(() => {
+    init();
+  });
   // optimize: add other fnc
 
+  /** On scope dispose */
+  onScopeDispose(() => {
+    scope.stop();
+  });
   return {
     isConnected,
     connectionError,
     deviceInfo,
     connectionStatus,
     connect,
-    getDeviceClient
+    getDeviceClient,
+    isTrueDevice
   };
 });
