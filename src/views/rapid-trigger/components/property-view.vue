@@ -7,6 +7,7 @@ import CircleShow from '@/components/custom/circle-show.vue';
 import Slider from '@/components/custom/zw-slider.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
+import KeyMove from './key-move.vue';
 export type Opetion = { key: number; label: string };
 const argShow = ref(true);
 const showModal = ref(false);
@@ -121,12 +122,14 @@ getPerf1();
         </div>
 
         <Slider v-model="sliderValue" class="mt-10px"></Slider>
+
         <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
           <p class="... text-lg">{{ $t('repidTrigger.liftDeadZone') }}</p>
           <!-- <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p> -->
         </div>
         <Slider v-model="sliderValue" class="mt-10px"></Slider>
+        <KeyMove></KeyMove>
         <div class="flex-raw mt-30px flex justify-between">
           <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
           <button
