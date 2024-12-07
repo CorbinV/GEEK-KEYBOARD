@@ -13,7 +13,7 @@ const keyboardStore = useKeyboardStore();
 const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
 allowMutipleSelect.value = false;
 
-const tabName = ref(KeyTypeEnum.OKS);
+const tabName = ref(KeyTypeEnum.DKS);
 function handleKeyEventTabs(value: string | number) {
   tabName.value = Number(value);
 }
