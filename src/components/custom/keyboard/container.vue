@@ -17,10 +17,14 @@ const currentKeyFromKeyboard = ref({
   keyId: ''
 });
 function handleKeyEmit(data: { keyId: string; code: number; type: number }) {
+  const keyId = currentKeyFromKeyboard.value.keyId;
+  if (!keyId) {
+    return;
+  }
   selectedInfo.value = {
     type: data.type || 0,
     code: data.code,
-    keyId: data.keyId
+    keyId
   };
   if (currentKeyFromKeyboard.value.keyId) {
     useCommonStore().setTargetKeyInfoById(data.keyId, {
