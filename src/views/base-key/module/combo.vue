@@ -25,6 +25,9 @@ let editItem = reactive<{
   }[];
 }>({ idx: 0, list: [] });
 
+let isEdit = false;
+let editItemCode = 0;
+
 function handleAddClicked() {
   if (groupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个组合键`);
@@ -32,42 +35,58 @@ function handleAddClicked() {
   }
   // opent edit modal(dialog)
   editItem = { idx: 0, list: [] };
+  isEdit = false;
   editVisible.value = true;
 }
 
 async function updateGroupList() {
-  const { shortcuts } = await getComboList();
-  groupList.value = shortcuts.map(item => {
-    const { code, type, key } = item;
-    const name = `组合按键${item.code}`;
-    return {
-      base: { code, type, name, key },
-      keyList: [] as any[]
-      // keyList: item.keys.map(keyBase => {
-      //   const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-      //   updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
-      //   return res;
-      // })
-    };
-  });
+  try {
+    console.log('getShortcuts');
+    const { shortcuts } = await getComboList();
+    console.log('getShortcuts ret', shortcuts);
+    groupList.value = shortcuts.map(item => {
+      const { code, type } = item;
+      const name = `组合按键${item.code}`;
+      return {
+        base: { code, type, name },
+        keyList: [] as any[]
+        // keyList: item.keys.map(keyBase => {
+        //   const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
+        //   updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
+        //   return res;
+        // })
+      };
+    });
+    window.$message!.success('读取成功');
+  } catch (error) {
+    console.error('handleGroupCreated', error);
+    window.$message!.error('读取失败, 请更新最新固件后重试');
+  }
 }
 onMounted(async () => {
   updateGroupList();
 });
 async function handleGroupCreated({ code, key, keys }: { code: number; key: string; keys: any[] }) {
   try {
+    let tmpCode = code;
+    if (isEdit) {
+      tmpCode = editItemCode;
+    }
     const type = KeyTypeEnum.Combo;
-    await createComboGroup({ code, keys, key, type });
-    groupList.value.push({
-      base: {
-        code,
-        key,
-        type,
-        name: `组合按键${code}`
-      },
-      keyList: keys
-    });
-    keyboardStore.updateSuperKey(key, { moduleType: type });
+    console.log('addShortcut', tmpCode, key, keys);
+    const ret = await createComboGroup({ code: tmpCode, keys, type });
+    console.log('addShortcut ret', ret);
+    updateGroupList();
+    // groupList.value.push({
+    //   base: {
+    //     code,
+    //     key,
+    //     type,
+    //     name: `组合按键${code}`
+    //   },
+    //   keyList: keys
+    // });
+    // keyboardStore.updateSuperKey(key, { moduleType: type });
     window.$message!.success('创建成功');
   } catch (error) {
     console.error('handleGroupCreated', error);
@@ -85,7 +104,9 @@ function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeE
 }
 async function handleGroupItemDelete(items: any, idx: number) {
   try {
-    await deleteComboGroup({ code: items.code });
+    console.log('delShortcut', items.base.code);
+    const ret = await deleteComboGroup({ code: items.base.code });
+    console.log('delShortcut ret', ret);
     groupList.value.splice(idx, 1);
     keyboardStore.removeSuperKey(items.key, { moduleType: KeyTypeEnum.Combo });
     window.$message!.success($t('businessCommon.delSuccess'));
@@ -98,7 +119,10 @@ async function handleGroupItemEdit(items: any, idx: number) {
   // feat: open edit modal(dialog), and transform data
   console.log('handleGroupItemEdit', items, idx);
   try {
+    console.log('getShortcut', items.base.code);
+    editItemCode = items.base.code;
     const ret = await getComboGroup({ code: items.base.code, type: items.base.type });
+    console.log('getShortcut ret', ret);
     editItem.list = [];
     ret.keys.forEach(key => {
       const res = getKeyDetail({ code: key.code, type: key.type });
@@ -107,6 +131,7 @@ async function handleGroupItemEdit(items: any, idx: number) {
         detail: res
       });
     });
+    isEdit = true;
     editItem.idx = idx;
     editVisible.value = true;
   } catch (error) {
