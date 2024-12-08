@@ -80,15 +80,30 @@ function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
   }
 }
 async function updateGroupList() {
-  const { mt } = await getMTList();
-  mtList.value = mt;
-  mtGroupList.value = mt.map(item => {
-    const { code, type, name, key } = item;
+  console.log('getMTList');
+  const ret = await getMTList({ pageNo: 1, pageSize: 8 });
+  console.log('getMTList ret', ret);
+  mtList.value = ret.mt;
+  mtGroupList.value = ret.mt.map(item => {
+    const { code, type, time, key } = item;
     return {
-      base: { code, type, name, key },
-      keyList: item.keys.map(keyBase => {
+      base: { code, type, time, key, name: '' },
+      keyList: item.keys.map((keyBase, index) => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(key!, toRaw(currentSuperKeyType.value), res);
+        if (index === 0) {
+          emit(
+            'key-clicked',
+            {
+              code: keyBase.code,
+              type: keyBase.type,
+              keyId: key
+            },
+            { toDevice: false }
+          );
+          console.log('key-clicked', keyBase.code, keyBase.type, key);
+          console.log('key-clicked', index, res);
+        }
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
@@ -99,13 +114,33 @@ async function updateGroupList() {
 }
 updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
+  console.log('handleGroupCreated code', code);
+  console.log('handleGroupCreated keys', keys);
+  console.log('handleGroupCreated name', name);
+  console.log('handleGroupCreated listDetail', listDetail);
+
+  const key = keys[0].key;
+  const type = KeyTypeEnum.MT;
   try {
-    await addMT({
+    const ret = await addMT({
+      type,
       code,
       time: inputTime.value,
       keys: keys.map((item: any) => ({ code: item.code, type: item.type })),
-      name
+      key
     });
+    console.log('addMT', ret);
+
+    // emit(
+    //   'key-clicked',
+    //   {
+    //     code: keys[0].code,
+    //     type: keys[0].type,
+    //     keyId: keys[0].key
+    //   },
+    //   { toDevice: false }
+    // );
+
     mtGroupList.value.push({
       base: {
         code,
@@ -131,15 +166,16 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
 }
 
 function handleGroupItemClicked({ base }: { base: GroupItem['base'] }) {
-  const { code, type } = base;
-  emit('key-clicked', {
-    code,
-    type
-  });
+  console.log('handleGroupItemClicked', base);
 }
-async function handleGroupItemDelete(item: GroupItem, idx: number) {
+async function handleGroupItemDelete(item: any, idx: number) {
   try {
-    await deleteMTByCode({ code: item.base.code });
+    console.log('handleGroupItemDelete', item.base.code);
+    console.log('handleGroupItemDelete', JSON.stringify(item), idx);
+    const ret = await deleteMTByCode({ code: item.base.code });
+    console.log('deleteMTByCode', ret);
+    keyboardStore.removeSuperKey(item.base.key, { moduleType: KeyTypeEnum.Combo });
+
     mtGroupList.value.splice(idx, 1);
     removeSuperKey(item.base.key!, { moduleType: KeyTypeEnum.MT });
     window.$message!.success($t('businessCommon.delSuccess'));
@@ -161,9 +197,9 @@ async function handleGroupItemRename(items: any, idx: number) {
   showRenameModal.value = true;
 }
 function generateGroupCode() {
-  if (mtGroupList.value.length === 0) return 1;
+  if (mtGroupList.value.length === 0) return 0;
   const usedCodes = new Set(mtGroupList.value.map((group: { base: { code: number } }) => group.base.code));
-  let newCode = 1;
+  let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
   }
@@ -173,7 +209,8 @@ async function handleReNameSave(data: { name: string }) {
   console.log('handleReNameSave', data.name);
   if (data.name === '') return;
   try {
-    await resetMTName({ code: editItem.base.code, name: data.name });
+    const ret = await resetMTName({ code: editItem.base.code, name: data.name });
+    console.log('resetMTName', ret);
     editItem.base.name = data.name;
     showRenameModal.value = false;
     mtGroupList.value[renameIndex.value].base.name = data.name;
@@ -201,7 +238,7 @@ async function handleReNameSave(data: { name: string }) {
             :group-item="item"
             :idx="idx"
             :enable-edit="true"
-            :enable-rename="true"
+            :enable-rename="false"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
