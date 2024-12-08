@@ -107,7 +107,6 @@ function updateSpConfig(x: KeyboardKeyProps['sp']) {
   }
   const label = tranformKeyTypeToChar(currentSuperKeyType.value as any);
   const color = tranformKeyTypeToColor(currentSuperKeyType.value as any);
-  console.log('updateSpConfig', label, color);
   spConfig.value = {
     label,
     color
@@ -160,14 +159,14 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
           <!-- base super function -->
           <div
             v-if="mt?.type"
-            class="absolute bottom-1 left-1 h-4 w-4 rounded-full bg-#0e1eb4 text-center align-middle text-xs text-white"
+            class="no-wrap absolute bottom-0.5 left-0.5 h-4.5 w-4.5 flex items-center justify-center rounded-full bg-#0e1eb4 text-center text-0.6rem text-white"
           >
             <i v-if="mt?.type === 'icon'" class="iconfont text-10px" :class="`icon-${mt?.icon}`"></i>
             <span v-else>{{ mt.label }}</span>
           </div>
           <div
             v-if="spConfig?.label"
-            class="absolute bottom-1 right-1 h-4 w-4 rounded-full text-center align-middle text-xs text-white"
+            class="no-wrap absolute bottom-0.5 right-0.5 h-4.5 w-4.5 flex items-center justify-center rounded-full bg-#0e1eb4 text-center text-0.6rem text-white"
             :style="{
               backgroundColor: spConfig.color
             }"
