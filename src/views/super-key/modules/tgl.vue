@@ -5,7 +5,6 @@ import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
-import { formatLableSub3 } from '@/hooks/common/format';
 import { addTGL, deleteTGLByCode, getTGLList, resetTGLName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
@@ -15,16 +14,16 @@ const tglGroupList = ref<any>([]);
 const editVisible = ref(false);
 const modalTitle = ref($t('businessCommon.switchSwitch'));
 const MAC_GORUP_CNT = 8;
-const emit = defineEmits(['key-clicked']);
+// const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
-const { getKeyDetail, updateSuperKey } = keyboardStore;
+const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.TGL;
 let editItem = reactive<{
-  base: { code: number; type: KeyTypeEnum; name: string };
+  base: { code: number; type: KeyTypeEnum; name: ''; key: '' };
   keyList: any[];
   keyBaseList: any[];
-}>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
+}>({ base: { code: -1, type: KeyTypeEnum.None, name: '', key: '' }, keyList: [], keyBaseList: [] });
 
 const { selectedKeys } = toRefs(keyboardStore);
 const kbCfg = toRef(keyboardStore, 'kbCfg');
@@ -32,6 +31,9 @@ const kbCfg = toRef(keyboardStore, 'kbCfg');
 let keyId = '';
 const showRenameModal = ref(false);
 const renameIndex = ref(-1);
+
+let isEdit = false;
+let editItemCode = 0;
 
 onMounted(() => {
   watch(
@@ -53,7 +55,7 @@ function handleAddClicked() {
     window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
   }
-  if (superKey?.sp) {
+  if (superKey?.sp?.length) {
     window.$message!.info($t('supperKey.keyBinedOtherFunc'));
     return;
   }
@@ -61,10 +63,11 @@ function handleAddClicked() {
     window.$message!.warning($t('supperKey.keyBinedOtherFunc', { total: MAC_GORUP_CNT }));
     return;
   }
+  isEdit = false;
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
-  if (currentSuperKeyType.value === KeyTypeEnum.MT) {
+  if (currentSuperKeyType.value === KeyTypeEnum.TGL) {
     const formatLable = (obj: any) => {
       if (obj.type !== 'str') return obj;
 
@@ -95,24 +98,22 @@ async function updateGroupList() {
     const { code, type, key } = item;
     return {
       base: { code, type, key },
-      keyList: item.keys.map((keyBase, index) => {
+      keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
-        if (index === 0) {
-          emit(
-            'key-clicked',
-            {
-              code: keyBase.code,
-              type: keyBase.type,
-              keyId: key
-            },
-            { toDevice: false }
-          );
-          console.log('key-clicked', keyBase.code, keyBase.type, key);
-          console.log('key-clicked', index, res);
-
-          updateSuperKey(keyBase.key!, { moduleType: toRaw(currentSuperKeyType.value), mtCfg: formatLableSub3(res) });
-        }
+        updateGroupEffect(key!, toRaw(currentSuperKeyType.value), res);
+        // if (index === 0) {
+        //   emit(
+        //     'key-clicked',
+        //     {
+        //       code: keyBase.code,
+        //       type: keyBase.type,
+        //       keyId: key
+        //     },
+        //     { toDevice: false }
+        //   );
+        //   console.log('key-clicked', keyBase.code, keyBase.type, key);
+        //   console.log('key-clicked', index, res);
+        // }
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
@@ -125,35 +126,43 @@ updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   try {
     console.log('handleGroupCreated', code, keys, name, listDetail);
-    const keyt = keys.map((item: any) => {
-      return {
-        code: item.code,
-        type: item.type
-      };
-    });
-    const key = keys[0].key;
+    let tmpCode = code;
+    let key = keys[0].key;
+    if (isEdit) {
+      tmpCode = editItemCode;
+      key = editItem.base.key;
+    }
+    // const key = keys[0].key;
     const type = KeyTypeEnum.TGL;
-    await addTGL({ type, code, keys: keyt, key });
+    await addTGL({ type, code: tmpCode, keys: keys.map((item: any) => ({ code: item.code, type: item.type })), key });
 
-    emit(
-      'key-clicked',
-      {
-        code: keys[0].code,
-        type: keys[0].type,
-        keyId: keys[0].key
-      },
-      { toDevice: false }
-    );
+    updateGroupList();
+    // emit(
+    //   'key-clicked',
+    //   {
+    //     code: keys[0].code,
+    //     type: keys[0].type,
+    //     keyId: keys[0].key
+    //   },
+    //   { toDevice: false }
+    // );
 
-    tglGroupList.value.push({
-      base: {
-        code,
-        name
-      },
-      keyList: listDetail.map((item: any) => {
-        return item.detail;
-      })
-    });
+    // tglGroupList.value.push({
+    //   base: {
+    //     code,
+    //     name,
+    //     key: keys[0].key,
+    //     type: KeyTypeEnum.TGL
+    //   },
+    //   keyList: listDetail.map((item: any) => {
+    //     return item.detail;
+    //   }),
+    //   keyBaseList: keys.map((keyBase: any) => {
+    //     return keyBase;
+    //   })
+    // });
+    // const res = getKeyDetail({ code: keys[1].code, type: keys[1].type });
+    // updateGroupEffect(keys[0].key!, toRaw(currentSuperKeyType.value), res);
     window.$message!.success($t('businessCommon.addSuccess'));
   } catch (e) {
     window.$message!.error($t('businessCommon.addFailPlsUpdate'));
@@ -165,10 +174,11 @@ function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeE
   console.log('handleGroupItemClicked', base);
 }
 async function handleGroupItemDelete(item: any, idx: number) {
+  console.log('handleGroupItemDelete', JSON.stringify(item), idx);
   try {
-    await deleteTGLByCode({ code: item.code });
-    keyboardStore.removeSuperKey(item.base.key, { moduleType: KeyTypeEnum.Combo });
+    await deleteTGLByCode({ code: item.base.code });
     tglGroupList.value.splice(idx, 1);
+    removeSuperKey(item.base.key!, { moduleType: KeyTypeEnum.TGL });
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
     window.$message!.error($t('businessCommon.delFailPlsUpdate'));
@@ -177,8 +187,11 @@ async function handleGroupItemDelete(item: any, idx: number) {
 }
 async function handleGroupItemEdit(items: any, idx: number) {
   // feat: open edit modal(dialog), and transform data
+  editItemCode = items.base.code;
+  editItem = items;
   console.log('handleGroupItemEdit', items, idx);
   editItem = items;
+  isEdit = true;
   editVisible.value = true;
 }
 async function handleGroupItemRename(items: any, idx: number) {
@@ -202,7 +215,7 @@ async function handleReNameSave(data: { name: string }) {
   if (data.name === '') return;
   try {
     await resetTGLName({ code: editItem.base.code, name: data.name });
-    editItem.base.name = data.name;
+    // editItem.base.name = data.name;
     showRenameModal.value = false;
     tglGroupList.value[renameIndex.value].base.name = data.name;
   } catch (error) {
@@ -229,7 +242,7 @@ async function handleReNameSave(data: { name: string }) {
             :group-item="item"
             :idx="idx"
             :enable-edit="true"
-            :enable-rename="true"
+            :enable-rename="false"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
