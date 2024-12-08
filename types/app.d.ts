@@ -688,7 +688,7 @@ declare namespace App {
         contactUs: string;
         moreProduct: string;
         officialWeb: string;
-        q7: string;
+        wechart: string;
       };
     };
   }

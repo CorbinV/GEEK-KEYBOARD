@@ -229,7 +229,7 @@ const lang: App.BusinessLanguage.Schema = {
     contactUs: '联系我们',
     moreProduct: '更多产品',
     officialWeb: '官网：',
-    q7: '公众号：'
+    wechart: '公众号：'
   }
 };
 export default lang;

@@ -230,7 +230,7 @@ const lang: App.BusinessLanguage.Schema = {
     contactUs: 'Contact Us',
     moreProduct: 'More Products',
     officialWeb: 'Official Website： {total}',
-    q7: 'Official Account： {total}'
+    wechart: 'Official Account： {total}'
   }
 };
 export default lang;
