@@ -1,6 +1,11 @@
 import type { KeyTypeEnum } from '@/enum/keyType';
 import type { BaseKey } from './combo';
 
+export type Page = {
+  pageNo: number;
+  pageSize: number;
+};
+
 export type OksItem = BaseKey & {
   name: string;
   keys: BaseKey[];
@@ -32,7 +37,6 @@ export type SOCDList = {
 
 // rs
 export type RSItem = BaseKey & {
-  name: string;
   keys: BaseKey[];
 };
 export type ResetRSName = {
@@ -46,7 +50,7 @@ export type RSList = {
 
 // mt
 export type MTItem = BaseKey & {
-  name: string;
+  time: number;
   keys: BaseKey[];
 };
 export type ResetMTName = {
@@ -57,12 +61,12 @@ export type MTBase = Omit<MTItem, 'type'> & {
   time: number;
 };
 export type MTList = {
+  len: number;
   mt: MTItem[];
 };
 
 // tgl
 export type TGLItem = BaseKey & {
-  name: string;
   keys: BaseKey[];
 };
 export type ResetTGLName = {
@@ -71,6 +75,7 @@ export type ResetTGLName = {
 };
 export type TGLBase = Omit<TGLItem, 'type'>;
 export type TGLList = {
+  len: number;
   tgl: TGLItem[];
 };
 
