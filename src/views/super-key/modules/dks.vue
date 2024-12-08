@@ -150,9 +150,9 @@ async function handleGroupItemRename(items: any, idx: number) {
   console.log('handleGroupItemRename', items, idx);
 }
 function generateGroupCode() {
-  if (oksGroupList.value.length === 0) return 1;
+  if (oksGroupList.value.length === 0) return 0;
   const usedCodes = new Set(oksGroupList.value.map((group: { code: number }) => group.code));
-  let newCode = 1;
+  let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
   }
