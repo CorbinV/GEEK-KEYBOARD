@@ -2,10 +2,11 @@ import requestClient from './config';
 import type {
   DksItem,
   DksList,
-  MTBase,
+  MTItem,
   MTList,
   OksBase,
   OksList,
+  Page,
   RSBase,
   RSList,
   ResetDksName,
@@ -16,7 +17,7 @@ import type {
   ResetTGLName,
   SOCDBase,
   SOCDList,
-  TGLBase,
+  TGLItem,
   TGLList
 } from './modules/super-key';
 import type { BaseKey } from './modules/combo';
@@ -113,9 +114,10 @@ export function addRS(data: RSBase) {
 }
 
 // mt
-export function getMTList() {
+export function getMTList(data: Page) {
   return requestClient.send<MTList>({
-    name: 'getMTList'
+    name: 'getMTList',
+    data
   });
 }
 export function resetMTName(data: ResetMTName) {
@@ -131,12 +133,12 @@ export function deleteMTByCode(data: { code: number }) {
   });
 }
 export function getTargetMT(data: BaseKey) {
-  return requestClient.send<never>({
+  return requestClient.send<MTItem>({
     name: 'getMT',
     data
   });
 }
-export function addMT(data: MTBase) {
+export function addMT(data: MTItem) {
   return requestClient.send<never>({
     name: 'setMT',
     data
@@ -144,9 +146,10 @@ export function addMT(data: MTBase) {
 }
 
 // tgl
-export function getTGLList() {
+export function getTGLList(data: Page) {
   return requestClient.send<TGLList>({
-    name: 'getTGLList'
+    name: 'getTGLList',
+    data
   });
 }
 export function resetTGLName(data: ResetTGLName) {
@@ -167,7 +170,7 @@ export function getTargetTGL(data: BaseKey) {
     data
   });
 }
-export function addTGL(data: TGLBase) {
+export function addTGL(data: TGLItem) {
   return requestClient.send<never>({
     name: 'setTGL',
     data
