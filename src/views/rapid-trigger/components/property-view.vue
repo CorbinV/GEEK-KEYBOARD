@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
-import { getPerf, setPerf } from '@/api/keyConfig-rapid-trigger';
+// import { getPerf, getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
+import { getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
+import { useCommonStore } from '@/store/modules/common';
 
 import CircleShow from '@/components/custom/circle-show.vue';
 import Slider from '@/components/custom/zw-slider.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
+// import { getComboList } from '@/api/combo';
 import KeyMove from './key-move.vue';
 export type Opetion = { key: number; label: string };
-
+const commonStore = useCommonStore();
 const EXE_DEAD_ZONE = 0;
 const RAPID_TRIGGER_SWITCH = 1;
 const DOWN_LMD_VALUE = 2;
@@ -27,6 +30,7 @@ const breakOptimize = ref<boolean>(false);
 const shakeLeaveValue = ref<number>(0);
 const rtTopDeadValue = ref<number>(0);
 const rtBelowDeadValue = ref<number>(0);
+const curKey = ref<string>('');
 
 const showModal = ref(false);
 const argShow = ref(true);
@@ -46,13 +50,23 @@ const shakelayerLabel = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('
 const keyboardStore = useKeyboardStore();
 
 function rateSelect(key: number) {
-  curRate.value = rateOption.value.find((item: Opetion) => item.key === key);
+  console.log(key);
+  // curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
+  const index = rateOption.value.findIndex((item: { key: number }) => item.key === key);
+
+  curRate.value = rateOption.value[index];
+  setPerfIndex(SHAKE_LEAVE, index);
+  console.log(index);
   setPerfIndex(SHAKE_LEAVE, key);
-  setDevPerf();
+
+  setRate({ index });
 }
 function shakeSelect(key: number) {
-  curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
-  setPerfIndex(SHAKE_LEAVE, key);
+  console.log(key);
+  // curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
+  const index = shakeOption.value.findIndex((item: { key: number }) => item.key === key);
+  curShake.value = shakeOption.value[index];
+  setPerfIndex(SHAKE_LEAVE, index);
   setDevPerf();
 }
 
@@ -102,30 +116,48 @@ const { selectedKeys } = toRefs(keyboardStore);
 
 watch(
   () => selectedKeys.value,
-  (nLength, oLength) => {
-    Object.keys(selectedKeys.value).forEach(key => {
-      const val = selectedKeys.value[key];
-      console.log(selectedKeys.value);
 
-      if (val?.base) {
-        // const base = val.base.key;
-        // selectedKey.value.push('7');
-        // console.log(base);
-        console.log(nLength);
-        console.log(oLength);
-      } else {
-        selectedKey.value.length = 0;
-      }
-    });
+  // (nLength, oLength) => {
+  nLength => {
+    setTimeout(() => {
+      Object.keys(selectedKeys.value).forEach(key => {
+        const val = selectedKeys.value[key];
+        console.log('11111111111', selectedKeys.value);
+
+        if (val?.base) {
+          // const base = val.base.key;
+          // selectedKey.value.push('7');
+          // console.log(base);
+          Object.entries(nLength).forEach(([newKey]) => {
+            commonStore.getTargetKeyInfo(newKey).then(data => {
+              Object.entries(nLength).forEach(([keykey]) => {
+                // console.log(`键: ${keykey}, 值: ${value}`);
+                curKey.value = keykey;
+              });
+              getDevPerf(data.tary);
+              console.log('22222222222 ', data.tary);
+              // curKey.value = data.getDevPerf();
+            });
+            // getDevPerf({ key: newKey });
+          });
+        } else {
+          selectedKey.value.length = 0;
+        }
+      });
+    }, 100);
   }
 );
 
 function setAxosome() {}
 // 1. 创建一个 Apple 实例并使其响应式
-async function getDevPerf() {
-  const x = await getPerf();
-  perfArr.value = x.tary;
-  exeDeadZoneValue.value = getPerfIndex(EXE_DEAD_ZONE);
+// async function getDevPerf(data: { key: string }) {
+async function getDevPerf(tary: number[]) {
+  // console.log(11111111);
+  // console.log(data);
+  //  const x = await getPerf(data);
+  perfArr.value = tary;
+  exeDeadZoneValue.value = Math.ceil(getPerfIndex(EXE_DEAD_ZONE) / 35) / 10;
+
   rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
   breakOptimize.value = getPerfIndex(BREAK_OPTIMIZE_SWITCH) === 1;
   downLMD.value = getPerfIndex(DOWN_LMD_VALUE);
@@ -152,13 +184,29 @@ async function getDevPerf() {
   // // curShake.value = shakeOption.value.find((item: Opetion) => item.key === perf.value.shakeIndex);
 }
 async function setDevPerf() {
-  const perf = { key: ['A', 'B'], tary: perfArr.value };
-  console.log(perf);
+  const perf = { key: [curKey.value], tary: perfArr.value };
   await setPerf(perf);
 
   //  await addOks({ code, keys, name });
 }
-getDevPerf();
+
+function exeDeadSlidingStop(value: number) {
+  setPerfIndex(EXE_DEAD_ZONE, value * 10 * 35);
+  setDevPerf();
+}
+async function getDevRate() {
+  const data = await getRate();
+  const rate = data.rate;
+  const index = data.index;
+  rateOption.value = rate.map(num => ({
+    key: num,
+    label: `${num / 1000}K`
+  }));
+  curRate.value = rateOption.value[index];
+}
+// getComboList();
+// getDevPerf({ key: 'G' });
+getDevRate();
 </script>
 
 <template>
@@ -190,7 +238,7 @@ getDevPerf();
           </NDropdown>
         </div>
 
-        <KeyMove></KeyMove>
+        <KeyMove v-model="exeDeadZoneValue" @stop-sliding="exeDeadSlidingStop"></KeyMove>
         <div class="flex-raw mt-30px flex justify-between">
           <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
           <button
@@ -235,7 +283,7 @@ getDevPerf();
           <p class="... text-lg">{{ $t('repidTrigger.liftSensitivity') }}</p>
         </div>
         <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-        <Slider v-model="upLMD" class="pt-10px" @sliding="upLmdSlide"></Slider>
+        <Slider v-model="upLMD" class="pt-10px" @stop-sliding="upLmdSlide"></Slider>
         <p class="... mt-10px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
           {{ $t('repidTrigger.advancedSettings') }}
         </p>

@@ -26,13 +26,17 @@ export type SetKeyPerfCallback = {
 
 export type GetKeyPerf = {
   code: number;
-  key: number[];
+  key: string;
   tary: number[];
 };
 export type Calibration = {
-  switch: boolean;
+  switch: number;
 };
 export type Rate = {
   rate: [1000, 2000, 4000, 8000];
+  index: 0;
+};
+
+export type RateIndex = {
   index: 0;
 };

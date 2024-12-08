@@ -1,17 +1,80 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { defineEmits, defineProps, onMounted, onUnmounted, ref, watch } from 'vue';
+
+// 定义 props 和 emits
+const props = defineProps<{
+  modelValue: number; // 外部传入的 sliderValue
+}>();
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: number): void; // 更新外部值
+  (e: 'stopSliding', value: number): void; // 更新外部值
+}>();
+
+// 内部的 sliderValue 绑定到外部的 modelValue
+const sliderValue = ref(props.modelValue);
+watch(
+  () => props.modelValue,
+  (newValue: number) => {
+    sliderValue.value = newValue;
+    calTop(sliderValue.value);
+  }
+);
+
 const mtValue = ref(-40);
-const sliderValue = ref(0);
+// 是否正在滑动
+const isSliding = ref(false);
+
 const onInput = (event: Event) => {
   // const target = event.target as HTMLInputElement;
   //  mtValue.value += target.value;
   const target = event.target as HTMLInputElement;
   if (target) {
     const value = Number.parseFloat(target.value); // 转为 number 类型
-    mtValue.value = -value * 10;
-    console.log('当前值:', mtValue.value);
+    calTop(value);
   }
 };
+
+function calTop(value: number) {
+  // 0.1;   -15
+  // 3.5; ~ -35
+  const xMin = 0.1;
+  const xMax = 3.5;
+  // 定义输出值的最小值和最大值
+  const yMin = -36;
+  const yMax = -15;
+  mtValue.value = yMin + ((value - xMin) * (yMax - yMin)) / (xMax - xMin);
+}
+// 滑动前触发
+const startSliding = () => {
+  isSliding.value = true;
+};
+
+// 滑动中触发
+const sliding = () => {
+  if (isSliding.value) {
+    emit('update:modelValue', sliderValue.value); // 触发更新外部值
+  }
+};
+
+// 滑动结束触发
+const stopSliding = () => {
+  if (isSliding.value) {
+    isSliding.value = false;
+    emit('stopSliding', sliderValue.value); // 触发更新外部值
+  }
+};
+
+// 添加事件监听器到全局（鼠标松开时）
+onMounted(() => {
+  window.addEventListener('mousemove', sliding);
+  window.addEventListener('mouseup', stopSliding);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', sliding);
+  window.removeEventListener('mouseup', stopSliding);
+});
 
 // function rateSelect(key: number) {
 //   curRate.value = rateOption.value.find((item: Opetion) => item.key === key);
@@ -28,6 +91,9 @@ const onInput = (event: Event) => {
       <!-- 滑杆条 -->
       <!-- 显示当前值 -->
       <div class="value-display">{{ sliderValue }}mm</div>
+
+      <!-- 滑块 -->
+
       <input
         v-model="sliderValue"
         type="range"
@@ -36,6 +102,7 @@ const onInput = (event: Event) => {
         step="0.1"
         class="vertical-slider"
         @input="onInput"
+        @mousedown="startSliding"
       />
     </div>
     <div class="relative h-190px w-145px overflow-hidden">
@@ -60,6 +127,7 @@ const onInput = (event: Event) => {
 .vertical-slider {
   writing-mode: bt-lr; /* 使滑杆垂直 */
   -webkit-appearance: slider-vertical; /* Webkit浏览器支持 */
+  transform: rotate(180deg); /* 翻转，使得最大值在下方 */
   width: 100px;
   height: 150px;
   margin: 10px 0;

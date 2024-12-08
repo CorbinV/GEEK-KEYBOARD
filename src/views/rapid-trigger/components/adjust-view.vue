@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Calibration } from '@/api/modules/keyboard-rapid-trigger';
-import { getCalibration } from '@/api/keyConfig-rapid-trigger';
+import { getCalibration, setCalibration } from '@/api/keyConfig-rapid-trigger';
 
-const calibration = ref<Calibration>({ switch: false });
-
-const bothwayAdjustSwitch = ref(false);
+const bothwayAdjustSwitch = ref<boolean>(false);
 // const triggerPoint = ref(66);
 
-function bothwayAdjust() {
-  bothwayAdjustSwitch.value = !bothwayAdjustSwitch.value;
+async function bothwayAdjustClick() {
+  // bothwayAdjustSwitch.value = !bothwayAdjustSwitch.value;
+  await setCalibration({ switch: bothwayAdjustSwitch.value ? 1 : 0 });
 }
 async function getConfig() {
-  calibration.value = await getCalibration();
+  // calibration.value = await getCalibration();
+  const data = await getCalibration();
+
+  bothwayAdjustSwitch.value = data.switch === 1;
 }
 
 getConfig();
@@ -31,7 +32,7 @@ getConfig();
           <p class="vertical-bar"></p>
           <p class="... text-lg">{{ $t('repidTrigger.doubleAdjust') }}</p>
         </div>
-        <NSwitch v-model:value="calibration.switch" @click="bothwayAdjust"></NSwitch>
+        <NSwitch v-model:value="bothwayAdjustSwitch" @click="bothwayAdjustClick"></NSwitch>
       </div>
       <p class="... mt-20px text-[16px] text-[#999999]">
         {{ $t('repidTrigger.doubleAdjustHint') }}

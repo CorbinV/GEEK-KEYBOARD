@@ -1,9 +1,17 @@
 import requestClient from './config';
-import type { Calibration, GetKeyPerf, Rate, SetKeyPerf, SetKeyPerfCallback } from './modules/keyboard-rapid-trigger';
+import type {
+  Calibration,
+  GetKeyPerf,
+  Rate,
+  RateIndex,
+  SetKeyPerf,
+  SetKeyPerfCallback
+} from './modules/keyboard-rapid-trigger';
 
-export function getPerf() {
+export function getPerf(data: { key: string }) {
   return requestClient.send<GetKeyPerf>({
-    name: 'getPerf'
+    name: 'getPerf',
+    data
   });
 }
 
@@ -19,9 +27,21 @@ export function getCalibration() {
     name: 'getCalibration'
   });
 }
+export function setCalibration(data: Calibration) {
+  return requestClient.send<Calibration>({
+    name: 'setCalibration',
+    data
+  });
+}
 
 export function getRate() {
   return requestClient.send<Rate>({
     name: 'getRate'
+  });
+}
+export function setRate(data: RateIndex) {
+  return requestClient.send<RateIndex>({
+    name: 'setRate',
+    data
   });
 }

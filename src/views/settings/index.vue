@@ -26,17 +26,28 @@ const onFactoryResetClick = () => {
   console.log('恢复出厂设置按钮被点击');
   // 这里可以加入恢复出厂设置的逻辑
 };
+
+// async function setWakeup() {
+//   const x = await getKeyboardSetting();
+//   console.log(x);
+// }
 // 处理全键无冲开关点击事件
 const onFullKeyRolloverChange = (newValue: boolean) => {
   console.log('全键无冲切换状态:', newValue);
-  // 在这里可以添加逻辑，比如同步到服务器或其他操作
+  setDevPerf();
 };
 
 // 处理感应唤醒开关点击事件
 const onWakeUpSwitchChange = (newValue: boolean) => {
   console.log('感应唤醒切换状态:', newValue);
+  setDevPerf();
   // 在这里可以添加逻辑，比如同步到服务器或其他操作
 };
+async function setDevPerf() {
+  // await getKeyboardSetting({ allKey: 1, wakeUp: 1 });
+  //  await addOks({ code, keys, name });
+}
+
 getVersion();
 getSet();
 </script>
