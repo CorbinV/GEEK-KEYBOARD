@@ -269,9 +269,27 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       };
       return kbCfg.layerKeys;
     };
-    const updateKeyBaseWhenKeyChange = async ({ keyId, type, code, layer }: any) => {
+    const updateKeyBaseWhenKeyChange = ({ keyId, type, code, layer }: any) => {
       const old = kbCfg.layerList[layer].keys;
       kbCfg.layerList[layer].keys[keyId] = { ...old[keyId], type, code };
+    };
+    const updateKeyBase = (keyId: string, data: any, layer: number = kbCfg.layerIdx) => {
+      const old = kbCfg.layerList[layer].keys;
+      kbCfg.layerList[layer].keys[keyId] = { ...old[keyId], ...data };
+    };
+
+    const setKeyDisabled = (
+      { keyId, layer = kbCfg.layerIdx }: { keyId: string; layer?: number },
+      disabled: boolean
+    ) => {
+      const idx = kbCfg.layerList[layer].xxx.disable.indexOf(keyId);
+      if (disabled) {
+        if (idx === -1) {
+          kbCfg.layerList[layer].xxx.disable.push(keyId);
+        }
+      } else if (idx > -1) {
+        kbCfg.layerList[layer].xxx.disable.splice(idx, 1);
+      }
     };
     initKeyMap();
     return {
@@ -281,18 +299,12 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       updateSuperKey,
       removeSuperKey,
       updateLayerKeys,
-      updateKeyBaseWhenKeyChange
+      updateKeyBaseWhenKeyChange,
+      setKeyDisabled,
+      updateKeyBase
     };
   }
-  const {
-    initKeyboardData,
-    kbCfg,
-    getKeyDetail,
-    updateSuperKey,
-    removeSuperKey,
-    updateLayerKeys,
-    updateKeyBaseWhenKeyChange
-  } = useConfigData();
+  const { initKeyboardData, kbCfg, getKeyDetail, updateLayerKeys, ...configDataFnc } = useConfigData();
   function useDeviceInfo() {
     const deviceStore = useDeviceStore();
     const { isConnected } = storeToRefs(deviceStore);
@@ -429,10 +441,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     currentSuperKeyType,
     resetCurrentSuperKeyType,
     getKeyDetail,
-    updateSuperKey,
     updateLayerKeys,
-    removeSuperKey,
-    updateKeyBaseWhenKeyChange,
+    ...configDataFnc,
     ...restRelatedSelectedData
   };
 });

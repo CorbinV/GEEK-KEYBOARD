@@ -4,7 +4,10 @@ import { useEventListener } from '@vueuse/core';
 import { SetupStoreId } from '@/enum';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { getKeyInfo, restoreKeyConfig, setKeyInfo } from '@/api/keyConfig';
+import { KeyTypeEnum } from '@/enum/keyType';
+import { useKeyboardStore } from '../keyboard/index';
 function useKeyInfo() {
+  const { setKeyDisabled, updateKeyBase, removeSuperKey } = useKeyboardStore();
   // key cache
   const KeyConfigMap = reactive<{ [key: string]: KeyInfo | null }>({});
 
@@ -37,6 +40,9 @@ function useKeyInfo() {
         ]
       });
     }
+    if (data.enable !== undefined) {
+      setKeyDisabled({ keyId: key }, !data.enable);
+    }
     KeyConfigMap[key] = null;
     return KeyConfigMap[key];
   }
@@ -56,6 +62,9 @@ function useKeyInfo() {
   async function restoreTargetKeyInfoById(key: string) {
     const data = await restoreKeyConfig({ key });
     KeyConfigMap[key] = data;
+    updateKeyBase(key, data);
+    removeSuperKey(key, { moduleType: KeyTypeEnum.None, removeAll: true });
+    setKeyDisabled({ keyId: key }, false);
     return KeyConfigMap[key];
   }
   return {
