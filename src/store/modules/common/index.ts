@@ -26,15 +26,17 @@ function useKeyInfo() {
     }
     return KeyConfigMap[key];
   }
-  async function setTargetKeyInfoById(key: string, data: Partial<KeyInfo>) {
-    await setKeyInfo({
-      keys: [
-        {
-          key,
-          ...data
-        }
-      ]
-    });
+  async function setTargetKeyInfoById(key: string, data: Partial<KeyInfo>, toDevice: boolean = true) {
+    if (toDevice) {
+      await setKeyInfo({
+        keys: [
+          {
+            key,
+            ...data
+          }
+        ]
+      });
+    }
     KeyConfigMap[key] = null;
     return KeyConfigMap[key];
   }
