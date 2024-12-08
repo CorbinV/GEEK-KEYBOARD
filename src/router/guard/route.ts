@@ -34,7 +34,7 @@ export function createRouteGuard(router: Router) {
 
     const authStore = useAuthStore();
     if (to.name === 'login' && authStore.useMock) {
-      authStore.login();
+      await authStore.login();
     }
     const isLogin = Boolean(localStg.get('token'));
     const needLogin = !to.meta.constant;

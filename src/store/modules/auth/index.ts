@@ -160,7 +160,9 @@ export const useAuthStore = defineStore(SetupStoreId.Auth, () => {
 
     return false;
   }
-
+  if (skipLogin) {
+    login();
+  }
   return {
     token,
     userInfo,
