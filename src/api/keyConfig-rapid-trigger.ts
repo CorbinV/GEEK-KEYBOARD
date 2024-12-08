@@ -1,4 +1,4 @@
-import requestClient from '@/utils/requset/deviceClient';
+import requestClient from './config';
 import type { Calibration, GetKeyPerf, Rate, SetKeyPerf, SetKeyPerfCallback } from './modules/keyboard-rapid-trigger';
 
 export function getPerf() {
