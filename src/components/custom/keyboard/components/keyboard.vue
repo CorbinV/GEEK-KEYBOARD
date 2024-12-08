@@ -2,7 +2,7 @@
 import { computed, inject, provide, reactive, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { LayerKeysConfig } from '@/api/modules/keyboard';
-import { KeyTypeEnum } from '@/enum/keyType';
+import type { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import KeyboardKey from './keyboard-key.vue';
 type KeyboardProps = {
@@ -56,51 +56,9 @@ function useKeySelectAndNotify() {
   provide('selectedDetail', readonly(selectedDetail));
   function updateSelectrdInfo(data: any) {
     if (clickedKey.value.idx !== -1 && data.type !== -1) {
-      // find keyDetail about label/icon/type
       const type = injSelectedInfo.value.type as KeyTypeEnum;
-      let code = injSelectedInfo.value.code as number;
-      let detail: any = {};
-
-      if (![KeyTypeEnum.None, KeyTypeEnum.Media, KeyTypeEnum.Normal, KeyTypeEnum.System].includes(type)) {
-        detail = {
-          icon: '',
-          type: 'str',
-          label: ''
-        };
-        code += 1;
-        switch (type) {
-          case KeyTypeEnum.Combo:
-            detail.label = `C${code}`;
-            break;
-          case KeyTypeEnum.DKS:
-            detail.label = `D${code}`;
-            break;
-          case KeyTypeEnum.Marco:
-            detail.label = `M${code}`;
-            break;
-          case KeyTypeEnum.OKS:
-            detail.label = `O${code}`;
-            break;
-          case KeyTypeEnum.RS:
-            detail.label = `R${code}`;
-            break;
-          case KeyTypeEnum.SOCD:
-            detail.label = `S${code}`;
-            break;
-          case KeyTypeEnum.TGL:
-            detail.label = `T${code}`;
-            break;
-          default:
-            break;
-        }
-      } else {
-        const info = kbCfg.value.keyMap[type]?.code?.[code];
-        detail = {
-          label: info?.label,
-          icon: info?.icon,
-          type: info?.type
-        };
-      }
+      const code = injSelectedInfo.value.code as number;
+      const detail = keyboardStore.getKeyDetail({ code, type });
       detail.keyId = clickedKey.value.keyId;
       selectedDetail.value = detail;
     }

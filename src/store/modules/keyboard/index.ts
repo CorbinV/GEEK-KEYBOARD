@@ -92,6 +92,40 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     };
 
     const getKeyDetail = ({ code, type }: Omit<BaseKey, 'key'>) => {
+      if (![KeyTypeEnum.None, KeyTypeEnum.Media, KeyTypeEnum.Normal, KeyTypeEnum.System].includes(type)) {
+        const detail = {
+          icon: '',
+          type: 'str',
+          label: ''
+        };
+        const localCode = code + 1;
+        switch (type) {
+          case KeyTypeEnum.Combo:
+            detail.label = `C${localCode}`;
+            break;
+          case KeyTypeEnum.DKS:
+            detail.label = `D${localCode}`;
+            break;
+          case KeyTypeEnum.Marco:
+            detail.label = `M${localCode}`;
+            break;
+          case KeyTypeEnum.OKS:
+            detail.label = `O${localCode}`;
+            break;
+          case KeyTypeEnum.RS:
+            detail.label = `R${localCode}`;
+            break;
+          case KeyTypeEnum.SOCD:
+            detail.label = `S${localCode}`;
+            break;
+          case KeyTypeEnum.TGL:
+            detail.label = `T${localCode}`;
+            break;
+          default:
+            break;
+        }
+        return detail;
+      }
       const codeMap = kbCfg.keyMap[type]?.code;
       if (!codeMap) {
         throw new Error('get key detail info failed, beause no code map');
