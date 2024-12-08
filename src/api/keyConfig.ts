@@ -27,12 +27,11 @@ export function restoreKeyConfig(data: { key: string }) {
     data
   });
 }
-export function setKeyInfo(
-  data: Partial<KeyInfo> &
-    {
-      key: string;
-    }[]
-) {
+export function setKeyInfo(data: {
+  keys: (Partial<KeyInfo> & {
+    key: string;
+  })[];
+}) {
   return requestClient.send<null>({
     name: 'setKeyInfo',
     data

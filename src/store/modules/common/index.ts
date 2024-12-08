@@ -39,13 +39,12 @@ function useKeyInfo() {
     return KeyConfigMap[key];
   }
   async function setKeyInfoByList(
-    data: Partial<KeyInfo> &
-      {
-        key: string;
-      }[]
+    data: (Partial<KeyInfo> & {
+      key: string;
+    })[]
   ) {
     await setKeyInfo({
-      keys: data
+      keys: data.map(item => item)
     });
     data.forEach(item => {
       const { key, ...rest } = item;
