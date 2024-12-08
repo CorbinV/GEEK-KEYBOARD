@@ -269,11 +269,30 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       };
       return kbCfg.layerKeys;
     };
-
+    const updateKeyBaseWhenKeyChange = async ({ keyId, type, code, layer }: any) => {
+      const old = kbCfg.layerList[layer].keys;
+      kbCfg.layerList[layer].keys[keyId] = { ...old[keyId], type, code };
+    };
     initKeyMap();
-    return { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey, updateLayerKeys };
+    return {
+      initKeyboardData,
+      kbCfg,
+      getKeyDetail,
+      updateSuperKey,
+      removeSuperKey,
+      updateLayerKeys,
+      updateKeyBaseWhenKeyChange
+    };
   }
-  const { initKeyboardData, kbCfg, getKeyDetail, updateSuperKey, removeSuperKey, updateLayerKeys } = useConfigData();
+  const {
+    initKeyboardData,
+    kbCfg,
+    getKeyDetail,
+    updateSuperKey,
+    removeSuperKey,
+    updateLayerKeys,
+    updateKeyBaseWhenKeyChange
+  } = useConfigData();
   function useDeviceInfo() {
     const deviceStore = useDeviceStore();
     const { isConnected } = storeToRefs(deviceStore);
@@ -413,6 +432,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     updateSuperKey,
     updateLayerKeys,
     removeSuperKey,
+    updateKeyBaseWhenKeyChange,
     ...restRelatedSelectedData
   };
 });

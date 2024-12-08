@@ -60,6 +60,7 @@ function useKeySelectAndNotify() {
       const code = injSelectedInfo.value.code as number;
       const detail = keyboardStore.getKeyDetail({ code, type });
       detail.keyId = clickedKey.value.keyId;
+      keyboardStore.updateKeyBaseWhenKeyChange({ keyId: detail.keyId, type, code, layer: props.layer });
       selectedDetail.value = detail;
     }
     if (injSelectedInfo.value?.type >= 0) {
