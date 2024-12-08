@@ -5,6 +5,7 @@ import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
+import { formatLableSub3 } from '@/hooks/common/format';
 import { addTGL, deleteTGLByCode, getTGLList, resetTGLName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
@@ -87,14 +88,31 @@ function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
   }
 }
 async function updateGroupList() {
-  const { tgl } = await getTGLList();
-  tglGroupList.value = tgl.map(item => {
-    const { code, type, name } = item;
+  console.log('getTGLList');
+  const ret = await getTGLList({ pageNo: 1, pageSize: 8 });
+  console.log('getTGLList ret', ret);
+  tglGroupList.value = ret.tgl.map(item => {
+    const { code, type, key } = item;
     return {
-      base: { code, type, name },
-      keyList: item.keys.map(keyBase => {
+      base: { code, type, key },
+      keyList: item.keys.map((keyBase, index) => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
+        if (index === 0) {
+          emit(
+            'key-clicked',
+            {
+              code: keyBase.code,
+              type: keyBase.type,
+              keyId: key
+            },
+            { toDevice: false }
+          );
+          console.log('key-clicked', keyBase.code, keyBase.type, key);
+          console.log('key-clicked', index, res);
+
+          updateSuperKey(keyBase.key!, { moduleType: toRaw(currentSuperKeyType.value), mtCfg: formatLableSub3(res) });
+        }
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
@@ -106,7 +124,27 @@ async function updateGroupList() {
 updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   try {
-    await addTGL({ code, keys, name });
+    console.log('handleGroupCreated', code, keys, name, listDetail);
+    const keyt = keys.map((item: any) => {
+      return {
+        code: item.code,
+        type: item.type
+      };
+    });
+    const key = keys[0].key;
+    const type = KeyTypeEnum.TGL;
+    await addTGL({ type, code, keys: keyt, key });
+
+    emit(
+      'key-clicked',
+      {
+        code: keys[0].code,
+        type: keys[0].type,
+        keyId: keys[0].key
+      },
+      { toDevice: false }
+    );
+
     tglGroupList.value.push({
       base: {
         code,
@@ -116,7 +154,7 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
         return item.detail;
       })
     });
-    window.$message!.success($t('businessCommon.delSuccess'));
+    window.$message!.success($t('businessCommon.addSuccess'));
   } catch (e) {
     window.$message!.error($t('businessCommon.addFailPlsUpdate'));
     console.error(e);
@@ -124,15 +162,12 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
 }
 
 function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.TGL } }) {
-  const { code, type } = base;
-  emit('key-clicked', {
-    code,
-    type
-  });
+  console.log('handleGroupItemClicked', base);
 }
-async function handleGroupItemDelete(item: { code: number }, idx: number) {
+async function handleGroupItemDelete(item: any, idx: number) {
   try {
     await deleteTGLByCode({ code: item.code });
+    keyboardStore.removeSuperKey(item.base.key, { moduleType: KeyTypeEnum.Combo });
     tglGroupList.value.splice(idx, 1);
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
@@ -154,9 +189,9 @@ async function handleGroupItemRename(items: any, idx: number) {
   showRenameModal.value = true;
 }
 function generateGroupCode() {
-  if (tglGroupList.value.length === 0) return 1;
+  if (tglGroupList.value.length === 0) return 0;
   const usedCodes = new Set(tglGroupList.value.map((group: { base: { code: number } }) => group.base.code));
-  let newCode = 1;
+  let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
   }
