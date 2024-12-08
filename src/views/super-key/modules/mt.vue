@@ -20,7 +20,7 @@ const mtGroupList = ref<GroupItem[]>([]);
 const editVisible = ref(false);
 const modalTitle = ref('单击/按住');
 const MAC_GORUP_CNT = 8;
-const emit = defineEmits(['key-clicked']);
+// const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
@@ -40,6 +40,9 @@ let keyId = '';
 const showRenameModal = ref(false);
 const renameIndex = ref(-1);
 
+let isEdit = false;
+let editItemCode = 0;
+
 onMounted(() => {
   watch(
     () => selectedKeys.value,
@@ -52,6 +55,7 @@ onMounted(() => {
 
 function handleAddClicked() {
   const superKey = kbCfg.value.superKeyMap[keyId];
+  console.log('handleAddClicked', superKey);
   if (keyId === '') {
     window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
@@ -60,7 +64,7 @@ function handleAddClicked() {
     window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
   }
-  if (superKey?.sp) {
+  if (superKey?.sp?.length) {
     window.$message!.info($t('supperKey.keyBinedOtherFunc'));
     return;
   }
@@ -69,6 +73,7 @@ function handleAddClicked() {
     return;
   }
   inputTime.value = 100;
+  isEdit = false;
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
@@ -88,22 +93,22 @@ async function updateGroupList() {
     const { code, type, time, key } = item;
     return {
       base: { code, type, time, key, name: '' },
-      keyList: item.keys.map((keyBase, index) => {
+      keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(key!, toRaw(currentSuperKeyType.value), res);
-        if (index === 0) {
-          emit(
-            'key-clicked',
-            {
-              code: keyBase.code,
-              type: keyBase.type,
-              keyId: key
-            },
-            { toDevice: false }
-          );
-          console.log('key-clicked', keyBase.code, keyBase.type, key);
-          console.log('key-clicked', index, res);
-        }
+        // if (index === 0) {
+        //   emit(
+        //     'key-clicked',
+        //     {
+        //       code: keyBase.code,
+        //       type: keyBase.type,
+        //       keyId: key
+        //     },
+        //     { toDevice: false }
+        //   );
+        //   console.log('key-clicked', keyBase.code, keyBase.type, key);
+        //   console.log('key-clicked', index, res);
+        // }
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
@@ -119,18 +124,25 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   console.log('handleGroupCreated name', name);
   console.log('handleGroupCreated listDetail', listDetail);
 
-  const key = keys[0].key;
+  let tmpCode = code;
+  let tmpKey = keys[0].key;
+  if (isEdit) {
+    tmpCode = editItemCode;
+    tmpKey = editItem.base.key;
+  }
+  console.log('addShortcut tmpCode editItemCode', tmpCode, editItemCode);
+  // const key = keys[0].key;
   const type = KeyTypeEnum.MT;
   try {
     const ret = await addMT({
       type,
-      code,
+      code: tmpCode,
       time: inputTime.value,
       keys: keys.map((item: any) => ({ code: item.code, type: item.type })),
-      key
+      key: tmpKey
     });
     console.log('addMT', ret);
-
+    updateGroupList();
     // emit(
     //   'key-clicked',
     //   {
@@ -141,23 +153,23 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
     //   { toDevice: false }
     // );
 
-    mtGroupList.value.push({
-      base: {
-        code,
-        name,
-        key: keys[0].key,
-        type: KeyTypeEnum.MT
-      },
-      keyList: listDetail.map((item: any) => {
-        return item.detail;
-      }),
-      keyBaseList: keys.map((keyBase: any) => {
-        return keyBase;
-      })
-    });
+    // mtGroupList.value.push({
+    //   base: {
+    //     code,
+    //     name,
+    //     key: keys[0].key,
+    //     type: KeyTypeEnum.MT
+    //   },
+    //   keyList: listDetail.map((item: any) => {
+    //     return item.detail;
+    //   }),
+    //   keyBaseList: keys.map((keyBase: any) => {
+    //     return keyBase;
+    //   })
+    // });
 
-    const res = getKeyDetail({ code: keys[1].code, type: keys[1].type });
-    updateGroupEffect(keys[0].key!, toRaw(currentSuperKeyType.value), res);
+    // const res = getKeyDetail({ code: keys[1].code, type: keys[1].type });
+    // updateGroupEffect(keys[0].key!, toRaw(currentSuperKeyType.value), res);
     window.$message!.success($t('businessCommon.executeSuccess'));
   } catch (e) {
     window.$message!.error($t('businessCommon.addFailPlsUpdate'));
@@ -174,7 +186,7 @@ async function handleGroupItemDelete(item: any, idx: number) {
     console.log('handleGroupItemDelete', JSON.stringify(item), idx);
     const ret = await deleteMTByCode({ code: item.base.code });
     console.log('deleteMTByCode', ret);
-    keyboardStore.removeSuperKey(item.base.key, { moduleType: KeyTypeEnum.Combo });
+    // keyboardStore.removeSuperKey(item.base.key, { moduleType: KeyTypeEnum.MT });
 
     mtGroupList.value.splice(idx, 1);
     removeSuperKey(item.base.key!, { moduleType: KeyTypeEnum.MT });
@@ -185,8 +197,10 @@ async function handleGroupItemDelete(item: any, idx: number) {
   }
 }
 async function handleGroupItemEdit(items: any, idx: number) {
+  editItemCode = items.base.code;
   editItem = items;
   inputTime.value = mtList.value[idx].time;
+  isEdit = true;
   editVisible.value = true;
 }
 async function handleGroupItemRename(items: any, idx: number) {
