@@ -67,7 +67,7 @@ function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
 async function updateGroupList() {
   const { rs } = await getRSList();
   rsGroupList.value = rs.map(item => {
-    const { code, type, name } = item;
+    const { code, type } = item;
     return {
       base: { code, type, name },
       keyList: item.keys.map(keyBase => {
@@ -84,7 +84,7 @@ async function updateGroupList() {
 updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   try {
-    await addRS({ code, keys, name });
+    await addRS({ code, keys });
     rsGroupList.value.push({
       base: {
         code,
