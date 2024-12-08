@@ -8,7 +8,7 @@ const lang: App.BusinessLanguage.Schema = {
     delete: '删除',
     save: '保存',
     delSuccess: '删除成功',
-
+    executeSuccess: '执行成功',
     delFailPlsUpdate: '删除失败, 请更新最新固件后重试',
     set: '设置',
 

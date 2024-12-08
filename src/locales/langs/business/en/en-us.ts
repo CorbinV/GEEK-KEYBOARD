@@ -9,6 +9,7 @@ const lang: App.BusinessLanguage.Schema = {
     save: 'Save',
     delSuccess: '"Deleted Successfully',
     addSuccess: 'Add Successfully',
+    executeSuccess: 'Execute Success',
     delFailPlsUpdate: '"Deletion failed. Please update to the latest firmware and try again.',
     set: 'Setting',
     addFailPlsUpdate: '添加失败，请更新最新固件后重试',

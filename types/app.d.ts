@@ -473,6 +473,7 @@ declare namespace App {
         delete: string;
         save: string;
         delSuccess: string;
+        executeSuccess: string;
         delFailPlsUpdate: string;
         addSuccess: string;
         set: string;
