@@ -1,41 +1,105 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
-import { getPerf } from '@/api/keyConfig-rapid-trigger';
-import type { SetKeyPerf } from '@/api/modules/keyboard-rapid-trigger';
+import { getPerf, setPerf } from '@/api/keyConfig-rapid-trigger';
+
 import CircleShow from '@/components/custom/circle-show.vue';
 import Slider from '@/components/custom/zw-slider.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
 import KeyMove from './key-move.vue';
 export type Opetion = { key: number; label: string };
-const argShow = ref(true);
+
+const EXE_DEAD_ZONE = 0;
+const RAPID_TRIGGER_SWITCH = 1;
+const DOWN_LMD_VALUE = 2;
+const UP_LMD_VALUE = 3;
+const BREAK_OPTIMIZE_SWITCH = 4;
+const SHAKE_LEAVE = 5;
+const RT_TOP_DEAD_ZONE = 6;
+const RT_BELOW_DEAD_ZONE = 7;
+
+const exeDeadZoneValue = ref<number>(0);
+const rapidTiggerSwitch = ref<boolean>(false);
+const downLMD = ref<number>(0);
+const upLMD = ref<number>(0);
+const breakOptimize = ref<boolean>(false);
+const shakeLeaveValue = ref<number>(0);
+const rtTopDeadValue = ref<number>(0);
+const rtBelowDeadValue = ref<number>(0);
+
 const showModal = ref(false);
-const lmdLock = ref(true);
+const argShow = ref(true);
+// const lmdLock = ref(true);
 const selectedKey = ref<string[]>([]);
-const sliderValue = ref(33);
+
 // const triggerPoint = ref(66);
 const rateOption = ref();
 const shakeOption = ref();
-const perf = ref<SetKeyPerf>({ actDeadZone: [0, 0] } as SetKeyPerf);
-
+// const perf = ref<GetKeyPerf>;
+// 正确的 ref 定义方式
+const perfArr = ref<number[]>([0, 0, 0, 0, 0, 0, 0, 0]); // perfArr 应该是一个 Ref 类型
 const curRate = ref({ key: 0, label: '' });
 const curShake = ref({ key: 0, label: '' });
 // const curRate = ref({});
-const shakelayer = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('repidTrigger.high')];
+const shakelayerLabel = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('repidTrigger.high')];
 const keyboardStore = useKeyboardStore();
 
 function rateSelect(key: number) {
   curRate.value = rateOption.value.find((item: Opetion) => item.key === key);
+  setPerfIndex(SHAKE_LEAVE, key);
+  setDevPerf();
 }
 function shakeSelect(key: number) {
   curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
+  setPerfIndex(SHAKE_LEAVE, key);
+  setDevPerf();
 }
 
 function reset() {}
 function lock() {}
 
+// 传入索引，返回对应的数据项
+function getPerfIndex(index: number) {
+  if (index >= 0 && index < perfArr.value.length) {
+    return perfArr.value[index]; // 根据索引获取数据
+  }
+  return 0; // 根据索引获取数据
+}
+
+function rapidSwitch(value: boolean) {
+  const rapid = value ? 1 : 0;
+  setPerfIndex(RAPID_TRIGGER_SWITCH, rapid);
+  setDevPerf();
+}
+function breakOptimizeSwitch(value: boolean) {
+  const rapid = value ? 1 : 0;
+  setPerfIndex(BREAK_OPTIMIZE_SWITCH, rapid);
+  setDevPerf();
+}
+// 滑动中事件处理
+function downLmdValue(value: number) {
+  setPerfIndex(DOWN_LMD_VALUE, value);
+  setDevPerf();
+}
+function upLmdSlide(value: number) {
+  setPerfIndex(UP_LMD_VALUE, value);
+  setDevPerf();
+}
+function rtTopDeadSlide(value: number) {
+  setPerfIndex(RT_TOP_DEAD_ZONE, value);
+  setDevPerf();
+}
+function rtBelowDeadSlide(value: number) {
+  setPerfIndex(RT_BELOW_DEAD_ZONE, value);
+  setDevPerf();
+}
+function setPerfIndex(index: number, value: number) {
+  perfArr.value[index] = value;
+}
+
 const { selectedKeys } = toRefs(keyboardStore);
+
 watch(
   () => selectedKeys.value,
   (nLength, oLength) => {
@@ -56,34 +120,45 @@ watch(
   }
 );
 
-// 滑动中事件处理
-const onSliding = (value: number) => {
-  if (lmdLock.value) {
-    console.log('滑动中，当前值:', value);
-  } else {
-    console.log('滑动中，当前值:', value);
-  }
-};
 function setAxosome() {}
 // 1. 创建一个 Apple 实例并使其响应式
-async function getPerf1() {
-  perf.value = await getPerf();
-  // console.log(calibration.value);
-  // 当前最大轮询率
-  rateOption.value = perf.value.rate.map(num => ({
-    key: num,
-    label: `${num / 1000}K`
-  }));
-  curRate.value = rateOption.value.find((item: Opetion) => item.key === perf.value.curRate);
+async function getDevPerf() {
+  const x = await getPerf();
+  perfArr.value = x.tary;
+  exeDeadZoneValue.value = getPerfIndex(EXE_DEAD_ZONE);
+  rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
+  breakOptimize.value = getPerfIndex(BREAK_OPTIMIZE_SWITCH) === 1;
+  downLMD.value = getPerfIndex(DOWN_LMD_VALUE);
+  upLMD.value = getPerfIndex(UP_LMD_VALUE);
+  shakeLeaveValue.value = getPerfIndex(SHAKE_LEAVE);
+  rtTopDeadValue.value = getPerfIndex(RT_TOP_DEAD_ZONE);
+  rtBelowDeadValue.value = getPerfIndex(RT_BELOW_DEAD_ZONE);
+
+  // // console.log(calibration.value);
+  // // 当前最大轮询率
+  // console.log('滑动中，当前值:', perfArr.value);
+  // // rateOption.value = perf.value.rate.map(num => ({
+  // //   key: num,
+  // //   label: `${num / 1000}K`
+  // // }));
+  // curRate.value = rateOption.value.find((item: Opetion) => item.key === perf.value.curRate);
   // 当前防抖等级
-  shakeOption.value = shakelayer.map((label, index) => ({
+  shakeOption.value = shakelayerLabel.map((label, index) => ({
     key: index,
     label
   }));
+  curShake.value.label = shakelayerLabel[shakeLeaveValue.value];
 
-  curShake.value = shakeOption.value.find((item: Opetion) => item.key === perf.value.shakeIndex);
+  // // curShake.value = shakeOption.value.find((item: Opetion) => item.key === perf.value.shakeIndex);
 }
-getPerf1();
+async function setDevPerf() {
+  const perf = { key: ['A', 'B'], tary: perfArr.value };
+  console.log(perf);
+  await setPerf(perf);
+
+  //  await addOks({ code, keys, name });
+}
+getDevPerf();
 </script>
 
 <template>
@@ -115,20 +190,6 @@ getPerf1();
           </NDropdown>
         </div>
 
-        <div class="flex-raw flex items-center pt-10px">
-          <p class="vertical-bar"></p>
-          <p class="... text-lg">{{ $t('repidTrigger.triggerDeadZone') }}</p>
-          <!-- <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p> -->
-        </div>
-
-        <Slider v-model="sliderValue" class="mt-10px"></Slider>
-
-        <div class="flex-raw flex items-center pt-10px">
-          <p class="vertical-bar"></p>
-          <p class="... text-lg">{{ $t('repidTrigger.liftDeadZone') }}</p>
-          <!-- <p class="... text-[14px] text-#999999">（ 死区为0时，轻微抖动就会触发，设置请谨慎）</p> -->
-        </div>
-        <Slider v-model="sliderValue" class="mt-10px"></Slider>
         <KeyMove></KeyMove>
         <div class="flex-raw mt-30px flex justify-between">
           <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
@@ -149,7 +210,8 @@ getPerf1();
             <p class="... text-lg text-#999999">{{ $t('repidTrigger.fastTrigger') }}</p>
           </div>
 
-          <NSwitch v-model:value="perf.quick"></NSwitch>
+          <!-- <NSwitch v-model:value="perf.quick"></NSwitch> -->
+          <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
         </div>
         <span class="... border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
           {{ $t('repidTrigger.fastTriggerDesc') }}
@@ -159,7 +221,7 @@ getPerf1();
           <p class="... text-lg">{{ $t('repidTrigger.pressSensitivity') }}</p>
         </div>
         <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-        <Slider v-model="sliderValue" class="pt-10px" @sliding="onSliding"></Slider>
+        <Slider v-model="downLMD" class="pt-10px" @stop-sliding="downLmdValue"></Slider>
 
         <div class="mt-10px flex flex-row items-center justify-center gap-5">
           <div class="h-1px w-20% bg-[#ccc]"></div>
@@ -173,7 +235,7 @@ getPerf1();
           <p class="... text-lg">{{ $t('repidTrigger.liftSensitivity') }}</p>
         </div>
         <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-        <Slider v-model="sliderValue" class="pt-10px" @sliding="onSliding"></Slider>
+        <Slider v-model="upLMD" class="pt-10px" @sliding="upLmdSlide"></Slider>
         <p class="... mt-10px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
           {{ $t('repidTrigger.advancedSettings') }}
         </p>
@@ -183,10 +245,10 @@ getPerf1();
             <p>{{ $t('repidTrigger.advancedSettings') }}</p>
 
             <p class="mt-40px w-100% text-[18px]">{{ $t('repidTrigger.rtTopDeadZone') }}</p>
-            <Slider v-model="sliderValue" class="mt-20px"></Slider>
+            <Slider v-model="rtTopDeadValue" onsclass="mt-20px" @stop-sliding="rtTopDeadSlide"></Slider>
 
             <p class="mt-20px w-100% text-[18px]">{{ $t('repidTrigger.rtBellowDeadZone') }}</p>
-            <Slider v-model="sliderValue" class="mt-20px"></Slider>
+            <Slider v-model="rtBelowDeadValue" class="mt-20px" @stop-sliding="rtBelowDeadSlide"></Slider>
 
             <div class="mt-30px flex flex-row justify-center gap-70px">
               <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
@@ -210,7 +272,7 @@ getPerf1();
             <p class="... text-lg">{{ $t('repidTrigger.debounceOptimization') }}</p>
           </div>
 
-          <NSwitch v-model:value="perf.breakOptimize"></NSwitch>
+          <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
         </div>
         <div class="flex-raw back flex justify-between border-b-1px border-[#232327] pb-10px pt-10px">
           <div class="flex-raw flex items-center">

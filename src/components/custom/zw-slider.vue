@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void; // 更新外部值
+  (e: 'stopSliding', value: number): void; // 更新外部值
 }>();
 
 // 内部的 sliderValue 绑定到外部的 modelValue
@@ -43,7 +44,6 @@ const startSliding = () => {
 const sliding = () => {
   if (isSliding.value) {
     emit('update:modelValue', sliderValue.value); // 触发更新外部值
-    console.log('Sliding in progress:', sliderValue.value);
   }
 };
 
@@ -51,7 +51,7 @@ const sliding = () => {
 const stopSliding = () => {
   if (isSliding.value) {
     isSliding.value = false;
-    console.log('Sliding stopped at value:', sliderValue.value);
+    emit('stopSliding', sliderValue.value); // 触发更新外部值
   }
 };
 

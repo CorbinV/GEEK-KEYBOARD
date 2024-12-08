@@ -24,7 +24,7 @@ const onInput = (event: Event) => {
     <!-- <div class="slider-container"></div> -->
     <!-- <input v-model="sliderValue" type="range" :min="minSlider" :max="maxSlider" /> -->
 
-    <div class="ml-115px flex flex-col items-center justify-center bg-#0e1eb4">
+    <div class="ml-115px flex flex-col items-center justify-center">
       <!-- 滑杆条 -->
       <!-- 显示当前值 -->
       <div class="value-display">{{ sliderValue }}mm</div>
@@ -60,7 +60,7 @@ const onInput = (event: Event) => {
 .vertical-slider {
   writing-mode: bt-lr; /* 使滑杆垂直 */
   -webkit-appearance: slider-vertical; /* Webkit浏览器支持 */
-  width: 8px;
+  width: 100px;
   height: 150px;
   margin: 10px 0;
 }
