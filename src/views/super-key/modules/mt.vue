@@ -8,25 +8,31 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import { addMT, deleteMTByCode, getMTList, resetMTName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
+import { formatLableSub3 } from '@/hooks/common/format';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
-const mtGroupList = ref<any>([]);
+type GroupItem = {
+  base: { code: number; type: KeyTypeEnum; name: string; key?: string };
+  keyList: any[];
+  keyBaseList: any[];
+};
+const mtGroupList = ref<GroupItem[]>([]);
 const editVisible = ref(false);
 const modalTitle = ref('单击/按住');
 const MAC_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
-const { getKeyDetail, updateSuperKey } = keyboardStore;
+const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.MT;
 // 按住时间
 const inputTime = ref(100);
 const mtList = ref<any>([]);
-let editItem = reactive<{
-  base: { code: number; type: KeyTypeEnum; name: string };
-  keyList: any[];
-  keyBaseList: any[];
-}>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
+let editItem = reactive<GroupItem>({
+  base: { code: -1, type: KeyTypeEnum.None, name: '', key: '' },
+  keyList: [],
+  keyBaseList: []
+});
 const { selectedKeys } = toRefs(keyboardStore);
 const kbCfg = toRef(keyboardStore, 'kbCfg');
 
@@ -67,23 +73,7 @@ function handleAddClicked() {
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
   if (currentSuperKeyType.value === KeyTypeEnum.MT) {
-    const formatLable = (obj: any) => {
-      if (obj.type !== 'str') return obj;
-
-      const label = obj.label.trim() as string;
-
-      if (label.includes(' ')) {
-        const formatted = label
-          .split(' ')
-          .filter(word => word.length > 0)
-          .map(word => word[0])
-          .join('');
-        return { ...obj, label: formatted };
-      }
-      const formatted = label.length > 2 ? label.slice(0, 2) : label;
-      return { ...obj, label: formatted };
-    };
-    const mtCfg = formatLable(res);
+    const mtCfg = formatLableSub3(res);
     updateSuperKey(key!, { moduleType, mtCfg });
   } else {
     updateSuperKey(key!, { moduleType });
@@ -93,12 +83,12 @@ async function updateGroupList() {
   const { mt } = await getMTList();
   mtList.value = mt;
   mtGroupList.value = mt.map(item => {
-    const { code, type, name } = item;
+    const { code, type, name, key } = item;
     return {
-      base: { code, type, name },
+      base: { code, type, name, key },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
+        updateGroupEffect(key!, toRaw(currentSuperKeyType.value), res);
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
@@ -110,34 +100,48 @@ async function updateGroupList() {
 updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
   try {
-    await addMT({ code, time: inputTime.value, keys, name });
+    await addMT({
+      code,
+      time: inputTime.value,
+      keys: keys.map((item: any) => ({ code: item.code, type: item.type })),
+      name
+    });
     mtGroupList.value.push({
       base: {
         code,
-        name
+        name,
+        key: keys[0].key,
+        type: KeyTypeEnum.MT
       },
       keyList: listDetail.map((item: any) => {
         return item.detail;
+      }),
+      keyBaseList: keys.map((keyBase: any) => {
+        return keyBase;
       })
     });
-    window.$message!.success($t('businessCommon.delSuccess'));
+
+    const res = getKeyDetail({ code: keys[1].code, type: keys[1].type });
+    updateGroupEffect(keys[0].key!, toRaw(currentSuperKeyType.value), res);
+    window.$message!.success($t('businessCommon.executeSuccess'));
   } catch (e) {
     window.$message!.error($t('businessCommon.addFailPlsUpdate'));
     console.error(e);
   }
 }
 
-function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.MT } }) {
+function handleGroupItemClicked({ base }: { base: GroupItem['base'] }) {
   const { code, type } = base;
   emit('key-clicked', {
     code,
     type
   });
 }
-async function handleGroupItemDelete(item: { code: number }, idx: number) {
+async function handleGroupItemDelete(item: GroupItem, idx: number) {
   try {
-    await deleteMTByCode({ code: item.code });
+    await deleteMTByCode({ code: item.base.code });
     mtGroupList.value.splice(idx, 1);
+    removeSuperKey(item.base.key!, { moduleType: KeyTypeEnum.MT });
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
     window.$message!.error($t('businessCommon.delFailPlsUpdate'));
@@ -145,8 +149,6 @@ async function handleGroupItemDelete(item: { code: number }, idx: number) {
   }
 }
 async function handleGroupItemEdit(items: any, idx: number) {
-  // feat: open edit modal(dialog), and transform data
-  console.log('handleGroupItemEdit', items, idx);
   editItem = items;
   inputTime.value = mtList.value[idx].time;
   editVisible.value = true;
@@ -187,7 +189,7 @@ async function handleReNameSave(data: { name: string }) {
       <BasicGroupAdd icon="add" :desc="$t('supperKey.addClickDown')" @click="handleAddClicked" />
       <BasicGroupItem
         v-for="(item, idx) in mtGroupList"
-        :key="item.code"
+        :key="item.base.code"
         :base="item.base"
         :key-list="item.keyList"
         code-preffix="M"
