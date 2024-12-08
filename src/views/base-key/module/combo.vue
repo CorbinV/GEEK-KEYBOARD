@@ -46,7 +46,7 @@ async function updateGroupList() {
     console.log('getShortcuts ret', shortcuts);
     groupList.value = shortcuts.map(item => {
       const { code, type } = item;
-      const name = `组合按键${item.code}`;
+      const name = `组合按键${item.code + 1}`;
       return {
         base: { code, type, name },
         keyList: [] as any[]
@@ -140,9 +140,9 @@ async function handleGroupItemEdit(items: any, idx: number) {
   }
 }
 function generateGroupCode() {
-  if (groupList.value.length === 0) return 1;
+  if (groupList.value.length === 0) return 0;
   const usedCodes = new Set(groupList.value.map((group: { base: { code: number } }) => group.base.code));
-  let newCode = 1;
+  let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
   }
