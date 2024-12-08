@@ -5,13 +5,11 @@ export const getShortcuts = {
     shortcuts: [
       {
         type: 3,
-        key: 'A',
-        code: 4
+        code: 0
       },
       {
         type: 3,
-        key: 'C',
-        code: 5
+        code: 1
       }
     ]
   }
@@ -21,18 +19,23 @@ export const getShortcut = {
   code: 0,
   data: {
     type: 3,
-    code: 1,
-    key: 'A',
+    code: 0,
     keys: [
       {
         type: 0,
-        key: 'G',
         code: 4
       },
       {
         type: 0,
-        key: 'L',
         code: 5
+      },
+      {
+        type: 0,
+        code: 6
+      },
+      {
+        type: 0,
+        code: 7
       }
     ]
   }
@@ -41,7 +44,7 @@ export const addShortcut = {
   name: 'addShortcut',
   code: 0
 };
-export const deleteShortcut = {
+export const delShortcut = {
   name: 'delShortcut',
   code: 0
 };

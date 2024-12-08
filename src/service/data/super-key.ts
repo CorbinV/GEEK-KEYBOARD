@@ -7,7 +7,6 @@ export const getOKSList = {
       {
         type: 7,
         code: 1,
-        name: '快速急停AD',
         keys: [
           {
             key: 'W',
@@ -24,7 +23,6 @@ export const getOKSList = {
       {
         type: 7,
         code: 2,
-        name: '快速急停WS',
         keys: [
           {
             key: 'Q',
@@ -53,8 +51,8 @@ export const getOKS = {
   name: 'getOKS',
   code: 0,
   data: {
+    type: 7,
     code: 1,
-    name: '快速急停AD',
     keys: [
       {
         key: 'W',
@@ -84,7 +82,6 @@ export const getSOCDList = {
         type: 8,
         code: 1,
         trigger: 1,
-        name: 'SOCD1',
         keys: [
           {
             key: 'B',
@@ -102,7 +99,6 @@ export const getSOCDList = {
         type: 8,
         code: 2,
         trigger: 2,
-        name: 'SOCD2',
         keys: [
           {
             key: 'D',
@@ -131,8 +127,8 @@ export const getSOCD = {
   name: 'getSOCD',
   code: 0,
   data: {
+    type: 8,
     code: 1,
-    name: 'SOCD1',
     trigger: 1,
     keys: [
       {
@@ -162,8 +158,6 @@ export const getRSList = {
       {
         type: 11,
         code: 1,
-        trigger: 1,
-        name: 'RS1',
         keys: [
           {
             key: 'H',
@@ -180,8 +174,6 @@ export const getRSList = {
       {
         type: 11,
         code: 2,
-        trigger: 2,
-        name: 'RS2',
         keys: [
           {
             key: 'J',
@@ -210,9 +202,8 @@ export const getRS = {
   name: 'getRS',
   code: 0,
   data: {
+    type: 11,
     code: 1,
-    name: 'RS1',
-    trigger: 1,
     keys: [
       {
         key: 'H',
@@ -237,20 +228,19 @@ export const getMTList = {
   name: 'getMTList',
   code: 0,
   data: {
+    len: 8,
     mt: [
       {
         type: 9,
-        code: 1,
+        code: 0,
         time: 100,
-        name: 'MT1',
+        key: 'A',
         keys: [
           {
-            key: 'J',
             code: 13,
             type: 0
           },
           {
-            key: 'K',
             code: 14,
             type: 0
           }
@@ -258,17 +248,15 @@ export const getMTList = {
       },
       {
         type: 9,
-        code: 2,
+        code: 1,
         time: 200,
-        name: 'MT2',
+        key: 'B',
         keys: [
           {
-            key: 'L',
             code: 15,
             type: 0
           },
           {
-            key: 'O',
             code: 18,
             type: 0
           }
@@ -290,9 +278,9 @@ export const getMT = {
   name: 'getMT',
   code: 0,
   data: {
+    type: 9,
     code: 1,
-    name: 'MT1',
-    trigger: 1,
+    time: 100,
     keys: [
       {
         key: 'J',
@@ -322,8 +310,6 @@ export const getTGLList = {
       {
         type: 10,
         code: 1,
-        trigger: 1,
-        name: 'TGL1',
         keys: [
           {
             key: 'P',
@@ -341,7 +327,6 @@ export const getTGLList = {
         type: 10,
         code: 2,
         trigger: 2,
-        name: 'TGL2',
         keys: [
           {
             key: 'U',
@@ -370,9 +355,8 @@ export const getTGL = {
   name: 'getTGL',
   code: 0,
   data: {
+    type: 10,
     code: 1,
-    name: 'TGL1',
-    trigger: 1,
     keys: [
       {
         key: 'P',
