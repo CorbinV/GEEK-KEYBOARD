@@ -222,14 +222,14 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         disable: []
       };
       const fetchData = async () => {
-        logger('fetchData pageNo', pageNo);
+        logger('fetchData pageNo 🟢', pageNo);
         const result = await getKeysCfgByLayer({
           config,
           layer,
           pageNo,
           pageSize
         });
-        logger('fetchData result', JSON.stringify(result));
+        logger('fetchData result 🟢🟢', result);
         if (pageNo === 1) {
           data = { ...result };
         } else {
@@ -245,7 +245,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         await fetchData();
       };
       await fetchData();
-      logger('fetchData', JSON.stringify(data));
+      logger('fetchData 🟩', data);
       const superKeyMap: any = {};
       Object.keys(data.smart).forEach((key: any) => {
         const superKey = generateSuperKey();

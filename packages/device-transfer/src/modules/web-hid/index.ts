@@ -90,7 +90,7 @@ export class HIDProtocolController extends EventTarget {
             reject(new Error('Request timeout'));
           }
         }, this.options.timeout);
-
+        console.log('sendWithRetry🟢', messageId, data);
         this.messageQueue.add(messageId, {
           name: data.name,
           callback: (response: HIDResponse) => {
@@ -138,6 +138,7 @@ export class HIDProtocolController extends EventTarget {
         console.log('not matchingRequests', name);
         return;
       }
+      console.log('handleInput🟩', message);
       callback(message);
       this.messageQueue.remove(messageId!);
       // }
