@@ -31,9 +31,16 @@ async function handleConnectBtnClicked() {
 
 <template>
   <div>
-    <div>
-      {{ isConnected }}
-      <NButton @click="handleConnectBtnClicked">connect</NButton>
+    <div class="h-full flex items-center justify-center">
+      <NSpin :show="isConnected">
+        <div
+          class="h-30 w-90 flex flex-col items-center justify-center gap-2.5 border border border-[#ffffff] rounded-lg border-dashed text-base text-[#3C8DF4] font-normal"
+          @click="handleConnectBtnClicked"
+        >
+          <i class="iconfont icon-add" style="color: #ffffff"></i>
+          <span class="text-[#ffffff]">请连接设备</span>
+        </div>
+      </NSpin>
     </div>
     <!-- <Dynamic class="h-2/5"/> -->
     <!-- <KeyboardContainer /> -->
