@@ -34,7 +34,7 @@ function updateKeyInfo(data: KeyInfo) {
   keyInfo.triggerPoint = triggerPoint;
   keyInfo.rtTrigger = rtTrigger;
   keyInfo.rtReset = rtReset;
-  if (data.mt.length) {
+  if (data.mt?.length) {
     // feat: add new function to get config by key type and code
     // keyInfo.params = ;
   }
@@ -59,17 +59,15 @@ async function handleDisableKey() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-y-4 low-layer-bg p-2">
+  <div class="min-w-168px flex flex-col gap-y-4 low-layer-bg p-2">
     <h1 class="text-center text-base">{{ $t('macro.keyInfo') }}</h1>
     <div class="flex flex-col text-c-primary">
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>
           {{ $t('baseKey.keyboard.admin1', { total: keyLabel }) }}
-          <!-- {{ $t('macro.keyInfo') }}默认{{ keyLabel || '/' }} -->
         </span>
         <span>
           {{ $t('baseKey.keyboard.current') }}
-          {{ $t('baseKey.keyboard.admin1', { total: keyLabel }) }}
           <i v-if="showIcon" class=""></i>
           <span>
             {{ keyInfo.currentKey?.label }}
@@ -98,8 +96,8 @@ async function handleDisableKey() {
       </div>
       -->
     </div>
-    <div>
-      <NButton type="info" ghost size="small" class="mr-2" @click="handleDisableKey">
+    <div class="no-wrap flex gap-x-2">
+      <NButton type="info" ghost size="small" @click="handleDisableKey">
         {{ $t('baseKey.keyboard.bandKey') }}
       </NButton>
       <NButton type="info" ghost size="small" @click="handleResetKey">{{ $t('baseKey.keyboard.recvoer') }}</NButton>
