@@ -1,4 +1,4 @@
-import requestClient from '@/utils/requset/deviceClient';
+import requestClient from './config';
 import type { MacroCfg, Macros } from './modules/macro';
 
 export function getMacros() {
