@@ -6,7 +6,7 @@ import type {
   Router
 } from 'vue-router';
 import type { RouteKey, RoutePath } from '@elegant-router/types';
-import { toRef } from 'vue';
+import { toRef, watch } from 'vue';
 import { useAuthStore } from '@/store/modules/auth';
 import { useRouteStore } from '@/store/modules/route';
 import { localStg } from '@/utils/storage';
@@ -20,7 +20,7 @@ const needConnectDevice = VITE_USE_CONNECT_DEVICE === 'Y';
  */
 export function createRouteGuard(router: Router) {
   const deviceStore = useDeviceStore();
-  const isConnected = toRef(deviceStore.isConnected);
+  const isConnected = toRef(deviceStore, 'isConnected');
   const routerMode = VITE_ROUTER_HISTORY_MODE === 'history';
   router.beforeEach(async (to, from, next) => {
     const rootRoute: RouteKey = 'root';
@@ -100,6 +100,16 @@ export function createRouteGuard(router: Router) {
       return condition;
     });
   });
+  watch(
+    () => isConnected.value,
+    nVal => {
+      if (needConnectDevice && !nVal) {
+        router.push({
+          name: 'connect'
+        });
+      }
+    }
+  );
 }
 
 /**
@@ -109,8 +119,10 @@ export function createRouteGuard(router: Router) {
  */
 async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw | null> {
   const routeStore = useRouteStore();
+
   const deviceStore = useDeviceStore();
-  const isConnected = toRef(deviceStore.isConnected);
+  const isConnected = toRef(deviceStore, 'isConnected');
+
   const notFoundRoute: RouteKey = 'not-found';
   const isNotFoundRoute = to.name === notFoundRoute;
 
@@ -159,7 +171,7 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
 
     return null;
   }
-  if (needConnectDevice) {
+  if (needConnectDevice && !isConnected.value) {
     const location: RouteLocationRaw = {
       name: 'connect',
       query: { redirect: to.fullPath }
