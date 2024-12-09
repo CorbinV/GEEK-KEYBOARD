@@ -149,7 +149,11 @@ function checkKeyComfirm() {
     window.$message!.info('请选择按键');
     return true;
   }
-  if (selectedKeyInfo.list[0].base.key === selectedKeyInfo.list[1].base.key) {
+  console.log('selectedKeyInfo.list', JSON.stringify(selectedKeyInfo.list));
+  if (
+    selectedKeyInfo.list[0].base.type === selectedKeyInfo.list[1].base.type &&
+    selectedKeyInfo.list[0].base.code === selectedKeyInfo.list[1].base.code
+  ) {
     window.$message!.info('请选择不同的按键');
     return true;
   }
