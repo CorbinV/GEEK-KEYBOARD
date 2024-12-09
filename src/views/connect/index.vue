@@ -37,14 +37,21 @@ async function handleConnectBtnClicked() {
 
 <template>
   <div class="h-full w-full flex flex-col justify-center">
-    <div class="h-full flex items-center justify-center">
+    <div class="mx-8 h-25 flex items-center justify-between bg-[##222226]">
+      <SystemLogo class="h-10 text-30 text-primary" />
+      <!-- <icon-ant-design-setting-outlined class="text-icon" /> -->
+    </div>
+    <div class="h-full flex justify-center bg-[#000000] pt-45">
       <NSpin :show="isConnected">
-        <div
-          class="h-30 w-90 flex flex-col items-center justify-center gap-2.5 border border border-[#ffffff] rounded-lg border-dashed text-base text-[#3C8DF4] font-normal"
-          @click="handleConnectBtnClicked"
-        >
-          <i class="iconfont icon-add" style="color: #ffffff"></i>
-          <span class="text-[#ffffff]">请连接设备</span>
+        <div class="w-173 flex flex-col items-center text-center text-4 text-#999999">
+          <span>
+            Explore unique Settings and personalize your device to your preferences. relaxed Access, configure easily,
+            save easily - win easily!
+          </span>
+
+          <button class="mt-14 h-15 w-42 rounded bg-[#3c8df4] text-[#fff]" @click="handleConnectBtnClicked">
+            连接设备
+          </button>
         </div>
       </NSpin>
     </div>
