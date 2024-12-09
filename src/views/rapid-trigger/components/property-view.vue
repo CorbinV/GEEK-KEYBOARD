@@ -34,7 +34,7 @@ const curKey = ref<string>('');
 
 const showModal = ref(false);
 const argShow = ref(true);
-// const lmdLock = ref(true);
+const lmdLock = ref(true);
 const selectedKey = ref<string[]>([]);
 
 // const triggerPoint = ref(66);
@@ -71,7 +71,10 @@ function shakeSelect(key: number) {
 }
 
 function reset() {}
-function lock() {}
+function lock() {
+  lmdLock.value = !lmdLock.value;
+  console.log(lmdLock.value);
+}
 
 // 传入索引，返回对应的数据项
 function getPerfIndex(index: number) {
@@ -93,16 +96,29 @@ function breakOptimizeSwitch(value: boolean) {
 }
 // 滑动中事件处理
 function downLmdValue(value: number) {
-  console.log('11111111111', value);
   setPerfIndex(DOWN_LMD_VALUE, convertValue(value));
+  if (lmdLock.value) {
+    setPerfIndex(UP_LMD_VALUE, convertValue(value));
+  }
   setDevPerf();
 }
 function upLmdSlide(value: number) {
-  console.log('11111111111', value);
   setPerfIndex(UP_LMD_VALUE, convertValue(value));
+  if (lmdLock.value) {
+    setPerfIndex(DOWN_LMD_VALUE, convertValue(value));
+  }
   setDevPerf();
 }
-
+function upLmdSlideUpdate(value: number) {
+  if (lmdLock.value) {
+    downLMD.value = value;
+  }
+}
+function downLmdSlideUpdate(value: number) {
+  if (lmdLock.value) {
+    upLMD.value = value;
+  }
+}
 function convertValue(x: number, min = 0.01, max = 3) {
   return Math.ceil(1 + ((x - min) / (max - min)) * (255 - 1));
 }
@@ -198,7 +214,10 @@ async function setDevPerf() {
 }
 
 function exeDeadSlidingStop(value: number) {
-  setPerfIndex(EXE_DEAD_ZONE, Math.ceil((value * 10 * 255) / 35));
+  console.log('2222222222222222', value);
+  const xxx = Math.floor((value * 10 * 255) / 35);
+  console.log('2222222222222222', xxx);
+  setPerfIndex(EXE_DEAD_ZONE, xxx);
   setDevPerf();
 }
 async function getDevRate() {
@@ -276,12 +295,21 @@ getDevRate();
           <p class="... text-18px">{{ $t('repidTrigger.pressSensitivity') }}</p>
         </div>
         <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-        <Slider v-model="downLMD" class="pt-10px" @stop-sliding="downLmdValue"></Slider>
+        <Slider
+          :model-value="downLMD"
+          class="pt-10px"
+          @update:model-value="downLmdSlideUpdate"
+          @stop-sliding="downLmdValue"
+        ></Slider>
 
         <div class="mt-10px flex flex-row items-center justify-center gap-5">
           <div class="h-1px w-20% bg-[#ccc]"></div>
 
-          <i class="iconfont icon-add text-[30px] text-[#3c8df4]" @click="lock"></i>
+          <i
+            class="iconfont icon-container text-[25px] text-[#fff]"
+            :class="lmdLock ? 'icon-lock-solid' : 'icon-unlock-solid'"
+            @click="lock"
+          ></i>
           <div class="h-1px w-20% bg-[#ccc]"></div>
         </div>
 
@@ -290,7 +318,12 @@ getDevRate();
           <p class="... text-18px">{{ $t('repidTrigger.liftSensitivity') }}</p>
         </div>
         <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-        <Slider v-model="upLMD" class="pt-10px" @stop-sliding="upLmdSlide"></Slider>
+        <Slider
+          :model-value="upLMD"
+          class="pt-10px"
+          @update:model-value="upLmdSlideUpdate"
+          @stop-sliding="upLmdSlide"
+        ></Slider>
         <p class="... mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
           {{ $t('repidTrigger.advancedSettings') }}
         </p>
@@ -363,6 +396,17 @@ getDevRate();
 </template>
 
 <style scoped>
+.icon-container {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #3c8df480;
+  cursor: pointer;
+}
+
 :root {
   --primary-color: #3c8df4;
   --background-color: #171619;
