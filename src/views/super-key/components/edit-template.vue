@@ -123,8 +123,7 @@ function showInfoMessage(message: string): void {
 const checkKeyBinding = (keyId: string, isMT: boolean = false): boolean => {
   const key = kbCfg.value.superKeyMap[keyId];
   if (!key) return false;
-  const isBound =
-    (isMT && (key?.dks || key?.sp.length > 0 || key?.mt !== undefined)) || (!isMT && (key?.dks || key?.sp.length > 0));
+  const isBound = (isMT && (key?.dks || key?.mt !== undefined)) || (!isMT && (key?.dks || key?.sp.length > 0));
   if (isBound) {
     showInfoMessage('按键已绑定其它功能');
   }
@@ -154,7 +153,7 @@ function checkKeyComfirm() {
     window.$message!.info('请选择不同的按键');
     return true;
   }
-  return checkKeyInput(selectedKeyInfo.list[0].base.key ?? '') && checkKeyInput(selectedKeyInfo.list[1].base.key ?? '');
+  return checkKeyInput(selectedKeyInfo.list[0].base.key ?? '') || checkKeyInput(selectedKeyInfo.list[1].base.key ?? '');
 }
 
 async function handleDialogComfirm() {

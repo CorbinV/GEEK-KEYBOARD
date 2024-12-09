@@ -64,10 +64,6 @@ function handleAddClicked() {
     window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
   }
-  if (superKey?.sp?.length) {
-    window.$message!.info($t('supperKey.keyBinedOtherFunc'));
-    return;
-  }
   if (mtGroupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAC_GORUP_CNT }));
     return;
