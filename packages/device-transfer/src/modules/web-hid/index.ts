@@ -10,6 +10,7 @@ export class HIDProtocolController extends EventTarget {
   private messageCounter: number = 0;
   private connected: boolean = false;
   private options: HIDProtocolOptions;
+  private filterConditions: FilterType | null = null;
 
   constructor(options: HIDProtocolOptions = {}) {
     super();
@@ -28,6 +29,7 @@ export class HIDProtocolController extends EventTarget {
   async connect(filters: FilterType) {
     const { usagePage, ...rest } = filters;
     try {
+      this.filterConditions = filters;
       let device: HIDDevice | undefined;
       const pairedDevice = await this.pairedDeviceByFilter(filters);
       if (pairedDevice) {
@@ -49,7 +51,25 @@ export class HIDProtocolController extends EventTarget {
       this.connected = true;
 
       this.device.addEventListener('inputreport', this.handleInput.bind(this));
-      this.device.addEventListener('disconnect', this.handleDisconnect.bind(this));
+      navigator.hid.addEventListener('disconnect', e => {
+        const disconnectDevice = e.device;
+        if (!disconnectDevice || !this.device) {
+          return;
+        }
+        if (disconnectDevice?.productId !== this.filterConditions?.productId) {
+          return;
+        }
+        if (disconnectDevice?.vendorId !== this.filterConditions?.vendorId) {
+          return;
+        }
+        const isTargetDevice = disconnectDevice.collections.some(
+          coll => coll.usagePage === this.filterConditions?.usagePage
+        );
+        if (isTargetDevice) {
+          this.filterConditions = null;
+          this.handleDisconnect();
+        }
+      });
 
       this.dispatchEvent(new CustomEvent('connected'));
     } catch (error) {
