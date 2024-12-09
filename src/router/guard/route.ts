@@ -6,27 +6,32 @@ import type {
   Router
 } from 'vue-router';
 import type { RouteKey, RoutePath } from '@elegant-router/types';
+import { toRef } from 'vue';
 import { useAuthStore } from '@/store/modules/auth';
 import { useRouteStore } from '@/store/modules/route';
 import { localStg } from '@/utils/storage';
-const { VITE_ROUTER_HISTORY_MODE = 'history' } = import.meta.env;
-
+import { useDeviceStore } from '@/store/modules/device';
+const { VITE_ROUTER_HISTORY_MODE = 'history', VITE_USE_CONNECT_DEVICE } = import.meta.env;
+const needConnectDevice = VITE_USE_CONNECT_DEVICE === 'Y';
 /**
  * create route guard
  *
  * @param router router instance
  */
 export function createRouteGuard(router: Router) {
+  const deviceStore = useDeviceStore();
+  const isConnected = toRef(deviceStore.isConnected);
   const routerMode = VITE_ROUTER_HISTORY_MODE === 'history';
   router.beforeEach(async (to, from, next) => {
     const rootRoute: RouteKey = 'root';
     const loginRoute: RouteKey = 'login';
+    const connectRoute: RouteKey = 'connect';
     const noAuthorizationRoute: RouteKey = '403';
     if (routerMode && to.fullPath.includes('index.html')) {
       next({ name: rootRoute });
     }
     const location = await initRoute(to);
-
+    console.log(11111, location, isConnected.value);
     if (location) {
       next(location);
       return;
@@ -43,8 +48,13 @@ export function createRouteGuard(router: Router) {
     const hasRole = authStore.userInfo.roles.some(role => routeRoles.includes(role));
 
     const hasAuth = authStore.isStaticSuper || !routeRoles.length || hasRole;
-
     const routeSwitches: CommonType.StrategicPattern[] = [
+      {
+        condition: needConnectDevice && !isConnected.value && to.name === connectRoute,
+        callback: () => {
+          return next();
+        }
+      },
       // if it is login route when logged in, then switch to the root page
       {
         condition: isLogin && to.name === loginRoute,
@@ -99,7 +109,8 @@ export function createRouteGuard(router: Router) {
  */
 async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw | null> {
   const routeStore = useRouteStore();
-
+  const deviceStore = useDeviceStore();
+  const isConnected = toRef(deviceStore.isConnected);
   const notFoundRoute: RouteKey = 'not-found';
   const isNotFoundRoute = to.name === notFoundRoute;
 
@@ -148,7 +159,13 @@ async function initRoute(to: RouteLocationNormalized): Promise<RouteLocationRaw 
 
     return null;
   }
-
+  if (needConnectDevice) {
+    const location: RouteLocationRaw = {
+      name: 'connect',
+      query: { redirect: to.fullPath }
+    };
+    return location;
+  }
   // if the auth route is not initialized, then initialize the auth route
   const isLogin = Boolean(localStg.get('token'));
   // initialize the auth route requires the user to be logged in, if not, redirect to the login page
