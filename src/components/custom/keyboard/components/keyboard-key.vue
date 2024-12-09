@@ -70,7 +70,8 @@ onMounted(async () => {
       return;
     }
     const { code, type } = data;
-    const info = kbCfg.value.keyMap[type]?.code?.[code];
+
+    const info = keyboardStore.getKeyDetail({ code, type });
     updateKeyView(info);
   }
   function updateKeyViewBySelectedDetail(data: any) {
