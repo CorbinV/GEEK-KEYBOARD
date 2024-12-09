@@ -87,7 +87,7 @@ onUnmounted(() => {
     <!-- <div class="slider-container"></div> -->
     <!-- <input v-model="sliderValue" type="range" :min="minSlider" :max="maxSlider" /> -->
 
-    <div class="ml-115px flex flex-col items-center justify-center">
+    <div class="ml-80px flex flex-col items-center justify-center">
       <!-- 滑杆条 -->
       <!-- 显示当前值 -->
       <div class="value-display">{{ sliderValue }}mm</div>
@@ -105,7 +105,7 @@ onUnmounted(() => {
         @mousedown="startSliding"
       />
     </div>
-    <div class="relative h-190px w-145px overflow-hidden">
+    <div class="relative h-190px w-145px overflow-hidden pt-30px">
       <!-- 背景层 -->
 
       <div class="background-layer absolute">

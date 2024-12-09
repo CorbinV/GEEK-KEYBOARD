@@ -93,19 +93,25 @@ function breakOptimizeSwitch(value: boolean) {
 }
 // 滑动中事件处理
 function downLmdValue(value: number) {
-  setPerfIndex(DOWN_LMD_VALUE, value);
+  console.log('11111111111', value);
+  setPerfIndex(DOWN_LMD_VALUE, convertValue(value));
   setDevPerf();
 }
 function upLmdSlide(value: number) {
-  setPerfIndex(UP_LMD_VALUE, value);
+  console.log('11111111111', value);
+  setPerfIndex(UP_LMD_VALUE, convertValue(value));
   setDevPerf();
 }
+
+function convertValue(x: number, min = 0.01, max = 3) {
+  return Math.ceil(1 + ((x - min) / (max - min)) * (255 - 1));
+}
 function rtTopDeadSlide(value: number) {
-  setPerfIndex(RT_TOP_DEAD_ZONE, value);
+  setPerfIndex(RT_TOP_DEAD_ZONE, convertValue(value));
   setDevPerf();
 }
 function rtBelowDeadSlide(value: number) {
-  setPerfIndex(RT_BELOW_DEAD_ZONE, value);
+  setPerfIndex(RT_BELOW_DEAD_ZONE, convertValue(value));
   setDevPerf();
 }
 function setPerfIndex(index: number, value: number) {
@@ -156,16 +162,15 @@ async function getDevPerf(tary: number[]) {
   // console.log(data);
   //  const x = await getPerf(data);
   perfArr.value = tary;
-  exeDeadZoneValue.value = Math.ceil(getPerfIndex(EXE_DEAD_ZONE) / 35) / 10;
 
   rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
   breakOptimize.value = getPerfIndex(BREAK_OPTIMIZE_SWITCH) === 1;
-  downLMD.value = getPerfIndex(DOWN_LMD_VALUE);
-  upLMD.value = getPerfIndex(UP_LMD_VALUE);
+  exeDeadZoneValue.value = Math.ceil(getPerfIndex(EXE_DEAD_ZONE) / 35) / 10;
+  downLMD.value = Math.ceil(getPerfIndex(DOWN_LMD_VALUE) / 30) / 10;
+  upLMD.value = Math.ceil(getPerfIndex(UP_LMD_VALUE) / 30) / 10;
   shakeLeaveValue.value = getPerfIndex(SHAKE_LEAVE);
-  rtTopDeadValue.value = getPerfIndex(RT_TOP_DEAD_ZONE);
-  rtBelowDeadValue.value = getPerfIndex(RT_BELOW_DEAD_ZONE);
-
+  rtTopDeadValue.value = Math.ceil(getPerfIndex(RT_TOP_DEAD_ZONE) / 30) / 10;
+  rtBelowDeadValue.value = Math.ceil(getPerfIndex(RT_BELOW_DEAD_ZONE) / 30) / 10;
   // // console.log(calibration.value);
   // // 当前最大轮询率
   // console.log('滑动中，当前值:', perfArr.value);
@@ -185,13 +190,15 @@ async function getDevPerf(tary: number[]) {
 }
 async function setDevPerf() {
   const perf = { key: [curKey.value], tary: perfArr.value };
+  console.log('2222222222222222', perf.tary);
+
   await setPerf(perf);
 
   //  await addOks({ code, keys, name });
 }
 
 function exeDeadSlidingStop(value: number) {
-  setPerfIndex(EXE_DEAD_ZONE, value * 10 * 35);
+  setPerfIndex(EXE_DEAD_ZONE, Math.ceil((value * 10 * 255) / 35));
   setDevPerf();
 }
 async function getDevRate() {
@@ -211,12 +218,12 @@ getDevRate();
 
 <template>
   <div>
-    <div class="flex-raw flex gap-30px bg-[#171619] p-20px">
+    <div class="flex-raw w-full flex gap-30px bg-[#171619] p-20px">
       <div class="flex flex-col flex-1">
         <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">{{ $t('repidTrigger.showArg') }}</p>
+            <p class="... text-18px">{{ $t('repidTrigger.showArg') }}</p>
           </div>
 
           <NSwitch v-model:value="argShow"></NSwitch>
@@ -224,7 +231,7 @@ getDevRate();
         <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">{{ $t('repidTrigger.pollingRate') }}</p>
+            <p class="... text-18px">{{ $t('repidTrigger.pollingRate') }}</p>
           </div>
 
           <NDropdown
@@ -239,7 +246,7 @@ getDevRate();
         </div>
 
         <KeyMove v-model="exeDeadZoneValue" @stop-sliding="exeDeadSlidingStop"></KeyMove>
-        <div class="flex-raw mt-30px flex justify-between">
+        <div class="flex-raw flex justify-between">
           <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
           <button
             class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
@@ -255,7 +262,7 @@ getDevRate();
         <div class="flex-raw flex justify-between pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg text-#999999">{{ $t('repidTrigger.fastTrigger') }}</p>
+            <p class="... text-18px text-#999999">{{ $t('repidTrigger.fastTrigger') }}</p>
           </div>
 
           <!-- <NSwitch v-model:value="perf.quick"></NSwitch> -->
@@ -266,7 +273,7 @@ getDevRate();
         </span>
         <div class="flex-raw flex items-center pt-10px">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">{{ $t('repidTrigger.pressSensitivity') }}</p>
+          <p class="... text-18px">{{ $t('repidTrigger.pressSensitivity') }}</p>
         </div>
         <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
         <Slider v-model="downLMD" class="pt-10px" @stop-sliding="downLmdValue"></Slider>
@@ -280,11 +287,11 @@ getDevRate();
 
         <div class="flex-raw flex items-center">
           <p class="vertical-bar"></p>
-          <p class="... text-lg">{{ $t('repidTrigger.liftSensitivity') }}</p>
+          <p class="... text-18px">{{ $t('repidTrigger.liftSensitivity') }}</p>
         </div>
         <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
         <Slider v-model="upLMD" class="pt-10px" @stop-sliding="upLmdSlide"></Slider>
-        <p class="... mt-10px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
+        <p class="... mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
           {{ $t('repidTrigger.advancedSettings') }}
         </p>
 
@@ -298,7 +305,7 @@ getDevRate();
             <p class="mt-20px w-100% text-[18px]">{{ $t('repidTrigger.rtBellowDeadZone') }}</p>
             <Slider v-model="rtBelowDeadValue" class="mt-20px" @stop-sliding="rtBelowDeadSlide"></Slider>
 
-            <div class="mt-30px flex flex-row justify-center gap-70px">
+            <div class="mt-88px flex flex-row justify-center gap-70px">
               <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
                 {{ $t('businessCommon.cancel') }}
               </button>
@@ -317,7 +324,7 @@ getDevRate();
         <div class="flex-raw flex justify-between border-b-1px border-[#232327] pb-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">{{ $t('repidTrigger.debounceOptimization') }}</p>
+            <p class="... text-18px">{{ $t('repidTrigger.debounceOptimization') }}</p>
           </div>
 
           <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
@@ -325,7 +332,7 @@ getDevRate();
         <div class="flex-raw back flex justify-between border-b-1px border-[#232327] pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">{{ $t('repidTrigger.debounceLevel') }}</p>
+            <p class="... text-18px">{{ $t('repidTrigger.debounceLevel') }}</p>
           </div>
 
           <NDropdown
@@ -341,7 +348,7 @@ getDevRate();
         <div class="flex-raw flex justify-between pb-10px pt-10px">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">
+            <p class="... text-18px">
               {{ $t('repidTrigger.keyLevelIllustration') }}
               <span class="text-[14px] text-[#999999]">{{ $t('repidTrigger.keyLevelIllustration') }}</span>
             </p>

@@ -57,7 +57,7 @@ function handleAddClicked() {
   const superKey = kbCfg.value.superKeyMap[keyId];
   console.log('handleAddClicked', superKey);
   if (keyId === '') {
-    window.$message!.info($t('supperKey.keyBinedDKSFunc'));
+    window.$message!.info($t('supperKey.plsSelectKey'));
     return;
   }
   if (superKey?.dks) {

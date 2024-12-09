@@ -219,7 +219,15 @@ const lang: App.BusinessLanguage.Schema = {
       '电感轴可以感知双手是否离开键盘，从而进入低功耗模式，当双手靠近键盘时立即唤醒键盘，从而达到降低功耗，和极大的续航',
     gjUpdate: '固件更新',
     checkUpdate: '检查更新',
+
     restore: '恢复出厂设置',
+
+    wakeUpOpenHint: '感应唤醒已开启',
+    wakeUpClosenHint: '感应唤醒已关闭',
+    allKeyOpenHint: '全键无冲已开启',
+    allKeyCloseHint: '全键无冲已关闭',
+    restoreSucess: '恢复出厂成功',
+
     pair24: '2.4g接收器配对'
   },
   global_Setting: {

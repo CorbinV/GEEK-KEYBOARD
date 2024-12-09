@@ -681,6 +681,11 @@ declare namespace App {
         checkUpdate: string;
         restore: string;
         pair24: string;
+        wakeUpOpenHint: string;
+        wakeUpClosenHint: string;
+        allKeyOpenHint: string;
+        allKeyCloseHint: string;
+        restoreSucess: string;
       };
       global_Setting: {
         version: string;

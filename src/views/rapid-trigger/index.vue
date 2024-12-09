@@ -28,7 +28,7 @@ function handleKeyEventTabs(value: string | number) {
     <KeyboardContainer>
       <template #default>
         <div class="h-full flex flex-col items-center">
-          <div class="flex-1">
+          <div class="w-full flex-1">
             <PropertyView v-if="tabName === 0"></PropertyView>
             <AdjustView v-if="tabName === 1"></AdjustView>
           </div>

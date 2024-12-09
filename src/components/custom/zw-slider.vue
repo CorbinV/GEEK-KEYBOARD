@@ -27,11 +27,11 @@ watch(
 const isSliding = ref(false);
 
 // 计算滑块的百分比位置，用于定位百分比值的显示
-const sliderPosition = computed(() => `${sliderValue.value}%`);
+const sliderPosition = computed(() => `${((sliderValue.value * 100) / 300) * 100}%`);
 
 // 动态计算背景色，已滑动部分为蓝色，未滑动部分为灰色
 const sliderBackground = computed(() => {
-  return `linear-gradient(to right, #007bff ${sliderValue.value}%, #ddd ${sliderValue.value}mm)`;
+  return `linear-gradient(to right, #007bff ${((sliderValue.value * 100) / 300) * 100}%, #ddd ${sliderValue.value}mm)`;
 });
 
 // 滑动前触发
@@ -81,14 +81,15 @@ onUnmounted(() => {
           v-model="sliderValue"
           class="slider"
           type="range"
-          min="0"
-          max="100"
+          min="0.01"
+          max="3"
+          step="0.01"
           :style="{ background: sliderBackground }"
           @input="updateValue"
           @mousedown="startSliding"
         />
         <!-- 显示滑块值，位置动态绑定 -->
-        <span class="slider-value" :style="{ left: sliderPosition }">{{ sliderValue }}%</span>
+        <span class="slider-value" :style="{ left: sliderPosition }">{{ sliderValue }}mm</span>
       </div>
     </div>
   </div>
@@ -129,7 +130,7 @@ input[type='range']::-webkit-slider-thumb {
   appearance: none;
   width: 16px;
   height: 16px;
-  background: #007bff;
+  background: #fff;
   cursor: pointer;
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -140,11 +141,11 @@ input[type='range']::-webkit-slider-thumb {
   position: absolute;
   bottom: -25px;
   transform: translateX(-50%);
-  background: #007bff;
-  color: #fff;
+  /* background: #007bff; */
+  color: #666;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 12px;
+  font-size: 14px;
   white-space: nowrap;
   pointer-events: none;
   transition: left 0.1s;

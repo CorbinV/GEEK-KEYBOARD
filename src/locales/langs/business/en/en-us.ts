@@ -12,11 +12,11 @@ const lang: App.BusinessLanguage.Schema = {
     executeSuccess: 'Execute Success',
     delFailPlsUpdate: '"Deletion failed. Please update to the latest firmware and try again.',
     set: 'Setting',
-    addFailPlsUpdate: '添加失败，请更新最新固件后重试',
-    addSwtich: '添加切换开关',
+    addFailPlsUpdate: 'Addition failed, please update to the latest firmware and try again',
+    addSwtich: 'Add switch',
 
-    plsSetSwitchKeys: '请设置需要开关持续触发的健值',
-    switchSwitch: '切换开关'
+    plsSetSwitchKeys: 'Please set the keys that need to trigger the switch continuously',
+    switchSwitch: 'Toggle switch'
   },
   baseKey: {
     keyboard: {
@@ -162,13 +162,13 @@ const lang: App.BusinessLanguage.Schema = {
     x7: 'MT Click/Hold',
     x8: 'TGL Toggle Switch',
     plsSelectKey: 'Please select a key first',
-    keyBinedDKSFunc: '该按键已绑定DKS功能',
-    keyBinedOtherFunc: '该按键已绑定其它功能',
-    maxAddCombinKey: '最多只能添加{total}个组合键',
-    singleKeyStop: '单键急停',
+    keyBinedDKSFunc: 'This key is already bound to the DKS function',
+    keyBinedOtherFunc: 'This key is already bound to another function',
+    maxAddCombinKey: 'You can add a maximum of {total} combination keys',
+    singleKeyStop: 'Per Key emergency stop',
     addClickDown: 'add Click Down',
-    setClickDowndown1down2: '设置单击按住，快速点击时触发1号键，按住触发2号键',
-    priorityExe: '优先触发',
+    setClickDowndown1down2: 'Set single click and hold: trigger key 1 on quick click, trigger key 2 when held',
+    priorityExe: 'Priority trigger',
 
     c1: 'DKS dynamic key travel',
     c2: 'OKS per key emergency stop ',
@@ -222,7 +222,12 @@ const lang: App.BusinessLanguage.Schema = {
     gjUpdate: 'Firmware Update',
     checkUpdate: 'Check for Updates',
     restore: 'Restore Factory Settings',
-    pair24: '2.4G Receiver Pairing'
+    pair24: '2.4G Receiver Pairing',
+    wakeUpOpenHint: 'Sensor Wake enabled',
+    wakeUpClosenHint: 'Sensor Wake disabled',
+    allKeyOpenHint: 'NKRO enabled',
+    restoreSucess: 'Factory reset successful',
+    allKeyCloseHint: 'NKRO disabled'
   },
   global_Setting: {
     version: 'Version：{total}',

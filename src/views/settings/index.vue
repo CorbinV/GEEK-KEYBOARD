@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { getKeyboardSetting } from '@/api/keyConfig-setting';
+import { useMessage } from 'naive-ui';
+import { getKeyboardSetting, setKeyboardSetting } from '@/api/keyConfig-setting';
 import keyboardImg from '@/assets/img/keyboard_img.png';
+import { $t } from '@/locales';
 // import RestoreFactoryModal from '@/views/settings/components/reset-modal.vue';
 
 async function getSet() {
@@ -11,10 +13,11 @@ async function getSet() {
 const versionCode = ref('1.2.0');
 const fullKeyRolloverSwitch = ref(true);
 const wakeUpSwitch = ref(true);
-
+const message = useMessage();
 const onCheckUpdateClick = () => {
-  console.log('检查更新按钮被点击');
-  // 这里可以加入更新检查的逻辑
+  message.success('已经是最新版本！', {
+    duration: 3000 // 持续时间
+  });
 };
 
 const onReceiverPairClick = () => {
@@ -23,28 +26,43 @@ const onReceiverPairClick = () => {
 };
 function getVersion() {}
 const onFactoryResetClick = () => {
-  console.log('恢复出厂设置按钮被点击');
+  message.success($t('setting.restoreSucess'), {
+    duration: 3000 // 持续时间
+  });
   // 这里可以加入恢复出厂设置的逻辑
 };
 
-// async function setWakeup() {
-//   const x = await getKeyboardSetting();
-//   console.log(x);
-// }
 // 处理全键无冲开关点击事件
 const onFullKeyRolloverChange = (newValue: boolean) => {
-  console.log('全键无冲切换状态:', newValue);
-  setDevPerf();
+  if (newValue) {
+    message.success($t('setting.allKeyOpenHint'), {
+      duration: 3000 // 持续时间
+    });
+  } else {
+    message.error($t('setting.allKeyCloseHint'), {
+      duration: 3000 // 持续时间
+    });
+  }
+
+  // setDevPerf();
 };
 
 // 处理感应唤醒开关点击事件
 const onWakeUpSwitchChange = (newValue: boolean) => {
-  console.log('感应唤醒切换状态:', newValue);
+  if (newValue) {
+    message.success($t('setting.wakeUpOpenHint'), {
+      duration: 3000 // 持续时间
+    });
+  } else {
+    message.error($t('setting.wakeUpClosenHint'), {
+      duration: 3000 // 持续时间
+    });
+  }
   setDevPerf();
   // 在这里可以添加逻辑，比如同步到服务器或其他操作
 };
 async function setDevPerf() {
-  // await getKeyboardSetting({ allKey: 1, wakeUp: 1 });
+  await setKeyboardSetting({ allKey: fullKeyRolloverSwitch.value ? 1 : 0, wakeUp: wakeUpSwitch.value ? 1 : 0 });
   //  await addOks({ code, keys, name });
 }
 
@@ -55,9 +73,9 @@ getSet();
 <template>
   <!-- 引用 public 目录下的图片 -->
   <div class="h-full w-full flex flex-col items-center">
-    <img :src="keyboardImg" alt="Logo" class="mt-50px h-324px w-804px" />
+    <img :src="keyboardImg" alt="Logo" class="h-324px w-804px" />
 
-    <div class="mt-38px h-520px w-976px flex flex-col items-center rounded-md bg-[#171619] p-30px">
+    <div class="mt-20px h-520px w-976px flex flex-col items-center rounded-md bg-[#171619] p-30px">
       <h1 class="text-[22px]">{{ $t('setting.devName', { total: 'NB99' }) }}</h1>
       <!-- <div class="li-title">连接模式</div> -->
 
@@ -90,7 +108,7 @@ getSet();
           {{ $t('setting.checkUpdate') }}
         </button>
       </div>
-      <div class="flex-raw w-full flex justify-between rounded-md pb-20px pt-20px">
+      <div class="flex-raw w-full flex justify-between rounded-md pt-20px">
         <button class="hollow-btn h-60px w-170px" @click="onReceiverPairClick">{{ $t('setting.pair24') }}</button>
         <button class="hollow-btn h-60px w-170px" @click="onFactoryResetClick">{{ $t('setting.restore') }}</button>
       </div>
