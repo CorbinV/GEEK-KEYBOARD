@@ -51,6 +51,17 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
+    name: 'connect',
+    path: '/connect',
+    component: 'layout.blank$view.connect',
+    meta: {
+      title: 'connect',
+      i18nKey: 'route.connect',
+      constant: true,
+      hideInMenu: true
+    }
+  },
+  {
     name: 'home',
     path: '/home',
     component: 'layout.base$view.home',

@@ -155,7 +155,8 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     'rapid-trigger': 'Rapid Trigger',
     marco: 'Marco',
     light: 'Light',
-    settings: 'Setting'
+    settings: 'Setting',
+    connect: 'Device Connect'
   },
   page: {
     login: {

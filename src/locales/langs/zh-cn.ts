@@ -151,7 +151,8 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     'rapid-trigger': '快速触发',
     marco: '宏编辑',
     light: '灯效',
-    settings: '设置'
+    settings: '设置',
+    connect: '设备连接'
     // exception: '异常页',
     // exception_403: '403',
     // exception_404: '404',
