@@ -22,4 +22,7 @@ export class ConnectionManager {
   getDeviceClient() {
     return this.deviceClient;
   }
+  onDeviceDisconnect(cb: any) {
+    return this.hidController.addEventListener('disconnected', cb);
+  }
 }

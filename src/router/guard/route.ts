@@ -31,7 +31,6 @@ export function createRouteGuard(router: Router) {
       next({ name: rootRoute });
     }
     const location = await initRoute(to);
-    console.log(11111, location, isConnected.value);
     if (location) {
       next(location);
       return;

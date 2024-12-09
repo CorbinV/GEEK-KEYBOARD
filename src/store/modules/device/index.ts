@@ -33,7 +33,9 @@ export const useDeviceStore = defineStore('device', () => {
   function getDeviceClient() {
     return connectionManager.getDeviceClient();
   }
-
+  connectionManager.onDeviceDisconnect(() => {
+    isConnected.value = false;
+  });
   function init() {
     if (!isTrueDevice) {
       isConnected.value = true;
