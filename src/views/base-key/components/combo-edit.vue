@@ -86,6 +86,10 @@ function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEn
   selectedKeyInfo.list[selectedKeyInfo.idx] = selectedData;
 }
 async function handleDialogComfirm() {
+  if (selectedKeyInfo.list.length < 2) {
+    window.$message!.info('请选择2-4个按键');
+    return;
+  }
   const cpy = JSON.parse(JSON.stringify(selectedKeyInfo));
   const sendData = {
     type: KeyTypeEnum.Combo,
