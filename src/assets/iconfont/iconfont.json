@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "42651903",
+      "name": "解锁",
+      "font_class": "unlock-solid",
+      "unicode": "e744",
+      "unicode_decimal": 59204
+    },
+    {
+      "icon_id": "42653374",
+      "name": "锁",
+      "font_class": "lock-solid",
+      "unicode": "e745",
+      "unicode_decimal": 59205
+    },
+    {
       "icon_id": "42465051",
       "name": "抬起",
       "font_class": "triangle-up",
