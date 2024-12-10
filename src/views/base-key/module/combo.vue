@@ -8,6 +8,7 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import GroupMenu from '@/views/super-key/components/group-menu.vue';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 import { $t } from '@/locales';
+import RenameModal from '@/views/marco/components/RenameModal.vue';
 import ComboEdit from '../components/combo-edit.vue';
 
 const keyboardStore = useKeyboardStore();
@@ -16,6 +17,10 @@ const groupList = ref<any>([]);
 const editVisible = ref(false);
 const MAC_GORUP_CNT = 20;
 const emit = defineEmits(['key-clicked']);
+
+const showRenameModal = ref(false);
+const listEditIndex = ref(-1);
+const editItemName = ref('');
 
 let editItem = reactive<{
   idx: number;
@@ -46,7 +51,12 @@ async function updateGroupList() {
     console.log('getShortcuts ret', shortcuts);
     groupList.value = shortcuts.map(item => {
       const { code, type } = item;
-      const name = `组合按键${item.code + 1}`;
+      let name = `组合按键${item.code + 1}`;
+      const itemName = getLocalName(item.type, item.code);
+      if (itemName) {
+        name = itemName;
+      }
+      editItemName.value = name;
       return {
         base: { code, type, name },
         keyList: [] as any[]
@@ -109,6 +119,7 @@ async function handleGroupItemDelete(items: any, idx: number) {
     console.log('delShortcut ret', ret);
     groupList.value.splice(idx, 1);
     keyboardStore.removeSuperKey(items.key, { moduleType: KeyTypeEnum.Combo });
+    removeLocalName(KeyTypeEnum.Combo, items.base.code);
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
     console.error('handleGroupItemDelete', error);
@@ -151,6 +162,28 @@ function generateGroupCode() {
 function handleGroupItemRename(items: any, idx: number) {
   // feat: rename group name
   console.log('handleGroupItemRename', items, idx);
+  listEditIndex.value = idx;
+  showRenameModal.value = true;
+}
+
+async function handleReNameSave(data: { name: string }) {
+  if (data.name === '' || listEditIndex.value === -1) return;
+  const defName = `组合按键${listEditIndex.value + 1}`;
+  if (defName === `${data.name}${listEditIndex.value + 1}`) return;
+  addLocalName(KeyTypeEnum.Combo, listEditIndex.value, data.name);
+  showRenameModal.value = false;
+  updateGroupList();
+}
+
+function getLocalName(type: number, code: number) {
+  return localStorage.getItem(`${type}-${code}`);
+}
+function addLocalName(type: number, code: number, name: string) {
+  localStorage.setItem(`${type}-${code}`, name);
+}
+
+function removeLocalName(type: number, code: number) {
+  localStorage.removeItem(`${type}-${code}`);
 }
 </script>
 
@@ -170,6 +203,7 @@ function handleGroupItemRename(items: any, idx: number) {
             :group-item="item"
             :idx="idx"
             :enable-edit="true"
+            :enable-rename="true"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
@@ -183,6 +217,12 @@ function handleGroupItemRename(items: any, idx: number) {
       :fnc-generate-code="generateGroupCode"
       :edit-item="editItem"
       @create-group="handleGroupCreated"
+    />
+    <RenameModal
+      :show="showRenameModal"
+      :name="editItemName"
+      @update:show="showRenameModal = $event"
+      @rename="handleReNameSave"
     />
   </div>
 </template>
