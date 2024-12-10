@@ -95,7 +95,7 @@ async function handleDialogComfirm() {
     type: KeyTypeEnum.Combo,
     code: props.fncGenerateCode(),
     key: bindKeyId.value,
-    keys: cpy.list.map((item: any) => item.base)
+    keys: cpy.list.filter((item: any) => item !== null).map((item: any) => item.base)
   };
   emit('create-group', {
     ...sendData,
