@@ -30,7 +30,7 @@ const showIcon = computed(() => {
 });
 function updateKeyInfo(data: KeyInfo) {
   keyInfo.currentKey = kbCfg.value.keyMap[data!.type]?.code?.[data!.code] || {};
-  const [triggerPoint, _1, _2, rtTrigger, rtReset] = data.tary;
+  const [triggerPoint, _1, rtTrigger, rtReset, _4] = data.tary;
   keyInfo.triggerPoint = triggerPoint;
   keyInfo.rtTrigger = rtTrigger;
   keyInfo.rtReset = rtReset;
