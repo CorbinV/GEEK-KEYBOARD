@@ -195,7 +195,7 @@
       "42": {
         "type": "str",
         "icon": "",
-        "label": "Back Space"
+        "label": "Back"
       },
       "43": {
         "type": "str",
@@ -265,7 +265,7 @@
       "57": {
         "type": "str",
         "icon": "",
-        "label": "Caps Lock"
+        "label": "Caps"
       },
       "58": {
         "type": "str",
