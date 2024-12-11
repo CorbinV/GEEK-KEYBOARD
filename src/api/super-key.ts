@@ -4,10 +4,10 @@ import type {
   DksList,
   MTItem,
   MTList,
-  OksBase,
+  OksItem,
   OksList,
   Page,
-  RSBase,
+  RSItem,
   RSList,
   ResetDksName,
   ResetMTName,
@@ -44,7 +44,7 @@ export function getTargetOks(data: BaseKey) {
     data
   });
 }
-export function addOks(data: OksBase) {
+export function addOks(data: OksItem) {
   return requestClient.send<never>({
     name: 'setOKS',
     data
@@ -83,9 +83,10 @@ export function addSOCD(data: SOCDBase) {
 }
 
 // rs
-export function getRSList() {
+export function getRSList(data: Page) {
   return requestClient.send<RSList>({
-    name: 'getRSList'
+    name: 'getRSList',
+    data
   });
 }
 export function resetRSName(data: ResetRSName) {
@@ -106,7 +107,7 @@ export function getTargetRS(data: BaseKey) {
     data
   });
 }
-export function addRS(data: RSBase) {
+export function addRS(data: RSItem) {
   return requestClient.send<never>({
     name: 'setRS',
     data

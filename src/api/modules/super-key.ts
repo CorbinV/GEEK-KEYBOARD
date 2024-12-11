@@ -7,7 +7,6 @@ export type Page = {
 };
 
 export type OksItem = BaseKey & {
-  name: string;
   keys: BaseKey[];
 };
 export type ResetOksName = {
@@ -45,6 +44,7 @@ export type ResetRSName = {
 };
 export type RSBase = Omit<RSItem, 'type'>;
 export type RSList = {
+  len: number;
   rs: RSItem[];
 };
 
