@@ -8,26 +8,35 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import { addOks, deleteOksByCode, getOksList, resetOksName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
+import { formatLableSub3 } from '@/hooks/common/format';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 const oksGroupList = ref<any>([]);
 const editVisible = ref(false);
 const modalTitle = ref($t('supperKey.singleKeyStop'));
 const MAC_GORUP_CNT = 8;
-const emit = defineEmits(['key-clicked']);
+// const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
-const { getKeyDetail, updateSuperKey } = keyboardStore;
+const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.OKS;
 
-let editItem = reactive<{
-  base: { code: number; type: KeyTypeEnum; name: string };
+type GroupItem = {
+  base: { code: number; type: KeyTypeEnum; name: string; key?: string };
   keyList: any[];
   keyBaseList: any[];
-}>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
+};
+let editItem = reactive<GroupItem>({
+  base: { code: -1, type: KeyTypeEnum.None, name: '', key: '' },
+  keyList: [],
+  keyBaseList: []
+});
 
 const showRenameModal = ref(false);
 const renameIndex = ref(-1);
+
+let isEdit = false;
+const editItemCode = 0;
 
 function handleAddClicked() {
   if (oksGroupList.value.length >= MAC_GORUP_CNT) {
@@ -39,27 +48,12 @@ function handleAddClicked() {
   //   return;
   // }
   editItem = { base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] };
+  isEdit = false;
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
-  if (currentSuperKeyType.value === KeyTypeEnum.MT) {
-    const formatLable = (obj: any) => {
-      if (obj.type !== 'str') return obj;
-
-      const label = obj.label.trim() as string;
-
-      if (label.includes(' ')) {
-        const formatted = label
-          .split(' ')
-          .filter(word => word.length > 0)
-          .map(word => word[0])
-          .join('');
-        return { ...obj, label: formatted };
-      }
-      const formatted = label.length > 2 ? label.slice(0, 2) : label;
-      return { ...obj, label: formatted };
-    };
-    const mtCfg = formatLable(res);
+  if (currentSuperKeyType.value === KeyTypeEnum.OKS) {
+    const mtCfg = formatLableSub3(res);
     updateSuperKey(key!, { moduleType, mtCfg });
   } else {
     updateSuperKey(key!, { moduleType });
@@ -67,10 +61,11 @@ function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
 }
 async function updateGroupList() {
   const { oks } = await getOksList();
+  console.log('oks', JSON.stringify(oks));
   oksGroupList.value = oks.map(item => {
-    const { code, type, name } = item;
+    const { code, type } = item;
     return {
-      base: { code, type, name },
+      base: { code, type },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
@@ -84,17 +79,27 @@ async function updateGroupList() {
 }
 updateGroupList();
 async function handleGroupCreated({ code, keys, name, listDetail }: any) {
+  console.log('handleGroupCreated', { code, keys, name, listDetail });
   try {
-    await addOks({ code, keys, name });
-    oksGroupList.value.push({
-      base: {
-        code,
-        name
-      },
-      keyList: listDetail.map((item: any) => {
-        return item.detail;
-      })
-    });
+    let tmpCode = code;
+    if (isEdit) {
+      tmpCode = editItemCode;
+      editItem.keyBaseList.forEach((listItem: any) => {
+        removeSuperKey(listItem.key!, { moduleType: KeyTypeEnum.OKS });
+      });
+    }
+    const type = KeyTypeEnum.OKS;
+    await addOks({ type, code: tmpCode, keys });
+    updateGroupList();
+    // oksGroupList.value.push({
+    //   base: {
+    //     code,
+    //     name
+    //   },
+    //   keyList: listDetail.map((item: any) => {
+    //     return item.detail;
+    //   })
+    // });
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (e) {
     window.$message!.error($t('businessCommon.addFailPlsUpdate'));
@@ -103,16 +108,20 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
 }
 
 function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.OKS } }) {
-  const { code, type } = base;
-  emit('key-clicked', {
-    code,
-    type
-  });
+  console.log('handleGroupItemClicked', base);
+  // const { code, type } = base;
+  // emit('key-clicked', {
+  //   code,
+  //   type
+  // });
 }
-async function handleGroupItemDelete(item: { code: number }, idx: number) {
+async function handleGroupItemDelete(item: any, idx: number) {
   try {
-    await deleteOksByCode({ code: item.code });
+    await deleteOksByCode({ code: item.base.code });
     oksGroupList.value.splice(idx, 1);
+    item.keyBaseList.forEach((listItem: any) => {
+      removeSuperKey(listItem.key!, { moduleType: KeyTypeEnum.OKS });
+    });
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
     window.$message!.error($t('businessCommon.delFailPlsUpdate'));
@@ -123,6 +132,7 @@ async function handleGroupItemEdit(items: any, idx: number) {
   // feat: open edit modal(dialog), and transform data
   console.log('handleGroupItemEdit', items, idx);
   editItem = items;
+  isEdit = true;
   editVisible.value = true;
 }
 async function handleGroupItemRename(items: any, idx: number) {
@@ -133,9 +143,9 @@ async function handleGroupItemRename(items: any, idx: number) {
   showRenameModal.value = true;
 }
 function generateGroupCode() {
-  if (oksGroupList.value.length === 0) return 1;
+  if (oksGroupList.value.length === 0) return 0;
   const usedCodes = new Set(oksGroupList.value.map((group: { base: { code: number } }) => group.base.code));
-  let newCode = 1;
+  let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
   }
@@ -174,7 +184,7 @@ async function handleReNameSave(data: { name: string }) {
             :group-item="item"
             :idx="idx"
             :enable-edit="true"
-            :enable-rename="true"
+            :enable-rename="false"
             @group-item-delete="handleGroupItemDelete"
             @group-item-edit="handleGroupItemEdit"
             @group-item-rename="handleGroupItemRename"
