@@ -3,20 +3,27 @@ import { toRefs, watchEffect } from 'vue';
 import { useDeviceStore } from '@/store/modules/device';
 import { router } from '@/router';
 import { useKeyboardStore } from '@/store/modules/keyboard';
+import { $t } from '@/locales';
 const deviceStore = useDeviceStore();
 const { isConnected } = toRefs(deviceStore);
 
 const keyboardStore = useKeyboardStore();
 const { kbInfo } = toRefs(keyboardStore);
+let timer: any = null;
 
 watchEffect(() => {
   if (kbInfo.value.mounted) {
+    clearTimeout(timer);
     router.push('base-key');
   }
 });
 async function handleConnectBtnClicked() {
   console.log('handleConnectBtnClicked');
   try {
+    timer = setTimeout(() => {
+      isConnected.value = false;
+      window.$message!.error($t('businessCommon.connectTimeout'));
+    }, 10000);
     await deviceStore.connect({
       vendorId: 0x4353,
       productId: 0x9108,
