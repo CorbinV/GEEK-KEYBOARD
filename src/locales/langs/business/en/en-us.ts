@@ -16,7 +16,8 @@ const lang: App.BusinessLanguage.Schema = {
     addSwtich: 'Add switch',
 
     plsSetSwitchKeys: 'Please set the keys that need to trigger the switch continuously',
-    switchSwitch: 'Toggle switch'
+    switchSwitch: 'Toggle switch',
+    connectTimeout: 'Connection timeout'
   },
   baseKey: {
     keyboard: {

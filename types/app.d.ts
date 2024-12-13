@@ -481,6 +481,7 @@ declare namespace App {
         addSwtich: string;
         plsSetSwitchKeys: string;
         switchSwitch: string;
+        connectTimeout: string;
       };
       baseKey: {
         keyboard: {

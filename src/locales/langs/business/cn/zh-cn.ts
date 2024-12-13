@@ -17,7 +17,8 @@ const lang: App.BusinessLanguage.Schema = {
 
     addSwtich: '添加切换开关',
     plsSetSwitchKeys: '请设置需要开关持续触发的健值',
-    switchSwitch: '切换开关'
+    switchSwitch: '切换开关',
+    connectTimeout: '连接超时'
   },
   baseKey: {
     keyboard: {
