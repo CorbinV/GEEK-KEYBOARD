@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { reactive, ref, toRaw, toRef } from 'vue';
+import { onMounted, reactive, ref, toRaw, toRef } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -9,8 +9,10 @@ import { addOks, deleteOksByCode, getOksList, resetOksName } from '@/api/super-k
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
 import { formatLableSub3 } from '@/hooks/common/format';
+import emitter from '@/utils/eventBus';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
+
 const oksGroupList = ref<any>([]);
 const editVisible = ref(false);
 const modalTitle = ref($t('supperKey.singleKeyStop'));
@@ -37,6 +39,27 @@ const renameIndex = ref(-1);
 
 let isEdit = false;
 const editItemCode = 0;
+
+onMounted(() => {
+  emitter.on('resetKey', (key: string) => {
+    console.log('resetKey', key);
+    if (currentSuperKeyType.value === KeyTypeEnum.OKS) {
+      if (key) {
+        console.log('oksGroupList', JSON.stringify(oksGroupList.value));
+        let index = 0;
+        for (const item of oksGroupList.value) {
+          const matchingKeyBase = item.keyBaseList.find((keyBase: any) => keyBase.key === key);
+          if (matchingKeyBase) {
+            console.log('找到了item', JSON.stringify(item), '索引:', index);
+            handleGroupItemDelete(item, index);
+            break;
+          }
+          index++;
+        }
+      }
+    }
+  });
+});
 
 function handleAddClicked() {
   if (oksGroupList.value.length >= MAC_GORUP_CNT) {
