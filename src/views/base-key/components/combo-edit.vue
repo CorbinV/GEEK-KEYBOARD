@@ -7,9 +7,10 @@ import BaseKey from '@/components/custom/keyboard/components/base-key.vue';
 import { StandardKeyboard } from '@/components/custom/keyboard';
 import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
+import useLoading from '@/utils/loading';
 import ModuleTemplate from './module-template.vue';
 const emit = defineEmits(['update:visible', 'create-group']);
-
+const { isLoading, lazyLoading } = useLoading();
 const keyboardStore = useKeyboardStore();
 const props = defineProps<{
   groupLength: number;
@@ -66,6 +67,7 @@ function useDialogController() {
 const { dialogControl, closeDialog } = useDialogController();
 
 function handleKeyClicked(e: MouseEvent) {
+  lazyLoading();
   const targetElement = (e.target as Element).closest('[data-idx]');
   if (targetElement && targetElement instanceof HTMLElement) {
     const idx = targetElement.dataset.idx;
@@ -137,39 +139,41 @@ watch(
     </template>
     <template #default>
       <div class="flex flex-col">
-        <NDivider class="!mt-0" />
-        <div class="flex flex-col gap-y-5">
-          <p class="text-center text-base text-c-second">{{ $t('baseKey.combination.plsSelctKeyComb') }}</p>
-          <div class="flex flex-row justify-center gap-x-12" @click="handleKeyClicked">
-            <div
-              v-for="(_, idx) in new Array(4)"
-              :key="`d-groups-${idx}`"
-              class="flex flex-col gap-y-2"
-              :data-idx="idx"
-            >
-              <BaseKey
-                :base="selectedKeyInfo.list?.[idx]?.base"
-                :detail="selectedKeyInfo.list?.[idx]?.detail"
-                :selected="selectedKeyInfo.idx === idx"
-              ></BaseKey>
-              <div class="text-center text-c-second">{{ idx }}</div>
+        <NSpin :show="isLoading">
+          <NDivider class="!mt-0" />
+          <div class="flex flex-col gap-y-5">
+            <p class="text-center text-base text-c-second">{{ $t('baseKey.combination.plsSelctKeyComb') }}</p>
+            <div class="flex flex-row justify-center gap-x-12" @click="handleKeyClicked">
+              <div
+                v-for="(_, idx) in new Array(4)"
+                :key="`d-groups-${idx}`"
+                class="flex flex-col gap-y-2"
+                :data-idx="idx"
+              >
+                <BaseKey
+                  :base="selectedKeyInfo.list?.[idx]?.base"
+                  :detail="selectedKeyInfo.list?.[idx]?.detail"
+                  :selected="selectedKeyInfo.idx === idx"
+                ></BaseKey>
+                <div class="text-center text-c-second">{{ idx }}</div>
+              </div>
             </div>
           </div>
-        </div>
-        <!-- tabs -->
-        <div>
-          <NTabs :theme-overrides="tabsThemeOverrides" tab-class="asdasf !text-xl">
-            <NTabPane name="Keyboard" :tab="$t('baseKey.tab.basic')">
-              <StandardKeyboard @key-clicked="handleFncClicked" />
-            </NTabPane>
-            <NTabPane name="System" :tab="$t('baseKey.tab.system')">
-              <ModuleTemplate :type="KeyTypeEnum.System" @key-clicked="handleFncClicked" />
-            </NTabPane>
-            <NTabPane name="Media" :tab="$t('baseKey.tab.media')">
-              <ModuleTemplate :type="KeyTypeEnum.Media" @key-clicked="handleFncClicked" />
-            </NTabPane>
-          </NTabs>
-        </div>
+          <!-- tabs -->
+          <div>
+            <NTabs :theme-overrides="tabsThemeOverrides" tab-class="asdasf !text-xl">
+              <NTabPane name="Keyboard" :tab="$t('baseKey.tab.basic')">
+                <StandardKeyboard @key-clicked="handleFncClicked" />
+              </NTabPane>
+              <NTabPane name="System" :tab="$t('baseKey.tab.system')">
+                <ModuleTemplate :type="KeyTypeEnum.System" @key-clicked="handleFncClicked" />
+              </NTabPane>
+              <NTabPane name="Media" :tab="$t('baseKey.tab.media')">
+                <ModuleTemplate :type="KeyTypeEnum.Media" @key-clicked="handleFncClicked" />
+              </NTabPane>
+            </NTabs>
+          </div>
+        </NSpin>
       </div>
     </template>
     <template #footer>
