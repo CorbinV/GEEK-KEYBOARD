@@ -8,6 +8,7 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import { addTGL, deleteTGLByCode, getTGLList, resetTGLName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
+import { formatLableSub3 } from '@/hooks/common/format';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 const tglGroupList = ref<any>([]);
@@ -68,23 +69,7 @@ function handleAddClicked() {
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
   if (currentSuperKeyType.value === KeyTypeEnum.TGL) {
-    const formatLable = (obj: any) => {
-      if (obj.type !== 'str') return obj;
-
-      const label = obj.label.trim() as string;
-
-      if (label.includes(' ')) {
-        const formatted = label
-          .split(' ')
-          .filter(word => word.length > 0)
-          .map(word => word[0])
-          .join('');
-        return { ...obj, label: formatted };
-      }
-      const formatted = label.length > 2 ? label.slice(0, 2) : label;
-      return { ...obj, label: formatted };
-    };
-    const mtCfg = formatLable(res);
+    const mtCfg = formatLableSub3(res);
     updateSuperKey(key!, { moduleType, mtCfg });
   } else {
     updateSuperKey(key!, { moduleType });
