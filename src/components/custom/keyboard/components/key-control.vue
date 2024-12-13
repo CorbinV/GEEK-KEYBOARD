@@ -3,6 +3,7 @@ import { computed, reactive, toRefs, watchEffect } from 'vue';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
+import emitter from '@/utils/eventBus';
 
 const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
@@ -49,6 +50,8 @@ async function handleResetKey() {
   const data = await commonStore.restoreTargetKeyInfoById(props.keyId);
   updateKeyInfo(data);
   // optimize: add a notification to show the result
+  if (props.keyId === '') return;
+  emitter.emit('resetKey', props.keyId);
 }
 async function handleDisableKey() {
   await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 });
