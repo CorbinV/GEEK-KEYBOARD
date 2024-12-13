@@ -26,7 +26,7 @@ const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 currentSuperKeyType.value = KeyTypeEnum.MT;
 // 按住时间
-const inputTime = ref(100);
+const inputTime = ref(200);
 const mtList = ref<any>([]);
 let editItem = reactive<GroupItem>({
   base: { code: -1, type: KeyTypeEnum.None, name: '', key: '' },
@@ -68,7 +68,7 @@ function handleAddClicked() {
     window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAC_GORUP_CNT }));
     return;
   }
-  inputTime.value = 100;
+  inputTime.value = 200;
   isEdit = false;
   editVisible.value = true;
 }
