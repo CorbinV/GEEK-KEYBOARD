@@ -3,7 +3,7 @@ import type { TabsProps } from 'naive-ui';
 import { nextTick, reactive, ref, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
-import BaseKey from '@/components/custom/keyboard/components/base-key.vue';
+import BaseKeyWrapper from '@/components/custom/keyboard/components/base-key-wrapper.vue';
 import { StandardKeyboard } from '@/components/custom/keyboard';
 import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
@@ -122,6 +122,12 @@ watch(
     }
   }
 );
+function handleSelecteKeyRemove(idx: number) {
+  selectedKeyInfo.list[idx] = {
+    base: {} as any,
+    detail: {}
+  };
+}
 </script>
 
 <template>
@@ -150,12 +156,15 @@ watch(
                 class="flex flex-col gap-y-2"
                 :data-idx="idx"
               >
-                <BaseKey
+                <BaseKeyWrapper
                   :base="selectedKeyInfo.list?.[idx]?.base"
                   :detail="selectedKeyInfo.list?.[idx]?.detail"
                   :selected="selectedKeyInfo.idx === idx"
-                ></BaseKey>
-                <div class="text-center text-c-second">{{ idx }}</div>
+                  :allow-clear="true"
+                  :idx="idx"
+                  @remove="handleSelecteKeyRemove"
+                ></BaseKeyWrapper>
+                <div class="text-center text-c-second">{{ idx + 1 }}</div>
               </div>
             </div>
           </div>
