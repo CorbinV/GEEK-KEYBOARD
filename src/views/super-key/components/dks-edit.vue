@@ -92,15 +92,19 @@ function useDragControlData() {
     });
     return res;
   };
+  const resetKeyRange = (idx: number) => {
+    dksGroupList.value[idx] = dksStore.generateGroupItem();
+  };
   onUnmounted(() => {
     dksStore.resetDksGroupList();
   });
   return {
     dksGroupList,
-    formatKeyRange
+    formatKeyRange,
+    resetKeyRange
   };
 }
-const { dksGroupList, formatKeyRange } = useDragControlData();
+const { dksGroupList, formatKeyRange, resetKeyRange } = useDragControlData();
 function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEnum; keyId: string }) {
   if (code === undefined || type === undefined) {
     window.$message!.info('设备未返回，此按键无效');
@@ -171,6 +175,10 @@ function useTitle() {
   });
   return [title];
 }
+function handleRemoveKey(idx: number) {
+  resetKeyRange(idx);
+  selectedKeyInfo.list.splice(idx, 1);
+}
 onUnmounted(() => {
   resetSelectedKeyInfo();
 });
@@ -215,6 +223,7 @@ onUnmounted(() => {
                 :seleted-idx="selectedKeyInfo.idx"
                 :key-idx="idx"
                 :selected-key="selectedKeyInfo.list?.[idx]"
+                @remove-key="handleRemoveKey"
               />
             </div>
             <KeyDistanceControl ref="keyDistanceControlRef" />
