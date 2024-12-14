@@ -11,14 +11,17 @@ export interface CapsuleItem {
 }
 export const useDksStore = defineStore(SetupStoreId.DKS, () => {
   const initialHeight = ref(0);
+  const generateBaseItem = (idx: number) => {
+    return { color: '#3c8df4', currentHeight: initialHeight.value, isAboveMask: false, position: idx, to: idx };
+  };
+  const generateGroupItem = () => {
+    return Array.from({ length: 4 }).map((_, idx) => {
+      return generateBaseItem(idx);
+    });
+  };
   const [dksGroupList, resetDksGroupList] = useResttableReactiveFn<any>(() => {
     return Array.from({ length: 4 }).map((): CapsuleItem[] => {
-      return [
-        { color: '#3c8df4', currentHeight: initialHeight.value, isAboveMask: false, position: 0, to: 0 },
-        { color: '#3c8df4', currentHeight: initialHeight.value, isAboveMask: false, position: 1, to: 1 },
-        { color: '#3c8df4', currentHeight: initialHeight.value, isAboveMask: false, position: 2, to: 2 },
-        { color: '#3c8df4', currentHeight: initialHeight.value, isAboveMask: false, position: 3, to: 3 }
-      ];
+      return generateGroupItem();
     });
   });
   const scope = effectScope();
@@ -36,5 +39,5 @@ export const useDksStore = defineStore(SetupStoreId.DKS, () => {
   // init
   init();
 
-  return { initialHeight, dksGroupList, resetDksGroupList };
+  return { initialHeight, dksGroupList, resetDksGroupList, generateGroupItem };
 });
