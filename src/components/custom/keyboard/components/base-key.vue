@@ -1,29 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import type { BaseKeyView } from '@/api/modules/combo';
-
-const props = defineProps<{
+defineProps<{
+  hasValue: boolean;
   base?: {
     code: number;
     type: number;
   };
   detail?: BaseKeyView;
-  selected?: boolean;
 }>();
-const hasValue = computed(() => {
-  return props.base?.type !== undefined;
-});
 </script>
 
 <template>
   <div
     :key="hasValue ? `${base!.code}-${detail!.icon}-${detail!.label}` : `${Math.random()}`"
-    :class="[
-      {
-        '!border-[#3C8DF4]': selected,
-        'text-[#3C8DF4]': selected
-      }
-    ]"
     class="box-border h-50px w-50px inline-flex items-center justify-center break-words border border-1 border-#3c3933 rounded-md base-light-bg text-c-primary"
   >
     <template v-if="hasValue">
