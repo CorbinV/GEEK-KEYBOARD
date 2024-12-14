@@ -2,7 +2,7 @@
 import { nextTick, onMounted, reactive, ref, toRef, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
-import BaseKey from '@/components/custom/keyboard/components/base-key.vue';
+import BaseKeyWrapper from '@/components/custom/keyboard/components/base-key-wrapper.vue';
 import { BaseKeyboard, StandardKeyboard } from '@/components/custom/keyboard';
 import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
@@ -193,7 +193,6 @@ function handleKeyClickedx(data: { type: KeyTypeEnum; code: number; keyId: strin
   handleFncClicked(data);
 }
 function handleStanderKbClicked(data: { type: KeyTypeEnum; code: number; keyId: string }) {
-  console.log('handleStanderKbClicked data', selectedKeyInfo.idx, data);
   if (checkKeyInput(data.keyId)) {
     return;
   }
@@ -253,12 +252,12 @@ function useTitle() {
               class="flex flex-col gap-y-4"
               @click="handleBaseKeyClicked"
             >
-              <BaseKey
+              <BaseKeyWrapper
                 :base="selectedKeyInfo.list?.[idx]?.base"
                 :detail="selectedKeyInfo.list?.[idx]?.detail"
                 :selected="selectedKeyInfo.idx === idx"
                 :data-idx="idx"
-              ></BaseKey>
+              ></BaseKeyWrapper>
               <div class="text-center text-c-second">{{ idx + 1 }}</div>
             </div>
           </div>
