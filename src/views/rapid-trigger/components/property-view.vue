@@ -181,7 +181,8 @@ async function getDevPerf(tary: number[]) {
 
   rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
   breakOptimize.value = getPerfIndex(BREAK_OPTIMIZE_SWITCH) === 1;
-  exeDeadZoneValue.value = Math.ceil(getPerfIndex(EXE_DEAD_ZONE) / 35) / 10;
+  exeDeadZoneValue.value = getPerfIndex(EXE_DEAD_ZONE) / Math.ceil(255 / 35);
+
   downLMD.value = Math.ceil(getPerfIndex(DOWN_LMD_VALUE) / 30) / 10;
   upLMD.value = Math.ceil(getPerfIndex(UP_LMD_VALUE) / 30) / 10;
   shakeLeaveValue.value = getPerfIndex(SHAKE_LEAVE);

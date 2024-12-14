@@ -17,7 +17,10 @@ const lang: App.BusinessLanguage.Schema = {
 
     plsSetSwitchKeys: 'Please set the keys that need to trigger the switch continuously',
     switchSwitch: 'Toggle switch',
-    connectTimeout: 'Connection timeout'
+    connectTimeout: 'Connection timeout',
+    connectDev: 'Connect Devices',
+    connectHint:
+      'Explore unlque settings, and personallze your device to your llking. Easy access, easy conlguratlon, easy saving - Easy to win!'
   },
   baseKey: {
     keyboard: {
