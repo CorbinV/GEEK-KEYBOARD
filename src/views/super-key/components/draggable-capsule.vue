@@ -26,6 +26,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:height': [value: number];
+  'update:isAboveMask': [value: boolean];
   'position-change': [index: number, position: number];
   'drag-end': [index: number, position: number];
 }>();
