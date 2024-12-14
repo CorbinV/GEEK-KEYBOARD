@@ -57,7 +57,7 @@ const hasComboKey = computed(() => props.keyList.length);
     </div>
     <div class="flex flex-row items-center justify-between rounded-b-md base-light-bg px-5 py-1">
       <span class="text-c-primary">{{ codePreffix + (base.code + 1) }}</span>
-      <div>
+      <div :key="`${base.code}-${codePreffix}-menu`">
         <slot name="menu"></slot>
       </div>
     </div>
