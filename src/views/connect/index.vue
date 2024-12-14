@@ -3,8 +3,6 @@ import { toRefs, watchEffect } from 'vue';
 import { useDeviceStore } from '@/store/modules/device';
 import { router } from '@/router';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-
-import GlobalHeader from '@/layouts/modules/global-header/index.vue';
 const deviceStore = useDeviceStore();
 const { isConnected } = toRefs(deviceStore);
 
@@ -39,12 +37,10 @@ async function handleConnectBtnClicked() {
 
 <template>
   <div class="h-full w-full flex flex-col">
-    <!--
- <div class="h-100px flex items-center justify-between bg-[#222226]">
+    <div class="h-100px flex items-center justify-between bg-[#222226]">
       <SystemLogo class="ml-30px h-70px w-210px text-30 text-primary" />
     </div>
--->
-    <GlobalHeader></GlobalHeader>
+    <!-- <GlobalHeader></GlobalHeader> -->
     <!-- <icon-ant-design-setting-outlined class="text-icon" /> -->
     <div class="background-image h-full w-full flex">
       <NSpin :show="isConnected" class="h-100% w-100%">
