@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
 // import { getPerf, getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
+import useConver from '@/utils/conver';
 import { getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
 import { useCommonStore } from '@/store/modules/common';
 
@@ -11,6 +12,7 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
 // import { getComboList } from '@/api/combo';
 import KeyMove from './key-move.vue';
+const { triggerToPage, PageToTrigger, sensitivityToPage, PageToSensitivity } = useConver();
 export type Opetion = { key: number; label: string };
 const commonStore = useCommonStore();
 const EXE_DEAD_ZONE = 0;
@@ -94,21 +96,7 @@ function breakOptimizeSwitch(value: boolean) {
   setPerfIndex(BREAK_OPTIMIZE_SWITCH, rapid);
   setDevPerf();
 }
-// 滑动中事件处理
-function downLmdValue(value: number) {
-  setPerfIndex(DOWN_LMD_VALUE, convertValue(value));
-  if (lmdLock.value) {
-    setPerfIndex(UP_LMD_VALUE, convertValue(value));
-  }
-  setDevPerf();
-}
-function upLmdSlide(value: number) {
-  setPerfIndex(UP_LMD_VALUE, convertValue(value));
-  if (lmdLock.value) {
-    setPerfIndex(DOWN_LMD_VALUE, convertValue(value));
-  }
-  setDevPerf();
-}
+
 function upLmdSlideUpdate(value: number) {
   if (lmdLock.value) {
     downLMD.value = value;
@@ -119,15 +107,15 @@ function downLmdSlideUpdate(value: number) {
     upLMD.value = value;
   }
 }
-function convertValue(x: number, min = 0.01, max = 3) {
-  return Math.ceil(1 + ((x - min) / (max - min)) * (255 - 1));
-}
+// function convertValue(x: number, min = 0.01, max = 3) {
+//   return Math.ceil(1 + ((x - min) / (max - min)) * (255 - 1));
+// }
 function rtTopDeadSlide(value: number) {
-  setPerfIndex(RT_TOP_DEAD_ZONE, convertValue(value));
+  setPerfIndex(RT_TOP_DEAD_ZONE, Number(PageToSensitivity(value)));
   setDevPerf();
 }
 function rtBelowDeadSlide(value: number) {
-  setPerfIndex(RT_BELOW_DEAD_ZONE, convertValue(value));
+  setPerfIndex(RT_BELOW_DEAD_ZONE, Number(PageToSensitivity(value)));
   setDevPerf();
 }
 function setPerfIndex(index: number, value: number) {
@@ -170,7 +158,7 @@ watch(
   }
 );
 
-function setAxosome() {}
+// function setAxosome() {}
 // 1. 创建一个 Apple 实例并使其响应式
 // async function getDevPerf(data: { key: string }) {
 async function getDevPerf(tary: number[]) {
@@ -181,13 +169,20 @@ async function getDevPerf(tary: number[]) {
 
   rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
   breakOptimize.value = getPerfIndex(BREAK_OPTIMIZE_SWITCH) === 1;
-  exeDeadZoneValue.value = getPerfIndex(EXE_DEAD_ZONE) / Math.ceil(255 / 35);
+  //  exeDeadZoneValue.value = getPerfIndex(EXE_DEAD_ZONE) / Math.ceil(255 / 35);
+  exeDeadZoneValue.value = Number(triggerToPage(getPerfIndex(EXE_DEAD_ZONE)));
 
   downLMD.value = Math.ceil(getPerfIndex(DOWN_LMD_VALUE) / 30) / 10;
   upLMD.value = Math.ceil(getPerfIndex(UP_LMD_VALUE) / 30) / 10;
+  downLMD.value = Number(sensitivityToPage(getPerfIndex(DOWN_LMD_VALUE)));
+  upLMD.value = Number(sensitivityToPage(getPerfIndex(UP_LMD_VALUE)));
+
   shakeLeaveValue.value = getPerfIndex(SHAKE_LEAVE);
-  rtTopDeadValue.value = Math.ceil(getPerfIndex(RT_TOP_DEAD_ZONE) / 30) / 10;
-  rtBelowDeadValue.value = Math.ceil(getPerfIndex(RT_BELOW_DEAD_ZONE) / 30) / 10;
+  // rtTopDeadValue.value = Math.ceil(getPerfIndex(RT_TOP_DEAD_ZONE) / 30) / 10;
+  // rtBelowDeadValue.value = Math.ceil(getPerfIndex(RT_BELOW_DEAD_ZONE) / 30) / 10;
+
+  rtTopDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_TOP_DEAD_ZONE)));
+  rtBelowDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_BELOW_DEAD_ZONE)));
   // // console.log(calibration.value);
   // // 当前最大轮询率
   // console.log('滑动中，当前值:', perfArr.value);
@@ -216,9 +211,33 @@ async function setDevPerf() {
 
 function exeDeadSlidingStop(value: number) {
   console.log('2222222222222222', value);
-  const xxx = Math.floor((value * 10 * 255) / 35);
+  // const xxx = Math.floor((value * 10 * 255) / 35);
+  const xxx = PageToTrigger(value);
   console.log('2222222222222222', xxx);
-  setPerfIndex(EXE_DEAD_ZONE, xxx);
+  setPerfIndex(EXE_DEAD_ZONE, Number(xxx));
+  setDevPerf();
+}
+
+// 滑动中事件处理
+function downLmdValue(value: number) {
+  console.log('11111111111', value);
+  const xxx = Number(PageToSensitivity(value));
+  console.log('11111111111', xxx);
+
+  // setPerfIndex(EXE_DEAD_ZONE, Number(xxx));
+  setPerfIndex(DOWN_LMD_VALUE, xxx);
+  if (lmdLock.value) {
+    setPerfIndex(UP_LMD_VALUE, xxx);
+  }
+  setDevPerf();
+}
+function upLmdSlide(value: number) {
+  const xxx = Number(PageToSensitivity(value));
+  setPerfIndex(UP_LMD_VALUE, xxx);
+  if (lmdLock.value) {
+    setPerfIndex(DOWN_LMD_VALUE, xxx);
+  }
+
   setDevPerf();
 }
 async function getDevRate() {
@@ -266,14 +285,16 @@ getDevRate();
         </div>
 
         <KeyMove v-model="exeDeadZoneValue" @stop-sliding="exeDeadSlidingStop"></KeyMove>
-        <div class="flex-raw flex justify-between">
+        <div class="flex-raw flex justify-center">
           <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
-          <button
+          <!--
+ <button
             class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
             @click="setAxosome"
           >
             {{ $t('repidTrigger.switchType') }}
           </button>
+-->
         </div>
       </div>
 
