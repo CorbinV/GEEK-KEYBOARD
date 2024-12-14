@@ -4,6 +4,8 @@ import type { KeyInfo } from '@/api/modules/keyboard';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
 import emitter from '@/utils/eventBus';
+import useConver from '@/utils/conver';
+const { triggerToPage, sensitivityToPage } = useConver();
 
 const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
@@ -79,15 +81,15 @@ async function handleDisableKey() {
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>{{ $t('baseKey.keyboard.exeDot') }}</span>
-        <span class="text-c-hl">{{ keyInfo.triggerPoint || '/' }}</span>
+        <span class="text-c-hl">{{ triggerToPage(keyInfo.triggerPoint) || '/' }}</span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>{{ $t('baseKey.keyboard.exeRt') }}</span>
-        <span class="text-c-hl">{{ keyInfo.rtTrigger || '/' }}</span>
+        <span class="text-c-hl">{{ sensitivityToPage(keyInfo.rtTrigger) || '/' }}</span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>{{ $t('baseKey.keyboard.resetRt') }}</span>
-        <span class="text-c-hl">{{ keyInfo.rtReset || '/' }}</span>
+        <span class="text-c-hl">{{ sensitivityToPage(keyInfo.rtReset) || '/' }}</span>
       </div>
       <!-- feat: finish the params -->
       <!--
