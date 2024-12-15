@@ -36,6 +36,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       offsetList: number[]; // keyboard row offset
       keyMap: any;
       superKeyMap: { [key: string]: CacheSuperKey };
+      dksKeyMap: Map<string, string>; // string<{code, type}> : key/keyId
+      comboKeyMap: Map<string, string>;
       layerIdx: number;
       layerKeys: any;
       layerList: any[];
@@ -44,6 +46,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       offsetList: [],
       keyMap: {},
       superKeyMap: {},
+      dksKeyMap: new Map(),
+      comboKeyMap: new Map(),
       layerIdx: 0,
       layerList: [],
       layerKeys: {}
@@ -275,7 +279,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     };
     const updateKeyBase = (keyId: string, data: any, layer: number = kbCfg.layerIdx) => {
       const old = kbCfg.layerList[layer].keys;
-      kbCfg.layerList[layer].keys[keyId] = { ...old[keyId], ...data };
+      kbCfg.layerList[layer].keys[keyId] = { ...(old[keyId] || {}), ...data };
     };
 
     const setKeyDisabled = (
@@ -291,6 +295,34 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         kbCfg.layerList[layer].xxx.disable.splice(idx, 1);
       }
     };
+    const updateKeyTag = (
+      origin: {
+        key: string;
+        data: { type: KeyTypeEnum; code: number };
+      },
+      ops: {
+        type?: 'add' | 'remove';
+        tag?: 'combo' | 'dks';
+      }
+    ) => {
+      const { key, data } = origin;
+      const { type = 'add', tag = 'combo' } = ops || {};
+      const dataStr = JSON.stringify(data);
+      const paramName = (() => {
+        if (tag === 'combo') {
+          return 'comboKeyMap';
+        }
+        return 'dksKeyMap';
+      })();
+      let mapValue = kbCfg[paramName].get(dataStr!);
+      if (type === 'add') {
+        kbCfg[paramName].set(dataStr!, key);
+        mapValue = key;
+      } else {
+        kbCfg[paramName].delete(dataStr!);
+      }
+      return mapValue;
+    };
     initKeyMap();
     return {
       initKeyboardData,
@@ -301,6 +333,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       updateLayerKeys,
       updateKeyBaseWhenKeyChange,
       setKeyDisabled,
+      updateKeyTag,
       updateKeyBase
     };
   }

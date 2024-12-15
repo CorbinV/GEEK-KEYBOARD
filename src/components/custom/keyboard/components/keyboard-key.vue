@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { inject, onMounted, reactive, ref, toRaw, toRefs, watchEffect } from 'vue';
+import { inject, onMounted, reactive, ref, toRaw, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyCfg } from '@/api/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { tranformKeyTypeToChar, tranformKeyTypeToColor } from '@/hooks/common/transform';
 import type { BaseKeyView } from '@/api/modules/combo';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
+import { useCommonStore } from '@/store/modules/common';
 
 interface KeyboardKeyProps {
   keyId: string;
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 }>();
 const props = defineProps<KeyboardKeyProps>();
 const keyboardStore = useKeyboardStore();
+const commonStore = useCommonStore();
 const { kbCfg, currentSuperKeyType } = toRefs(keyboardStore);
 const keyInfo = ref();
 const keyStyle = ref({});
@@ -65,12 +67,19 @@ function updateKeyView(data: any) {
 onMounted(async () => {
   const injectSelectedDetail = inject('selectedDetail') as any;
   useLayout(kbCfg);
+  const specKeyEffect = (code: number, type: KeyTypeEnum) => {
+    if (KeyTypeEnum.Combo === type) {
+      commonStore.updateComboKeyTag(props.keyId, { code, type }, { type: 'add', updateOrigin: false });
+    } else if (KeyTypeEnum.DKS === type) {
+      commonStore.updateDksKeyTag(props.keyId, { code, type }, { type: 'add', updateOrigin: false });
+    }
+  };
   function updateKeyCfg(data: KeyCfg) {
     if (!data) {
       return;
     }
     const { code, type } = data;
-
+    specKeyEffect(code, type);
     const info = keyboardStore.getKeyDetail({ code, type });
     updateKeyView(info);
   }
@@ -85,9 +94,19 @@ onMounted(async () => {
   watchEffect(() => {
     updateKeyViewBySelectedDetail(injectSelectedDetail.value);
   });
-  watchEffect(() => {
-    updateKeyCfg(props.keyDetail);
-  });
+  // watchEffect(() => {
+  //   updateKeyCfg(props.keyDetail);
+  // });
+  watch(
+    () => props.keyDetail,
+    nVal => {
+      updateKeyCfg(nVal);
+    },
+    {
+      immediate: true,
+      deep: true
+    }
+  );
   if (props.kbLength !== undefined && props.kbLength === props.idx + 1) {
     emit('lastKeyMounted', null);
   }

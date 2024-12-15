@@ -7,7 +7,7 @@ import { getKeyInfo, restoreKeyConfig, setKeyInfo } from '@/api/keyConfig';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { useKeyboardStore } from '../keyboard/index';
 function useKeyInfo() {
-  const { setKeyDisabled, updateKeyBase, removeSuperKey } = useKeyboardStore();
+  const { setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag } = useKeyboardStore();
   // key cache
   const KeyConfigMap = reactive<{ [key: string]: KeyInfo | null }>({});
 
@@ -40,6 +40,13 @@ function useKeyInfo() {
         ]
       });
     }
+    if (data.code !== undefined) {
+      if (data.type === KeyTypeEnum.Combo) {
+        updateComboKeyTag(key, { code: data.code, type: data.type }, { type: 'add', updateOrigin: false });
+      } else if (data.type === KeyTypeEnum.DKS) {
+        updateDksKeyTag(key, { code: data.code, type: data.type }, { type: 'add', updateOrigin: false });
+      }
+    }
     if (data.enable !== undefined) {
       setKeyDisabled({ keyId: key }, !data.enable);
     }
@@ -67,13 +74,48 @@ function useKeyInfo() {
     setKeyDisabled({ keyId: key }, false);
     return KeyConfigMap[key];
   }
+  async function updateKeyTagCommon(
+    tag: 'combo' | 'dks',
+    origin: {
+      key: string;
+      data: { code: number; type: KeyTypeEnum };
+    },
+    ops?: { type: 'add' | 'remove'; updateOrigin: boolean }
+  ) {
+    const { key, data } = origin;
+    const { updateOrigin = true, type: typeFnc = 'add' } = ops || {};
+    const keyId = updateKeyTag({ key, data }, { tag, type: typeFnc });
+    if (!updateOrigin || !keyId) {
+      return keyId;
+    }
+    const keyInfo = await getKeyInfo({ key: keyId });
+    KeyConfigMap[keyId] = keyInfo;
+    updateKeyBase(keyId, { code: keyInfo.code, type: keyInfo.type });
+    return keyId;
+  }
+  async function updateComboKeyTag(
+    key: string,
+    data: { code: number; type: KeyTypeEnum },
+    ops?: { type: 'add' | 'remove'; updateOrigin: boolean }
+  ) {
+    return await updateKeyTagCommon('combo', { key, data }, ops);
+  }
+  async function updateDksKeyTag(
+    key: string,
+    data: { code: number; type: KeyTypeEnum },
+    ops?: { type: 'add' | 'remove'; updateOrigin: boolean }
+  ) {
+    return await updateKeyTagCommon('combo', { key, data }, ops);
+  }
   return {
     KeyConfigMap,
     fetchTargetKeyInfo,
     getTargetKeyInfo,
     restoreTargetKeyInfoById,
     setTargetKeyInfoById,
-    setKeyInfoByList
+    setKeyInfoByList,
+    updateComboKeyTag,
+    updateDksKeyTag
   };
 }
 export const useCommonStore = defineStore(SetupStoreId.Common, () => {
