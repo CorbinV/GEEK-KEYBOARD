@@ -9,9 +9,10 @@ import { addTGL, deleteTGLByCode, getTGLList, resetTGLName } from '@/api/super-k
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
 import { formatLableSub3 } from '@/hooks/common/format';
+import emitter from '@/utils/eventBus';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
-const tglGroupList = ref<any>([]);
+const groupList = ref<any[]>([]);
 const editVisible = ref(false);
 const modalTitle = ref($t('businessCommon.switchSwitch'));
 const MAC_GORUP_CNT = 8;
@@ -35,7 +36,19 @@ const renameIndex = ref(-1);
 
 let isEdit = false;
 let editItemCode = 0;
-
+function handleMittEvent() {
+  emitter.on('resetKey', (key: string) => {
+    if (!key) {
+      return;
+    }
+    groupList.value.forEach((group, idx: number) => {
+      const matchingKeyBase = group.base.key === key;
+      if (matchingKeyBase) {
+        handleGroupItemDelete(group, idx);
+      }
+    });
+  });
+}
 onMounted(() => {
   watch(
     () => selectedKeys.value,
@@ -44,6 +57,7 @@ onMounted(() => {
       keyId = keys.length > 0 ? keys[0] : '';
     }
   );
+  handleMittEvent();
 });
 
 function handleAddClicked() {
@@ -60,7 +74,7 @@ function handleAddClicked() {
     window.$message!.info($t('supperKey.keyBinedOtherFunc'));
     return;
   }
-  if (tglGroupList.value.length >= MAC_GORUP_CNT) {
+  if (groupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning($t('supperKey.keyBinedOtherFunc', { total: MAC_GORUP_CNT }));
     return;
   }
@@ -79,7 +93,7 @@ async function updateGroupList() {
   console.log('getTGLList');
   const ret = await getTGLList({ pageNo: 1, pageSize: 8 });
   console.log('getTGLList ret', ret);
-  tglGroupList.value = ret.tgl.map(item => {
+  groupList.value = ret.tgl.map(item => {
     const { code, type, key } = item;
     return {
       base: { code, type, key },
@@ -132,7 +146,7 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
     //   { toDevice: false }
     // );
 
-    // tglGroupList.value.push({
+    // groupList.value.push({
     //   base: {
     //     code,
     //     name,
@@ -162,7 +176,7 @@ async function handleGroupItemDelete(item: any, idx: number) {
   console.log('handleGroupItemDelete', JSON.stringify(item), idx);
   try {
     await deleteTGLByCode({ code: item.base.code });
-    tglGroupList.value.splice(idx, 1);
+    groupList.value.splice(idx, 1);
     removeSuperKey(item.base.key!, { moduleType: KeyTypeEnum.TGL });
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
@@ -187,8 +201,8 @@ async function handleGroupItemRename(items: any, idx: number) {
   showRenameModal.value = true;
 }
 function generateGroupCode() {
-  if (tglGroupList.value.length === 0) return 0;
-  const usedCodes = new Set(tglGroupList.value.map((group: { base: { code: number } }) => group.base.code));
+  if (groupList.value.length === 0) return 0;
+  const usedCodes = new Set(groupList.value.map((group: { base: { code: number } }) => group.base.code));
   let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
@@ -202,7 +216,7 @@ async function handleReNameSave(data: { name: string }) {
     await resetTGLName({ code: editItem.base.code, name: data.name });
     // editItem.base.name = data.name;
     showRenameModal.value = false;
-    tglGroupList.value[renameIndex.value].base.name = data.name;
+    groupList.value[renameIndex.value].base.name = data.name;
   } catch (error) {
     console.log('error', error);
   }
@@ -214,7 +228,7 @@ async function handleReNameSave(data: { name: string }) {
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
       <BasicGroupAdd icon="add" :desc="$t('businessCommon.addSwtich')" @click="handleAddClicked" />
       <BasicGroupItem
-        v-for="(item, idx) in tglGroupList"
+        v-for="(item, idx) in groupList"
         :key="item.code"
         :base="item.base"
         :key-list="item.keyList"

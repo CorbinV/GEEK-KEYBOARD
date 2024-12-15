@@ -9,14 +9,16 @@ import { addMT, deleteMTByCode, getMTList, resetMTName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
 import { formatLableSub3 } from '@/hooks/common/format';
+import emitter from '@/utils/eventBus';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
+
 type GroupItem = {
   base: { code: number; type: KeyTypeEnum; name: string; key?: string };
   keyList: any[];
   keyBaseList: any[];
 };
-const mtGroupList = ref<GroupItem[]>([]);
+const groupList = ref<GroupItem[]>([]);
 const editVisible = ref(false);
 const modalTitle = ref('单击/按住');
 const MAC_GORUP_CNT = 8;
@@ -42,7 +44,19 @@ const renameIndex = ref(-1);
 
 let isEdit = false;
 let editItemCode = 0;
-
+function handleMittEvent() {
+  emitter.on('resetKey', (key: string) => {
+    if (!key) {
+      return;
+    }
+    groupList.value.forEach((group, idx) => {
+      const matchingKeyBase = group.base.key === key;
+      if (matchingKeyBase) {
+        handleGroupItemDelete(group, idx);
+      }
+    });
+  });
+}
 onMounted(() => {
   watch(
     () => selectedKeys.value,
@@ -51,6 +65,7 @@ onMounted(() => {
       keyId = keys.length > 0 ? keys[0] : '';
     }
   );
+  handleMittEvent();
 });
 
 function handleAddClicked() {
@@ -64,7 +79,7 @@ function handleAddClicked() {
     window.$message!.info($t('supperKey.keyBinedDKSFunc'));
     return;
   }
-  if (mtGroupList.value.length >= MAC_GORUP_CNT) {
+  if (groupList.value.length >= MAC_GORUP_CNT) {
     window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAC_GORUP_CNT }));
     return;
   }
@@ -85,7 +100,7 @@ async function updateGroupList() {
   const ret = await getMTList({ pageNo: 1, pageSize: 8 });
   console.log('getMTList ret', ret);
   mtList.value = ret.mt;
-  mtGroupList.value = ret.mt.map(item => {
+  groupList.value = ret.mt.map(item => {
     const { code, type, time, key } = item;
     return {
       base: { code, type, time, key, name: '' },
@@ -149,7 +164,7 @@ async function handleGroupCreated({ code, keys, name, listDetail }: any) {
     //   { toDevice: false }
     // );
 
-    // mtGroupList.value.push({
+    // groupList.value.push({
     //   base: {
     //     code,
     //     name,
@@ -184,7 +199,7 @@ async function handleGroupItemDelete(item: any, idx: number) {
     console.log('deleteMTByCode', ret);
     // keyboardStore.removeSuperKey(item.base.key, { moduleType: KeyTypeEnum.MT });
 
-    mtGroupList.value.splice(idx, 1);
+    groupList.value.splice(idx, 1);
     removeSuperKey(item.base.key!, { moduleType: KeyTypeEnum.MT });
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
@@ -207,8 +222,8 @@ async function handleGroupItemRename(items: any, idx: number) {
   showRenameModal.value = true;
 }
 function generateGroupCode() {
-  if (mtGroupList.value.length === 0) return 0;
-  const usedCodes = new Set(mtGroupList.value.map((group: { base: { code: number } }) => group.base.code));
+  if (groupList.value.length === 0) return 0;
+  const usedCodes = new Set(groupList.value.map((group: { base: { code: number } }) => group.base.code));
   let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
@@ -223,7 +238,7 @@ async function handleReNameSave(data: { name: string }) {
     console.log('resetMTName', ret);
     editItem.base.name = data.name;
     showRenameModal.value = false;
-    mtGroupList.value[renameIndex.value].base.name = data.name;
+    groupList.value[renameIndex.value].base.name = data.name;
   } catch (error) {
     console.log('error', error);
   }
@@ -235,7 +250,7 @@ async function handleReNameSave(data: { name: string }) {
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
       <BasicGroupAdd icon="add" :desc="$t('supperKey.addClickDown')" @click="handleAddClicked" />
       <BasicGroupItem
-        v-for="(item, idx) in mtGroupList"
+        v-for="(item, idx) in groupList"
         :key="item.base.code"
         :base="item.base"
         :key-list="item.keyList"
