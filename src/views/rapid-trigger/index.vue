@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref, toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
+import { useKeyboardStore } from '@/store/modules/keyboard';
 import AdjustView from './components/adjust-view.vue';
 import PropertyView from './components/property-view.vue';
 // const allSelct = () => {
@@ -21,6 +22,17 @@ const tabName = ref(0);
 function handleKeyEventTabs(value: string | number) {
   tabName.value = Number(value);
 }
+function useMutipleKeysControl() {
+  const keyboardStore = useKeyboardStore();
+  const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
+  onMounted(() => {
+    allowMutipleSelect.value = true;
+  });
+  onUnmounted(() => {
+    allowMutipleSelect.value = false;
+  });
+}
+useMutipleKeysControl();
 </script>
 
 <template>
