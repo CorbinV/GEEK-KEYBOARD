@@ -45,3 +45,9 @@ export function setRate(data: RateIndex) {
     data
   });
 }
+export function resetRt(data: string[]) {
+  return requestClient.send<RateIndex>({
+    name: 'resetRT',
+    data
+  });
+}
