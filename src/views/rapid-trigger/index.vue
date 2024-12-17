@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, toRef } from 'vue';
+import { onUnmounted, ref, toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import AdjustView from './components/adjust-view.vue';
 import PropertyView from './components/property-view.vue';
+import ButtonGroup from './components/button-group.vue';
 // const allSelct = () => {
 //   console.log('2.4g接收器配对按钮被点击');
 //   // 这里可以加入接收器配对的逻辑
@@ -25,9 +26,7 @@ function handleKeyEventTabs(value: string | number) {
 function useMutipleKeysControl() {
   const keyboardStore = useKeyboardStore();
   const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
-  onMounted(() => {
-    allowMutipleSelect.value = true;
-  });
+  allowMutipleSelect.value = true;
   onUnmounted(() => {
     allowMutipleSelect.value = false;
   });
@@ -38,6 +37,9 @@ useMutipleKeysControl();
 <template>
   <div>
     <KeyboardContainer>
+      <template #keyboardBottom>
+        <ButtonGroup />
+      </template>
       <template #default>
         <div class="h-full flex flex-col items-center">
           <div class="w-full flex-1">
