@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { computed, inject, provide, reactive, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
+import { computed, inject, onMounted, provide, reactive, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { LayerKeysConfig } from '@/api/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
+import { useCommonStore } from '@/store/modules/common';
+import emitter, { EventNameEnum } from '@/utils/eventBus';
+
+import { resetRt } from '@/api/keyConfig-rapid-trigger';
+import { $t } from '@/locales';
 import KeyboardKey from './keyboard-key.vue';
 type KeyboardProps = {
   module?: string; // device module
@@ -11,10 +16,9 @@ type KeyboardProps = {
   config?: number;
   as?: 'component' | 'template';
 };
-
+const commonStore = useCommonStore();
 const injSelectedInfo = inject('selectedInfo') as any;
 const injResetSelectedInfo = inject('resetSelectedInfo') as any;
-
 const emit = defineEmits<{
   (e: 'update:keyId', preload: { keyId: string; idx: number; code: number; type: KeyTypeEnum }): void;
 }>();
@@ -53,6 +57,7 @@ const layoutList = computed(() => {
 });
 function useStoreData() {
   const selected = toRef(keyboardStore, 'selectedKeys');
+  const selectedMap = toRef(keyboardStore, 'selectedKeysMap');
   const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
   // optimize: wait single/multiple selected
   // if (props.as === 'template') {
@@ -62,11 +67,12 @@ function useStoreData() {
   // }
   return {
     storeSelectedKeys: selected,
+    storeSelectedKeyMap: selectedMap,
     storeMutipleModule: allowMutipleSelect
   };
 }
 function useKeySelectAndNotify() {
-  const { storeSelectedKeys, storeMutipleModule } = useStoreData();
+  const { storeSelectedKeys, storeMutipleModule, storeSelectedKeyMap } = useStoreData();
   const selectedDetail = ref<null | {
     label: string;
     icon: string;
@@ -104,6 +110,8 @@ function useKeySelectAndNotify() {
           return false;
         } else if (selectedIdxObj.value[idx]) {
           return true;
+        } else if (clickedKey.value.idx === idx) {
+          return true;
         }
         return false;
       });
@@ -127,11 +135,20 @@ function useKeySelectAndNotify() {
     storeMutipleModule,
     selectedIdxObj,
     resetSelectedIdxObj,
+    storeSelectedKeyMap,
     selectedList
   };
 }
-const { clickedKey, resetClickedKey, storeSelectedKeys, storeMutipleModule, selectedIdxObj, selectedList } =
-  useKeySelectAndNotify();
+const {
+  clickedKey,
+  resetClickedKey,
+  storeSelectedKeys,
+  storeSelectedKeyMap,
+  storeMutipleModule,
+  selectedIdxObj,
+  resetSelectedIdxObj,
+  selectedList
+} = useKeySelectAndNotify();
 
 function xxx(keyId: string, idx: number) {
   const keyCfgInfo = toRaw(layerData[props.layer]?.keys[keyId!]);
@@ -155,9 +172,11 @@ function xxx(keyId: string, idx: number) {
       selectedIdxObj.value[idx] = '';
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete storeSelectedKeys.value[keyId];
+      storeSelectedKeyMap.value.delete(keyId);
     } else {
       selectedIdxObj.value[idx] = keyId;
       storeSelectedKeys.value[keyId] = cacheData;
+      storeSelectedKeyMap.value.set(keyId, cacheData);
     }
   } else {
     // perf: high coupling!
@@ -184,6 +203,99 @@ function handleKeyClick(e: MouseEvent) {
 
   }
 }
+async function handleApiSelectAll() {
+  let [firstKey] = storeSelectedKeyMap.value.keys();
+  if (!firstKey) {
+    firstKey = layoutList.value[0];
+  }
+  const firstSelectInfo = storeSelectedKeyMap.value.get(firstKey);
+  // notice: if not key has selected in after -> get layoutList first key config(device)
+
+  let emitData;
+  if (!firstSelectInfo?.config?.tary) {
+    emitData = await commonStore.getTargetKeyInfo(firstKey);
+  }
+  const keyCfgInfo = toRaw(layerData[props.layer]?.keys[firstKey!]);
+  const base = {
+    code: keyCfgInfo.code,
+    type: keyCfgInfo.type,
+    key: firstKey
+  };
+  layoutList.value.forEach((key, idx) => {
+    selectedIdxObj.value[idx] = key;
+    if (storeSelectedKeyMap.value.has(key)) {
+      return;
+    }
+    storeSelectedKeyMap.value.set(key, {} as any);
+  });
+  const keyDetail = await keyboardStore.getKeyDetail({ code: keyCfgInfo.code, type: keyCfgInfo.type });
+  const firstMap = storeSelectedKeyMap.value.get(firstKey)!;
+  firstMap.config = emitData;
+  firstMap.detail = keyDetail;
+  firstMap.base = base;
+}
+async function handleApiSelectClear() {
+  keyboardStore.emitResetSelectedKeys();
+  resetSelectedIdxObj();
+}
+async function handleApiReverseSelete() {
+  layoutList.value.forEach((key, idx) => {
+    if (selectedIdxObj.value[idx]) {
+      storeSelectedKeyMap.value.delete(key);
+      selectedIdxObj.value[idx] = '';
+      return;
+    }
+    selectedIdxObj.value[idx] = key;
+    storeSelectedKeyMap.value.set(key, {} as any);
+  });
+  let [firstKey] = storeSelectedKeyMap.value.keys();
+  if (!firstKey) {
+    firstKey = layoutList.value[0];
+  }
+  const keyCfgInfo = toRaw(layerData[props.layer]?.keys[firstKey!]);
+  const base = {
+    code: keyCfgInfo.code,
+    type: keyCfgInfo.type,
+    key: firstKey
+  };
+  const keyDetail = await keyboardStore.getKeyDetail({ code: keyCfgInfo.code, type: keyCfgInfo.type });
+
+  const firstSelectInfo = storeSelectedKeyMap.value.get(firstKey)!;
+  let emitData;
+  if (!firstSelectInfo?.config?.tary) {
+    emitData = await commonStore.getTargetKeyInfo(firstKey);
+  }
+  firstSelectInfo.base = base;
+  firstSelectInfo.detail = keyDetail;
+  firstSelectInfo.config = emitData;
+}
+async function handleApiResetRtFnc() {
+  try {
+    const selectKeyList = storeSelectedKeyMap.value.keys();
+    await resetRt(Array.from(selectKeyList));
+    window.$message?.success($t('businessCommon.executeSuccess'));
+  } catch (error) {
+    console.error(error);
+    window.$message?.error($t('businessCommon.delFailPlsUpdate'));
+  }
+}
+onMounted(() => {
+  if (!storeMutipleModule.value) {
+    return;
+  }
+  emitter.on(EventNameEnum.selecteAll, () => {
+    handleApiSelectAll();
+  });
+  emitter.on(EventNameEnum.selecteClear, () => {
+    handleApiSelectClear();
+  });
+  emitter.on(EventNameEnum.reverseSelect, () => {
+    handleApiReverseSelete();
+  });
+  emitter.on(EventNameEnum.rtFncReset, () => {
+    handleApiResetRtFnc();
+  });
+});
 watch(
   () => storeSelectedKeys.value,
   nVal => {

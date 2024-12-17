@@ -414,6 +414,18 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         config: any;
       };
     }>(() => ({}));
+    const [selectedKeysMap, resetSelectedKeysMap] = useResttableRefFn<
+      Map<
+        string,
+        {
+          base: { code: number; type: number };
+          detail: any;
+          config: any;
+        }
+      >
+    >(() => {
+      return new Map();
+    });
     const [selectedKeysTemp, resetSelectedKeysTemp] = useResttableRefFn<{
       [key: string]: {
         base: { code: number; type: number };
@@ -422,8 +434,9 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       };
     }>(() => ({}));
     const [allowMutipleSelect, resetAllowMutipleSelect] = useResttableRefFn(() => false);
-    function emitResetSelectedKeys(_: any) {
+    function emitResetSelectedKeys(_?: any) {
       resetSelectedKeys();
+      selectedKeysMap.value.clear();
     }
     watchEffect(() => {
       // feat: when allow mutiple select value change, the selected keys should be reset
@@ -435,7 +448,10 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       allowMutipleSelect,
       resetAllowMutipleSelect,
       selectedKeysTemp,
-      resetSelectedKeysTemp
+      resetSelectedKeysTemp,
+      selectedKeysMap,
+      resetSelectedKeysMap,
+      emitResetSelectedKeys
     };
   }
   const { resetSelectedKeys, ...restRelatedSelectedData } = useRelatedSelectedKeys();
