@@ -149,14 +149,15 @@ function xxx(keyId: string, idx: number) {
     config: keyCfgInfo
   };
   if (storeMutipleModule.value) {
-    storeSelectedKeys.value[keyId] = cacheData;
-
     // exist ? remove : add
     const target = selectedIdxObj.value[idx];
     if (target) {
       selectedIdxObj.value[idx] = '';
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+      delete storeSelectedKeys.value[keyId];
     } else {
       selectedIdxObj.value[idx] = keyId;
+      storeSelectedKeys.value[keyId] = cacheData;
     }
   } else {
     // perf: high coupling!
