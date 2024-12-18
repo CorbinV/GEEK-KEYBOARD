@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, toRefs, watchEffect } from 'vue';
+import { computed, toRefs, watchEffect } from 'vue';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
-import emitter from '@/utils/eventBus';
+import emitter, { EventNameEnum } from '@/utils/eventBus';
 import useConver from '@/utils/conver';
+import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
 const { triggerToPage, sensitivityToPage } = useConver();
 
 const keyboardStore = useKeyboardStore();
@@ -17,7 +18,7 @@ const props = withDefaults(defineProps<KeyControlProps>(), {
   keyId: ''
 });
 const { kbCfg } = toRefs(keyboardStore);
-const keyInfo = reactive({
+const [keyInfo, resetKeyInfo] = useResttableReactiveFn(() => ({
   currentKey: {} as {
     type: string;
     label: string;
@@ -27,7 +28,7 @@ const keyInfo = reactive({
   rtTrigger: 0,
   rtReset: 0,
   params: []
-});
+}));
 const showIcon = computed(() => {
   return keyInfo.currentKey?.type !== 'str';
 });
@@ -44,7 +45,10 @@ function updateKeyInfo(data: KeyInfo) {
 }
 // optimize: add a notification to show the result
 watchEffect(async () => {
-  if (props.keyId === '') return;
+  if (props.keyId === '') {
+    resetKeyInfo();
+    return;
+  }
   const data = await commonStore.getTargetKeyInfo(props.keyId);
   updateKeyInfo(data);
 });
@@ -53,7 +57,7 @@ async function handleResetKey() {
   updateKeyInfo(data);
   // optimize: add a notification to show the result
   if (props.keyId === '') return;
-  emitter.emit('resetKey', props.keyId);
+  emitter.emit(EventNameEnum.resetKey, props.keyId);
 }
 async function handleDisableKey() {
   await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 });
