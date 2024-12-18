@@ -233,10 +233,13 @@ async function handleApiSelectAll() {
   firstMap.config = emitData;
   firstMap.detail = keyDetail;
   firstMap.base = base;
+  const index = layoutList.value.findIndex(k => k === firstKey);
+  emit('update:keyId', { keyId: firstKey, idx: index, ...keyCfgInfo });
 }
 async function handleApiSelectClear() {
   keyboardStore.emitResetSelectedKeys();
   resetSelectedIdxObj();
+  emit('update:keyId', { keyId: '', idx: -1 } as any);
 }
 async function handleApiReverseSelete() {
   layoutList.value.forEach((key, idx) => {
@@ -248,9 +251,10 @@ async function handleApiReverseSelete() {
     selectedIdxObj.value[idx] = key;
     storeSelectedKeyMap.value.set(key, {} as any);
   });
-  let [firstKey] = storeSelectedKeyMap.value.keys();
+  const [firstKey] = storeSelectedKeyMap.value.keys();
   if (!firstKey) {
-    firstKey = layoutList.value[0];
+    emit('update:keyId', { keyId: '', idx: -1 } as any);
+    return;
   }
   const keyCfgInfo = toRaw(layerData[props.layer]?.keys[firstKey!]);
   const base = {
@@ -259,12 +263,14 @@ async function handleApiReverseSelete() {
     key: firstKey
   };
   const keyDetail = await keyboardStore.getKeyDetail({ code: keyCfgInfo.code, type: keyCfgInfo.type });
-
   const firstSelectInfo = storeSelectedKeyMap.value.get(firstKey)!;
   let emitData;
   if (!firstSelectInfo?.config?.tary) {
     emitData = await commonStore.getTargetKeyInfo(firstKey);
   }
+  const index = layoutList.value.findIndex(k => k === firstKey);
+  emit('update:keyId', { keyId: firstKey, idx: index, ...keyCfgInfo });
+
   firstSelectInfo.base = base;
   firstSelectInfo.detail = keyDetail;
   firstSelectInfo.config = emitData;

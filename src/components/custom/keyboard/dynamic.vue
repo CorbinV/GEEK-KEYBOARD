@@ -34,9 +34,12 @@ const selectedKey = ref({
 function handleSelectKey(data: Omit<BaseKey, 'key'> & { idx: number; keyId: string }) {
   const { keyId, type, code } = data;
   selectedKey.value.keyId = keyId;
+  if (keyId === '' || keyId === undefined) {
+    selectedKey.value.label = '';
+    return;
+  }
   const { label } = getKeyDetail({ type, code });
   selectedKey.value.label = label;
-
   emit('change:key-id', keyId);
 }
 </script>
