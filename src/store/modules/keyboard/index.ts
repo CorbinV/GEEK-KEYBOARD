@@ -13,16 +13,19 @@ import { formatLableSub3 } from '@/hooks/common/format';
 import type { LayerKeysConfig } from '@/api/modules/keyboard';
 import { logger } from '@/utils/log';
 import { useDeviceStore } from '../device';
+
 type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
   KeyTypeEnum.Normal | KeyTypeEnum.System | KeyTypeEnum.Media | KeyTypeEnum.Combo | KeyTypeEnum.Special
 >;
+type RtLabelMapType = { trigPt: string; rtTrig: string; rtReset: string; enableRt: number };
 type CacheSuperKey = {
   sp: KeyTypeEnum[];
   mt?: BaseKeyView;
   dks: boolean;
   combo: boolean;
 };
+
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
 
@@ -38,6 +41,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       superKeyMap: { [key: string]: CacheSuperKey };
       dksKeyMap: Map<string, string>; // string<{code, type}> : key/keyId
       comboKeyMap: Map<string, string>;
+      rtLabelMap: Map<string, RtLabelMapType>;
       layerIdx: number;
       layerKeys: any;
       layerList: any[];
@@ -48,6 +52,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       superKeyMap: {},
       dksKeyMap: new Map(),
       comboKeyMap: new Map(),
+      rtLabelMap: new Map(),
       layerIdx: 0,
       layerList: [],
       layerKeys: {}
@@ -434,6 +439,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       };
     }>(() => ({}));
     const [allowMutipleSelect, resetAllowMutipleSelect] = useResttableRefFn(() => false);
+    const [showKeyParams] = useResttableRefFn(() => false);
+
     function emitResetSelectedKeys(_?: any) {
       resetSelectedKeys();
       selectedKeysMap.value.clear();
@@ -441,6 +448,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     watchEffect(() => {
       // feat: when allow mutiple select value change, the selected keys should be reset
       emitResetSelectedKeys(allowMutipleSelect.value);
+    });
+    watchEffect(() => {
+      if (!allowMutipleSelect.value) {
+        showKeyParams.value = false;
+      }
     });
     return {
       selectedKeys,
@@ -451,7 +463,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       resetSelectedKeysTemp,
       selectedKeysMap,
       resetSelectedKeysMap,
-      emitResetSelectedKeys
+      emitResetSelectedKeys,
+      showKeyParams
     };
   }
   const { resetSelectedKeys, ...restRelatedSelectedData } = useRelatedSelectedKeys();

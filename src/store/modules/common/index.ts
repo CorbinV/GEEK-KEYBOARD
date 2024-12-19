@@ -1,19 +1,26 @@
-import { effectScope, onScopeDispose, reactive } from 'vue';
+import { computed, effectScope, nextTick, onScopeDispose, toRef } from 'vue';
 import { defineStore } from 'pinia';
 import { useEventListener } from '@vueuse/core';
 import { SetupStoreId } from '@/enum';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { getKeyInfo, restoreKeyConfig, setKeyInfo } from '@/api/keyConfig';
 import { KeyTypeEnum } from '@/enum/keyType';
+import { getPerf } from '@/api/keyConfig-rapid-trigger';
+import useConver from '@/utils/conver';
 import { useKeyboardStore } from '../keyboard/index';
+
 function useKeyInfo() {
-  const { setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag } = useKeyboardStore();
+  const keyboardStore = useKeyboardStore();
+  const { setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag } = keyboardStore;
   // key cache
-  const KeyConfigMap = reactive<{ [key: string]: KeyInfo | null }>({});
+  const kbCfg = toRef(keyboardStore, 'kbCfg');
+  const keyConfigMap = computed(() => kbCfg.value.layerKeys);
+  const { triggerToPage, sensitivityToPage } = useConver();
 
   async function fetchTargetKeyInfo(key: string) {
     const keyInfo = await getKeyInfo({ key });
-    KeyConfigMap[key] = keyInfo;
+    keyConfigMap.value[key] = keyInfo;
+    updateTaryDataCache([key]);
     return keyInfo;
   }
   /**
@@ -24,10 +31,10 @@ function useKeyInfo() {
     if (refresh) {
       return await fetchTargetKeyInfo(key);
     }
-    if (!KeyConfigMap[key]) {
+    if (!keyConfigMap.value[key]?.mt) {
       return await fetchTargetKeyInfo(key);
     }
-    return KeyConfigMap[key];
+    return keyConfigMap.value[key];
   }
   async function setTargetKeyInfoById(key: string, data: Partial<KeyInfo>, toDevice: boolean = true) {
     if (toDevice) {
@@ -50,8 +57,9 @@ function useKeyInfo() {
     if (data.enable !== undefined) {
       setKeyDisabled({ keyId: key }, !data.enable);
     }
-    KeyConfigMap[key] = null;
-    return KeyConfigMap[key];
+    keyConfigMap.value[key].mt = [] as any;
+    nextTick(() => getTargetKeyInfo(key, true));
+    return keyConfigMap.value[key];
   }
   async function setKeyInfoByList(
     data: (Partial<KeyInfo> & {
@@ -63,16 +71,16 @@ function useKeyInfo() {
     });
     data.forEach(item => {
       const { key, ...rest } = item;
-      KeyConfigMap[key] = { ...(KeyConfigMap[key] || {}), ...rest } as any;
+      keyConfigMap.value[key] = { ...(keyConfigMap.value[key] || {}), ...rest } as any;
     });
   }
   async function restoreTargetKeyInfoById(key: string) {
     const data = await restoreKeyConfig({ key });
-    KeyConfigMap[key] = data;
+    keyConfigMap.value[key] = data;
     updateKeyBase(key, data);
     removeSuperKey(key, { moduleType: KeyTypeEnum.None, removeAll: true });
     setKeyDisabled({ keyId: key }, false);
-    return KeyConfigMap[key];
+    return keyConfigMap.value[key];
   }
   async function updateKeyTagCommon(
     tag: 'combo' | 'dks',
@@ -89,7 +97,7 @@ function useKeyInfo() {
       return keyId;
     }
     const keyInfo = await getKeyInfo({ key: keyId });
-    KeyConfigMap[keyId] = keyInfo;
+    keyConfigMap.value[keyId] = keyInfo;
     updateKeyBase(keyId, { code: keyInfo.code, type: keyInfo.type });
     return keyId;
   }
@@ -107,20 +115,80 @@ function useKeyInfo() {
   ) {
     return await updateKeyTagCommon('combo', { key, data }, ops);
   }
+  async function updateAllKeyTary() {
+    let lenCnt = 0;
+    return new Promise((res, rej) => {
+      const fetchTary = async () => {
+        try {
+          const { len, keys: taryObj } = await getPerf();
+          lenCnt += Object.keys(taryObj).length;
+          Object.keys(taryObj).forEach(key => {
+            if (!kbCfg.value.layerKeys[key]) {
+              kbCfg.value.layerKeys[key] = {};
+            }
+            kbCfg.value.layerKeys[key].tary = taryObj[key];
+          });
+          if (len > lenCnt) {
+            requestAnimationFrame(fetchTary);
+          } else {
+            res('');
+          }
+        } catch (error) {
+          console.log(error);
+          rej(error);
+        }
+      };
+      requestAnimationFrame(fetchTary);
+    });
+  }
+  async function updateTaryDataCache(keys?: string[]) {
+    let exeKeys: string[];
+    if (!keys?.length) {
+      exeKeys = Object.keys(kbCfg.value.layerKeys);
+    } else {
+      exeKeys = keys;
+    }
+    let idx = 0;
+    const chunkSize = 10;
+    const handle = () => {
+      const end = Math.min(idx + chunkSize, exeKeys.length);
+      for (let i = idx; i < end; i++) {
+        const key = exeKeys[idx];
+        const data = kbCfg.value.layerKeys[key].tary;
+        const [triggerPoint, enableRt, rtTrigger, rtReset] = data;
+        const cache = {
+          trigPt: triggerPoint ? triggerToPage(triggerPoint) : '',
+          enableRt,
+          rtTrig: rtTrigger ? sensitivityToPage(rtTrigger) : '',
+          rtReset: rtReset ? sensitivityToPage(rtReset) : ''
+        };
+        kbCfg.value.rtLabelMap.set(key, {
+          ...cache
+        });
+      }
+      idx = end;
+      if (idx < exeKeys.length) {
+        requestAnimationFrame(handle);
+      }
+    };
+    requestAnimationFrame(handle);
+  }
   return {
-    KeyConfigMap,
+    keyConfigMap,
     fetchTargetKeyInfo,
     getTargetKeyInfo,
     restoreTargetKeyInfoById,
     setTargetKeyInfoById,
     setKeyInfoByList,
     updateComboKeyTag,
-    updateDksKeyTag
+    updateDksKeyTag,
+    updateAllKeyTary,
+    updateTaryDataCache
   };
 }
 export const useCommonStore = defineStore(SetupStoreId.Common, () => {
   const scope = effectScope();
-  const { KeyConfigMap, ...restFnc } = useKeyInfo();
+  const { keyConfigMap, ...restFnc } = useKeyInfo();
   async function init() {}
 
   // watch store
@@ -138,6 +206,6 @@ export const useCommonStore = defineStore(SetupStoreId.Common, () => {
 
   return {
     ...restFnc,
-    KeyConfigMap
+    keyConfigMap
   };
 });
