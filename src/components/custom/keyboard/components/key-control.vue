@@ -4,9 +4,7 @@ import type { KeyInfo } from '@/api/modules/keyboard';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
-import useConver from '@/utils/conver';
 import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
-const { triggerToPage, sensitivityToPage } = useConver();
 
 const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
@@ -18,15 +16,15 @@ const props = withDefaults(defineProps<KeyControlProps>(), {
   keyId: ''
 });
 const { kbCfg } = toRefs(keyboardStore);
+const rtConfig = computed(() => {
+  return kbCfg.value.rtLabelMap.get(props.keyId);
+});
 const [keyInfo, resetKeyInfo] = useResttableReactiveFn(() => ({
   currentKey: {} as {
     type: string;
     label: string;
     icon: string;
   },
-  triggerPoint: 0,
-  rtTrigger: 0,
-  rtReset: 0,
   params: []
 }));
 const showIcon = computed(() => {
@@ -34,10 +32,6 @@ const showIcon = computed(() => {
 });
 function updateKeyInfo(data: KeyInfo) {
   keyInfo.currentKey = kbCfg.value.keyMap[data!.type]?.code?.[data!.code] || {};
-  const [triggerPoint, _1, rtTrigger, rtReset, _4] = data.tary;
-  keyInfo.triggerPoint = triggerPoint;
-  keyInfo.rtTrigger = rtTrigger;
-  keyInfo.rtReset = rtReset;
   if (data.mt?.length) {
     // feat: add new function to get config by key type and code
     // keyInfo.params = ;
@@ -85,15 +79,15 @@ async function handleDisableKey() {
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>{{ $t('baseKey.keyboard.exeDot') }}</span>
-        <span class="text-c-hl">{{ triggerToPage(keyInfo.triggerPoint) || '/' }}</span>
+        <span class="text-c-hl">{{ rtConfig?.trigPt || '/' }}</span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>{{ $t('baseKey.keyboard.exeRt') }}</span>
-        <span class="text-c-hl">{{ sensitivityToPage(keyInfo.rtTrigger) || '/' }}</span>
+        <span class="text-c-hl">{{ rtConfig?.rtTrig || '/' }}</span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>{{ $t('baseKey.keyboard.resetRt') }}</span>
-        <span class="text-c-hl">{{ sensitivityToPage(keyInfo.rtReset) || '/' }}</span>
+        <span class="text-c-hl">{{ rtConfig?.rtReset || '/' }}</span>
       </div>
       <!-- feat: finish the params -->
       <!--
