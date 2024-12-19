@@ -25,9 +25,8 @@ export type SetKeyPerfCallback = {
 };
 
 export type GetKeyPerf = {
-  code: number;
-  key: string;
-  tary: number[];
+  len: number;
+  keys: { [key: string]: number[] };
 };
 export type Calibration = {
   switch: number;

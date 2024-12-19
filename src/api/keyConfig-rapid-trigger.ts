@@ -8,7 +8,7 @@ import type {
   SetKeyPerfCallback
 } from './modules/keyboard-rapid-trigger';
 
-export function getPerf(data: { key: string }) {
+export function getPerf(data?: { key: string[] }) {
   return requestClient.send<GetKeyPerf>({
     name: 'getPerf',
     data
