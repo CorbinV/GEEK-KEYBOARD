@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, reactive, ref, toRaw, toRefs, watch, watchEffect } from 'vue';
+import { computed, inject, onMounted, reactive, ref, toRaw, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyCfg } from '@/api/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
@@ -25,7 +25,7 @@ const emit = defineEmits<{
 const props = defineProps<KeyboardKeyProps>();
 const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
-const { kbCfg, currentSuperKeyType } = toRefs(keyboardStore);
+const { kbCfg, currentSuperKeyType, showKeyParams } = toRefs(keyboardStore);
 const keyInfo = ref();
 const keyStyle = ref({});
 function useLayout(cfg: any) {
@@ -56,6 +56,9 @@ const KeyView = reactive({
   icon: '',
   type: 'str'
 });
+const keyConfigView = computed(() => {
+  return kbCfg.value.rtLabelMap.get(props.keyId);
+});
 function updateKeyView(data: any) {
   if (!data) {
     return;
@@ -80,8 +83,8 @@ onMounted(async () => {
     }
     const { code, type } = data;
     specKeyEffect(code, type);
-    const info = keyboardStore.getKeyDetail({ code, type });
-    updateKeyView(info);
+    const detail = keyboardStore.getKeyDetail({ code, type });
+    updateKeyView(detail);
   }
   function updateKeyViewBySelectedDetail(data: any) {
     if (!props.selected) {
@@ -94,9 +97,6 @@ onMounted(async () => {
   watchEffect(() => {
     updateKeyViewBySelectedDetail(injectSelectedDetail.value);
   });
-  // watchEffect(() => {
-  //   updateKeyCfg(props.keyDetail);
-  // });
   watch(
     () => props.keyDetail,
     nVal => {
@@ -177,22 +177,37 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
             <span class="break-words text-center">{{ KeyView.label }}</span>
           </template>
           <!-- base super function -->
-          <div
-            v-if="mt?.type"
-            class="no-wrap absolute bottom-0.5 left-0.5 h-4.5 w-4.5 flex items-center justify-center rounded-full bg-#0e1eb4 text-center text-0.6rem text-white"
-          >
-            <i v-if="mt?.type === 'icon'" class="iconfont text-10px" :class="`icon-${mt?.icon}`"></i>
-            <span v-else>{{ mt.label }}</span>
-          </div>
-          <div
-            v-if="spConfig?.label"
-            class="no-wrap absolute bottom-0.5 right-0.5 h-4.5 w-4.5 flex items-center justify-center rounded-full bg-#0e1eb4 text-center text-0.6rem text-white"
-            :style="{
-              backgroundColor: spConfig.color
-            }"
-          >
-            {{ spConfig.label }}
-          </div>
+          <template v-if="!showKeyParams">
+            <div
+              v-if="mt?.type"
+              class="no-wrap absolute bottom-0.5 left-0.5 h-4.5 w-4.5 flex items-center justify-center rounded-full bg-#0e1eb4 text-center text-0.6rem text-white"
+            >
+              <i v-if="mt?.type === 'icon'" class="iconfont text-10px" :class="`icon-${mt?.icon}`"></i>
+              <span v-else>{{ mt.label }}</span>
+            </div>
+            <div
+              v-if="spConfig?.label"
+              class="no-wrap absolute bottom-0.5 right-0.5 h-4.5 w-4.5 flex items-center justify-center rounded-full bg-#0e1eb4 text-center text-0.6rem text-white"
+              :style="{
+                backgroundColor: spConfig.color
+              }"
+            >
+              {{ spConfig.label }}
+            </div>
+          </template>
+          <template v-else>
+            <div
+              class="absolute z-1 grid grid-cols-2 grid-rows-2 h-full w-full p-0.5 text-8px will-change-transform"
+              style="transform: translateZ(0)"
+            >
+              <span class="self-start justify-self-start">{{ keyConfigView?.trigPt }}</span>
+              <span class="self-start justify-self-end">
+                <SvgIcon v-if="keyConfigView?.enableRt" local-icon="thunder" class="color-#3c8df4" />
+              </span>
+              <span class="self-end justify-self-start">{{ keyConfigView?.rtTrig }}</span>
+              <span class="self-end justify-self-end">{{ keyConfigView?.rtReset }}</span>
+            </div>
+          </template>
         </div>
       </div>
     </template>
