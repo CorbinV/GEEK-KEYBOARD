@@ -222,7 +222,7 @@ async function handleReNameSave(data: { name: string }) {
       :code-type="KeyTypeEnum.OKS"
       :fnc-generate-code="generateGroupCode"
       :need-import-key="false"
-      keyboard-type="standard"
+      keyboard-type="base"
       :desc="$t('supperKey.c6')"
       :edit-item="editItem"
       @create-group="handleGroupCreated"
