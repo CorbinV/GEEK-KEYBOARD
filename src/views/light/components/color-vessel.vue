@@ -1,25 +1,38 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import ZWColors from '@/views/light/components/zw-colors.vue';
-import Slider from '@/components/custom/zw-slider.vue';
+import Slider from '@/components/custom/zw-slider2.vue';
 import { $t } from '@/locales';
+import { getLight, setLight } from '@/api/light';
+import type { Light } from '@/api/modules/light';
 
 // 假设你有 15 个项目来填充三行五列的网格
 const items = ref([$t('light.q1'), $t('light.q2')]);
 // 选中的项，默认没有选中
-const selectedItem = ref<number | null>(null);
+// const selectedItem = ref<number | null>(null);
+const light = ref<Light>({
+  isRGB: 0,
+  pattern: 0,
+  brightness: 0,
+  speed: 0,
+  sleep: 0,
+  R: 0,
+  G: 0,
+  B: 0
+});
 
 const sleepTimeitems = ref([
+  $t('light.never', { total: 0 }),
+
   $t('light.minute', { total: 5 }),
   $t('light.minute', { total: 10 }),
   $t('light.minute', { total: 15 }),
   $t('light.minute', { total: 30 }),
-  $t('light.never'),
-  $t('light.interaction')
+  $t('light.interaction', { total: 1 })
 ]);
-const selectedSleepTime = ref<number | null>(null);
-const lightLevel = ref(10);
-const vLevel = ref(10);
+// const selectedSleepTime = ref<number | null>(null);
+// const lightLevel = ref(10);
+// const vLevel = ref(10);
 // 定义滑块的数值
 // const sliderValue = ref(10);
 // // 计算滑块的百分比位置，用于定位百分比值的显示
@@ -36,21 +49,42 @@ const vLevel = ref(10);
 // };
 // 选中项的处理函数
 function selectItem(index: number) {
-  if (selectedItem.value === index) {
-    selectedItem.value = null; // 如果点击的是已选中的项，取消选择
-  } else {
-    selectedItem.value = index; // 否则选择当前项
-  }
+  light.value.pattern = index; // 否则选择当前项
+  setLight(light.value);
 }
 
 // 选中项的处理函数
 function selectSleepTimeItem(index: number) {
-  if (selectedSleepTime.value === index) {
-    selectedSleepTime.value = null; // 如果点击的是已选中的项，取消选择
-  } else {
-    selectedSleepTime.value = index; // 否则选择当前项
-  }
+  light.value.sleep = index; // 否则选择当前项
+  setLight(light.value);
 }
+async function brightness(value: number) {
+  light.value.brightness = value;
+  setLight(light.value);
+}
+async function lightSpeed(value: number) {
+  light.value.speed = value;
+  setLight(light.value);
+}
+async function isRgbSwitch(value: boolean) {
+  light.value.isRGB = value ? 1 : 0;
+  setLight(light.value);
+}
+async function rgbColorCallback(r: number, g: number, b: number) {
+  light.value.R = r;
+  light.value.G = g;
+  light.value.B = b;
+  setLight(light.value);
+}
+
+async function getDevLight() {
+  light.value = await getLight();
+  console.log('11111111111', light.value);
+  //  await addOks({ code, keys, name });
+}
+
+getDevLight();
+// setDevLight();
 </script>
 
 <template>
@@ -65,7 +99,7 @@ function selectSleepTimeItem(index: number) {
           v-for="(item, index) in items"
           :key="index"
           class="grid-item text-[#999999]"
-          :class="{ selected: selectedItem === index }"
+          :class="{ selected: light.pattern === index }"
           @click="selectItem(index)"
         >
           {{ item }}
@@ -78,15 +112,15 @@ function selectSleepTimeItem(index: number) {
         <p class="vertical-bar"></p>
         <p class="... text-lg">{{ $t('light.luminance') }}</p>
       </div>
-      <Slider v-model="lightLevel"></Slider>
+      <Slider v-model="light.brightness" @stop-sliding="brightness"></Slider>
       <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
         <p class="... text-lg">{{ $t('light.speend') }}</p>
       </div>
-      <Slider v-model="vLevel"></Slider>
+      <Slider v-model="light.speed" @stop-sliding="lightSpeed"></Slider>
       <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">{{ $t('light.speend') }}</p>
+        <p class="... text-lg">{{ $t('light.lightSleep') }}</p>
       </div>
 
       <div class="grid-container grid mt-20px gap-x-55px gap-y-30px">
@@ -94,7 +128,7 @@ function selectSleepTimeItem(index: number) {
           v-for="(item, index) in sleepTimeitems"
           :key="index"
           class="grid-item text-[#999999]"
-          :class="{ selected: selectedSleepTime === index }"
+          :class="{ selected: light.sleep === index }"
           @click="selectSleepTimeItem(index)"
         >
           <!-- 在这里渲染每个网格项的内容 -->
@@ -104,7 +138,15 @@ function selectSleepTimeItem(index: number) {
     </div>
     <div class="border-l-1px border-[#232327]"></div>
     <div class="flex-1">
-      <ZWColors class="w-200p h-100"></ZWColors>
+      <ZWColors
+        class="w-200p h-100"
+        :color-r="0"
+        :color-b="255"
+        :color-g="255"
+        :is-rgb="true"
+        @is-rgb-switch="isRgbSwitch"
+        @stop-sliding="rgbColorCallback"
+      ></ZWColors>
     </div>
   </div>
 </template>

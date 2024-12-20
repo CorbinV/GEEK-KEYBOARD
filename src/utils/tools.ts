@@ -13,49 +13,86 @@ export async function delay(delayMs: number) {
   });
 }
 export function hslToRgb(h = 0, s = 0, l = 0) {
-  // eslint-disable-next-line no-param-reassign
-  s /= 100;
-  // eslint-disable-next-line no-param-reassign
-  l /= 100;
+  const H = h / 360; // 将 H 转换为 [0, 1] 范围
+  const S = s / 100; // 将 S 转换为 [0, 1] 范围
+  const L = l / 100; // 将 L 转换为 [0, 1] 范围
 
-  const c = (1 - Math.abs(2 * l - 1)) * s; // Chroma
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1)); // Secondary color
-  const m = l - c / 2;
+  const C = (1 - Math.abs(2 * L - 1)) * S; // 色差
+  const X = C * (1 - Math.abs(((H * 6) % 2) - 1)); // 计算辅助值
+  const m = L - C / 2; // 偏移量
 
-  let b = 0;
-  let g = 0;
-  let r = 0;
+  let b;
+  let g;
+  let r;
 
-  if (h >= 0 && h < 60) {
-    r = c;
-    g = x;
+  if (H >= 0 && H < 1 / 6) {
+    r = C;
+    g = X;
     b = 0;
-  } else if (h >= 60 && h < 120) {
-    r = x;
-    g = c;
+  } else if (H >= 1 / 6 && H < 2 / 6) {
+    r = X;
+    g = C;
     b = 0;
-  } else if (h >= 120 && h < 180) {
+  } else if (H >= 2 / 6 && H < 3 / 6) {
     r = 0;
-    g = c;
-    b = x;
-  } else if (h >= 180 && h < 240) {
+    g = C;
+    b = X;
+  } else if (H >= 3 / 6 && H < 4 / 6) {
     r = 0;
-    g = x;
-    b = c;
-  } else if (h >= 240 && h < 300) {
-    r = x;
+    g = X;
+    b = C;
+  } else if (H >= 4 / 6 && H < 5 / 6) {
+    r = X;
     g = 0;
-    b = c;
-  } else if (h >= 300 && h < 360) {
-    r = c;
+    b = C;
+  } else {
+    r = C;
     g = 0;
-    b = x;
+    b = X;
   }
 
-  // 将 r, g, b 转换到 [0, 255] 的范围
+  // 加上偏移量 m，确保值在 [0, 1] 范围内
   r = Math.round((r + m) * 255);
   g = Math.round((g + m) * 255);
   b = Math.round((b + m) * 255);
 
+  // return { r, g, b };
   return [r, g, b];
+}
+
+export function rgbToHsl(r = 0, g = 0, b = 0) {
+  // 将 RGB 值映射到 [0, 1] 范围
+  const red = r / 255;
+  const green = g / 255;
+  const blue = b / 255;
+
+  const max = Math.max(red, green, blue);
+  const min = Math.min(red, green, blue);
+  const delta = max - min;
+
+  let H;
+  let S;
+  const L = (max + min) / 2; // 计算亮度
+
+  if (delta === 0) {
+    H = 0; // 如果没有差异，色调为 0
+    S = 0; // 如果没有色差，饱和度为 0
+  } else {
+    S = delta / (1 - Math.abs(2 * L - 1)); // 计算饱和度
+    if (max === red) {
+      H = (green - blue) / delta;
+    } else if (max === green) {
+      H = 2 + (blue - red) / delta;
+    } else {
+      H = 4 + (red - green) / delta;
+    }
+    H *= 60; // 转换为度数
+
+    if (H < 0) {
+      H += 360; // 如果 H 变为负数，则加上 360
+    }
+  }
+
+  // 将 H, S, L 转换回百分比格式
+  return { H, S: S * 100, L: L * 100 };
 }
