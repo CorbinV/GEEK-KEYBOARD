@@ -101,8 +101,15 @@ getSet();
         class="flex-raw h-110px w-full flex justify-between border-b-1px border-[#232327] pb-20px pt-20px text-[18px]"
       >
         <div class="flex flex-col">
-          <div>{{ $t('setting.gjUpdate') }}</div>
-          <p class="mt-20px text-[16px] text-[#999]">{{ versionCode }}</p>
+          <div>
+            {{ $t('setting.gjUpdate') }}
+            <span class="text-14px text-[#999]">{{ versionCode }}</span>
+          </div>
+          <div class="mt-10px">
+            <i class="iconfont icon-shezhi-daoru text-[28px] text-[#3C8DF4]"></i>
+            <i class="iconfont icon-shezhi-daochu ml-30px text-[28px] text-[#3C8DF4]"></i>
+            <input id="file-upload" type="file" class="file-input" />
+          </div>
         </div>
         <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
           {{ $t('setting.checkUpdate') }}

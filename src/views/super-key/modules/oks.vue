@@ -9,7 +9,7 @@ import { addOks, deleteOksByCode, getOksList, resetOksName } from '@/api/super-k
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
 import { formatLableSub3 } from '@/hooks/common/format';
-import emitter from '@/utils/eventBus';
+import emitter, { EventNameEnum } from '@/utils/eventBus';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 
@@ -41,8 +41,8 @@ let isEdit = false;
 const editItemCode = 0;
 
 onMounted(() => {
-  emitter.on('resetKey', (key: string) => {
-    console.log('resetKey', key);
+  emitter.on(EventNameEnum.resetKey, (key: string) => {
+    console.log(EventNameEnum.resetKey, key);
     if (currentSuperKeyType.value === KeyTypeEnum.OKS) {
       if (key) {
         console.log('oksGroupList', JSON.stringify(oksGroupList.value));

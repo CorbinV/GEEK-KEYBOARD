@@ -6,6 +6,34 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "42882175",
+      "name": "完成",
+      "font_class": "hollow-done",
+      "unicode": "e747",
+      "unicode_decimal": 59207
+    },
+    {
+      "icon_id": "42882223",
+      "name": "失败",
+      "font_class": "hollow-close",
+      "unicode": "e748",
+      "unicode_decimal": 59208
+    },
+    {
+      "icon_id": "42771295",
+      "name": "设置-导出",
+      "font_class": "shezhi-daochu",
+      "unicode": "e743",
+      "unicode_decimal": 59203
+    },
+    {
+      "icon_id": "42771296",
+      "name": "设置-导入",
+      "font_class": "shezhi-daoru",
+      "unicode": "e746",
+      "unicode_decimal": 59206
+    },
+    {
       "icon_id": "42651903",
       "name": "解锁",
       "font_class": "unlock-solid",

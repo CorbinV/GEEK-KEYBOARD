@@ -9,7 +9,7 @@ import { addMT, deleteMTByCode, getMTList, resetMTName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
 import { formatLableSub3 } from '@/hooks/common/format';
-import emitter from '@/utils/eventBus';
+import emitter, { EventNameEnum } from '@/utils/eventBus';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 
@@ -45,7 +45,7 @@ const renameIndex = ref(-1);
 let isEdit = false;
 let editItemCode = 0;
 function handleMittEvent() {
-  emitter.on('resetKey', (key: string) => {
+  emitter.on(EventNameEnum.resetKey, (key: string) => {
     if (!key) {
       return;
     }
