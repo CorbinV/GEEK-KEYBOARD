@@ -5,6 +5,13 @@ import { getKeyboardSetting, setKeyboardSetting } from '@/api/keyConfig-setting'
 import keyboardImg from '@/assets/img/keyboard_img.png';
 import { $t } from '@/locales';
 // import RestoreFactoryModal from '@/views/settings/components/reset-modal.vue';
+import OtaProgress from './components/ota-progress.vue';
+import OtaVersion from './components/ota-version.vue';
+import { useOTA } from './composables/useOTA';
+
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const { loading, showVersion, versionInfo, progress, showProgress, fetchVersion, upgrade, fileImport, fileExport } =
+  useOTA();
 
 async function getSet() {
   const x = await getKeyboardSetting();
@@ -15,9 +22,7 @@ const fullKeyRolloverSwitch = ref(true);
 const wakeUpSwitch = ref(true);
 const message = useMessage();
 const onCheckUpdateClick = () => {
-  message.success('已经是最新版本！', {
-    duration: 3000 // 持续时间
-  });
+  fetchVersion();
 };
 
 const onReceiverPairClick = () => {
@@ -68,6 +73,12 @@ async function setDevPerf() {
 
 getVersion();
 getSet();
+
+const triggerFileImport = () => {
+  if (fileInputRef.value) {
+    fileInputRef.value.click();
+  }
+};
 </script>
 
 <template>
@@ -106,14 +117,24 @@ getSet();
             <span class="text-14px text-[#999]">{{ versionCode }}</span>
           </div>
           <div class="mt-10px">
-            <i class="iconfont icon-shezhi-daoru text-[28px] text-[#3C8DF4]"></i>
-            <i class="iconfont icon-shezhi-daochu ml-30px text-[28px] text-[#3C8DF4]"></i>
-            <input id="file-upload" type="file" class="file-input" />
+            <i class="iconfont icon-shezhi-daoru text-[28px] text-[#3C8DF4]" @click="fileExport"></i>
+            <i class="iconfont icon-shezhi-daochu ml-30px text-[28px] text-[#3C8DF4]" @click="triggerFileImport"></i>
+            <input ref="fileInputRef" type="file" accept=".bin,.ufw" style="display: none" @change="fileImport" />
           </div>
         </div>
-        <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
+        <!--
+ <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
           {{ $t('setting.checkUpdate') }}
         </button>
+-->
+        <NButton
+          :loading="loading"
+          icon-placement="right"
+          class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]"
+          @click="onCheckUpdateClick"
+        >
+          {{ $t('setting.checkUpdate') }}
+        </NButton>
       </div>
       <div class="flex-raw w-full flex justify-between rounded-md pt-20px">
         <button class="hollow-btn h-60px w-170px" @click="onReceiverPairClick">{{ $t('setting.pair24') }}</button>
@@ -121,6 +142,8 @@ getSet();
       </div>
       <!-- <RestoreFactoryModal></RestoreFactoryModal> -->
     </div>
+    <OtaVersion :show="showVersion" :versioninfo="versionInfo" @update:show="showVersion = $event" @upgrade="upgrade" />
+    <OtaProgress :show="showProgress" :progress="progress" @update:show="showProgress = $event" />
   </div>
 </template>
 
