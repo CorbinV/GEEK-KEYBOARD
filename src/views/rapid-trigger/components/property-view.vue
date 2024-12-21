@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
 // import { getPerf, getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
+import { useMessage } from 'naive-ui';
 import useConver from '@/utils/conver';
 import { getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
 import { useCommonStore } from '@/store/modules/common';
@@ -35,6 +36,7 @@ const shakeLeaveValue = ref<number>(0);
 const rtTopDeadValue = ref<number>(0);
 const rtBelowDeadValue = ref<number>(0);
 const curKey = ref<string>('');
+const timeoutId = ref();
 
 const showModal = ref(false);
 const argShow = ref(true);
@@ -53,7 +55,7 @@ const curShake = ref({ key: 0, label: '' });
 // const curRate = ref({});
 const shakelayerLabel = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('repidTrigger.high')];
 const keyboardStore = useKeyboardStore();
-
+const message = useMessage();
 function rateSelect(key: number) {
   console.log(key);
   // curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
@@ -244,8 +246,20 @@ async function getDevPerf(tary: number[]) {
 async function setDevPerf() {
   const perf = { key: selectedKey.value, tary: perfArr.value };
   isLoading.value = true;
+
+  timeoutId.value = setTimeout(() => {
+    isLoading.value = false;
+    message.error('写入失败', {
+      duration: 2000 // 持续时间
+    });
+  }, 3000);
   await setPerf(perf);
+
   isLoading.value = false;
+
+  if (timeoutId.value) {
+    clearTimeout(timeoutId.value); // 清除之前的定时器
+  }
 
   //  await addOks({ code, keys, name });
 }
