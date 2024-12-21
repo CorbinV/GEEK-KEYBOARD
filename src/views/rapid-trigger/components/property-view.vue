@@ -102,16 +102,6 @@ function breakOptimizeSwitch(value: boolean) {
   setDevPerf();
 }
 
-function upLmdSlideUpdate(value: number) {
-  if (lmdLock.value) {
-    downLMD.value = value;
-  }
-}
-function downLmdSlideUpdate(value: number) {
-  if (lmdLock.value) {
-    upLMD.value = value;
-  }
-}
 // function convertValue(x: number, min = 0.01, max = 3) {
 //   return Math.ceil(1 + ((x - min) / (max - min)) * (255 - 1));
 // }
@@ -149,13 +139,10 @@ watch(
 watch(
   () => Object.keys(selectedKeys.value),
   () => {
-    console.log('11111111111', Object.keys(selectedKeys.value));
     selectedKey.value = Object.keys(selectedKeys.value);
 
     Object.entries(selectedKey.value).forEach(([newKey]) => {
       commonStore.getTargetKeyInfo(newKey).then(data => {
-        console.log('333333333333333', newKey);
-
         if (newKey === '0') {
           // 如果需要遍历某个数据结构中的键
           Object.entries(data).forEach(([keykey]) => {
@@ -214,15 +201,14 @@ async function getDevPerf(tary: number[]) {
 
   rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
   breakOptimize.value = getPerfIndex(BREAK_OPTIMIZE_SWITCH) === 1;
-  //  exeDeadZoneValue.value = getPerfIndex(EXE_DEAD_ZONE) / Math.ceil(255 / 35);
   exeDeadZoneValue.value = Number(triggerToPage(getPerfIndex(EXE_DEAD_ZONE)));
 
   downLMD.value = Number(sensitivityToPage(getPerfIndex(DOWN_LMD_VALUE)));
   upLMD.value = Number(sensitivityToPage(getPerfIndex(UP_LMD_VALUE)));
 
+  console.log(downLMD.value);
+  console.log(upLMD.value);
   shakeLeaveValue.value = getPerfIndex(SHAKE_LEAVE);
-  // rtTopDeadValue.value = Math.ceil(getPerfIndex(RT_TOP_DEAD_ZONE) / 30) / 10;
-  // rtBelowDeadValue.value = Math.ceil(getPerfIndex(RT_BELOW_DEAD_ZONE) / 30) / 10;
 
   rtTopDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_TOP_DEAD_ZONE)));
   rtBelowDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_BELOW_DEAD_ZONE)));
@@ -240,8 +226,6 @@ async function getDevPerf(tary: number[]) {
     label
   }));
   curShake.value.label = shakelayerLabel[shakeLeaveValue.value];
-
-  // // curShake.value = shakeOption.value.find((item: Opetion) => item.key === perf.value.shakeIndex);
 }
 async function setDevPerf() {
   const perf = { key: selectedKey.value, tary: perfArr.value };
@@ -265,19 +249,27 @@ async function setDevPerf() {
 }
 
 function exeDeadSlidingStop(value: number) {
-  // const xxx = Math.floor((value * 10 * 255) / 35);
   const deadValue = PageToTrigger(value);
   setPerfIndex(EXE_DEAD_ZONE, Number(deadValue));
   setDevPerf();
 }
-
+function upLmdSlideUpdate(value: number) {
+  if (lmdLock.value) {
+    downLMD.value = value;
+  }
+}
+function downLmdSlideUpdate(value: number) {
+  if (lmdLock.value) {
+    upLMD.value = value;
+  }
+}
 // 滑动中事件处理
 function downLmdValue(value: number) {
   const downValue = Number(PageToSensitivity(value));
 
-  // setPerfIndex(EXE_DEAD_ZONE, Number(xxx));
   setPerfIndex(DOWN_LMD_VALUE, downValue);
   if (lmdLock.value) {
+    upLMD.value = value;
     setPerfIndex(UP_LMD_VALUE, upLMD.value);
   }
   setDevPerf();
@@ -286,6 +278,7 @@ function upLmdSlide(value: number) {
   const upValue = Number(PageToSensitivity(value));
   setPerfIndex(UP_LMD_VALUE, upValue);
   if (lmdLock.value) {
+    downLMD.value = value;
     setPerfIndex(DOWN_LMD_VALUE, downLMD.value);
   }
 
@@ -354,81 +347,87 @@ getDevRate();
         </div>
 
         <div class="border-l-1px border-[#232327]"></div>
-        <div class="flex flex-col flex-1">
-          <div class="flex-raw flex justify-between pb-10px">
+
+        <div class="position-relative flex-1">
+          <div class="absolute z-2 flex flex-col">
+            <div class="flex-raw flex justify-between pb-10px">
+              <div class="flex-raw flex items-center">
+                <p class="vertical-bar"></p>
+                <p class="... text-18px text-#999999">{{ $t('repidTrigger.fastTrigger') }}</p>
+              </div>
+
+              <!-- <NSwitch v-model:value="perf.quick"></NSwitch> -->
+              <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
+            </div>
+            <span class="... border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
+              {{ $t('repidTrigger.fastTriggerDesc') }}
+            </span>
+            <div class="flex-raw flex items-center pt-10px">
+              <p class="vertical-bar"></p>
+              <p class="... text-18px">{{ $t('repidTrigger.pressSensitivity') }}</p>
+            </div>
+            <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+            <Slider
+              :model-value="downLMD"
+              class="pt-10px"
+              @update:model-value="downLmdSlideUpdate"
+              @stop-sliding="downLmdValue"
+            ></Slider>
+
+            <div class="mt-10px flex flex-row items-center justify-center gap-5">
+              <div class="h-1px w-20% bg-[#ccc]"></div>
+
+              <i
+                class="iconfont icon-container text-[25px] text-[#fff]"
+                :class="lmdLock ? 'icon-lock-solid' : 'icon-unlock-solid'"
+                @click="lock"
+              ></i>
+              <div class="h-1px w-20% bg-[#ccc]"></div>
+            </div>
+
             <div class="flex-raw flex items-center">
               <p class="vertical-bar"></p>
-              <p class="... text-18px text-#999999">{{ $t('repidTrigger.fastTrigger') }}</p>
+              <p class="... text-18px">{{ $t('repidTrigger.liftSensitivity') }}</p>
             </div>
+            <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+            <Slider
+              :model-value="upLMD"
+              class="pt-10px"
+              @update:model-value="upLmdSlideUpdate"
+              @stop-sliding="upLmdSlide"
+            ></Slider>
+            <p class="... mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
+              {{ $t('repidTrigger.advancedSettings') }}
+            </p>
 
-            <!-- <NSwitch v-model:value="perf.quick"></NSwitch> -->
-            <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
-          </div>
-          <span class="... border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
-            {{ $t('repidTrigger.fastTriggerDesc') }}
-          </span>
-          <div class="flex-raw flex items-center pt-10px">
-            <p class="vertical-bar"></p>
-            <p class="... text-18px">{{ $t('repidTrigger.pressSensitivity') }}</p>
-          </div>
-          <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-          <Slider
-            :model-value="downLMD"
-            class="pt-10px"
-            @update:model-value="downLmdSlideUpdate"
-            @stop-sliding="downLmdValue"
-          ></Slider>
+            <NModal v-model:show="showModal" class="h-500px w-34% rounded-[10px] bg-[#191b1d]">
+              <div class="model-bg flex flex-col items-center p-30px text-[22px]">
+                <p>{{ $t('repidTrigger.advancedSettings') }}</p>
 
-          <div class="mt-10px flex flex-row items-center justify-center gap-5">
-            <div class="h-1px w-20% bg-[#ccc]"></div>
+                <p class="mt-40px w-100% text-[18px]">{{ $t('repidTrigger.rtTopDeadZone') }}</p>
+                <Slider v-model="rtTopDeadValue" onsclass="mt-20px" @stop-sliding="rtTopDeadSlide"></Slider>
 
-            <i
-              class="iconfont icon-container text-[25px] text-[#fff]"
-              :class="lmdLock ? 'icon-lock-solid' : 'icon-unlock-solid'"
-              @click="lock"
-            ></i>
-            <div class="h-1px w-20% bg-[#ccc]"></div>
-          </div>
+                <p class="mt-20px w-100% text-[18px]">{{ $t('repidTrigger.rtBellowDeadZone') }}</p>
+                <Slider v-model="rtBelowDeadValue" class="mt-20px" @stop-sliding="rtBelowDeadSlide"></Slider>
 
-          <div class="flex-raw flex items-center">
-            <p class="vertical-bar"></p>
-            <p class="... text-18px">{{ $t('repidTrigger.liftSensitivity') }}</p>
-          </div>
-          <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-          <Slider
-            :model-value="upLMD"
-            class="pt-10px"
-            @update:model-value="upLmdSlideUpdate"
-            @stop-sliding="upLmdSlide"
-          ></Slider>
-          <p class="... mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
-            {{ $t('repidTrigger.advancedSettings') }}
-          </p>
-
-          <NModal v-model:show="showModal" class="h-500px w-34% rounded-[10px] bg-[#191b1d]">
-            <div class="model-bg flex flex-col items-center p-30px text-[22px]">
-              <p>{{ $t('repidTrigger.advancedSettings') }}</p>
-
-              <p class="mt-40px w-100% text-[18px]">{{ $t('repidTrigger.rtTopDeadZone') }}</p>
-              <Slider v-model="rtTopDeadValue" onsclass="mt-20px" @stop-sliding="rtTopDeadSlide"></Slider>
-
-              <p class="mt-20px w-100% text-[18px]">{{ $t('repidTrigger.rtBellowDeadZone') }}</p>
-              <Slider v-model="rtBelowDeadValue" class="mt-20px" @stop-sliding="rtBelowDeadSlide"></Slider>
-
-              <div class="mt-88px flex flex-row justify-center gap-70px">
-                <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
-                  {{ $t('businessCommon.cancel') }}
-                </button>
-                <button
-                  class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
-                  @click="showModal = false"
-                >
-                  {{ $t('businessCommon.confirm1') }}
-                </button>
+                <div class="mt-88px flex flex-row justify-center gap-70px">
+                  <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
+                    {{ $t('businessCommon.cancel') }}
+                  </button>
+                  <button
+                    class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
+                    @click="showModal = false"
+                  >
+                    {{ $t('businessCommon.confirm1') }}
+                  </button>
+                </div>
               </div>
-            </div>
-          </NModal>
+            </NModal>
+          </div>
+
+          <!-- <div class="z-1 h-100% w-100% flex bg-[#3c8df4]"></div> -->
         </div>
+
         <div class="border-l-1px border-[#232327]"></div>
         <div class="flex flex-col flex-1">
           <div class="flex-raw flex justify-between border-b-1px border-[#232327] pb-10px">

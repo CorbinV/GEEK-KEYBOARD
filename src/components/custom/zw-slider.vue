@@ -40,6 +40,17 @@ const startSliding = () => {
   console.log('Sliding started');
 };
 
+const valueAdd = () => {
+  sliderValue.value = (sliderValue.value * 100 + 1) / 100;
+
+  emit('stopSliding', sliderValue.value); // 触发更新外部值
+};
+const valueRemove = () => {
+  sliderValue.value -= 0.01;
+  sliderValue.value = (sliderValue.value * 100 - 1) / 100;
+
+  emit('stopSliding', sliderValue.value); // 触发更新外部值
+};
 // 滑动中触发
 // const sliding = () => {
 //   if (isSliding.value) {
@@ -75,27 +86,34 @@ onUnmounted(() => {
 });
 </script>
 
+<!-- <i class="iconfont icon-hollow-remove text-center text-30px text-[#3C8DF4]"></i> -->
+
 <template>
+  <!-- <div class="rlex-row w-100% flex"> -->
   <div class="outer-container">
-    <div class="inner-container">
-      <div class="slider-container">
-        <!-- 滑块 -->
-        <input
-          v-model="sliderValue"
-          class="slider"
-          type="range"
-          min="0.01"
-          max="3"
-          step="0.01"
-          :style="{ background: sliderBackground }"
-          @input="updateValue"
-          @mousedown="startSliding"
-        />
-        <!-- 显示滑块值，位置动态绑定 -->
-        <span class="slider-value" :style="{ left: sliderPosition }">{{ sliderValue }}mm</span>
-      </div>
+    <i
+      class="iconfont icon-hollow-remove inline-block p-0 text-center text-30px text-[#3C8DF4]"
+      @click="valueRemove"
+    ></i>
+
+    <div class="slider-container">
+      <input
+        v-model="sliderValue"
+        class="slider"
+        type="range"
+        min="0.01"
+        max="3"
+        step="0.01"
+        :style="{ background: sliderBackground }"
+        @input="updateValue"
+        @mousedown="startSliding"
+      />
+      <span class="slider-value" :style="{ left: sliderPosition }">{{ sliderValue }}mm</span>
+      <!-- 显示滑块值，位置动态绑定 -->
     </div>
+    <i class="iconfont icon-hollow-add text-center text-30px text-[#3C8DF4]" @click="valueAdd"></i>
   </div>
+  <!-- </div> -->
 </template>
 
 <style scoped>
@@ -103,24 +121,21 @@ onUnmounted(() => {
 .outer-container {
   width: 100%;
   /* padding: 20px; */
-  box-sizing: border-box;
-}
-
-.inner-container {
-  width: 100%;
+  display: flex;
+  justify-content: space-between;
   box-sizing: border-box;
 }
 
 /* 滑块容器 */
 .slider-container {
   position: relative;
-  width: 100%; /* 确保容器占满父布局 */
+  width: 80%;
 }
 
 /* 滑块样式 */
 input[type='range'] {
   -webkit-appearance: none;
-  width: 100%; /* 确保滑块宽度占满父父布局 */
+  width: 100%;
   height: 8px;
   background: #ddd;
   border-radius: 5px;
@@ -142,7 +157,7 @@ input[type='range']::-webkit-slider-thumb {
 /* 显示滑块值 */
 .slider-value {
   position: absolute;
-  bottom: -25px;
+  bottom: -8px;
   transform: translateX(-50%);
   /* background: #007bff; */
   color: #666;
