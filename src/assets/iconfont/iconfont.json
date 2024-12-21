@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "42894727",
+      "name": "减少",
+      "font_class": "hollow-remove",
+      "unicode": "e749",
+      "unicode_decimal": 59209
+    },
+    {
+      "icon_id": "42894728",
+      "name": "增加",
+      "font_class": "hollow-add",
+      "unicode": "e74a",
+      "unicode_decimal": 59210
+    },
+    {
       "icon_id": "42882175",
       "name": "完成",
       "font_class": "hollow-done",
@@ -22,14 +36,14 @@
     {
       "icon_id": "42771295",
       "name": "设置-导出",
-      "font_class": "shezhi-daochu",
+      "font_class": "file-export",
       "unicode": "e743",
       "unicode_decimal": 59203
     },
     {
       "icon_id": "42771296",
       "name": "设置-导入",
-      "font_class": "shezhi-daoru",
+      "font_class": "file-import",
       "unicode": "e746",
       "unicode_decimal": 59206
     },

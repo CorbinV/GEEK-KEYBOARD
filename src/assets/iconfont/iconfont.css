@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'iconfont'; /* Project id 4741999 */
   src:
-    url('iconfont.woff2?t=1734665250245') format('woff2'),
-    url('iconfont.woff?t=1734665250245') format('woff'),
-    url('iconfont.ttf?t=1734665250245') format('truetype');
+    url('iconfont.woff2?t=1734764392351') format('woff2'),
+    url('iconfont.woff?t=1734764392351') format('woff'),
+    url('iconfont.ttf?t=1734764392351') format('truetype');
 }
 
 .iconfont {
@@ -14,6 +14,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-hollow-remove:before {
+  content: '\e749';
+}
+
+.icon-hollow-add:before {
+  content: '\e74a';
+}
+
 .icon-hollow-done:before {
   content: '\e747';
 }
@@ -22,11 +30,11 @@
   content: '\e748';
 }
 
-.icon-shezhi-daochu:before {
+.icon-file-export:before {
   content: '\e743';
 }
 
-.icon-shezhi-daoru:before {
+.icon-file-import:before {
   content: '\e746';
 }
 
