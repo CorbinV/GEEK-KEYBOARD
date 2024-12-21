@@ -41,13 +41,16 @@ const startSliding = () => {
 };
 
 const valueAdd = () => {
-  sliderValue.value = (sliderValue.value * 100 + 1) / 100;
+  sliderValue.value = Number((sliderValue.value + 0.01).toFixed(2));
+
+  sliderValue.value = Math.min(sliderValue.value, 3);
 
   emit('stopSliding', sliderValue.value); // 触发更新外部值
 };
 const valueRemove = () => {
-  sliderValue.value -= 0.01;
-  sliderValue.value = (sliderValue.value * 100 - 1) / 100;
+  sliderValue.value = Number((sliderValue.value - 0.01).toFixed(2));
+
+  sliderValue.value = Math.max(sliderValue.value, 0.01);
 
   emit('stopSliding', sliderValue.value); // 触发更新外部值
 };
