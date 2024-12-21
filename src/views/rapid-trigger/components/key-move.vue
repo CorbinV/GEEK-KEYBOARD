@@ -25,13 +25,22 @@ const mtValue = ref(-40);
 // 是否正在滑动
 const isSliding = ref(false);
 
-const onInput = (event: Event) => {
-  // const target = event.target as HTMLInputElement;
-  //  mtValue.value += target.value;
-  const target = event.target as HTMLInputElement;
-  if (target) {
-    const value = Number.parseFloat(target.value); // 转为 number 类型
-    calTop(value);
+// const onInput = (event: Event) => {
+//   // const target = event.target as HTMLInputElement;
+//   //  mtValue.value += target.value;
+//   const target = event.target as HTMLInputElement;
+//   if (target) {
+//     const value = Number.parseFloat(target.value); // 转为 number 类型
+//     calTop(value);
+//   }
+// };
+
+// 更新数值，确保值在 0 到 100 之间
+const onInput = () => {
+  sliderValue.value = Math.min(Math.max(sliderValue.value, 0), 100);
+  if (isSliding.value) {
+    calTop(sliderValue.value);
+    emit('update:modelValue', sliderValue.value); // 触发更新外部值
   }
 };
 
@@ -51,11 +60,11 @@ const startSliding = () => {
 };
 
 // 滑动中触发
-const sliding = () => {
-  if (isSliding.value) {
-    emit('update:modelValue', sliderValue.value); // 触发更新外部值
-  }
-};
+// const sliding = () => {
+//   if (isSliding.value) {
+//     emit('update:modelValue', sliderValue.value); // 触发更新外部值
+//   }
+// };
 
 // 滑动结束触发
 const stopSliding = () => {
@@ -67,12 +76,12 @@ const stopSliding = () => {
 
 // 添加事件监听器到全局（鼠标松开时）
 onMounted(() => {
-  window.addEventListener('mousemove', sliding);
+  // window.addEventListener('mousemove', sliding);
   window.addEventListener('mouseup', stopSliding);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', sliding);
+  // window.removeEventListener('mousemove', sliding);
   window.removeEventListener('mouseup', stopSliding);
 });
 
