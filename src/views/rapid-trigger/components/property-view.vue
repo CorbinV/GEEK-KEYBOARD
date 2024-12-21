@@ -11,9 +11,11 @@ import Slider from '@/components/custom/zw-slider.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
 // import { getComboList } from '@/api/combo';
+import emitter, { EventNameEnum } from '@/utils/eventBus';
 import KeyMove from './key-move.vue';
 const { triggerToPage, PageToTrigger, sensitivityToPage, PageToSensitivity } = useConver();
 export type Opetion = { key: number; label: string };
+
 const commonStore = useCommonStore();
 const EXE_DEAD_ZONE = 0;
 const RAPID_TRIGGER_SWITCH = 1;
@@ -72,7 +74,7 @@ function shakeSelect(key: number) {
   setDevPerf();
 }
 
-function reset() {}
+// function reset() {}
 function lock() {
   lmdLock.value = !lmdLock.value;
   console.log(lmdLock.value);
@@ -121,42 +123,82 @@ function rtBelowDeadSlide(value: number) {
 function setPerfIndex(index: number, value: number) {
   perfArr.value[index] = value;
 }
-
-const { selectedKeys } = toRefs(keyboardStore);
-
+emitter.on(EventNameEnum.selecteAll, () => {});
+const { selectedKeys, selectedKeysMap } = toRefs(keyboardStore);
 watch(
-  () => selectedKeys.value,
+  () => selectedKeysMap.value.keys(),
+  () => {
+    selectedKey.value = Object.keys(selectedKeys.value);
 
-  // (nLength, oLength) => {
-  nLength => {
-    setTimeout(() => {
-      Object.keys(selectedKeys.value).forEach(key => {
-        const val = selectedKeys.value[key];
-        console.log('11111111111', selectedKeys.value);
-
-        if (val?.base) {
-          // const base = val.base.key;
-          // selectedKey.value.push('7');
-          // console.log(base);
-          Object.entries(nLength).forEach(([newKey]) => {
-            commonStore.getTargetKeyInfo(newKey).then(data => {
-              Object.entries(nLength).forEach(([keykey]) => {
-                // console.log(`键: ${keykey}, 值: ${value}`);
-                curKey.value = keykey;
-              });
-              getDevPerf(data.tary);
-              console.log('22222222222 ', data.tary);
-              // curKey.value = data.getDevPerf();
-            });
-            // getDevPerf({ key: newKey });
+    Object.entries(selectedKeysMap.value).forEach(([newKey]) => {
+      commonStore.getTargetKeyInfo(newKey).then(data => {
+        if (newKey === '0') {
+          // 如果需要遍历某个数据结构中的键
+          Object.entries(data).forEach(([keykey]) => {
+            curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
           });
-        } else {
-          selectedKey.value.length = 0;
+          getDevPerf(data.tary); // 假设的功能调用
         }
       });
-    }, 100);
+    });
   }
 );
+watch(
+  () => Object.keys(selectedKeys.value),
+  () => {
+    console.log('11111111111', Object.keys(selectedKeys.value));
+    selectedKey.value = Object.keys(selectedKeys.value);
+
+    Object.entries(selectedKey.value).forEach(([newKey]) => {
+      commonStore.getTargetKeyInfo(newKey).then(data => {
+        console.log('333333333333333', newKey);
+
+        if (newKey === '0') {
+          // 如果需要遍历某个数据结构中的键
+          Object.entries(data).forEach(([keykey]) => {
+            curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
+          });
+          getDevPerf(data.tary); // 假设的功能调用
+        }
+      });
+    });
+  }
+);
+// watch(
+//   () => selectedKeys.value,
+//       console.log('11111111111', Object.keys(selectedKeys.value));
+
+//   // (nLength, oLength) => {
+//   nLength => {
+//     setTimeout(() => {
+
+//       Object.keys(selectedKeys.value).forEach(key => {
+//         const val = selectedKeys.value[key];
+//         console.log('11111111111', selectedKeys.value);
+
+//         if (val?.base) {
+//           // const base = val.base.key;
+//           // selectedKey.value.push('7');
+//           // console.log(base);
+//           Object.entries(nLength).forEach(([newKey]) => {
+//             commonStore.getTargetKeyInfo(newKey).then(data => {
+//               Object.entries(nLength).forEach(([keykey]) => {
+//                 // console.log(`键: ${keykey}, 值: ${value}`);
+//                 curKey.value = keykey;
+//               });
+//               getDevPerf(data.tary);
+//               console.log('22222222222 ', data.tary);
+//               // curKey.value = data.getDevPerf();
+//             });
+//             // getDevPerf({ key: newKey });
+//           });
+//         } else {
+//           selectedKey.value.length = 0;
+//         }
+//       });
+//     }, 100);
+//   }
+// );
 
 // function setAxosome() {}
 // 1. 创建一个 Apple 实例并使其响应式
@@ -172,8 +214,6 @@ async function getDevPerf(tary: number[]) {
   //  exeDeadZoneValue.value = getPerfIndex(EXE_DEAD_ZONE) / Math.ceil(255 / 35);
   exeDeadZoneValue.value = Number(triggerToPage(getPerfIndex(EXE_DEAD_ZONE)));
 
-  downLMD.value = Math.ceil(getPerfIndex(DOWN_LMD_VALUE) / 30) / 10;
-  upLMD.value = Math.ceil(getPerfIndex(UP_LMD_VALUE) / 30) / 10;
   downLMD.value = Number(sensitivityToPage(getPerfIndex(DOWN_LMD_VALUE)));
   upLMD.value = Number(sensitivityToPage(getPerfIndex(UP_LMD_VALUE)));
 
@@ -201,9 +241,7 @@ async function getDevPerf(tary: number[]) {
   // // curShake.value = shakeOption.value.find((item: Opetion) => item.key === perf.value.shakeIndex);
 }
 async function setDevPerf() {
-  const perf = { key: [curKey.value], tary: perfArr.value };
-  console.log('2222222222222222', perf.tary);
-
+  const perf = { key: selectedKey.value, tary: perfArr.value };
   await setPerf(perf);
 
   //  await addOks({ code, keys, name });
@@ -221,21 +259,20 @@ function exeDeadSlidingStop(value: number) {
 // 滑动中事件处理
 function downLmdValue(value: number) {
   console.log('11111111111', value);
-  const xxx = Number(PageToSensitivity(value));
-  console.log('11111111111', xxx);
+  const downValue = Number(PageToSensitivity(value));
 
   // setPerfIndex(EXE_DEAD_ZONE, Number(xxx));
-  setPerfIndex(DOWN_LMD_VALUE, xxx);
+  setPerfIndex(DOWN_LMD_VALUE, downValue);
   if (lmdLock.value) {
-    setPerfIndex(UP_LMD_VALUE, xxx);
+    setPerfIndex(UP_LMD_VALUE, upLMD.value);
   }
   setDevPerf();
 }
 function upLmdSlide(value: number) {
-  const xxx = Number(PageToSensitivity(value));
-  setPerfIndex(UP_LMD_VALUE, xxx);
+  const upValue = Number(PageToSensitivity(value));
+  setPerfIndex(UP_LMD_VALUE, upValue);
   if (lmdLock.value) {
-    setPerfIndex(DOWN_LMD_VALUE, xxx);
+    setPerfIndex(DOWN_LMD_VALUE, downLMD.value);
   }
 
   setDevPerf();
@@ -283,19 +320,22 @@ getDevRate();
             <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton>
           </NDropdown>
         </div>
-
+        <div class="flex-raw flex items-center pt-10px">
+          <p class="vertical-bar"></p>
+          <p class="... text-18px">{{ $t('repidTrigger.exeDistance') }}</p>
+        </div>
         <KeyMove v-model="exeDeadZoneValue" @stop-sliding="exeDeadSlidingStop"></KeyMove>
-        <div class="flex-raw flex justify-center">
+        <!--
+ <div class="flex-raw flex justify-center">
           <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
-          <!--
- <button
+          <button
             class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
             @click="setAxosome"
           >
             {{ $t('repidTrigger.switchType') }}
           </button>
--->
         </div>
+-->
       </div>
 
       <div class="border-l-1px border-[#232327]"></div>

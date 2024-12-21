@@ -41,11 +41,11 @@ const startSliding = () => {
 };
 
 // 滑动中触发
-const sliding = () => {
-  if (isSliding.value) {
-    emit('update:modelValue', sliderValue.value); // 触发更新外部值
-  }
-};
+// const sliding = () => {
+//   if (isSliding.value) {
+//     emit('update:modelValue', sliderValue.value); // 触发更新外部值
+//   }
+// };
 
 // 滑动结束触发
 const stopSliding = () => {
@@ -58,16 +58,19 @@ const stopSliding = () => {
 // 更新数值，确保值在 0 到 100 之间
 const updateValue = () => {
   sliderValue.value = Math.min(Math.max(sliderValue.value, 0), 100);
+  if (isSliding.value) {
+    emit('update:modelValue', sliderValue.value); // 触发更新外部值
+  }
 };
 
 // 添加事件监听器到全局（鼠标松开时）
 onMounted(() => {
-  window.addEventListener('mousemove', sliding);
+  // window.addEventListener('mousemove', sliding);
   window.addEventListener('mouseup', stopSliding);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', sliding);
+  // window.removeEventListener('mousemove', sliding);
   window.removeEventListener('mouseup', stopSliding);
 });
 </script>
