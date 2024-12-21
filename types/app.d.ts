@@ -614,6 +614,7 @@ declare namespace App {
         adjust: string;
         rtTopDeadZone: string;
         rtBellowDeadZone: string;
+        exeDistance: string;
       };
       supperKey: {
         x1: string;

@@ -151,7 +151,8 @@ const lang: App.BusinessLanguage.Schema = {
     property: '性能',
     adjust: '校准',
     rtTopDeadZone: 'RT顶部死区',
-    rtBellowDeadZone: 'RT底部死区'
+    rtBellowDeadZone: 'RT底部死区',
+    exeDistance: '触发行程'
   },
   supperKey: {
     x1: '添加单键急停按键',

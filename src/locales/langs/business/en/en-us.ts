@@ -154,7 +154,8 @@ const lang: App.BusinessLanguage.Schema = {
     property: 'Performance',
     adjust: 'Calibration',
     rtTopDeadZone: 'RT Top Dead Zone',
-    rtBellowDeadZone: 'RT Bottom Dead Zone'
+    rtBellowDeadZone: 'RT Bottom Dead Zone',
+    exeDistance: 'trigger the itinerary'
   },
   supperKey: {
     x1: 'Add Per Key emergency stop',

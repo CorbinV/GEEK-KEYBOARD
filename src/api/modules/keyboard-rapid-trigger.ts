@@ -20,7 +20,7 @@ export type SetKeyPerf = {
 };
 
 export type SetKeyPerfCallback = {
-  name: string;
+  name: string[];
   code: 0;
 };
 
