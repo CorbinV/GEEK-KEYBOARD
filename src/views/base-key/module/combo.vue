@@ -11,11 +11,13 @@ import { $t } from '@/locales';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { useCommonStore } from '@/store/modules/common';
 import ComboEdit from '../components/combo-edit.vue';
+import ComboLock from '../components/combo-lock.vue';
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail } = keyboardStore;
 const commonStore = useCommonStore();
 const groupList = ref<any>([]);
 const editVisible = ref(false);
+const lockVisible = ref(false);
 const MAC_GORUP_CNT = 20;
 const emit = defineEmits(['key-clicked']);
 
@@ -189,6 +191,9 @@ function addLocalName(type: number, code: number, name: string) {
 function removeLocalName(type: number, code: number) {
   localStorage.removeItem(`${type}-${code}`);
 }
+function handleLockCombo() {
+  lockVisible.value = true;
+}
 </script>
 
 <template>
@@ -228,5 +233,6 @@ function removeLocalName(type: number, code: number) {
       @update:show="showRenameModal = $event"
       @rename="handleReNameSave"
     />
+    <ComboLock v-model:visible="lockVisible" />
   </div>
 </template>
