@@ -24,3 +24,12 @@ export type ComboItem = Omit<BaseKey, 'key'>;
 export type ComboList = {
   shortcuts: ComboItem[];
 };
+
+export type ComboLockGroup = {
+  enable: 0 | 1;
+  keys: number[];
+};
+export type ComboLockData = {
+  defaultLock: ComboLockGroup[];
+  customLock: ComboLockGroup[];
+};

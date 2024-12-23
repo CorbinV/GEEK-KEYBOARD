@@ -1,5 +1,5 @@
 import requestClient from './config';
-import type { ComboGoup, ComboList } from './modules/combo';
+import type { ComboGoup, ComboList, ComboLockData } from './modules/combo';
 export function getComboList() {
   return requestClient.send<ComboList>({
     name: 'getShortcuts'
@@ -20,6 +20,18 @@ export function createComboGroup(data: ComboGoup) {
 export function deleteComboGroup(data: { code: number }) {
   return requestClient.send<null>({
     name: 'delShortcut',
+    data
+  });
+}
+
+export function getComboLock() {
+  return requestClient.send<ComboLockData>({
+    name: 'getLockShortcuts'
+  });
+}
+export function setComboLock(data: ComboLockData) {
+  return requestClient.send<null>({
+    name: 'setLockShortcuts',
     data
   });
 }
