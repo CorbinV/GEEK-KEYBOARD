@@ -11,6 +11,7 @@ import { $t } from '@/locales';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { useCommonStore } from '@/store/modules/common';
 import ComboEdit from '../components/combo-edit.vue';
+import TopBanner from '../components/top-banner.vue';
 import ComboLock from '../components/combo-lock.vue';
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail } = keyboardStore;
@@ -198,6 +199,11 @@ function handleLockCombo() {
 
 <template>
   <div>
+    <TopBanner>
+      <template #right-extra>
+        <NButton size="large" type="info" ghost class="ml-4" @click="handleLockCombo">锁组合按键</NButton>
+      </template>
+    </TopBanner>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
       <BasicGroupAdd icon="add" :desc="$t('baseKey.combination.addCombKey')" @click="handleAddClicked" />
       <BasicGroupItem
