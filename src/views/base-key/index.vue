@@ -1,14 +1,65 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { KeyboardContainer, StandardKeyboard } from '@/components/custom/keyboard/index';
+import { computed, ref, shallowRef } from 'vue';
+import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { KeyTypeEnum } from '@/enum/keyType';
-import Macro from '../marco/components/Macro.vue';
+import TopBanner from './components/top-banner.vue';
+
+import Macro from './module/marco.vue';
+import Base from './module/base.vue';
 import ModuleTemplate from './components/module-template.vue';
 import Combo from './module/combo.vue';
 const tabName = ref(KeyTypeEnum.Normal);
 function handleKeyEventTabs(value: string | number) {
   tabName.value = Number(value);
 }
+const xList = shallowRef([
+  {
+    label: 'baseKey.tab.basic',
+    type: KeyTypeEnum.Normal,
+    component: Base,
+    isTemplate: false,
+    needBanner: false
+  },
+  {
+    label: 'baseKey.tab.system',
+    type: KeyTypeEnum.System,
+    component: ModuleTemplate,
+    isTemplate: true,
+    needBanner: true
+  },
+  {
+    label: 'baseKey.tab.media',
+    type: KeyTypeEnum.Media,
+    component: ModuleTemplate,
+    isTemplate: true,
+    needBanner: true
+  },
+  {
+    label: 'baseKey.tab.combination',
+    type: KeyTypeEnum.Combo,
+    component: Combo,
+    isTemplate: false,
+    needBanner: false
+  },
+  {
+    label: 'baseKey.tab.special',
+    type: KeyTypeEnum.Special,
+    component: ModuleTemplate,
+    isTemplate: true,
+    needBanner: true
+  },
+  {
+    label: 'baseKey.tab.macro',
+    type: KeyTypeEnum.Marco,
+    component: Macro,
+    isTemplate: false,
+    needBanner: false
+  }
+]);
+const currentContent = computed(() => {
+  const res = xList.value.find(item => item.type === tabName.value)!;
+  return res;
+});
 </script>
 
 <template>
@@ -16,37 +67,19 @@ function handleKeyEventTabs(value: string | number) {
     <KeyboardContainer>
       <template #default="{ handleKeyEmit }">
         <div class="h-full flex flex-col">
+          <TopBanner v-if="currentContent.needBanner" />
           <div class="flex-1">
-            <StandardKeyboard
-              v-if="tabName === KeyTypeEnum.Normal"
-              @key-clicked="data => handleKeyEmit({ ...data, type: 0 })"
-            />
-            <ModuleTemplate
-              v-if="tabName === KeyTypeEnum.System"
-              :type="KeyTypeEnum.System"
+            <component
+              :is="currentContent.component"
+              :key="currentContent.label"
+              class="h-full w-full"
+              :type="currentContent.type"
               @key-clicked="handleKeyEmit"
-            />
-            <ModuleTemplate
-              v-if="tabName === KeyTypeEnum.Media"
-              :type="KeyTypeEnum.Media"
-              @key-clicked="handleKeyEmit"
-            />
-            <Combo v-if="tabName === KeyTypeEnum.Combo" @key-clicked="handleKeyEmit" />
-            <ModuleTemplate
-              v-if="tabName === KeyTypeEnum.Special"
-              :type="KeyTypeEnum.Special"
-              @key-clicked="handleKeyEmit"
-            />
-            <Macro v-if="tabName === KeyTypeEnum.Marco" :edit="false" @key-clicked="handleKeyEmit" />
+            ></component>
           </div>
 
           <NTabs v-model:value="tabName" type="segment" animated @update:value="handleKeyEventTabs">
-            <NTab :name="KeyTypeEnum.Normal" :tab="$t('baseKey.tab.basic')" />
-            <NTab :name="KeyTypeEnum.System" :tab="$t('baseKey.tab.system')" />
-            <NTab :name="KeyTypeEnum.Media" :tab="$t('baseKey.tab.media')" />
-            <NTab :name="KeyTypeEnum.Combo" :tab="$t('baseKey.tab.combination')" />
-            <NTab :name="KeyTypeEnum.Special" :tab="$t('baseKey.tab.special')" />
-            <NTab :name="KeyTypeEnum.Marco" :tab="$t('baseKey.tab.macro')" />
+            <NTab v-for="item in xList" :key="item.label" :name="item.type" :tab="$t(item.label)"></NTab>
           </NTabs>
         </div>
       </template>
