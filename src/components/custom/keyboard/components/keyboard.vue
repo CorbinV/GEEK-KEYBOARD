@@ -121,7 +121,7 @@ function useKeySelectAndNotify() {
     });
   });
   watchEffect(() => {
-    if (!storeMutipleModule.value) {
+    if (storeMutipleModule.value) {
       resetSelectedIdxObj();
       return;
     }
