@@ -9,10 +9,11 @@ import GroupMenu from '@/views/super-key/components/group-menu.vue';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 import { $t } from '@/locales';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
+import { useCommonStore } from '@/store/modules/common';
 import ComboEdit from '../components/combo-edit.vue';
-
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail } = keyboardStore;
+const commonStore = useCommonStore();
 const groupList = ref<any>([]);
 const editVisible = ref(false);
 const MAC_GORUP_CNT = 20;
@@ -76,16 +77,15 @@ async function updateGroupList() {
 onMounted(async () => {
   updateGroupList();
 });
-async function handleGroupCreated({ code, key, keys }: { code: number; key: string; keys: any[] }) {
+async function handleGroupCreated({ code, key: _key, keys }: { code: number; key: string; keys: any[] }) {
   try {
     let tmpCode = code;
     if (isEdit) {
       tmpCode = editItemCode;
     }
     const type = KeyTypeEnum.Combo;
-    console.log('addShortcut', tmpCode, key, keys);
-    const ret = await createComboGroup({ code: tmpCode, keys, type });
-    console.log('addShortcut ret', ret);
+
+    await createComboGroup({ code: tmpCode, keys, type });
     updateGroupList();
     // groupList.value.push({
     //   base: {
@@ -112,14 +112,18 @@ function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeE
     keyId
   });
 }
-async function handleGroupItemDelete(items: any, idx: number) {
+async function handleGroupItemDelete(item: any, idx: number) {
   try {
-    console.log('delShortcut', items.base.code);
-    const ret = await deleteComboGroup({ code: items.base.code });
+    const ret = await deleteComboGroup({ code: item.base.code });
     console.log('delShortcut ret', ret);
+    const simpleBase = { code: item.base.code, type: item.base.type };
+    const keyId = await commonStore.updateComboKeyTag('', simpleBase, { type: 'remove', updateOrigin: true });
+    if (keyId) {
+      keyboardStore.removeSuperKey(keyId as string, { moduleType: KeyTypeEnum.Combo });
+    }
+    removeLocalName(KeyTypeEnum.Combo, item.base.code);
     groupList.value.splice(idx, 1);
-    keyboardStore.removeSuperKey(items.key, { moduleType: KeyTypeEnum.Combo });
-    removeLocalName(KeyTypeEnum.Combo, items.base.code);
+
     window.$message!.success($t('businessCommon.delSuccess'));
   } catch (error) {
     console.error('handleGroupItemDelete', error);
