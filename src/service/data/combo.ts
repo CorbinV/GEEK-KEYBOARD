@@ -48,3 +48,49 @@ export const delShortcut = {
   name: 'delShortcut',
   code: 0
 };
+export const getLockShortcuts = {
+  name: 'getLockShortcuts',
+  code: 0,
+  data: {
+    defaultLock: [
+      {
+        enable: 1,
+        keys: [4, 65]
+      },
+      {
+        enable: 1,
+        keys: [5, 65]
+      },
+      {
+        enable: 1,
+        keys: [5, 65]
+      },
+      {
+        enable: 1,
+        keys: [5, 65]
+      }
+    ],
+    customLock: [
+      {
+        enable: 0,
+        keys: [4, 65, 7]
+      },
+      {
+        enable: 0,
+        keys: [4, 65, 7]
+      },
+      {
+        enable: 0,
+        keys: [4, 65, 7]
+      },
+      {
+        enable: 0,
+        keys: [4, 65, 7]
+      }
+    ]
+  }
+};
+export const setLockShortcuts = {
+  name: 'setLockShortcuts',
+  code: 0
+};
