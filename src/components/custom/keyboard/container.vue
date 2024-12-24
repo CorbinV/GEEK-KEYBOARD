@@ -2,6 +2,7 @@
 import { provide, readonly, ref } from 'vue';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { useCommonStore } from '@/store/modules/common';
+import { $t } from '@/locales';
 import Dynamic from './dynamic.vue';
 type SelectedInfo = {
   type: number;
@@ -20,6 +21,7 @@ const currentKeyFromKeyboard = ref({
 function handleKeyEmit(data: { keyId: string; code: number; type: number }, { toDevice } = { toDevice: true }) {
   const keyId = currentKeyFromKeyboard.value.keyId;
   if (!keyId) {
+    window.$message!.info($t('baseKey.keyboard.keyboardHint'));
     return;
   }
   selectedInfo.value = {
