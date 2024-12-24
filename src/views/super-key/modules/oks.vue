@@ -192,7 +192,7 @@ async function handleReNameSave(data: { name: string }) {
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd icon="add" :desc="$t('supperKey.x1')" @click="handleAddClicked" />
+      <BasicGroupAdd v-if="oksGroupList.length < 8" icon="add" :desc="$t('supperKey.x1')" @click="handleAddClicked" />
       <BasicGroupItem
         v-for="(item, idx) in oksGroupList"
         :key="item.code"
