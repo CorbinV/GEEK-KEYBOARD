@@ -70,9 +70,10 @@ const drawColorWheel = () => {
   // ctx.fill();
 };
 
-const handleMouseUp = (event: MouseEvent) => {
-  console.log(event);
+const handleMouseUp = () => {
   mouseIsMove.value = false;
+
+  emit('stopSliding', R.value, G.value, B.value); // 触发更新外部值
 };
 const handleMouseDown = (event: MouseEvent) => {
   console.log(event);
@@ -88,50 +89,39 @@ const handleMouseMove = (event: MouseEvent) => {
   const rect = dotCanvas.value.getBoundingClientRect();
   const x = event.clientX - rect.left - dotCanvas.value.width / 2;
   const y = event.clientY - rect.top - dotCanvas.value.height / 2;
-  const distance = Math.sqrt(x * x + y * y);
 
-  if (distance < dotCanvas.value.width / 2) {
+  const insideSize = 8; // 控制圆的半径
+  const insideSizeRadius = insideSize / 2; // 控制圆的半径
+  const dotX = x + dotCanvas.value.width / 2; // 控制圆的半径
+  const dotY = y + dotCanvas.value.height / 2; // 控制圆的半径
+
+  const dotYdistance = Math.sqrt(x * x + y * y) + insideSizeRadius;
+  // 计算大圆的半径
+  const maxRadius = dotCanvas.value.width / 2 - insideSizeRadius;
+
+  if (maxRadius > dotYdistance) {
     // 计算角度，调整为顺时针
     const angle = Math.atan2(y, x);
 
     const hue = (angle * 180) / Math.PI + 180; // 调整角度范围
-    //    const hue = angle * (180 / Math.PI);
-    console.log(hue);
-
-    // if (hue < 0) {
-    //   hue += 360; // 保证 hue 始终是正数
-    // }(360 - oldAngle) % 360;
-    // selectedColor.value = `hsl(${hue - 180}, 100%, 50%)`;
-    // selectedColor.value = `hsl(${(180 - hue) % 360}, 100%, 50%)`;
     ctx.clearRect(0, 0, dotCanvas.value.width, dotCanvas.value.height);
-
     const rgb = hslToRgb(hue, 100, 50);
 
     R.value = rgb[0]; // 转换为十六进制
     G.value = rgb[1]; // 转换为十六进制
     B.value = rgb[2]; // 转换为十六进制
     initValue();
-    // rgbHex.value = `${rHex}${gHex}${bHex}`;
 
-    const dotSize = 5; // 控制圆的半径
-    const strokeSize = dotSize / 2; // 控制圆的半径
-
-    // 绘制小圆
     ctx.beginPath();
-    ctx.arc(
-      x + dotCanvas.value.width / 2 + dotSize / 2,
-      y + dotCanvas.value.height / 2 + dotSize / 2,
-      dotSize,
-      0,
-      2 * Math.PI
-    );
-
+    ctx.arc(dotX, dotY, insideSize, 0, 2 * Math.PI);
     ctx.closePath();
     ctx.stroke(); // 描边
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = strokeSize;
+    ctx.lineWidth = insideSizeRadius;
     ctx.fillStyle = `hsl(${hue}, 100%, 45%)`;
     ctx.fill();
+  } else {
+    handleMouseUp();
   }
 };
 
@@ -160,17 +150,10 @@ onMounted(() => {
   drawColorWheel();
 });
 
-// 滑动结束触发
-const stopSliding = () => {
-  emit('stopSliding', R.value, G.value, B.value); // 触发更新外部值
-};
-
 const isRgbSwitch = (value: boolean) => {
   emit('isRgbSwitch', value);
 };
-onMounted(() => {
-  window.addEventListener('mouseup', stopSliding);
-});
+
 initValue();
 </script>
 

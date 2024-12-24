@@ -664,8 +664,14 @@ declare namespace App {
       };
       light: {
         modeSelect: string;
+        q0: string;
         q1: string;
         q2: string;
+        q3: string;
+        q4: string;
+        q5: string;
+        q6: string;
+        q7: string;
         luminance: string;
         speend: string;
         lightSleep: string;

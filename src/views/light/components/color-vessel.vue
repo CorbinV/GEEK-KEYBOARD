@@ -7,7 +7,16 @@ import { getLight, setLight } from '@/api/light';
 import type { Light } from '@/api/modules/light';
 
 // 假设你有 15 个项目来填充三行五列的网格
-const items = ref([$t('light.q1'), $t('light.q2')]);
+const items = ref([
+  $t('light.q0'),
+  $t('light.q1'),
+  $t('light.q2'),
+  $t('light.q3'),
+  $t('light.q4'),
+  $t('light.q5'),
+  $t('light.q6'),
+  $t('light.q7')
+]);
 // 选中的项，默认没有选中
 // const selectedItem = ref<number | null>(null);
 const light = ref<Light>({
@@ -49,13 +58,13 @@ const sleepTimeitems = ref([
 // };
 // 选中项的处理函数
 function selectItem(index: number) {
-  light.value.pattern = index; // 否则选择当前项
+  light.value.pattern = index;
   setLight(light.value);
 }
 
 // 选中项的处理函数
 function selectSleepTimeItem(index: number) {
-  light.value.sleep = index; // 否则选择当前项
+  light.value.sleep = index;
   setLight(light.value);
 }
 async function brightness(value: number) {
