@@ -20,7 +20,6 @@ const MAC_GORUP_CNT = 8;
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
-currentSuperKeyType.value = KeyTypeEnum.TGL;
 let editItem = reactive<{
   base: { code: number; type: KeyTypeEnum; name: ''; key: '' };
   keyList: any[];

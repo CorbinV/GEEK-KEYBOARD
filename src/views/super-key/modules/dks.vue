@@ -17,7 +17,6 @@ const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
-currentSuperKeyType.value = KeyTypeEnum.DKS;
 function useSimulate() {
   const enableSimulate = ref<0 | 1>(0); // enbale simulate
   const simulateStatus = ref<'0' | '1' | '2'>('0');

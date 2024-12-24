@@ -21,7 +21,6 @@ const MAC_GORUP_CNT = 8;
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
-currentSuperKeyType.value = KeyTypeEnum.OKS;
 
 type GroupItem = {
   base: { code: number; type: KeyTypeEnum; name: string; key?: string };

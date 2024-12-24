@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref, toRef } from 'vue';
+import { onUnmounted, ref, toRef, watchEffect } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
@@ -11,12 +11,10 @@ import TGL from './modules/tgl.vue';
 import Rs from './modules/rs.vue';
 const keyboardStore = useKeyboardStore();
 const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
-allowMutipleSelect.value = false;
+const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 
-const tabName = ref(KeyTypeEnum.DKS);
-function handleKeyEventTabs(value: string | number) {
-  tabName.value = Number(value);
-}
+allowMutipleSelect.value = false;
+currentSuperKeyType.value = KeyTypeEnum.DKS;
 
 onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
 
@@ -71,10 +69,13 @@ const paneList = [
 
         <div class="h-full flex flex-col">
           <div class="flex-1">
-            <component :is="paneList.find(item => item.name === tabName)?.component" @key-clicked="handleKeyEmit" />
+            <component
+              :is="paneList.find(item => item.name === currentSuperKeyType)?.component"
+              @key-clicked="handleKeyEmit"
+            />
           </div>
 
-          <NTabs v-model:value="tabName" type="segment" animated @update:value="handleKeyEventTabs">
+          <NTabs v-model:value="currentSuperKeyType" type="segment" animated>
             <NTab :name="KeyTypeEnum.DKS" :tab="$t('supperKey.c1')" />
             <NTab :name="KeyTypeEnum.OKS" :tab="$t('supperKey.c2')" />
             <NTab :name="KeyTypeEnum.SOCD" tab="SOCD" />

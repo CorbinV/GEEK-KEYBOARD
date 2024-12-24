@@ -20,7 +20,6 @@ const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
-currentSuperKeyType.value = KeyTypeEnum.SOCD;
 // 优先触发
 const trigger = ref<number>(0);
 const socdList = ref<any>([]);

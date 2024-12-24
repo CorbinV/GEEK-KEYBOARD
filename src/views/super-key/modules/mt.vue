@@ -26,7 +26,6 @@ const MAC_GORUP_CNT = 8;
 const keyboardStore = useKeyboardStore();
 const { getKeyDetail, updateSuperKey, removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
-currentSuperKeyType.value = KeyTypeEnum.MT;
 // 按住时间
 const inputTime = ref(200);
 const mtList = ref<any>([]);
