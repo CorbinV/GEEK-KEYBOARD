@@ -116,21 +116,19 @@ const [spConfig, resetSpConfig] = useResttableRefFn(() => ({
   color: 'transparent'
 }));
 function updateSpConfig(x: KeyboardKeyProps['sp']) {
-  const needReset = [
-    !x,
-    currentSuperKeyType.value === KeyTypeEnum.None,
-    !x?.includes(currentSuperKeyType.value as any)
-  ].some(r => r);
+  const needReset = [!x, currentSuperKeyType.value === KeyTypeEnum.None].some(r => r);
   if (needReset) {
     resetSpConfig();
     return;
   }
-  const label = tranformKeyTypeToChar(currentSuperKeyType.value as any);
-  const color = tranformKeyTypeToColor(currentSuperKeyType.value as any);
-  spConfig.value = {
-    label,
-    color
-  };
+  x?.forEach(type => {
+    const label = tranformKeyTypeToChar(type as any);
+    const color = tranformKeyTypeToColor(type as any);
+    spConfig.value = {
+      label,
+      color
+    };
+  });
 }
 watchEffect(() => {
   updateSpConfig(props.sp);
