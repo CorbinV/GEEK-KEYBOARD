@@ -164,7 +164,7 @@ function generateGroupCode() {
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd icon="add" desc="添加动态键程按键" @click="handleAddClicked" />
+      <BasicGroupAdd v-if="oksGroupList.length < 8" icon="add" desc="添加动态键程按键" @click="handleAddClicked" />
       <BasicGroupItem
         v-for="(item, idx) in oksGroupList"
         :key="item.code"
