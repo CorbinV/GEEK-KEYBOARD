@@ -130,6 +130,9 @@ function updateSpConfig(x: KeyboardKeyProps['sp']) {
     };
   });
 }
+const showMt = computed(() => {
+  return currentSuperKeyType.value !== KeyTypeEnum.None && props.mt?.type;
+});
 watchEffect(() => {
   updateSpConfig(props.sp);
 });
@@ -177,11 +180,11 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
           <!-- base super function -->
           <template v-if="!showKeyParams">
             <div
-              v-if="mt?.type"
+              v-if="showMt"
               class="no-wrap absolute bottom-0.5 left-0.5 h-4.5 w-4.5 flex items-center justify-center rounded-full bg-#0e1eb4 text-center text-0.6rem text-white"
             >
               <i v-if="mt?.type === 'icon'" class="iconfont text-10px" :class="`icon-${mt?.icon}`"></i>
-              <span v-else>{{ mt.label }}</span>
+              <span v-else>{{ mt!.label }}</span>
             </div>
             <div
               v-if="spConfig?.label"
