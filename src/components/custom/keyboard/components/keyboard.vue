@@ -158,7 +158,6 @@ function xxx(keyId: string, idx: number) {
     key: keyId
   };
   const keyDetail = keyboardStore.getKeyDetail(baseKey);
-  emit('update:keyId', { keyId, idx, ...keyCfgInfo });
 
   const cacheData = {
     base: baseKey,
@@ -173,10 +172,18 @@ function xxx(keyId: string, idx: number) {
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete storeSelectedKeys.value[keyId];
       storeSelectedKeyMap.value.delete(keyId);
+      const [firstKey] = storeSelectedKeyMap.value.keys();
+      if (firstKey) {
+        const cfgInfo = toRaw(layerData[props.layer]?.keys[firstKey!]);
+        emit('update:keyId', { keyId: firstKey, idx, ...cfgInfo });
+      } else {
+        emit('update:keyId', { keyId: '', idx, ...keyCfgInfo });
+      }
     } else {
       selectedIdxObj.value[idx] = keyId;
       storeSelectedKeys.value[keyId] = cacheData;
       storeSelectedKeyMap.value.set(keyId, cacheData);
+      emit('update:keyId', { keyId, idx, ...keyCfgInfo });
     }
   } else {
     // perf: high coupling!
@@ -188,6 +195,7 @@ function xxx(keyId: string, idx: number) {
       idx,
       keyId
     };
+    emit('update:keyId', { keyId, idx, ...keyCfgInfo });
   }
 }
 function handleKeyClick(e: MouseEvent) {
