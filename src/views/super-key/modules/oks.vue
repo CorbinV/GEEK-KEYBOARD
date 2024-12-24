@@ -8,7 +8,6 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import { addOks, deleteOksByCode, getOksList, resetOksName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
-import { formatLableSub3 } from '@/hooks/common/format';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
@@ -73,13 +72,8 @@ function handleAddClicked() {
   isEdit = false;
   editVisible.value = true;
 }
-function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
-  if (currentSuperKeyType.value === KeyTypeEnum.OKS) {
-    const mtCfg = formatLableSub3(res);
-    updateSuperKey(key!, { moduleType, mtCfg });
-  } else {
-    updateSuperKey(key!, { moduleType });
-  }
+function updateGroupEffect(key: string, moduleType: KeyTypeEnum) {
+  updateSuperKey(key!, { moduleType });
 }
 async function updateGroupList() {
   const { oks } = await getOksList();
@@ -90,7 +84,7 @@ async function updateGroupList() {
       base: { code, type },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
+        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value));
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {

@@ -8,7 +8,6 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import { addRS, deleteRSByCode, getRSList, resetRSName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
-import { formatLableSub3 } from '@/hooks/common/format';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 const rsGroupList = ref<any>([]);
@@ -45,13 +44,8 @@ function handleAddClicked() {
   isEdit = false;
   editVisible.value = true;
 }
-function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
-  if (currentSuperKeyType.value === KeyTypeEnum.RS) {
-    const mtCfg = formatLableSub3(res);
-    updateSuperKey(key!, { moduleType, mtCfg });
-  } else {
-    updateSuperKey(key!, { moduleType });
-  }
+function updateGroupEffect(key: string, moduleType: KeyTypeEnum) {
+  updateSuperKey(key!, { moduleType });
 }
 async function updateGroupList() {
   const { rs } = await getRSList({ pageNo: 1, pageSize: 8 });

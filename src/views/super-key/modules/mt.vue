@@ -87,12 +87,8 @@ function handleAddClicked() {
   editVisible.value = true;
 }
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
-  if (currentSuperKeyType.value === KeyTypeEnum.MT) {
-    const mtCfg = formatLableSub3(res);
-    updateSuperKey(key!, { moduleType, mtCfg });
-  } else {
-    updateSuperKey(key!, { moduleType });
-  }
+  const mtCfg = formatLableSub3(res);
+  updateSuperKey(key!, { moduleType, mtCfg });
 }
 async function updateGroupList() {
   console.log('getMTList');
