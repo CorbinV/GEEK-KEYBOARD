@@ -45,3 +45,18 @@ export const resetRt = {
   name: 'resetRT',
   code: 0
 };
+
+export const getRate = {
+  name: 'getRate',
+  code: 0,
+  data: {
+    rate: [1000, 2000, 4000, 8000],
+    index: 1
+  }
+};
+export const setRate = {
+  name: 'setRate',
+  data: {
+    index: 0
+  }
+};
