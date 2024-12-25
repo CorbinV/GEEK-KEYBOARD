@@ -6,7 +6,8 @@ export function setupElegantRouter() {
   return ElegantVueRouter({
     layouts: {
       base: 'src/layouts/base-layout/index.vue',
-      blank: 'src/layouts/blank-layout/index.vue'
+      blank: 'src/layouts/blank-layout/index.vue',
+      header: 'src/layouts/base-header-layout/index.vue'
     },
     routePathTransformer(routeName, routePath) {
       const key = routeName as RouteKey;

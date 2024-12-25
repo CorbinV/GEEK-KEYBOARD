@@ -53,7 +53,7 @@ export const generatedRoutes: GeneratedRoute[] = [
   {
     name: 'connect',
     path: '/connect',
-    component: 'layout.blank$view.connect',
+    component: 'layout.header$view.connect',
     meta: {
       title: 'connect',
       i18nKey: 'route.connect',
