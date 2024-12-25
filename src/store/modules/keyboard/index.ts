@@ -1,4 +1,4 @@
-import { effectScope, onScopeDispose, reactive, watchEffect } from 'vue';
+import { effectScope, onScopeDispose, reactive, watch, watchEffect } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import { useEventListener } from '@vueuse/core';
 import { useBoolean } from '@sa/hooks';
@@ -7,7 +7,7 @@ import { kbStg, keyboardforage } from '@/utils/storage';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { KeyTypeEnum } from '@/enum/keyType';
 import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
-import { getDeviceConfigAndLayer, getKeysCfgByLayer } from '@/api/keyConfig';
+import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } from '@/api/keyConfig';
 import keyMapJson from '@/assets/files/key-map.json';
 import { formatLableSub3 } from '@/hooks/common/format';
 import type { LayerKeysConfig } from '@/api/modules/keyboard';
@@ -43,8 +43,16 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       comboKeyMap: Map<string, string>;
       rtLabelMap: Map<string, RtLabelMapType>;
       layerIdx: number;
+      cfgIdx: number;
       layerKeys: any;
-      layerList: any[];
+      layerList: {
+        superKeyMap: { [key: string]: CacheSuperKey };
+        dksKeyMap: Map<string, string>;
+        comboKeyMap: Map<string, string>;
+        rtLabelMap: Map<string, RtLabelMapType>;
+        keys: any;
+        xxx: any;
+      }[];
     }>({
       layoutMap: new Map(),
       offsetList: [],
@@ -54,9 +62,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       comboKeyMap: new Map(),
       rtLabelMap: new Map(),
       layerIdx: 0,
+      cfgIdx: 0,
       layerList: [],
       layerKeys: {}
     });
+
     const { bool: hasConfig } = useBoolean(kbStg.get('hasConfig') === 'Y');
     // const boardConfigList = reactive<any[]>(Array.from({ length: 4 }));
     const getConfigFormCache = async () => {
@@ -214,7 +224,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       logger('updateLayerKeys------', config, layer);
       if (kbCfg.layerList[layer]) {
         kbCfg.superKeyMap = kbCfg.layerList[layer].superKeyMap;
+        kbCfg.dksKeyMap = kbCfg.layerList[layer].dksKeyMap;
+        kbCfg.comboKeyMap = kbCfg.layerList[layer].comboKeyMap;
+        kbCfg.rtLabelMap = kbCfg.layerList[layer].rtLabelMap;
         kbCfg.layerKeys = kbCfg.layerList[layer].keys;
+        console.log('updateLayerKeys', layer, kbCfg);
         return kbCfg.layerKeys;
       }
 
@@ -274,6 +288,9 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       kbCfg.layerList[layer] = {
         keys: data.keys,
         superKeyMap,
+        dksKeyMap: new Map(),
+        comboKeyMap: new Map(),
+        rtLabelMap: new Map(),
         xxx: data
       };
       return kbCfg.layerKeys;
@@ -329,6 +346,22 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       return mapValue;
     };
     initKeyMap();
+    watch([() => kbCfg.cfgIdx, () => kbCfg.layerIdx], ([cfgIdx, layerIdx]) => {
+      updateDeviceCfgAndLayer({
+        layerIdx,
+        cfgIdx
+      })
+        .then(() => {
+          updateLayerKeys({
+            config: cfgIdx,
+            layer: layerIdx
+          });
+        })
+        .catch(e => {
+          window.$message?.error('设备响应异常');
+          console.log(e);
+        });
+    });
     return {
       initKeyboardData,
       kbCfg,
