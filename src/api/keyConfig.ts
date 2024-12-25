@@ -54,3 +54,13 @@ export function getDeviceConfigAndLayer(): Promise<ConfigAndLayer> {
       .catch(reject);
   });
 }
+export function updateDeviceCfgAndLayer(data: { layerIdx: number; cfgIdx: number }) {
+  const sendData = {
+    config_index: data.cfgIdx,
+    layer_index: data.layerIdx
+  };
+  return requestClient.send<null>({
+    name: 'setConfigLayerIndex',
+    data: sendData
+  });
+}
