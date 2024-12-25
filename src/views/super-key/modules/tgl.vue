@@ -92,20 +92,7 @@ async function updateGroupList() {
       base: { code, type, key },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
-        // if (index === 0) {
-        //   emit(
-        //     'key-clicked',
-        //     {
-        //       code: keyBase.code,
-        //       type: keyBase.type,
-        //       keyId: key
-        //     },
-        //     { toDevice: false }
-        //   );
-        //   console.log('key-clicked', keyBase.code, keyBase.type, key);
-        //   console.log('key-clicked', index, res);
-        // }
+        updateGroupEffect(key!, toRaw(currentSuperKeyType.value));
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
