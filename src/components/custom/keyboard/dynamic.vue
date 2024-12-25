@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, toRef } from 'vue';
 import type { BaseKey } from '@/api/modules/combo';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
@@ -7,7 +7,8 @@ import KeyControl from './components/key-control.vue';
 import LayerControl from './components/layer-control.vue';
 import Keyboard from './components/keyboard.vue';
 const emit = defineEmits(['change:key-id']);
-const { getKeyDetail } = useKeyboardStore();
+const keyboardStore = useKeyboardStore();
+const { getKeyDetail } = keyboardStore;
 const layerList = [
   {
     layer: 0,
@@ -26,7 +27,8 @@ const layerList = [
     label: 'FN3'
   }
 ];
-const currentLayer = ref(0);
+
+const kbCfg = toRef(keyboardStore, 'kbCfg');
 const selectedKey = ref({
   keyId: '',
   label: ''
@@ -46,8 +48,8 @@ function handleSelectKey(data: Omit<BaseKey, 'key'> & { idx: number; keyId: stri
 
 <template>
   <div class="flex flex-row items-end justify-center gap-x-4">
-    <LayerControl v-model:layer="currentLayer" :layer-list="layerList"></LayerControl>
-    <Keyboard :layer="currentLayer" class="kb-control" @update:key-id="handleSelectKey" />
+    <LayerControl v-model:layer="kbCfg.layerIdx" :layer-list="layerList"></LayerControl>
+    <Keyboard :layer="kbCfg.layerIdx" class="kb-control" @update:key-id="handleSelectKey" />
     <div class="second-view flex flex-1 items-center justify-center text-2xl font-bold">
       <p>The screen is too small to display.</p>
     </div>
