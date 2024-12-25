@@ -21,6 +21,7 @@ interface Props {
   showMenuToggler?: App.Global.HeaderProps['showMenuToggler'];
   /** Whether to show the menu */
   showMenu?: App.Global.HeaderProps['showMenu'];
+  showTitle?: boolean;
 }
 
 defineProps<Props>();
@@ -46,7 +47,12 @@ const headerMenus = computed(() => {
 
 <template>
   <DarkModeContainer class="h-full flex-y-center shadow-header" style="background-color: #222226">
-    <GlobalLogo v-if="showLogo" class="h-full" :style="{ width: themeStore.sider.width + 'px' }" />
+    <GlobalLogo
+      v-if="showLogo"
+      :show-title="showTitle"
+      class="h-full"
+      :style="{ width: themeStore.sider.width + 'px' }"
+    />
     <HorizontalMenu v-if="showMenu" mode="horizontal" :menus="headerMenus" class="win-drag px-12px" />
     <div v-else class="win-drag h-full flex-y-center flex-1-hidden">
       <MenuToggler
