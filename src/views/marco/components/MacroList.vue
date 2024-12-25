@@ -32,7 +32,7 @@ function handleMacrosMenu(key: string | number, item: Macro) {
 
 <template>
   <!-- list -->
-  <div class="grid grid-cols-4 gap-4 p-7">
+  <div class="grid grid-cols-4 gap-4 p-4">
     <!-- add -->
     <div
       v-if="canAddMacro"
