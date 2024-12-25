@@ -21,8 +21,11 @@ export function useOTA() {
   const loading = ref(false);
   const showVersion = ref(false);
   const showProgress = ref(false);
-  const progress = ref(100);
+  const progress = ref(0);
+  // mtu  从设备读取
   const mtu = 64;
+  // 当前固件版本 从设备读取
+  const localVersion = ref(0);
   let isDownload = false;
   const versionInfo = ref<VersionInfo>({
     version: 0,
@@ -146,7 +149,7 @@ export function useOTA() {
     loading.value = false;
     const data: Result = await response.json();
     if (data.list.length === 0) {
-      handleSuccess('已经是最新版本');
+      handleSuccess('无版本信息');
       loading.value = false;
       return;
     }
@@ -154,8 +157,10 @@ export function useOTA() {
     versionInfo.value.desc_cn = versionInfo.value.desc_cn.replace(/\n/g, '<br>');
     if (isDownload) {
       fetchFirmware(versionInfo.value.main, isDownload);
-    } else {
+    } else if (versionInfo.value.version > localVersion.value) {
       showVersion.value = true;
+    } else {
+      handleSuccess('已经是最新版本');
     }
   };
 
