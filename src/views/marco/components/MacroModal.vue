@@ -3,9 +3,24 @@ import { nextTick, onMounted, reactive, ref, watch } from 'vue';
 import type { TabsInst } from 'naive-ui';
 import { NInputNumber, NModal, NRadio, NSelect, NSwitch, NTab, NTabs } from 'naive-ui';
 import type { Macro, MacroAttr } from '@/api/modules/macro';
-import { MacroType } from '../core/macroType';
-import type { UIKey } from '../core/macroHelper';
-import actions from '../core/macroHelper';
+import { MacroType } from '../composables/macroType';
+import type { UIKey } from '../composables/useMacro';
+import { useMacro } from '../composables/useMacro';
+
+const {
+  getMacroAttr,
+  getUIKey,
+  updateAllTime,
+  updateKey,
+  deleteUIKey,
+  insertUIKey,
+  resetUIKey,
+  recordUIKey,
+  addFrame,
+  pauseRecordMacro,
+  setMacroAttr,
+  saveUIKey
+} = useMacro();
 
 const props = defineProps<{
   show: boolean;
@@ -64,7 +79,7 @@ onMounted(() => {
 });
 
 function updateUI() {
-  const macroAttr = actions.getMacroAttr();
+  const macroAttr = getMacroAttr();
   inputName.value = macroAttr.name;
   trigger.value = macroAttr.trigger;
   inputDelayTime.value = macroAttr.triggerDelay;
@@ -72,7 +87,7 @@ function updateUI() {
   stopType.value = macroAttr.stopType;
   inputDelayTimeStart.value = macroAttr.delay[0];
   inputDelayTimeEnd.value = macroAttr.delay[1];
-  uiKey = actions.getUIKey();
+  uiKey = getUIKey();
 }
 
 function handleTrigger(value: number) {
@@ -90,7 +105,7 @@ function handleRandomDelay(value: boolean) {
 
 function handleAllTime() {
   if (inputTime.value === null) return;
-  actions.updateAllTime(Number(inputTime.value));
+  updateAllTime(Number(inputTime.value));
 }
 
 function handleRadio() {
@@ -119,24 +134,24 @@ function selectItem(item: UIKey, index: number) {
 }
 
 function handleKeyEventTabs(value: string | number) {
-  actions.updateKey(selectIndex.value, value === MacroType.KeyStatusTabs.Down ? 1 : 2);
+  updateKey(selectIndex.value, value === MacroType.KeyStatusTabs.Down ? 1 : 2);
 }
 
 function handleDelete() {
-  actions.deleteUIKey(selectIndex.value);
+  deleteUIKey(selectIndex.value);
 }
 
 function handleInsertTime() {
-  actions.insertUIKey(selectIndex.value, { type: 3, code: 0, value: 0 });
+  insertUIKey(selectIndex.value, { type: 3, code: 0, value: 0 });
 }
 
 function handleInsertKey() {
-  actions.insertUIKey(selectIndex.value, { type: 1, code: 0, value: 0 });
+  insertUIKey(selectIndex.value, { type: 1, code: 0, value: 0 });
 }
 
 function handleReset() {
   pauseRecord();
-  actions.resetUIKey();
+  resetUIKey();
 }
 
 function handleRecord() {
@@ -144,7 +159,7 @@ function handleRecord() {
     pauseRecord();
   } else {
     startRecord();
-    actions.recordUIKey();
+    recordUIKey();
   }
 }
 
@@ -160,14 +175,14 @@ function startRecord() {
   ];
   frames.forEach((item, index) => {
     setTimeout(() => {
-      actions.addFrame(item);
+      addFrame(item);
     }, 1000 * index);
   });
 }
 
 function pauseRecord() {
   recordStatus.value = false;
-  actions.pauseRecord();
+  pauseRecordMacro();
 }
 
 function handleCancel() {
@@ -191,13 +206,13 @@ function saveMacroAttr() {
     delay: [inputDelayTimeStart.value, inputDelayTimeEnd.value],
     stopType: stopType.value
   };
-  actions.setMacroAttr(macroAttr);
+  setMacroAttr(macroAttr);
 }
 
 function handleSave() {
   pauseRecord();
   saveMacroAttr();
-  const result = actions.saveUIKey();
+  const result = saveUIKey();
   if (result) {
     emit('save', { macro, listEditIndex: listEditIndex.value, editType: editType.value });
   }

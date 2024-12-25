@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Macro } from '@/api/modules/macro';
-import { MacroType } from '../core/macroType';
+import { MacroType } from '../composables/macroType';
 
 const props = defineProps<{
   edit: boolean;

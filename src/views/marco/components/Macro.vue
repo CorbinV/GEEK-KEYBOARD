@@ -2,11 +2,13 @@
 import { onMounted, reactive, ref } from 'vue';
 import { delMacro, getMacroCfg, getMacros, setMacro, setMacroName } from '@/api/macroApi';
 import type { Macro, MacroCfg } from '@/api/modules/macro';
-import { MacroType } from '../core/macroType';
-import actions from '../core/macroHelper';
+import { MacroType } from '../composables/macroType';
+import { useMacro } from '../composables/useMacro';
 import MacroList from './MacroList.vue';
 import RenameModal from './RenameModal.vue';
 import MacroModal from './MacroModal.vue';
+
+const { newMacroCode, initMacroCfg, saveUIKey } = useMacro();
 
 const emit = defineEmits(['key-clicked']);
 const props = defineProps<{ edit: boolean }>();
@@ -61,7 +63,7 @@ function handleMacrosMenu(key: string | number, item: Macro) {
 
 // 添加宏按键
 function handleNewMacro() {
-  listEditIndex.value = actions.newMacroCode(macros);
+  listEditIndex.value = newMacroCode(macros);
   editType = 0;
   macro = {
     type: 6,
@@ -81,7 +83,7 @@ function handleNewMacro() {
     },
     keys: []
   };
-  actions.initMacroCfg(macroCfg);
+  initMacroCfg(macroCfg);
   showModal.value = true;
 }
 
@@ -91,7 +93,7 @@ async function handleMacroEdit(item: Macro) {
   macro = item;
   try {
     const macroCfg = await getMacroCfg({ type: macro.type, code: macro.code });
-    actions.initMacroCfg(macroCfg);
+    initMacroCfg(macroCfg);
     showModal.value = true;
   } catch (error) {
     console.log('error', error);
@@ -128,7 +130,7 @@ async function handleMacroDelete() {
 
 // 保存
 async function handleSave() {
-  const result = actions.saveUIKey();
+  const result = saveUIKey();
   if (result) {
     await setMacro({ attr: result.attr, keys: result.keys });
     macros.macro.splice(listEditIndex.value, editType, macro);
