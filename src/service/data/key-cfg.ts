@@ -615,3 +615,11 @@ export const setKeyInfo = {
   name: 'setKeyInfo',
   code: 0
 };
+export const setConfigLayerIndex = {
+  name: 'setConfigLayerIndex',
+  data: {
+    config_index: 1,
+    layer_index: 1
+  },
+  code: 0
+};
