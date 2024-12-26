@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
+import { useMessage } from 'naive-ui';
 import { delMacro, getMacroCfg, getMacros, setMacro, setMacroName } from '@/api/macroApi';
 import type { Macro, MacroCfg } from '@/api/modules/macro';
+import { useMacroStore } from '@/store/modules/macro';
 import { MacroType } from '../composables/macroType';
-import { useMacro } from '../composables/useMacro';
 import MacroList from './MacroList.vue';
 import RenameModal from './RenameModal.vue';
 import MacroModal from './MacroModal.vue';
 
-const { newMacroCode, initMacroCfg, saveUIKey } = useMacro();
+const message = useMessage();
+const { newMacroCode, initMacroCfg, saveUIKey } = useMacroStore();
 
 const emit = defineEmits(['key-clicked']);
 const props = defineProps<{ edit: boolean }>();
@@ -35,8 +37,15 @@ onMounted(async () => {
 
 // 初始化数据
 async function initData() {
-  const macrosList = await getMacros();
-  macros.macro = macrosList.macro.slice(0, 7);
+  try {
+    const macrosList = await getMacros();
+    macros.macro = macrosList.macro.slice(0, 7);
+  } catch (error) {
+    console.log('error', error);
+    message.error('获取宏列表失败', {
+      duration: 1000
+    });
+  }
 }
 
 // 宏列表操作菜单
@@ -87,7 +96,7 @@ function handleNewMacro() {
   showModal.value = true;
 }
 
-// 编辑宏
+// 编辑宏按键
 async function handleMacroEdit(item: Macro) {
   editType = 1;
   macro = item;
@@ -99,7 +108,7 @@ async function handleMacroEdit(item: Macro) {
     console.log('error', error);
   }
 }
-// 重命名
+// 重命名弹窗
 function handleReName() {
   showRenameModal.value = true;
 }
@@ -107,13 +116,19 @@ function handleReName() {
 // 重命名保存
 async function handleReNameSave(data: { name: string }) {
   if (data.name === '' || listEditIndex.value === -1) return;
-  macro.name = data.name;
   try {
     await setMacroName({ type: macro.type, code: macro.code, name: macro.name });
+    macro.name = data.name;
     macros.macro[listEditIndex.value].name = macro.name;
     showRenameModal.value = false;
+    message.success('重命名成功', {
+      duration: 1000
+    });
   } catch (error) {
     console.log('error', error);
+    message.success('重命名失败', {
+      duration: 1000
+    });
   }
 }
 
@@ -123,18 +138,41 @@ async function handleMacroDelete() {
   try {
     await delMacro({ code: macros.macro[listEditIndex.value].code });
     macros.macro.splice(listEditIndex.value, 1);
+    message.success('删除成功', {
+      duration: 1000
+    });
   } catch (error) {
     console.log('error', error);
+    message.error('删除失败', {
+      duration: 1000
+    });
   }
 }
 
-// 保存
+// 保存宏配置
 async function handleSave() {
-  const result = saveUIKey();
+  console.log('handleSave');
+  const result: MacroCfg | undefined = saveUIKey();
+  console.log('result', JSON.stringify(result));
   if (result) {
-    await setMacro({ attr: result.attr, keys: result.keys });
-    macros.macro.splice(listEditIndex.value, editType, macro);
-    showModal.value = false;
+    try {
+      console.log('开始保存');
+      await setMacro({ attr: result.attr, keys: result.keys });
+      macros.macro.splice(listEditIndex.value, editType, macro);
+      showModal.value = false;
+      message.success('保存成功', {
+        duration: 1000
+      });
+    } catch (error) {
+      console.log('error', error);
+      message.error('保存失败', {
+        duration: 1000
+      });
+    }
+  } else {
+    message.error('保存失败', {
+      duration: 1000
+    });
   }
 }
 </script>

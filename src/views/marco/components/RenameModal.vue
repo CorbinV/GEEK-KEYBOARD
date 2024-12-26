@@ -12,12 +12,15 @@ const emit = defineEmits<{
   (e: 'rename', payload: { name: string }): void;
 }>();
 
+// 最长6个字符
+const nameMaxLen = 6;
+
 const inputReName = ref(props.name || '');
 
 const showModal = computed(() => props.show);
 
 watchEffect(() => {
-  inputReName.value = props.name?.trim()?.slice(0, 6) || '';
+  inputReName.value = props.name?.trim()?.slice(0, nameMaxLen) || '';
 });
 
 const handleCancel = () => {
@@ -26,7 +29,7 @@ const handleCancel = () => {
 
 const handleSave = async () => {
   if (inputReName.value.trim() === '') return;
-  emit('rename', { name: inputReName.value.trim().slice(0, 6) });
+  emit('rename', { name: inputReName.value.trim().slice(0, nameMaxLen) });
   emit('update:show', false);
 };
 </script>

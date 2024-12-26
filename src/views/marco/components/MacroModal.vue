@@ -1,26 +1,27 @@
 <script setup lang="ts">
-import { nextTick, onMounted, reactive, ref, watch } from 'vue';
+import { nextTick, reactive, ref, watch } from 'vue';
 import type { TabsInst } from 'naive-ui';
-import { NInputNumber, NModal, NRadio, NSelect, NSwitch, NTab, NTabs } from 'naive-ui';
+import { NInputNumber, NModal, NRadio, NSelect, NSwitch, NTab, NTabs, useMessage } from 'naive-ui';
 import type { Macro, MacroAttr } from '@/api/modules/macro';
+import { macroStart, macroStop, setMacro } from '@/api/macroApi';
+import type { UIKey } from '@/store/modules/macro';
+import { useMacroStore } from '@/store/modules/macro';
 import { MacroType } from '../composables/macroType';
-import type { UIKey } from '../composables/useMacro';
-import { useMacro } from '../composables/useMacro';
+
+const message = useMessage();
 
 const {
   getMacroAttr,
-  getUIKey,
   updateAllTime,
   updateKey,
   deleteUIKey,
   insertUIKey,
   resetUIKey,
-  recordUIKey,
   addFrame,
-  pauseRecordMacro,
   setMacroAttr,
-  saveUIKey
-} = useMacro();
+  saveUIKey,
+  uiKey
+} = useMacroStore();
 
 const props = defineProps<{
   show: boolean;
@@ -33,8 +34,8 @@ const emit = defineEmits(['update:show', 'save']);
 
 const showModal = ref(props.show);
 const macro = reactive(props.macro);
-const listEditIndex = ref(props.listEditIndex);
-const editType = ref(props.editType);
+// const listEditIndex = ref(props.listEditIndex);
+// const editType = ref(props.editType);
 
 // 宏名称
 const inputName = ref('');
@@ -53,7 +54,7 @@ const inputDelayTimeEnd = ref(1);
 const inputTime = ref(0);
 const allTimeRadioValue = ref<string | null>(MacroType.AllTime.Show);
 const isEdit = ref(false);
-let uiKey = reactive([] as UIKey[]);
+// let uiKey = reactive([] as UIKey[]);
 const selectKey = ref<UIKey>({ type: -1, code: -1, value: -1 });
 // 选中索引
 const selectIndex = ref(-1);
@@ -61,7 +62,7 @@ const selectName = ref('');
 const tabIndex = ref(MacroType.KeyStatusTabs.Down);
 // 宏录制状态
 const recordStatus = ref(false);
-const inputKeyTime = ref(null);
+const inputKeyTime = ref(0);
 const tabsInstRef = ref<TabsInst | null>(null);
 
 watch(
@@ -74,11 +75,29 @@ watch(
   }
 );
 
-onMounted(() => {
-  updateUI();
-});
+watch(
+  () => selectName.value,
+  value => {
+    if (selectIndex.value !== -1 && selectKey.value.type !== 3) {
+      uiKey[selectIndex.value].value = selectName.value;
+    }
+    console.log('selectName', value);
+  }
+);
 
+watch(
+  () => inputKeyTime.value,
+  value => {
+    if (selectIndex.value !== -1 && selectKey.value.type === 3) {
+      uiKey[selectIndex.value].value = Number(inputKeyTime.value);
+    }
+    console.log('inputKeyTime', value);
+  }
+);
+
+// 更新UI
 function updateUI() {
+  console.log('updateUI');
   const macroAttr = getMacroAttr();
   inputName.value = macroAttr.name;
   trigger.value = macroAttr.trigger;
@@ -87,27 +106,37 @@ function updateUI() {
   stopType.value = macroAttr.stopType;
   inputDelayTimeStart.value = macroAttr.delay[0];
   inputDelayTimeEnd.value = macroAttr.delay[1];
-  uiKey = getUIKey();
+  // uiKey = getUIKey();
 }
 
+// 触发方式
 function handleTrigger(value: number) {
   trigger.value = value;
   inputDelayTime.value = 1;
 }
 
+// 停止方式
 function handleStopType(value: number) {
   stopType.value = value;
 }
 
+// 随机延迟
 function handleRandomDelay(value: boolean) {
   randomDelay.value = value;
 }
 
+// 修改全部时间-生效
 function handleAllTime() {
+  if (recordStatus.value) {
+    message.warning('录制中，请先停止录制');
+    return;
+  }
   if (inputTime.value === null) return;
+  if (uiKey.length === 0) return;
   updateAllTime(Number(inputTime.value));
 }
 
+// 显示时间
 function handleRadio() {
   if (allTimeRadioValue.value === MacroType.AllTime.Show) {
     allTimeRadioValue.value = MacroType.AllTime.Hide;
@@ -116,9 +145,11 @@ function handleRadio() {
   }
 }
 
+// 选择帧
 function selectItem(item: UIKey, index: number) {
   if (recordStatus.value) return;
   selectKey.value = item;
+  console.log(index, item);
   if (selectIndex.value === index) {
     selectIndex.value = -1;
   } else {
@@ -129,43 +160,80 @@ function selectItem(item: UIKey, index: number) {
     } else if (item.type === 2) {
       tabIndex.value = MacroType.KeyStatusTabs.Up;
       nextTick(() => tabsInstRef.value?.syncBarPosition());
+    } else {
+      inputKeyTime.value = Number(item.value);
     }
   }
 }
 
+// 按下或抬起
 function handleKeyEventTabs(value: string | number) {
   updateKey(selectIndex.value, value === MacroType.KeyStatusTabs.Down ? 1 : 2);
 }
 
+// 删除
 function handleDelete() {
   deleteUIKey(selectIndex.value);
+  selectIndex.value = -1;
+  inputKeyTime.value = 0;
+  selectName.value = '';
 }
 
+// 插入时间
 function handleInsertTime() {
   insertUIKey(selectIndex.value, { type: 3, code: 0, value: 0 });
 }
 
+// 插入按键
 function handleInsertKey() {
   insertUIKey(selectIndex.value, { type: 1, code: 0, value: 0 });
 }
 
+// 重置
 function handleReset() {
-  pauseRecord();
+  if (recordStatus.value) {
+    message.warning('录制中，请先停止录制');
+    return;
+  }
+  stopRecord();
   resetUIKey();
+  message.success('重置成功');
 }
 
+// 录制
 function handleRecord() {
   if (recordStatus.value) {
-    pauseRecord();
+    stopRecord();
   } else {
     startRecord();
-    recordUIKey();
   }
 }
 
-function startRecord() {
-  recordStatus.value = true;
+// 开始录制
+async function startRecord() {
+  try {
+    await macroStart();
+    recordStatus.value = true;
+    await recording();
+  } catch (e) {
+    console.log(e);
+    message.error('开始录制失败');
+  }
+}
 
+async function stopRecord() {
+  try {
+    await macroStop();
+    recordStatus.value = false;
+  } catch (e) {
+    console.log(e);
+    message.error('停止录制失败');
+  }
+}
+
+// 添加帧
+async function recording() {
+  // 模拟录制 - 待完善
   const frames = [
     { index: 0, code: [4, 5], time: 0 },
     { index: 1, code: [4], time: 3 },
@@ -180,14 +248,12 @@ function startRecord() {
   });
 }
 
-function pauseRecord() {
-  recordStatus.value = false;
-  pauseRecordMacro();
-}
-
-function handleCancel() {
-  pauseRecord();
-  // showModal.value = false;
+// 取消
+async function handleCancel() {
+  if (recordStatus.value) {
+    message.warning('录制中，请先停止录制');
+    return;
+  }
   emit('update:show', false);
 }
 
@@ -209,15 +275,24 @@ function saveMacroAttr() {
   setMacroAttr(macroAttr);
 }
 
-function handleSave() {
-  pauseRecord();
+// 保存
+async function handleSave() {
+  if (recordStatus.value) {
+    message.warning('录制中，请先停止录制');
+    return;
+  }
+  if (uiKey.length === 0) {
+    message.warning('请录制后保存');
+    return;
+  }
   saveMacroAttr();
   const result = saveUIKey();
   if (result) {
-    emit('save', { macro, listEditIndex: listEditIndex.value, editType: editType.value });
+    await setMacro({ attr: result.attr, keys: result.keys });
+    message.success('保存成功');
+    emit('update:show', false);
+    // emit('save', { macro, listEditIndex: listEditIndex.value, editType: editType.value });
   }
-  // showModal.value = false;
-  emit('update:show', false);
 }
 </script>
 
@@ -406,7 +481,7 @@ function handleSave() {
             style="width: 180px"
             :placeholder="String(selectKey.value)"
             :disabled="selectKey.type !== 3"
-            maxlength="6"
+            maxlength="1"
           />
           <NInputNumber
             v-if="selectKey.type === 3"
