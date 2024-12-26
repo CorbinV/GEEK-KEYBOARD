@@ -93,9 +93,35 @@ export const getMacro = {
 
 export const setMacroName = {
   name: 'setMacroName',
+  code: 0
+};
+
+export const delMacro = {
+  name: 'delMacro',
+  code: 0
+};
+
+export const setMacro = {
+  name: 'setMacro',
+  code: 0
+};
+
+export const macroStart = {
+  name: 'macroStart',
+  code: 0
+};
+
+export const macroFrame = {
+  name: 'macroFrame',
+  code: 0,
   data: {
-    name: '一键换装',
-    type: 6,
-    code: 0
+    index: 0,
+    time: 0,
+    code: [0, 0]
   }
+};
+
+export const macroStop = {
+  name: 'macroStop',
+  code: 0
 };
