@@ -94,10 +94,7 @@ onUnmounted(() => {
 <template>
   <!-- <div class="rlex-row w-100% flex"> -->
   <div class="outer-container">
-    <i
-      class="iconfont icon-hollow-remove inline-block p-0 text-center text-30px text-[#3C8DF4]"
-      @click="valueRemove"
-    ></i>
+    <i class="iconfont icon-hollow-remove" @click="valueRemove"></i>
 
     <div class="slider-container">
       <input
@@ -114,12 +111,20 @@ onUnmounted(() => {
       <span class="slider-value" :style="{ left: sliderPosition }">{{ sliderValue }}mm</span>
       <!-- 显示滑块值，位置动态绑定 -->
     </div>
-    <i class="iconfont icon-hollow-add text-center text-30px text-[#3C8DF4]" @click="valueAdd"></i>
+    <i class="iconfont icon-hollow-add" @click="valueAdd"></i>
   </div>
   <!-- </div> -->
 </template>
 
 <style scoped>
+.iconfont {
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  font-size: 30px;
+  text-align: center;
+  color: #3c8df4;
+}
 /* 父父布局 */
 .outer-container {
   width: 100%;
@@ -160,7 +165,8 @@ input[type='range']::-webkit-slider-thumb {
 /* 显示滑块值 */
 .slider-value {
   position: absolute;
-  bottom: -8px;
+  z-index: 40;
+  bottom: -14px;
   transform: translateX(-50%);
   /* background: #007bff; */
   color: #666;

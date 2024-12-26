@@ -182,7 +182,7 @@ initValue();
           ref="dotCanvas"
           width="200px"
           height="200px"
-          class="absolute h-200px w-200px"
+          class="absolute z-40 h-200px w-200px"
           @mousemove="handleMouseMove"
           @mousedown="handleMouseDown"
           @mouseup="handleMouseUp"

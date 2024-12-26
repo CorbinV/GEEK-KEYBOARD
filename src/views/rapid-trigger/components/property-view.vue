@@ -353,7 +353,7 @@ getDevRate();
             <div class="flex-raw flex justify-between pb-10px">
               <div class="flex-raw flex items-center">
                 <p class="vertical-bar"></p>
-                <p class="... text-18px text-#999999">{{ $t('repidTrigger.fastTrigger') }}</p>
+                <p class="... text-18px">{{ $t('repidTrigger.fastTrigger') }}</p>
               </div>
 
               <!-- <NSwitch v-model:value="perf.quick"></NSwitch> -->
@@ -369,7 +369,7 @@ getDevRate();
             <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
             <Slider
               :model-value="downLMD"
-              class="pt-10px"
+              class="z-10 pt-10px"
               @update:model-value="downLmdSlideUpdate"
               @stop-sliding="downLmdValue"
             ></Slider>
