@@ -59,7 +59,7 @@ export function useOTA() {
       await chunks.reduce(async (previousPromise, chunk, _) => {
         await previousPromise;
         try {
-          await OTAPacket({ data: chunk });
+          await OTAPacket({ index: currentChunkIndex, data: chunk });
           await delay(1);
           currentChunkIndex += 1;
           const current = Math.round((currentChunkIndex / totalChunks) * 100);
@@ -84,7 +84,7 @@ export function useOTA() {
 
     // start
     try {
-      await OTAStart({ ver: 1000, len: firmware.length, sum: 0 });
+      await OTAStart({ ver: 1000, len: firmware.length, crc: 0 });
     } catch (error) {
       console.log('error', error);
       handleError('升级开始失败，请确认设备是否连接');
