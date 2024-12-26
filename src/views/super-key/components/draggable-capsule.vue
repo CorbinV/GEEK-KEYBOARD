@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 
 interface DragConstraints {
   minY: number;
@@ -35,7 +35,9 @@ const position = ref(0);
 const isDragging = ref(false);
 const startY = ref(0);
 const startPosition = ref(0);
+let hasDraged = false;
 const handleDrag = (e: MouseEvent) => {
+  hasDraged = true;
   if (!isDragging.value) return;
 
   const deltaY = e.clientY - startY.value;
@@ -52,7 +54,6 @@ const handleDrag = (e: MouseEvent) => {
 
 const stopDrag = () => {
   isDragging.value = false;
-  isDragging.value = true;
 
   document.removeEventListener('mousemove', handleDrag);
   document.removeEventListener('mouseup', stopDrag);
@@ -80,10 +81,22 @@ const startDrag = (e: MouseEvent) => {
 
   startY.value = e.clientY;
   startPosition.value = position.value;
-
+  nextTick(() => {
+    isDragging.value = true;
+  });
   document.addEventListener('mousemove', handleDrag);
   document.addEventListener('mouseup', stopDrag);
 };
+function handleClick() {
+  if (!hasDraged) {
+    emit('update:isAboveMask', false);
+    position.value = 0;
+    startPosition.value = 0;
+    emit('update:height', props.initialHeight);
+    emit('position-change', props.index, 0);
+  }
+  hasDraged = false;
+}
 defineExpose({
   updateConstraints
 });
