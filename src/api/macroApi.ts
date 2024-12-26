@@ -34,3 +34,15 @@ export function setMacro(data: MacroCfg) {
     data
   });
 }
+
+export function macroStart() {
+  return requestClient.send({
+    name: 'macroStart'
+  });
+}
+
+export function macroStop() {
+  return requestClient.send({
+    name: 'macroStop'
+  });
+}
