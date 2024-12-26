@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onUnmounted, ref, toRef, watchEffect } from 'vue';
+import type { Ref } from 'vue';
+import { onUnmounted, toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';

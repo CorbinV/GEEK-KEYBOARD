@@ -55,7 +55,7 @@ async function updateGroupList() {
       base: { code, type },
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
+        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value));
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
