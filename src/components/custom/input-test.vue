@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 export type Keys = {
   id: number;
   key: string;
@@ -8,11 +8,13 @@ export type Keys = {
 };
 const keys = ref<Keys[]>([]);
 const lastKeyTime = ref(0); // 用于计算时间间隔
+const isTestMode = ref(false); // 用于计算时间间隔
 
 // 添加一个按键输出的函数
 const addKey = (event: KeyboardEvent) => {
   const currentTime = Date.now();
   const timeInterval = lastKeyTime.value ? currentTime - lastKeyTime.value : 0;
+
   lastKeyTime.value = currentTime;
   // 生成一个新的按键对象
   const newKey = {
@@ -31,30 +33,52 @@ const addKey = (event: KeyboardEvent) => {
   // 每个按键显示 3 秒后消失
   setTimeout(() => {
     newKey.opacity = 0; // 设置透明度为 0，触发淡出效果
-  }, 3000);
 
-  // 3 秒后移除已消失的按键
-  setTimeout(() => {
     const index = keys.value.findIndex(item => item.id === newKey.id);
     if (index !== -1) {
       keys.value.splice(index, 1);
     }
-  }, 3500);
+
+    // if (index === 0) {
+    //   lastKeyTime.value = 0;
+    // }
+  }, 3000);
+
+  // 3 秒后移除已消失的按键
+  // setTimeout(() => {}, 3500);
 };
-document.addEventListener('keydown', addKey);
+
+function testmoClick() {
+  isTestMode.value = !isTestMode.value;
+  console.log(isTestMode.value);
+}
+onMounted(() => {
+  document.addEventListener('keydown', addKey);
+});
+onUnmounted(() => {
+  document.removeEventListener('keydown', addKey);
+});
 </script>
 
 <template>
-  <div class="h-8 w-full flex items-center justify-center rounded-md bg-#1e1e22 text-c-hl xl:h-10">
-    <div tabindex="0" class="key-display-container">
+  <div class="h-8 w-full flex items-center justify-center rounded-md bg-#1e1e22 xl:h-10">
+    <p
+      v-show="!isTestMode"
+      class="h-full w-full flex select-none items-center justify-center text-[16px] text-#666666"
+      @click="testmoClick"
+    >
+      点击测试按键
+    </p>
+    <div v-show="isTestMode" tabindex="0" class="key-display-container">
       <div
         v-for="(keyData, index) in keys"
         :key="index"
         class="key-item ml-10px text-16px text-#3C8DF4"
         :style="{ opacity: keyData.opacity }"
       >
+        <span v-if="keyData.timeInterval > 0">({{ keyData.timeInterval }})ms</span>
+
         <span>{{ keyData.key }}</span>
-        <span v-if="keyData.timeInterval > 0">-{{ keyData.timeInterval }}ms</span>
       </div>
     </div>
   </div>
@@ -72,6 +96,8 @@ document.addEventListener('keydown', addKey);
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  border: 1px solid #007bff;
+  border-radius: 10px;
   font-family: Arial, sans-serif;
 }
 </style>
