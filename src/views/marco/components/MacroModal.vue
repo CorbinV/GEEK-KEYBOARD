@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, reactive, ref, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import type { TabsInst } from 'naive-ui';
 import { NInputNumber, NModal, NRadio, NSelect, NSwitch, NTab, NTabs, useMessage } from 'naive-ui';
 import type { Macro, MacroAttr } from '@/api/modules/macro';
@@ -7,6 +7,7 @@ import { macroStart, macroStop, setMacro } from '@/api/macroApi';
 import type { UIKey } from '@/store/modules/macro';
 import { useMacroStore } from '@/store/modules/macro';
 import { MacroType } from '../composables/macroType';
+import { useKeyListener } from '../composables/useKeyListener';
 
 const message = useMessage();
 
@@ -20,8 +21,11 @@ const {
   addFrame,
   setMacroAttr,
   saveUIKey,
-  uiKey
+  uiKey,
+  getKeyNameByCode
 } = useMacroStore();
+
+const { keyPressed, onKeyListener, offKeyListener } = useKeyListener();
 
 const props = defineProps<{
   show: boolean;
@@ -65,13 +69,32 @@ const recordStatus = ref(false);
 const inputKeyTime = ref(0);
 const tabsInstRef = ref<TabsInst | null>(null);
 
+onMounted(() => offKeyListener());
+onUnmounted(() => offKeyListener());
+
 watch(
   () => props.show,
   newVal => {
     showModal.value = newVal;
-    if (newVal) {
-      updateUI();
+    if (newVal) updateUI();
+  }
+);
+
+watch(
+  () => keyPressed.value,
+  newVal => {
+    if (newVal !== -1) {
+      uiKey[selectIndex.value].code = newVal;
+      selectName.value = getKeyNameByCode(newVal);
     }
+  }
+);
+
+watch(
+  () => selectIndex.value,
+  newVal => {
+    if (newVal !== -1 && selectKey.value.type !== 3) onKeyListener();
+    else offKeyListener();
   }
 );
 
@@ -186,7 +209,7 @@ function handleInsertTime() {
 
 // 插入按键
 function handleInsertKey() {
-  insertUIKey(selectIndex.value, { type: 1, code: 0, value: 0 });
+  insertUIKey(selectIndex.value, { type: 1, code: 4, value: 'A' });
 }
 
 // 重置
@@ -297,7 +320,7 @@ async function handleSave() {
 </script>
 
 <template>
-  <NModal v-model:show="showModal" :mask-closable="false">
+  <NModal v-model:show="showModal" :mask-closable="false" :close-on-es="false">
     <div class="h-[90vh] w-4/5 flex flex-col rounded-lg bg-[#191B1D] p-7">
       <!-- header -->
       <div class="flex-col flex-none items-center justify-center">
