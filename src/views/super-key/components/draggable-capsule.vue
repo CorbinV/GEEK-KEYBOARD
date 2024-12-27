@@ -111,6 +111,7 @@ defineExpose({
       cursor: disabled ? 'default' : 'grab'
     }"
     @mousedown="startDrag"
+    @click="handleClick"
   >
     <path :d="generatePath" :fill="color" class="capsule" />
   </svg>

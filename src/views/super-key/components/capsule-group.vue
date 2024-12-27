@@ -82,20 +82,28 @@ onMounted(() => {
 });
 
 function checkOverlap(dragIndex: number, currentPos: number): [boolean, number, number] {
-  if (dragIndex >= items.length - 1) return [false, -1, dragIndex];
-  const currentItemBottom = currentPos + props.initialHeight;
+  let res: [boolean, number, number] = [false, -1, items.length - 1];
+
+  if (dragIndex >= items.length - 1) {
+    res = [false, -1, dragIndex];
+    return res;
+  }
+  const currentItemBottom = currentPos + (props.initialHeight + props.gap) * dragIndex;
   for (let i = dragIndex + 1; i < items.length; i++) {
     const top = i * (props.initialHeight + props.gap);
     const bottom = top + props.initialHeight;
-
-    if (currentItemBottom < bottom && currentItemBottom > top) {
-      return [true, i, -1];
+    const mid = top + props.initialHeight / 2;
+    if (currentItemBottom < mid) {
+      const idx = i - 1 === 0 ? 1 : i;
+      res = [false, -1, idx];
+      break;
     }
-    if (currentItemBottom <= top) {
-      return [false, -1, i];
+    if (currentItemBottom < bottom && currentItemBottom >= mid) {
+      res = [true, i, -1];
+      break;
     }
   }
-  return [false, -1, items.length - 1];
+  return res;
 }
 
 const handleDragEnd = (index: number, position: number) => {
