@@ -211,6 +211,10 @@ export const useMacroStore = defineStore('macro', () => {
     return macroCfg;
   };
 
+  const getKeyNameByCode = (code: number) => {
+    return codeMap.value[code]?.label?.replace(/\s+/g, '');
+  };
+
   return {
     resetUIKey,
     setMacroAttr,
@@ -228,6 +232,7 @@ export const useMacroStore = defineStore('macro', () => {
     recordUIKey,
     pauseRecordMacro,
     saveUIKey,
-    uiKey
+    uiKey,
+    getKeyNameByCode
   };
 });
