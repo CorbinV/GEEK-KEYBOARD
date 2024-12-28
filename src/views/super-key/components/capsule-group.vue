@@ -134,14 +134,14 @@ const handleDragEnd = (index: number, position: number) => {
     <div
       v-for="(item, index) in items"
       :key="index"
-      class="relative w-full"
+      class="capsule-item"
       :style="{
         height: initialHeight + 'px',
         marginBottom: items.length === index + 1 ? '16px' : gap + 'px'
       }"
     >
       <div
-        class="z-1"
+        class="mask z-1"
         :class="item.isAboveMask ? 'opacity-0' : 'opacity-100'"
         :style="{
           width: width + 'px',
@@ -171,3 +171,22 @@ const handleDragEnd = (index: number, position: number) => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.capsule-group {
+  position: relative;
+  padding: 16px;
+}
+
+.capsule-item {
+  position: relative;
+  width: 100%;
+}
+
+.mask {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 25px;
+  cursor: pointer;
+}
+</style>
