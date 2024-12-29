@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRefs, watchEffect } from 'vue';
+import { computed, toRef, watchEffect } from 'vue';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
@@ -15,9 +15,10 @@ type KeyControlProps = {
 const props = withDefaults(defineProps<KeyControlProps>(), {
   keyId: ''
 });
-const { kbCfg } = toRefs(keyboardStore);
+const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
+const kbCfg = toRef(keyboardStore, 'kbCfg');
 const rtConfig = computed(() => {
-  return kbCfg.value.rtLabelMap.get(props.keyId);
+  return activeKeyLayer.value.rtLabelMap.get(props.keyId);
 });
 const [keyInfo, resetKeyInfo] = useResttableReactiveFn(() => ({
   currentKey: {} as {

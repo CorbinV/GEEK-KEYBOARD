@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, provide, reactive, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
+import { computed, inject, onMounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-import type { LayerKeysConfig } from '@/api/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { useCommonStore } from '@/store/modules/common';
@@ -18,6 +17,7 @@ type KeyboardProps = {
 };
 const commonStore = useCommonStore();
 const injSelectedInfo = inject('selectedInfo') as any;
+
 const injResetSelectedInfo = inject('resetSelectedInfo') as any;
 const emit = defineEmits<{
   (e: 'update:keyId', preload: { keyId: string; idx: number; code: number; type: KeyTypeEnum }): void;
@@ -30,16 +30,17 @@ const props = withDefaults(defineProps<KeyboardProps>(), {
 });
 const keyboardStore = useKeyboardStore();
 const kbCfg = toRef(keyboardStore, 'kbCfg');
+const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
 
-const layerData = reactive<any>({});
-function updateLayerData(data: LayerKeysConfig) {
-  layerData[props.layer] = data;
-}
+const layerOriginData = ref<any>({});
+
 watch(
   () => props.layer,
   () => {
-    const data = kbCfg.value.layerList[props.layer];
-    updateLayerData(data.xxx);
+    const data = activeKeyLayer.value;
+    if (data) {
+      layerOriginData.value = data.xxx;
+    }
   },
   {
     immediate: true
@@ -151,7 +152,7 @@ const {
 } = useKeySelectAndNotify();
 
 function xxx(keyId: string, idx: number) {
-  const keyCfgInfo = toRaw(layerData[props.layer]?.keys[keyId!]);
+  const keyCfgInfo = toRaw(activeKeyLayer.value?.keys[keyId!]);
   const baseKey = {
     code: keyCfgInfo.code,
     type: keyCfgInfo.type,
@@ -174,7 +175,7 @@ function xxx(keyId: string, idx: number) {
       storeSelectedKeyMap.value.delete(keyId);
       const [firstKey] = storeSelectedKeyMap.value.keys();
       if (firstKey) {
-        const cfgInfo = toRaw(layerData[props.layer]?.keys[firstKey!]);
+        const cfgInfo = toRaw(activeKeyLayer.value?.keys[firstKey!]);
         emit('update:keyId', { keyId: firstKey, idx, ...cfgInfo });
       } else {
         emit('update:keyId', { keyId: '', idx, ...keyCfgInfo });
@@ -223,7 +224,7 @@ async function handleApiSelectAll() {
   if (!firstSelectInfo?.config?.tary) {
     emitData = await commonStore.getTargetKeyInfo(firstKey);
   }
-  const keyCfgInfo = toRaw(layerData[props.layer]?.keys[firstKey!]);
+  const keyCfgInfo = toRaw(activeKeyLayer.value?.keys[firstKey!]);
   const base = {
     code: keyCfgInfo.code,
     type: keyCfgInfo.type,
@@ -264,7 +265,7 @@ async function handleApiReverseSelete() {
     emit('update:keyId', { keyId: '', idx: -1 } as any);
     return;
   }
-  const keyCfgInfo = toRaw(layerData[props.layer]?.keys[firstKey!]);
+  const keyCfgInfo = toRaw(activeKeyLayer.value?.keys[firstKey!]);
   const base = {
     code: keyCfgInfo.code,
     type: keyCfgInfo.type,
@@ -333,12 +334,12 @@ function handleLastKeyMounted() {
       :idx="idx"
       :kb-length="layoutList.length"
       :selected="selectedList[idx]"
-      :key-detail="layerData[layer]?.keys[key]"
-      :disabled="layerData[layer]?.disable.includes(key)"
-      :smart="layerData[layer]?.smart[key]"
-      :sp="kbCfg.superKeyMap[key]?.sp"
-      :mt="kbCfg.superKeyMap[key]?.mt"
-      :dks="kbCfg.superKeyMap[key]?.dks"
+      :key-detail="layerOriginData?.keys[key]"
+      :disabled="layerOriginData?.disable.includes(key)"
+      :smart="layerOriginData?.smart[key]"
+      :sp="activeKeyLayer.superKeyMap[key]?.sp"
+      :mt="activeKeyLayer.superKeyMap[key]?.mt"
+      :dks="activeKeyLayer.superKeyMap[key]?.dks"
       @last-key-mounted="handleLastKeyMounted"
     />
   </div>

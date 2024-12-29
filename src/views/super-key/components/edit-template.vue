@@ -11,7 +11,7 @@ const emit = defineEmits(['update:visible', 'update:title', 'create-group']);
 const keyboardStore = useKeyboardStore();
 const getKeyDetail = keyboardStore.getKeyDetail;
 const { selectedKeys } = toRefs(keyboardStore);
-const kbCfg = toRef(keyboardStore, 'kbCfg');
+const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
 
 const props = withDefaults(
   defineProps<{
@@ -121,7 +121,7 @@ function showInfoMessage(message: string): void {
   window.$message!.info(message);
 }
 const checkKeyBinding = (keyId: string, isMT: boolean = false): boolean => {
-  const key = kbCfg.value.superKeyMap[keyId];
+  const key = activeKeyLayer.value.superKeyMap[keyId];
   if (!key) return false;
   const isBound = (isMT && (key?.dks || key?.mt !== undefined)) || (!isMT && (key?.dks || key?.sp.length > 0));
   if (isBound) {

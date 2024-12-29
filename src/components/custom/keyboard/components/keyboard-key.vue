@@ -25,7 +25,7 @@ const emit = defineEmits<{
 const props = defineProps<KeyboardKeyProps>();
 const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
-const { kbCfg, currentSuperKeyType, showKeyParams } = toRefs(keyboardStore);
+const { kbCfg, activeKeyLayer, currentSuperKeyType, showKeyParams } = toRefs(keyboardStore);
 const keyInfo = ref();
 const keyStyle = ref({});
 function useLayout(cfg: any) {
@@ -57,7 +57,7 @@ const KeyView = reactive({
   type: 'str'
 });
 const keyConfigView = computed(() => {
-  return kbCfg.value.rtLabelMap.get(props.keyId);
+  return activeKeyLayer.value.rtLabelMap.get(props.keyId);
 });
 function updateKeyView(data: any) {
   if (!data) {

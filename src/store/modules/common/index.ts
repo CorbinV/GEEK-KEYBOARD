@@ -13,8 +13,9 @@ function useKeyInfo() {
   const keyboardStore = useKeyboardStore();
   const { setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag } = keyboardStore;
   // key cache
-  const kbCfg = toRef(keyboardStore, 'kbCfg');
-  const keyConfigMap = computed(() => kbCfg.value.layerKeys);
+  const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
+  const keyConfigMap = computed(() => activeKeyLayer.value.keys);
+
   const { triggerToPage, sensitivityToPage } = useConver();
 
   async function fetchTargetKeyInfo(key: string) {
@@ -123,10 +124,10 @@ function useKeyInfo() {
           const { len, keys: taryObj } = await getPerf();
           lenCnt += Object.keys(taryObj).length;
           Object.keys(taryObj).forEach(key => {
-            if (!kbCfg.value.layerKeys[key]) {
-              kbCfg.value.layerKeys[key] = {};
+            if (!activeKeyLayer.value.keys[key]) {
+              activeKeyLayer.value.keys[key] = {};
             }
-            kbCfg.value.layerKeys[key].tary = taryObj[key];
+            activeKeyLayer.value.keys[key].tary = taryObj[key];
           });
           if (len > lenCnt) {
             requestAnimationFrame(fetchTary);
@@ -144,7 +145,7 @@ function useKeyInfo() {
   async function updateTaryDataCache(keys?: string[]) {
     let exeKeys: string[];
     if (!keys?.length) {
-      exeKeys = Object.keys(kbCfg.value.layerKeys);
+      exeKeys = Object.keys(keyConfigMap.value.keys);
     } else {
       exeKeys = keys;
     }
@@ -154,7 +155,7 @@ function useKeyInfo() {
       const end = Math.min(idx + chunkSize, exeKeys.length);
       for (let i = idx; i < end; i++) {
         const key = exeKeys[idx];
-        const data = kbCfg.value.layerKeys[key].tary;
+        const data = keyConfigMap.value[key].tary;
         const [triggerPoint, enableRt, rtTrigger, rtReset] = data;
         const cache = {
           trigPt: triggerPoint ? triggerToPage(triggerPoint) : '',
@@ -162,7 +163,7 @@ function useKeyInfo() {
           rtTrig: rtTrigger ? sensitivityToPage(rtTrigger) : '',
           rtReset: rtReset ? sensitivityToPage(rtReset) : ''
         };
-        kbCfg.value.rtLabelMap.set(key, {
+        activeKeyLayer.value.rtLabelMap.set(key, {
           ...cache
         });
       }

@@ -26,7 +26,7 @@ let editItem = reactive<{
 }>({ base: { code: -1, type: KeyTypeEnum.None, name: '', key: '' }, keyList: [], keyBaseList: [] });
 
 const { selectedKeys } = toRefs(keyboardStore);
-const kbCfg = toRef(keyboardStore, 'kbCfg');
+const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
 
 let keyId = '';
 const showRenameModal = ref(false);
@@ -59,7 +59,7 @@ onMounted(() => {
 });
 
 function handleAddClicked() {
-  const superKey = kbCfg.value.superKeyMap[keyId];
+  const superKey = activeKeyLayer.value.superKeyMap[keyId];
   if (keyId === '') {
     window.$message!.info($t('supperKey.plsSelectKey'));
     return;
