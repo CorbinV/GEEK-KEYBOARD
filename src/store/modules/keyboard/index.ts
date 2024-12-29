@@ -101,6 +101,51 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     };
   }
   const { initKeyboardData, kbCfg, ...configDataFnc } = useConfigData();
+  // handle layer and config origin data
+  const useKeyLayerCfg = () => {
+    const dataManager = new Map<string, CacheLayerKeysSpConfig>(); // `${config}-${layer}`
+    type CacheLayerKeysSpConfig = {
+      superKeyMap: { [key: string]: CacheSuperKey };
+      dksKeyMap: Map<string, string>;
+      comboKeyMap: Map<string, string>;
+      rtLabelMap: Map<string, RtLabelMapType>;
+      keys: any;
+      xxx: any;
+    };
+    type CacheLayerKeysConfig = Pick<LayerKeysConfig, 'keys' | 'disable' | 'smart'>;
+    const activeKeyLayer = reactive<CacheLayerKeysSpConfig>({
+      keys: {},
+      superKeyMap: {},
+      dksKeyMap: new Map(),
+      comboKeyMap: new Map(),
+      rtLabelMap: new Map(),
+      xxx: {}
+    } as CacheLayerKeysSpConfig);
+    const activeLayerSp = reactive<{
+      superKeyMap: { [key: string]: CacheSuperKey };
+      dksKeyMap: Map<string, string>; // string<{code, type}> : key/keyId
+      comboKeyMap: Map<string, string>;
+      rtLabelMap: Map<string, RtLabelMapType>;
+    }>({
+      superKeyMap: {},
+      dksKeyMap: new Map(),
+      comboKeyMap: new Map(),
+      rtLabelMap: new Map()
+    });
+    const keyLayerInfo = reactive({
+      configCount: 0,
+      configIndex: 0,
+      layerIndex: 0,
+      layerCount: 0
+    });
+    const generateSuperKey = () => {
+      return {
+        sp: [] as KeyTypeEnum[],
+        mt: undefined,
+        dks: false,
+        combo: false
+      };
+    };
     const getKeyDetail = ({ code, type }: Omit<BaseKey, 'key'>) => {
       if (![KeyTypeEnum.None, KeyTypeEnum.Media, KeyTypeEnum.Normal, KeyTypeEnum.System].includes(type)) {
         const detail = {
@@ -146,10 +191,127 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       }
       return codeDetail;
     };
+    const fetchLayerKeys = async (
+      params: {
+        configIdx: number;
+        layerIdx: number;
+        prevData?: CacheLayerKeysConfig;
+        pageSize?: number;
+        pageNo?: number;
+      },
+      onProgress?: (current: number, total: number) => void
+    ): Promise<CacheLayerKeysConfig> => {
+      const { configIdx, layerIdx, pageSize = 25, prevData, pageNo = 1 } = params;
+      const result = await getKeysCfgByLayer({
+        config: configIdx,
+        layer: layerIdx,
+        pageNo,
+        pageSize
+      });
+      const currentData = prevData
+        ? {
+            keys: { ...prevData.keys, ...result.keys },
+            smart: { ...prevData.smart, ...result.smart },
+            disable: [...prevData.disable, ...result.disable],
+            len: result.len
+          }
+        : result;
+      onProgress?.(pageNo * pageSize, result.len);
+      if (pageNo * pageSize >= result.len) {
+        return currentData;
+      }
+      return fetchLayerKeys(
+        {
+          configIdx,
+          layerIdx,
+          pageSize,
+          pageNo: pageNo + 1,
+          prevData: currentData
+        },
+        onProgress
+      );
     };
+    const updateLayerKeys = async ({ config = keyLayerInfo.configIndex, layer = keyLayerInfo.layerIndex }) => {
+      const managerId = `${config}-${layer}`;
+      const layerInfo = dataManager.get(managerId);
+
+      logger('updateLayerKeys------', config, layer);
+
+      if (layerInfo) {
+        activeKeyLayer.superKeyMap = layerInfo.superKeyMap;
+        activeKeyLayer.dksKeyMap = layerInfo.dksKeyMap;
+        activeKeyLayer.comboKeyMap = layerInfo.comboKeyMap;
+        activeKeyLayer.rtLabelMap = layerInfo.rtLabelMap;
+        activeKeyLayer.keys = layerInfo.keys;
+        activeKeyLayer.xxx = layerInfo.xxx;
+        return layerInfo;
+      }
+
+      const cfgData = await fetchLayerKeys({
+        configIdx: config,
+        layerIdx: layer
+      });
+      logger('fetchData 🟩', cfgData);
+      const superKeyMap: any = {};
+      Object.keys(cfgData.smart).forEach((key: any) => {
+        const superKey = generateSuperKey();
+        const { mt, super: superTuple } = cfgData.smart[key];
+        if (mt?.length > 0) {
+          const detail = getKeyDetail({
+            code: mt[0],
+            type: mt[1]
+          });
+          superKey.mt = formatLableSub3(detail);
+        }
+        if (superTuple?.length > 0) {
+          superKey.sp.push(superTuple[0]);
+        }
+        superKeyMap[key] = superKey;
+      });
+      const cache = {
+        keys: cfgData.keys,
+        superKeyMap,
+        dksKeyMap: new Map(),
+        comboKeyMap: new Map(),
+        rtLabelMap: new Map(),
+        xxx: cfgData
       };
+      dataManager.set(managerId, cache);
+      return cache;
+    };
+    const updateAllLayerKeys = async (
+      { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
+      { finish = false, finishCb }: { skipIdx?: number; finish?: boolean; finishCb?: any }
+    ) => {
+      if (finish) {
+        if (finishCb instanceof Function) {
+          finishCb();
+        }
+        return;
+      }
+      await updateLayerKeys({
+        config: configIdx,
+        layer: fetchIdx
+      });
+      window.requestAnimationFrame(() =>
+        updateAllLayerKeys(
+          { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
+          {
+            finish: fetchIdx === maxFetch,
+            finishCb
+          }
+        )
+      );
+    };
+    const updateDeviceCfgAndLayers = async () => {
+      const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
+      keyLayerInfo.configCount = configCount;
+      keyLayerInfo.configIndex = configIndex;
+      keyLayerInfo.layerIndex = layerIndex;
+      keyLayerInfo.layerCount = layerCount;
     };
     const updateSuperKey = (keyId: string, { moduleType, mtCfg }: { moduleType: KeyTypeEnum; mtCfg?: any }) => {
+      let superKey = activeLayerSp.superKeyMap[keyId];
       if (!superKey) {
         // init super key if not exist
         superKey = generateSuperKey();
@@ -168,15 +330,18 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       } else if (KeyTypeEnum.Combo === moduleType) {
         superKey.combo = true;
       }
+      activeLayerSp.superKeyMap[keyId] = superKey;
     };
     const removeSuperKey = (
       keyId: string,
       { moduleType, removeAll }: { moduleType: KeyTypeEnum; removeAll?: boolean }
     ) => {
+      const superKey = activeLayerSp.superKeyMap[keyId];
       if (!superKey) {
         return;
       }
       if (removeAll) {
+        activeLayerSp.superKeyMap[keyId] = generateSuperKey();
         return;
       }
       const codition = [KeyTypeEnum.OKS, KeyTypeEnum.SOCD, KeyTypeEnum.TGL, KeyTypeEnum.RS];
@@ -193,14 +358,21 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       } else if (KeyTypeEnum.Combo === moduleType) {
         superKey.combo = false;
       }
+      activeLayerSp.superKeyMap[keyId] = superKey;
     };
     const setKeyDisabled = (
+      { keyId, layer = keyLayerInfo.layerIndex }: { keyId: string; layer?: number },
       disabled: boolean
     ) => {
+      const managerId = `${keyLayerInfo.configIndex}-${layer || keyLayerInfo.layerIndex}`;
+      const layerInfo = layer ? activeKeyLayer.keys : dataManager.get(managerId);
+      const idx = layerInfo?.xxx.disable.indexOf(keyId);
       if (disabled) {
         if (idx === -1) {
+          dataManager.get(managerId)!.xxx.disable.push(keyId);
         }
       } else if (idx > -1) {
+        dataManager.get(managerId)!.xxx.disable.splice(idx, 1);
       }
     };
     const updateKeyTag = (
@@ -222,12 +394,38 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         }
         return 'dksKeyMap';
       })();
+      let mapValue = activeLayerSp[paramName].get(dataStr!);
       if (type === 'add') {
+        activeLayerSp[paramName].set(dataStr!, key);
         mapValue = key;
       } else {
+        activeLayerSp[paramName].delete(dataStr!);
       }
       return mapValue;
     };
+    const updateKeyBaseWhenKeyChange = ({ keyId, type, code, layer }: any) => {
+      let oldKeys;
+      const managerId = `${keyLayerInfo.configIndex}-${layer || keyLayerInfo.layerIndex}`;
+      if (layer !== undefined) {
+        oldKeys = activeKeyLayer.keys;
+        activeKeyLayer.keys[keyId] = { ...oldKeys[keyId], type, code };
+      } else {
+        oldKeys = dataManager.get(managerId)!.keys;
+        dataManager.get(managerId)!.keys[keyId] = { ...oldKeys[keyId], type, code };
+      }
+    };
+    const updateKeyBase = (keyId: string, data: any, layer: number = keyLayerInfo.layerIndex) => {
+      let oldKeys;
+      const managerId = `${keyLayerInfo.configIndex}-${layer || keyLayerInfo.layerIndex}`;
+      if (layer !== undefined) {
+        oldKeys = activeKeyLayer.keys;
+        activeKeyLayer.keys[keyId] = { ...(oldKeys[keyId] || {}), ...data };
+      } else {
+        oldKeys = dataManager.get(managerId)!.keys;
+        dataManager.get(managerId)!.keys[keyId] = { ...(oldKeys[keyId] || {}), ...data };
+      }
+    };
+    watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], ([cfgIdx, layerIdx]) => {
       updateDeviceCfgAndLayer({
         layerIdx,
         cfgIdx
@@ -244,11 +442,29 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         });
     });
     return {
+      keyLayerInfo,
+      activeKeyLayer,
       updateLayerKeys,
+      updateAllLayerKeys,
+      updateDeviceCfgAndLayers,
+      getKeyDetail,
+      generateSuperKey,
       setKeyDisabled,
       updateKeyTag,
+      removeSuperKey,
+      updateSuperKey,
+      updateKeyBaseWhenKeyChange,
       updateKeyBase
     };
+  };
+  const {
+    keyLayerInfo,
+    updateAllLayerKeys,
+    updateDeviceCfgAndLayers,
+    getKeyDetail,
+    updateLayerKeys,
+    ...keyLayerCfgFnc
+  } = useKeyLayerCfg();
   function useDeviceInfo() {
     const deviceStore = useDeviceStore();
     const { isConnected } = storeToRefs(deviceStore);
@@ -382,12 +598,14 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   return {
     kbCfg,
     kbInfo,
+    keyLayerInfo,
     initKeyboardData,
     resetSelectedKeys,
     currentSuperKeyType,
     resetCurrentSuperKeyType,
     getKeyDetail,
     updateLayerKeys,
+    ...keyLayerCfgFnc,
     ...configDataFnc,
     ...restRelatedSelectedData
   };
