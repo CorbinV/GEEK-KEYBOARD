@@ -253,70 +253,48 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     const deviceStore = useDeviceStore();
     const { isConnected } = storeToRefs(deviceStore);
     const kbInfo = reactive({
-      configCount: 0,
-      configIndex: 0,
-      layerIndex: 0,
-      layerCount: 0,
       isLoad: false,
       mounted: false
     });
-    const updateAllLayerKeys = async (
-      { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
-      { finish = false, finishCb }: { skipIdx?: number; finish?: boolean; finishCb?: any }
-    ) => {
-      if (finish) {
-        if (finishCb instanceof Function) {
-          finishCb();
-        }
-        return;
-      }
-      await updateLayerKeys({
-        config: configIdx,
-        layer: fetchIdx
-      });
-      window.requestAnimationFrame(() =>
+
+    const handleDevConn = async () => {
+      kbInfo.isLoad = true;
+      await updateDeviceCfgAndLayers();
+      await new Promise(resolve => {
         updateAllLayerKeys(
-          { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
-          {
-            finish: fetchIdx === maxFetch,
-            finishCb
-          }
-        )
-      );
+          { configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount },
+          { finishCb: resolve }
+        );
+      });
+      // set layer to  device current cfg
+      updateLayerKeys({
+        config: keyLayerInfo.configIndex,
+        layer: keyLayerInfo.configIndex
+      });
+      kbInfo.isLoad = false;
+      kbInfo.mounted = true;
     };
-    const doInit = () => {
+    const handleDevDisConn = async () => {
+      kbInfo.mounted = false;
+      logger('device is disconnected');
+    };
+    const watchDevConnStatus = () => {
+      // optimize: use watch to replace watcheffect
       watchEffect(async () => {
-        if (isConnected.value) {
-          kbInfo.isLoad = true;
-          const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
-          kbInfo.configCount = configCount;
-          kbInfo.configIndex = configIndex;
-          kbInfo.layerIndex = layerIndex;
-          kbInfo.layerCount = layerCount;
-
-          await new Promise(resolve => {
-            updateAllLayerKeys({ configIdx: configIndex, maxFetch: layerCount }, { finishCb: resolve });
-          });
-
-          updateLayerKeys({
-            config: configIndex,
-            layer: configIndex
-          });
-          kbInfo.isLoad = false;
-          kbInfo.mounted = true;
+        if (isConnected.value && !kbInfo.mounted) {
+          await handleDevConn();
         } else {
-          kbInfo.mounted = false;
-          logger('device is disconnected');
+          await handleDevDisConn();
         }
       });
     };
     return {
       kbInfo,
-      initConfigAndLayer: doInit,
-      updateAllLayerKeys
+      updateAllLayerKeys,
+      watchDevConnStatus
     };
   }
-  const { kbInfo, initConfigAndLayer } = useDeviceInfo();
+  const { kbInfo, watchDevConnStatus } = useDeviceInfo();
   function useRelatedSelectedKeys() {
     const [selectedKeys, resetSelectedKeys] = useResttableRefFn<{
       [key: string]: {
@@ -388,7 +366,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
 
   // watch store
   scope.run(() => {
-    initConfigAndLayer();
+    watchDevConnStatus();
   });
 
   // cache mixSiderFixed
