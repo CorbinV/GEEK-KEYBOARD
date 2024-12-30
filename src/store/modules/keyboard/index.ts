@@ -4,7 +4,7 @@ import { useEventListener } from '@vueuse/core';
 import { useBoolean } from '@sa/hooks';
 import { SetupStoreId } from '@/enum';
 import { kbStg, keyboardforage } from '@/utils/storage';
-import { useResttableRefFn } from '@/hooks/common/basicFnc';
+import { useResttableReactiveFn, useResttableRefFn } from '@/hooks/common/basicFnc';
 import { KeyTypeEnum } from '@/enum/keyType';
 import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
 import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } from '@/api/keyConfig';
@@ -103,7 +103,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const { initKeyboardData, kbCfg, ...configDataFnc } = useConfigData();
   // handle layer and config origin data
   const useKeyLayerCfg = () => {
-    const dataManager = new Map<string, CacheLayerKeysSpConfig>(); // `${config}-${layer}`
     type CacheLayerKeysSpConfig = {
       superKeyMap: { [key: string]: CacheSuperKey };
       dksKeyMap: Map<string, string>;
@@ -113,31 +112,35 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       xxx: any;
     };
     type CacheLayerKeysConfig = Pick<LayerKeysConfig, 'keys' | 'disable' | 'smart'>;
-    const activeKeyLayer = reactive<CacheLayerKeysSpConfig>({
-      keys: {},
-      superKeyMap: {},
-      dksKeyMap: new Map(),
-      comboKeyMap: new Map(),
-      rtLabelMap: new Map(),
-      xxx: {}
-    } as CacheLayerKeysSpConfig);
-    const activeLayerSp = reactive<{
+    const dataManager = new Map<string, CacheLayerKeysSpConfig>(); // `${config}-${layer}`
+    const [activeKeyLayer, resetActiveKeyLayer] = useResttableReactiveFn<CacheLayerKeysSpConfig>(
+      () =>
+        ({
+          keys: {},
+          superKeyMap: {},
+          dksKeyMap: new Map(),
+          comboKeyMap: new Map(),
+          rtLabelMap: new Map(),
+          xxx: {}
+        }) as CacheLayerKeysSpConfig
+    );
+    const [activeLayerSp, resetActiveLayerSp] = useResttableReactiveFn<{
       superKeyMap: { [key: string]: CacheSuperKey };
       dksKeyMap: Map<string, string>; // string<{code, type}> : key/keyId
       comboKeyMap: Map<string, string>;
       rtLabelMap: Map<string, RtLabelMapType>;
-    }>({
+    }>(() => ({
       superKeyMap: {},
       dksKeyMap: new Map(),
       comboKeyMap: new Map(),
       rtLabelMap: new Map()
-    });
-    const keyLayerInfo = reactive({
+    }));
+    const [keyLayerInfo, resetKeyLayerInfo] = useResttableReactiveFn(() => ({
       configCount: 0,
       configIndex: 0,
       layerIndex: 0,
       layerCount: 0
-    });
+    }));
     const generateSuperKey = () => {
       return {
         sp: [] as KeyTypeEnum[],
@@ -303,7 +306,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         )
       );
     };
-    const updateDeviceCfgAndLayers = async () => {
+    const updateDeviceCfgAndLayers = async (): Promise<void> => {
       const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
       keyLayerInfo.configCount = configCount;
       keyLayerInfo.configIndex = configIndex;
@@ -425,6 +428,12 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         dataManager.get(managerId)!.keys[keyId] = { ...(oldKeys[keyId] || {}), ...data };
       }
     };
+    const resetKeyLayerCfgCtrl = () => {
+      resetActiveKeyLayer();
+      resetActiveLayerSp();
+      resetKeyLayerInfo();
+      dataManager.clear();
+    };
     watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], ([cfgIdx, layerIdx]) => {
       updateDeviceCfgAndLayer({
         layerIdx,
@@ -454,7 +463,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       removeSuperKey,
       updateSuperKey,
       updateKeyBaseWhenKeyChange,
-      updateKeyBase
+      updateKeyBase,
+      resetKeyLayerCfgCtrl
     };
   };
   const {
@@ -463,6 +473,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     updateDeviceCfgAndLayers,
     getKeyDetail,
     updateLayerKeys,
+    resetKeyLayerCfgCtrl,
     ...keyLayerCfgFnc
   } = useKeyLayerCfg();
   function useDeviceInfo() {
@@ -494,13 +505,21 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       kbInfo.mounted = false;
       logger('device is disconnected');
     };
-    const watchDevConnStatus = () => {
-      // optimize: use watch to replace watcheffect
+    const watchDevConnStatus = (ops?: { connCb?: () => void; disconnCb?: () => void }) => {
+      const { connCb, disconnCb } = ops || {};
       watchEffect(async () => {
-        if (isConnected.value && !kbInfo.mounted) {
-          await handleDevConn();
-        } else {
+        if (!isConnected.value) {
           await handleDevDisConn();
+          if (disconnCb instanceof Function) {
+            await disconnCb();
+          }
+          return;
+        }
+        if (!kbInfo.mounted) {
+          await handleDevConn();
+          if (connCb instanceof Function) {
+            await connCb();
+          }
         }
       });
     };
@@ -545,6 +564,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       resetSelectedKeys();
       selectedKeysMap.value.clear();
     }
+    const resetRelatedSelectedKeysCtrl = () => {
+      resetSelectedKeys();
+      resetSelectedKeysMap();
+      resetSelectedKeysTemp();
+    };
     watchEffect(() => {
       // feat: when allow mutiple select value change, the selected keys should be reset
       emitResetSelectedKeys(allowMutipleSelect.value);
@@ -564,10 +588,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       selectedKeysMap,
       resetSelectedKeysMap,
       emitResetSelectedKeys,
-      showKeyParams
+      showKeyParams,
+      resetRelatedSelectedKeysCtrl
     };
   }
-  const { resetSelectedKeys, ...restRelatedSelectedData } = useRelatedSelectedKeys();
+  const { resetSelectedKeys, resetRelatedSelectedKeysCtrl, ...restRelatedSelectedData } = useRelatedSelectedKeys();
   const [currentSuperKeyType, resetCurrentSuperKeyType] = useResttableRefFn<CurrentSuperKeyType>(
     () => KeyTypeEnum.None
   );
@@ -580,10 +605,20 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     await initKeyboardData();
   }
 
-  // watch store
-  scope.run(() => {
-    watchDevConnStatus();
+  watchDevConnStatus({
+    connCb: () => {
+      console.log('connect ....');
+    },
+    disconnCb: () => {
+      resetKeyLayerCfgCtrl();
+      resetKeyLayerCfgCtrl();
+      resetRelatedSelectedKeysCtrl();
+      console.log('device disattch, data reset success');
+    }
   });
+  // watch store
+  // scope.run(() => {
+  // });
 
   // cache mixSiderFixed
   useEventListener(window, 'beforeunload', () => {});
