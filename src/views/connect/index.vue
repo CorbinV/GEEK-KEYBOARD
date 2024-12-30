@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { toRefs, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
 import { useDeviceStore } from '@/store/modules/device';
 import { router } from '@/router';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -8,9 +9,15 @@ const { isConnected } = toRefs(deviceStore);
 
 const keyboardStore = useKeyboardStore();
 const { kbInfo } = toRefs(keyboardStore);
-
+const route = useRoute();
 watchEffect(() => {
-  if (kbInfo.value.mounted) {
+  if (!kbInfo.value.mounted) {
+    return;
+  }
+  const redirctPath = route.query.redirect as string;
+  if (redirctPath) {
+    router.push(redirctPath);
+  } else {
     router.push('base-key');
   }
 });
