@@ -10,6 +10,7 @@ import { useMixMenuContext } from '../../context';
 import ThemeButton from './components/theme-button.vue';
 // import UserAvatar from './components/user-avatar.vue';
 
+      // 如果是 Pinia 错误，可以尝试重试
 defineOptions({
   name: 'GlobalHeader'
 });
