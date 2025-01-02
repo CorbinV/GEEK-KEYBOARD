@@ -124,17 +124,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
           xxx: {}
         }) as CacheLayerKeysSpConfig
     );
-    const [activeLayerSp, resetActiveLayerSp] = useResttableReactiveFn<{
-      superKeyMap: { [key: string]: CacheSuperKey };
-      dksKeyMap: Map<string, string>; // string<{code, type}> : key/keyId
-      comboKeyMap: Map<string, string>;
-      rtLabelMap: Map<string, RtLabelMapType>;
-    }>(() => ({
-      superKeyMap: {},
-      dksKeyMap: new Map(),
-      comboKeyMap: new Map(),
-      rtLabelMap: new Map()
-    }));
     const [keyLayerInfo, resetKeyLayerInfo] = useResttableReactiveFn(() => ({
       configCount: 0,
       configIndex: 0,
@@ -247,7 +236,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         activeKeyLayer.rtLabelMap = layerInfo.rtLabelMap;
         activeKeyLayer.keys = layerInfo.keys;
         activeKeyLayer.xxx = layerInfo.xxx;
-        return layerInfo;
+        return activeKeyLayer;
       }
 
       const cfgData = await fetchLayerKeys({
@@ -314,7 +303,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       keyLayerInfo.layerCount = layerCount;
     };
     const updateSuperKey = (keyId: string, { moduleType, mtCfg }: { moduleType: KeyTypeEnum; mtCfg?: any }) => {
-      let superKey = activeLayerSp.superKeyMap[keyId];
+      let superKey = activeKeyLayer.superKeyMap[keyId];
       if (!superKey) {
         // init super key if not exist
         superKey = generateSuperKey();
@@ -333,18 +322,18 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       } else if (KeyTypeEnum.Combo === moduleType) {
         superKey.combo = true;
       }
-      activeLayerSp.superKeyMap[keyId] = superKey;
+      activeKeyLayer.superKeyMap[keyId] = superKey;
     };
     const removeSuperKey = (
       keyId: string,
       { moduleType, removeAll }: { moduleType: KeyTypeEnum; removeAll?: boolean }
     ) => {
-      const superKey = activeLayerSp.superKeyMap[keyId];
+      const superKey = activeKeyLayer.superKeyMap[keyId];
       if (!superKey) {
         return;
       }
       if (removeAll) {
-        activeLayerSp.superKeyMap[keyId] = generateSuperKey();
+        activeKeyLayer.superKeyMap[keyId] = generateSuperKey();
         return;
       }
       const codition = [KeyTypeEnum.OKS, KeyTypeEnum.SOCD, KeyTypeEnum.TGL, KeyTypeEnum.RS];
@@ -361,7 +350,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       } else if (KeyTypeEnum.Combo === moduleType) {
         superKey.combo = false;
       }
-      activeLayerSp.superKeyMap[keyId] = superKey;
+      activeKeyLayer.superKeyMap[keyId] = superKey;
     };
     const setKeyDisabled = (
       { keyId, layer = keyLayerInfo.layerIndex }: { keyId: string; layer?: number },
@@ -397,12 +386,12 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         }
         return 'dksKeyMap';
       })();
-      let mapValue = activeLayerSp[paramName].get(dataStr!);
+      let mapValue = activeKeyLayer[paramName].get(dataStr!);
       if (type === 'add') {
-        activeLayerSp[paramName].set(dataStr!, key);
+        activeKeyLayer[paramName].set(dataStr!, key);
         mapValue = key;
       } else {
-        activeLayerSp[paramName].delete(dataStr!);
+        activeKeyLayer[paramName].delete(dataStr!);
       }
       return mapValue;
     };
@@ -430,7 +419,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     };
     const resetKeyLayerCfgCtrl = () => {
       resetActiveKeyLayer();
-      resetActiveLayerSp();
       resetKeyLayerInfo();
       dataManager.clear();
     };
