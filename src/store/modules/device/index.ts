@@ -36,14 +36,7 @@ export const useDeviceStore = defineStore('device', () => {
   connectionManager.onDeviceDisconnect(() => {
     isConnected.value = false;
   });
-  function init() {
-    if (!isTrueDevice) {
-      isConnected.value = true;
-    }
-  }
-  scope.run(() => {
-    init();
-  });
+  scope.run(() => {});
   // optimize: add other fnc
 
   /** On scope dispose */
@@ -57,6 +50,7 @@ export const useDeviceStore = defineStore('device', () => {
     connectionStatus,
     connect,
     getDeviceClient,
-    isTrueDevice
+    isTrueDevice,
+    initDevice
   };
 });

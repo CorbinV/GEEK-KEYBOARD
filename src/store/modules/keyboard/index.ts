@@ -469,9 +469,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     const { isConnected } = storeToRefs(deviceStore);
     const kbInfo = reactive({
       isLoad: false,
-      mounted: false
+      mounted: Boolean(localStorage.getItem('device-mounted') || '')
     });
-
     const handleDevConn = async () => {
       kbInfo.isLoad = true;
       await updateDeviceCfgAndLayers();
@@ -489,10 +488,23 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       kbInfo.isLoad = false;
       kbInfo.mounted = true;
     };
+
     const handleDevDisConn = async () => {
       kbInfo.mounted = false;
       logger('device is disconnected');
     };
+    watchEffect(() => {
+      if (!isConnected.value) {
+        kbInfo.mounted = false;
+      }
+    });
+    watch(
+      () => kbInfo.mounted,
+      v => {
+        localStorage.setItem('device-mounted', v ? '1' : '');
+      }
+    );
+
     const watchDevConnStatus = (ops?: { connCb?: () => void; disconnCb?: () => void }) => {
       const { connCb, disconnCb } = ops || {};
       watchEffect(async () => {

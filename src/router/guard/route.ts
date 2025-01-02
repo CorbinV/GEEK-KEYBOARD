@@ -21,6 +21,7 @@ const needConnectDevice = VITE_USE_CONNECT_DEVICE === 'Y';
 export function createRouteGuard(router: Router) {
   const deviceStore = useDeviceStore();
   const isConnected = toRef(deviceStore, 'isConnected');
+  const isTrueDevice = toRef(deviceStore, 'isTrueDevice');
   const routerMode = VITE_ROUTER_HISTORY_MODE === 'history';
   router.beforeEach(async (to, from, next) => {
     const rootRoute: RouteKey = 'root';
@@ -49,9 +50,18 @@ export function createRouteGuard(router: Router) {
     const hasAuth = authStore.isStaticSuper || !routeRoles.length || hasRole;
     const routeSwitches: CommonType.StrategicPattern[] = [
       {
-        condition: needConnectDevice && !isConnected.value && to.name === connectRoute,
+        condition: !isConnected.value && to.name === connectRoute,
         callback: () => {
           return next();
+        }
+      },
+      {
+        condition: !isTrueDevice.value && !isConnected.value,
+        callback: () => {
+          return next({
+            name: connectRoute,
+            query: { redirect: to.fullPath }
+          });
         }
       },
       // if it is login route when logged in, then switch to the root page
