@@ -38,9 +38,10 @@ watch(
   () => props.layer,
   () => {
     const data = activeKeyLayer.value;
-    if (data) {
-      layerOriginData.value = data.xxx;
+    if (!Object.keys(data?.xxx).length) {
+      return;
     }
+    layerOriginData.value = data.xxx;
   },
   {
     immediate: true
@@ -173,6 +174,7 @@ function xxx(keyId: string, idx: number) {
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete storeSelectedKeys.value[keyId];
       storeSelectedKeyMap.value.delete(keyId);
+      // find currentMap first
       const [firstKey] = storeSelectedKeyMap.value.keys();
       if (firstKey) {
         const cfgInfo = toRaw(activeKeyLayer.value?.keys[firstKey!]);
@@ -187,6 +189,7 @@ function xxx(keyId: string, idx: number) {
       emit('update:keyId', { keyId, idx, ...keyCfgInfo });
     }
   } else {
+    // feat: use storeSelectedKeyMap replace storeSelectedKeys
     // perf: high coupling!
     storeSelectedKeys.value = {
       [keyId]: cacheData
@@ -210,9 +213,14 @@ function handleKeyClick(e: MouseEvent) {
       xxx(keyId, idx);
     }
 
+    // how about use api to select keys？
+    // -> it's a event -> told component to selecte keys
+    // -> provide keyId list/single
+    // -> repeat current function logic
   }
 }
 async function handleApiSelectAll() {
+  // ---------------- notic: use only in mutiple mode
   let [firstKey] = storeSelectedKeyMap.value.keys();
   if (!firstKey) {
     firstKey = layoutList.value[0];
@@ -224,6 +232,9 @@ async function handleApiSelectAll() {
   if (!firstSelectInfo?.config?.tary) {
     emitData = await commonStore.getTargetKeyInfo(firstKey);
   }
+
+  // storeSelectedKeys.value;
+  // get layoutList key -> set all keys to storeSelectedKeys
   const keyCfgInfo = toRaw(activeKeyLayer.value?.keys[firstKey!]);
   const base = {
     code: keyCfgInfo.code,
@@ -273,6 +284,8 @@ async function handleApiReverseSelete() {
   };
   const keyDetail = await keyboardStore.getKeyDetail({ code: keyCfgInfo.code, type: keyCfgInfo.type });
   const firstSelectInfo = storeSelectedKeyMap.value.get(firstKey)!;
+  // notice: if not key has selected in after -> get layoutList first key config(device)
+
   let emitData;
   if (!firstSelectInfo?.config?.tary) {
     emitData = await commonStore.getTargetKeyInfo(firstKey);
