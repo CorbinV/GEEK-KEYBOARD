@@ -5,7 +5,7 @@ import { useBoolean } from '@sa/hooks';
 import { SetupStoreId } from '@/enum';
 import { kbStg, keyboardforage } from '@/utils/storage';
 import { useResttableReactiveFn, useResttableRefFn } from '@/hooks/common/basicFnc';
-import { KeyTypeEnum } from '@/enum/keyType';
+import { KeyTypeEnum, keyTypeEnumProxy } from '@/enum/keyType';
 import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
 import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } from '@/api/keyConfig';
 import keyMapJson from '@/assets/files/key-map.json';
@@ -146,31 +146,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
           label: ''
         };
         const localCode = code + 1;
-        switch (type) {
-          case KeyTypeEnum.Combo:
-            detail.label = `C${localCode}`;
-            break;
-          case KeyTypeEnum.DKS:
-            detail.label = `D${localCode}`;
-            break;
-          case KeyTypeEnum.Marco:
-            detail.label = `M${localCode}`;
-            break;
-          case KeyTypeEnum.OKS:
-            detail.label = `O${localCode}`;
-            break;
-          case KeyTypeEnum.RS:
-            detail.label = `R${localCode}`;
-            break;
-          case KeyTypeEnum.SOCD:
-            detail.label = `S${localCode}`;
-            break;
-          case KeyTypeEnum.TGL:
-            detail.label = `T${localCode}`;
-            break;
-          default:
-            break;
-        }
+        const keyStr = keyTypeEnumProxy.getKey(type)?.substring(0, 1);
+        detail.label = `${keyStr}${localCode}`;
         return detail;
       }
       const codeMap = kbCfg.keyMap[type]?.code;
