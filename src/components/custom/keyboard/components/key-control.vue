@@ -5,7 +5,9 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
-
+import type { BaseKeyView } from '@/api/modules/combo';
+import { keyTypeEnumProxy } from '@/enum/keyType';
+import KeyLabel from './key-label.vue';
 const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
 type KeyControlProps = {
@@ -20,12 +22,30 @@ const kbCfg = toRef(keyboardStore, 'kbCfg');
 const rtConfig = computed(() => {
   return activeKeyLayer.value.rtLabelMap.get(props.keyId);
 });
+const mtConfig = computed(() => {
+  return activeKeyLayer.value.superKeyMap[props.keyId]?.mt;
+});
+const superTitle = computed(() => {
+  // get key type
+  const sp = activeKeyLayer.value.superKeyMap[props.keyId]?.sp;
+  if (sp) {
+    let keyStr = keyTypeEnumProxy.getKey(sp[0]) || '';
+    if (keyStr?.length > 3) {
+      keyStr = keyStr?.substring(0, 2);
+    }
+    return keyStr;
+  }
+  return '';
+});
+const keyDetail = computed(() => {
+  const { code, type } = (activeKeyLayer.value?.keys as any)[props.keyId] || {};
+  if (code === undefined || type === undefined) {
+    return {};
+  }
+  return keyboardStore.getKeyDetail({ code, type });
+});
 const [keyInfo, resetKeyInfo] = useResttableReactiveFn(() => ({
-  currentKey: {} as {
-    type: string;
-    label: string;
-    icon: string;
-  },
+  currentKey: {} as BaseKeyView,
   params: []
 }));
 const showIcon = computed(() => {
@@ -58,8 +78,6 @@ async function handleDisableKey() {
   await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 });
   // optimize: add a notification to show the result
 }
-
-// const
 </script>
 
 <template>
@@ -68,14 +86,13 @@ async function handleDisableKey() {
     <div class="flex flex-col text-c-primary">
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>
-          {{ $t('baseKey.keyboard.admin1', { total: keyLabel }) }}
+          {{ $t('baseKey.keyboard.admin1', { total: keyId }) }}
         </span>
         <span>
           {{ $t('baseKey.keyboard.current') }}
           <i v-if="showIcon" class=""></i>
-          <span>
-            {{ keyInfo.currentKey?.label }}
-          </span>
+          <!-- {{ keyInfo.currentKey?.label }} -->
+          <KeyLabel :detail="keyDetail" class="inline-flex" text-class="text-sm" icon-class="" />
         </span>
       </div>
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
@@ -90,15 +107,26 @@ async function handleDisableKey() {
         <span>{{ $t('baseKey.keyboard.resetRt') }}</span>
         <span class="text-c-hl">{{ rtConfig?.rtReset || '/' }}</span>
       </div>
-      <!-- feat: finish the params -->
-      <!--
-      <div class="flex flex-row justify-between py-3">
-            <span>属性:</span>
 
-      <div class="flex flex-col"></div>
-              <span class="text-c-hl">{{ detail.tary[2] }}</span>
+      <div class="flex flex-row py-3">
+        <div>属性:</div>
+        <div class="ml-2 flex flex-col flex-1 !text-c-hl !text-xs">
+          <div v-if="mtConfig?.type" class="inline-flex flex-1 flex-row items-center justify-between">
+            <div>MT</div>
+            <div class="ml-2 inline-flex gap-x-0.5">
+              <KeyLabel :detail="keyDetail" />
+              -
+              <KeyLabel :detail="mtConfig" />
+            </div>
+          </div>
+          <div v-if="superTitle" class="inline-flex flex-1 flex-row items-center justify-between">
+            <div>{{ superTitle }}</div>
+            <div class="ml-2 inline-flex gap-x-0.5">
+              <div class="ml-2 inline-flex gap-x-0.5">Y</div>
+            </div>
+          </div>
+        </div>
       </div>
-      -->
     </div>
     <div class="no-wrap flex gap-x-2">
       <NButton type="info" ghost size="small" @click="handleDisableKey">
