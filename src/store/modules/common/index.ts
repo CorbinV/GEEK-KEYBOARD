@@ -11,7 +11,7 @@ import { useKeyboardStore } from '../keyboard/index';
 
 function useKeyInfo() {
   const keyboardStore = useKeyboardStore();
-  const { setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag } = keyboardStore;
+  const { setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag, pushState } = keyboardStore;
   // key cache
   const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
   const keyConfigMap = computed(() => activeKeyLayer.value.keys);
@@ -37,7 +37,21 @@ function useKeyInfo() {
     }
     return keyConfigMap.value[key];
   }
-  async function setTargetKeyInfoById(key: string, data: Partial<KeyInfo>, toDevice: boolean = true) {
+  async function setTargetKeyInfoById(
+    key: string,
+    data: Partial<KeyInfo>,
+    ops?: { toDevice?: boolean; isxx?: boolean }
+  ) {
+    const { toDevice = true, isxx } = ops || {};
+    if (isxx) {
+      const oldVal = JSON.parse(JSON.stringify(activeKeyLayer.value.keys[key] || {}));
+      const newVal = JSON.parse(JSON.stringify({ ...oldVal, ...data }));
+      pushState({
+        oldVal,
+        newVal,
+        fnc: setKeyInfo
+      });
+    }
     if (toDevice) {
       await setKeyInfo({
         keys: [

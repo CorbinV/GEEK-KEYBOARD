@@ -75,7 +75,7 @@ async function handleResetKey() {
   emitter.emit(EventNameEnum.resetKey, props.keyId);
 }
 async function handleDisableKey() {
-  await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 });
+  await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 }, { isxx: true });
   // optimize: add a notification to show the result
 }
 </script>

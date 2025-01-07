@@ -37,7 +37,7 @@ function handleKeyEmit(data: { keyId: string; code: number; type: number }, { to
         type: data.type,
         code: data.code
       },
-      toDevice
+      { toDevice, isxx: true }
     );
     // optimize: add some notify to show the key config has been changed
   }
