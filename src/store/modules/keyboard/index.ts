@@ -10,7 +10,7 @@ import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
 import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } from '@/api/keyConfig';
 import keyMapJson from '@/assets/files/key-map.json';
 import { formatLableSub3 } from '@/hooks/common/format';
-import type { LayerKeysConfig } from '@/api/modules/keyboard';
+import type { KeyInfo, LayerKeysConfig } from '@/api/modules/keyboard';
 import { logger } from '@/utils/log';
 import { useDeviceStore } from '../device';
 
@@ -399,22 +399,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       resetKeyLayerInfo();
       dataManager.clear();
     };
-    watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], ([cfgIdx, layerIdx]) => {
-      updateDeviceCfgAndLayer({
-        layerIdx,
-        cfgIdx
-      })
-        .then(() => {
-          updateLayerKeys({
-            config: cfgIdx,
-            layer: layerIdx
-          });
-        })
-        .catch(e => {
-          window.$message?.error('设备响应异常');
-          console.log(e);
-        });
-    });
+
     return {
       keyLayerInfo,
       activeKeyLayer,
@@ -573,26 +558,103 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const [currentSuperKeyType, resetCurrentSuperKeyType] = useResttableRefFn<CurrentSuperKeyType>(
     () => KeyTypeEnum.None
   );
-  watchEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    currentSuperKeyType.value;
-    resetSelectedKeys();
-  });
+  function useKeyHistory() {
+    type ChangeKeyType = {
+      oldVal: KeyInfo;
+      newVal: KeyInfo;
+    };
+    const MAX_SIZE = 5;
+    const [current, resetCurrent] = useResttableRefFn<any>(() => ({}));
+    const [historyCtrl, resetHistoryCtrl] = useResttableRefFn<any>(() => {
+      return [];
+    });
+    const [futureCtrl, resetFutureCtrl] = useResttableRefFn<any>(() => {
+      return [];
+    });
+    // push data
+    const pushState = (data: ChangeKeyType) => {
+      historyCtrl.value.push(data);
+      console.log('pushState trigger', historyCtrl.value);
+      if (MAX_SIZE < historyCtrl.value.length) {
+        historyCtrl.value.shift();
+      }
+      current.value = data;
+      resetFutureCtrl();
+    };
+    // undo
+    const undo = () => {
+      if (!historyCtrl.value.length) {
+        return null;
+      }
+      futureCtrl.value.push(current.value);
+      current.value = historyCtrl.value.pop()!;
+      return current.value;
+    };
+    // redo
+    const redo = () => {
+      if (!futureCtrl.value.length) {
+        return null;
+      }
+      historyCtrl.value.push(current.value);
+      current.value = futureCtrl.value.pop()!;
+
+      return current.value;
+    };
+    const resetKeyHistory = () => {
+      resetFutureCtrl();
+      resetHistoryCtrl();
+    };
+    return {
+      pushState,
+      undo,
+      redo,
+      historyCtrl,
+      futureCtrl,
+      resetKeyHistory,
+      resetCurrent
+    };
+  }
+  const { resetKeyHistory, ...keyHistoryFnc } = useKeyHistory();
   async function init() {
     await initKeyboardData();
+    watchEffect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      currentSuperKeyType.value;
+      resetSelectedKeys();
+    });
+    watchDevConnStatus({
+      connCb: () => {
+        console.log('connect ....');
+      },
+      disconnCb: () => {
+        resetKeyLayerCfgCtrl();
+        resetKeyLayerCfgCtrl();
+        resetRelatedSelectedKeysCtrl();
+        resetKeyHistory();
+        console.log('device disattch, data reset success');
+      }
+    });
+
+    watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], ([cfgIdx, layerIdx]) => {
+      resetSelectedKeys();
+      resetKeyHistory();
+      updateDeviceCfgAndLayer({
+        layerIdx,
+        cfgIdx
+      })
+        .then(() => {
+          updateLayerKeys({
+            config: cfgIdx,
+            layer: layerIdx
+          });
+        })
+        .catch(e => {
+          window.$message?.error('设备响应异常');
+          console.log(e);
+        });
+    });
   }
 
-  watchDevConnStatus({
-    connCb: () => {
-      console.log('connect ....');
-    },
-    disconnCb: () => {
-      resetKeyLayerCfgCtrl();
-      resetKeyLayerCfgCtrl();
-      resetRelatedSelectedKeysCtrl();
-      console.log('device disattch, data reset success');
-    }
-  });
   // watch store
   // scope.run(() => {
   // });
@@ -619,6 +681,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     updateLayerKeys,
     ...keyLayerCfgFnc,
     ...configDataFnc,
-    ...restRelatedSelectedData
+    ...restRelatedSelectedData,
+    ...keyHistoryFnc
   };
 });
