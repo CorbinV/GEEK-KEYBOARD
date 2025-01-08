@@ -1,11 +1,12 @@
 /// <reference types="@types/w3c-web-hid" />
-import { HIDMessageQueue } from './message-queue';
+import { HIDMessageListener, HIDMessageQueue } from './message-queue';
 import type { FilterType, HIDProtocolOptions, HIDResponse } from './types';
 import { HIDMessageCodec } from './utils';
 
 export class HIDProtocolController extends EventTarget {
   private device: HIDDevice | null = null;
   private messageQueue: HIDMessageQueue;
+  private listenerMap: HIDMessageListener;
   private codec: HIDMessageCodec;
   private messageCounter: number = 0;
   private connected: boolean = false;
@@ -22,6 +23,7 @@ export class HIDProtocolController extends EventTarget {
     };
     this.messageQueue = new HIDMessageQueue();
     this.codec = new HIDMessageCodec();
+    this.listenerMap = new HIDMessageListener();
   }
   public getInstance() {
     return this.device;
@@ -137,8 +139,13 @@ export class HIDProtocolController extends EventTarget {
       throw error;
     }
   }
-
-  private handleInput(event: HIDInputReportEvent) {
+  async on(name: string, callback: (data?: any) => void) {
+    this.listenerMap.dispathOn(name, callback);
+  }
+  async off(name: string, callback: (data?: any) => void) {
+    this.listenerMap.dispathOff(name, callback);
+  }
+  private async handleInput(event: HIDInputReportEvent) {
     try {
       const message = this.codec.decodeMessage(event.data);
       if (!message) {
@@ -147,6 +154,12 @@ export class HIDProtocolController extends EventTarget {
       // console.log('handleInput', message)
       const { name } = message;
       if (!name) {
+        return;
+      }
+      const listeners = this.listenerMap.get(name);
+      if (listeners) {
+        const promiseArr = listeners.map(cb => cb(message));
+        await Promise.all(promiseArr);
         return;
       }
       const matchingRequests = Array.from(this.messageQueue.entries()).find(([_, request]) => {
