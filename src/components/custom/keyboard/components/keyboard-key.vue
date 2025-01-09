@@ -116,7 +116,7 @@ const [spConfig, resetSpConfig] = useResttableRefFn(() => ({
   color: 'transparent'
 }));
 function updateSpConfig(x: KeyboardKeyProps['sp']) {
-  const needReset = [!x, currentSuperKeyType.value === KeyTypeEnum.None].some(r => r);
+  const needReset = [!x?.length, currentSuperKeyType.value === KeyTypeEnum.None].some(r => r);
   if (needReset) {
     resetSpConfig();
     return;
