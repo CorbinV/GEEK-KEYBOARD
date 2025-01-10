@@ -31,7 +31,7 @@ defineExpose({});
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative select-none">
     <img
       ref="KeyboardImgRef"
       :src="imageSrc"

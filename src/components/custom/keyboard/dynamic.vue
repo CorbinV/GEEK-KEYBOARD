@@ -48,7 +48,7 @@ function handleSelectKey(data: Omit<BaseKey, 'key'> & { idx: number; keyId: stri
 </script>
 
 <template>
-  <div class="flex flex-row items-end justify-center gap-x-4">
+  <div class="flex flex-row select-none items-end justify-center gap-x-4">
     <div class="h-full flex flex-col justify-between">
       <RedoUndo class="mt-1/3 md:mt-12" />
       <LayerControl v-model:layer="keyLayerInfo.layerIndex" :layer-list="layerList"></LayerControl>
