@@ -97,13 +97,13 @@ getDevLight();
 </script>
 
 <template>
-  <div class="flex-raw flex gap-30px bg-[#171619] p-30px">
+  <div class="flex gap-30px bg-[#171619] p-30px">
     <div class="flex flex-col flex-1">
       <div class="flex-raw flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">{{ $t('light.modeSelect') }}</p>
+        <p class="text-lg">{{ $t('light.modeSelect') }}</p>
       </div>
-      <div class="grid-container grid mb-20px mt-20px gap-x-55px gap-y-30px">
+      <div class="grid-container grid mb-20px mt-20px h-40px gap-x-55px gap-y-30px">
         <div
           v-for="(item, index) in items"
           :key="index"
@@ -116,20 +116,20 @@ getDevLight();
       </div>
     </div>
     <div class="border-l-1px border-[#232327]"></div>
-    <div class="flex flex-col flex-1 bg-[#171619]">
-      <div class="flex-raw mt-20px flex items-center">
+    <div class="flex flex-col flex-1 gap-y-20px bg-[#171619]">
+      <div class="flex flex-row items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">{{ $t('light.luminance') }}</p>
+        <p class="text-lg">{{ $t('light.luminance') }}</p>
       </div>
       <Slider v-model="light.brightness" @stop-sliding="brightness"></Slider>
       <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">{{ $t('light.speend') }}</p>
+        <p class="text-lg">{{ $t('light.speend') }}</p>
       </div>
       <Slider v-model="light.speed" @stop-sliding="lightSpeed"></Slider>
       <div class="flex-raw mt-20px flex items-center">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">{{ $t('light.lightSleep') }}</p>
+        <p class="text-lg">{{ $t('light.lightSleep') }}</p>
       </div>
 
       <div class="grid-container grid mt-20px gap-x-55px gap-y-30px">
@@ -140,7 +140,6 @@ getDevLight();
           :class="{ selected: light.sleep === index }"
           @click="selectSleepTimeItem(index)"
         >
-          <!-- 在这里渲染每个网格项的内容 -->
           {{ item }}
         </div>
       </div>
@@ -169,8 +168,6 @@ getDevLight();
 }
 .grid-container {
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(5, 40px);
-
   overflow-y: auto; /* 当内容超出时允许滚动 */
 }
 .grid-item {
@@ -182,6 +179,7 @@ getDevLight();
   align-items: center;
   justify-content: center;
   text-align: center;
+  height: 40px;
 }
 .grid-item.selected {
   background-color: #3c8df4; /* 选中项的背景颜色 */

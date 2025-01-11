@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineEmits, onMounted, ref } from 'vue';
+import { computed, defineEmits, onMounted, reactive, ref, watchEffect } from 'vue';
+import { NInputNumber } from 'naive-ui';
 import { hslToRgb, rgbToHsl } from '@/utils/tools';
 
 // 定义 props 和 emits
@@ -16,18 +17,32 @@ const emit = defineEmits<{
 
 // 内部的 sliderValue 绑定到外部的 modelValue
 // const sliderValue = props.modelValue;
-const R = ref(props.colorR);
-const G = ref(props.colorG);
-const B = ref(props.colorB);
+const colorVal = reactive({
+  r: props.colorR,
+  g: props.colorG,
+  b: props.colorB,
+  rs: '',
+  gs: '',
+  bs: ''
+});
+const rgbHex = computed(() => {
+  return `${colorVal.rs}${colorVal.gs}${colorVal.bs}`;
+});
 const mouseIsMove = ref(false);
 const isRGB = ref(props.isRgb);
-const rgbHex = ref<string>(''); // 选中的颜色，使用 ref 来声明
 const colorCanvas = ref<HTMLCanvasElement | null>(null); // canvas 引用
 const dotCanvas = ref<HTMLCanvasElement | null>(null); // canvas 引用
 
-function initValue() {
-  rgbHex.value = `${R.value.toString(16).padStart(2, '0')}${G.value.toString(16).padStart(2, '0')}${B.value.toString(16).padStart(2, '0')}`;
-}
+watchEffect(() => {
+  colorVal.rs = colorVal.r.toString(16).padStart(2, '0').toUpperCase();
+});
+watchEffect(() => {
+  colorVal.gs = colorVal.g.toString(16).padStart(2, '0').toUpperCase();
+});
+watchEffect(() => {
+  colorVal.bs = colorVal.b.toString(16).padStart(2, '0').toUpperCase();
+});
+function initValue() {}
 // 绘制色轮
 const drawColorWheel = () => {
   if (!colorCanvas.value) return; // 检查 canvas 是否存在
@@ -52,7 +67,7 @@ const drawColorWheel = () => {
   ctx.fill();
 
   // // 绘制控制圆 (一个小的圆形控件)
-  const rsl = rgbToHsl(R.value, G.value, B.value);
+  const rsl = rgbToHsl(colorVal.r, colorVal.g, colorVal.b);
   console.log(rsl);
   // const controlRadius = 10; // 控制圆的半径
   // const angle = Math.PI / 4; // 控制圆的初始角度（比如在45度位置）
@@ -73,7 +88,7 @@ const drawColorWheel = () => {
 const handleMouseUp = () => {
   mouseIsMove.value = false;
 
-  emit('stopSliding', R.value, G.value, B.value); // 触发更新外部值
+  emit('stopSliding', colorVal.r, colorVal.g, colorVal.b); // 触发更新外部值
 };
 const handleMouseDown = (event: MouseEvent) => {
   console.log(event);
@@ -107,9 +122,9 @@ const handleMouseMove = (event: MouseEvent) => {
     ctx.clearRect(0, 0, dotCanvas.value.width, dotCanvas.value.height);
     const rgb = hslToRgb(hue, 100, 50);
 
-    R.value = rgb[0]; // 转换为十六进制
-    G.value = rgb[1]; // 转换为十六进制
-    B.value = rgb[2]; // 转换为十六进制
+    colorVal.r = rgb[0]; // 转换为十六进制
+    colorVal.g = rgb[1]; // 转换为十六进制
+    colorVal.b = rgb[2]; // 转换为十六进制
     initValue();
 
     ctx.beginPath();
@@ -143,7 +158,30 @@ const selectColor = (event: MouseEvent) => {
     // selectedColor.value = `hsl(${hue}, 100%, 50%)`;
   }
 };
+const handleInput = (e: any, key: 'r' | 'g' | 'b') => {
+  let { data } = e;
+  data -= 0;
+  // 去除空格并转换为大写
+  if (!Number.isFinite(data)) {
+    colorVal[key] = 0;
+  } else if (data > 255) {
+    colorVal[key] = 255;
+  } else if (data < 0) {
+    colorVal[key] = 0;
+  } else {
+    colorVal[key] = data;
+  }
+  // const formattedValue = `${value}`.trim().toUpperCase();
 
+  // 验证是否为有效的16进制数
+  // if (/^[0-9A-F]{0,2}$/.test(formattedValue)) {
+  //   colorVal[key] = formattedValue;
+  // } else {
+  //   // 如果不合法，只保留合法的部分
+  //   colorVal[key] = `${colorVal[key]}`.slice(0, 2);
+  // }
+  console.log('2222222', colorVal[key]);
+};
 // 初始化色轮
 
 onMounted(() => {
@@ -160,9 +198,9 @@ initValue();
 <template>
   <div divclass="h-100% w-100% flex-col items-center">
     <div class="flex-raw w-100% flex items-center justify-between gap-10px">
-      <div class="flex-raw flex gap-10px">
+      <div class="flex-raw flex items-center gap-10px">
         <p class="vertical-bar"></p>
-        <p class="... text-lg">{{ $t('light.color') }}</p>
+        <p class="text-lg">{{ $t('light.color') }}</p>
         <p class="h-24px w-24px rounded-[4px]" :style="{ backgroundColor: '#' + rgbHex }"></p>
         <p class="h-36px place-content-center rd-sm rounded-[6px] bg-[#222227] pl-10px pr-10px">
           {{ rgbHex }}
@@ -171,13 +209,11 @@ initValue();
       <div class="flex-raw flex gap-10px">
         <!-- <input type="radio" name="option" :checked="isRGB" @onchange="isRgbSwitch" /> -->
         <NCheckbox v-model:checked="isRGB" @update-checked="isRgbSwitch">{{ $t('light.allColor') }}</NCheckbox>
-        <!-- <p class="... text-lg text-[#999999]">{{ $t('light.allColor') }}</p> -->
       </div>
     </div>
     <div class="flex-raw mb-30px mt-30px w-100% flex justify-center">
       <div class="position-relative h-200px w-200px">
         <canvas ref="colorCanvas" width="200px" height="200px" class="absolute" @click="selectColor"></canvas>
-
         <canvas
           ref="dotCanvas"
           width="200px"
@@ -189,20 +225,44 @@ initValue();
         ></canvas>
       </div>
     </div>
-    <div class="flex-raw w-100% flex justify-center gap-20px">
+    <div class="flex flex-row items-center justify-center gap-20px">
       <p class="justify-center text-lg text-[#fff]">R</p>
-      <p class="h-36px w-42px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999]">
-        {{ R.toString(16).padStart(2, '0') }}
+      <p class="h-36px w-44px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999]">
+        <NInputNumber
+          v-model:value="colorVal.r"
+          :show-button="false"
+          maxlength="3"
+          max="255"
+          min="0"
+          placeholder=""
+          @update-value="handleInput($event, 'r')"
+        ></NInputNumber>
       </p>
 
       <p class="text-lg text-[#fff]">G</p>
-      <p class="h-36px w-42px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999]">
-        {{ G.toString(16).padStart(2, '0') }}
+      <p class="h-36px w-44px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999]">
+        <NInputNumber
+          v-model:value="colorVal.g"
+          :show-button="false"
+          maxlength="3"
+          max="255"
+          min="0"
+          placeholder=""
+          @update-value="handleInput($event, 'g')"
+        ></NInputNumber>
       </p>
 
       <p class="text-lg text-[#fff]">B</p>
-      <p class="h-36px w-42px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999]">
-        {{ B.toString(16).padStart(2, '0') }}
+      <p class="h-36px w-44px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999] !text-base">
+        <NInputNumber
+          v-model:value="colorVal.b"
+          :show-button="false"
+          maxlength="3"
+          max="255"
+          min="0"
+          placeholder=""
+          @update-value="handleInput($event, 'b')"
+        ></NInputNumber>
       </p>
     </div>
   </div>
@@ -233,15 +293,18 @@ initValue();
   height: 100px;
   background-color: lightcoral;
 }
+
 .color-picker {
   position: relative;
   display: inline-block;
 }
+
 .vertical-bar {
   width: 4px;
   height: 18px;
   margin-right: 10px;
-  background-color: #3c8df4; /* 按钮文字颜色 */
+  background-color: #3c8df4;
+  /* 按钮文字颜色 */
 }
 
 .selected-color {
