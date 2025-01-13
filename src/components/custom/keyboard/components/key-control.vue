@@ -74,6 +74,9 @@ async function handleResetKey() {
   if (props.keyId === '') return;
   emitter.emit(EventNameEnum.resetKey, props.keyId);
 }
+const originKeyLabel = computed(() => {
+  return kbCfg.value.standerMap.get(props.keyId)?.alt || '';
+});
 async function handleDisableKey() {
   await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 }, { isxx: true });
   // optimize: add a notification to show the result
@@ -86,7 +89,7 @@ async function handleDisableKey() {
     <div class="flex flex-col text-c-primary">
       <div class="flex flex-row justify-between border-b-1px border-#232327 py-3">
         <span>
-          {{ $t('baseKey.keyboard.admin1', { total: keyId }) }}
+          {{ $t('baseKey.keyboard.admin1', { total: originKeyLabel }) }}
         </span>
         <span>
           {{ $t('baseKey.keyboard.current') }}
