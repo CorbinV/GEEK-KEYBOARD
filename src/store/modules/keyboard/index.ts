@@ -34,14 +34,20 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     // const kbCfg = reactive<any>({
     //   'rs-s75': { data: {}, offsetList: [] }
     // });
+    type StandardKbItem = { code: number; alt: string; key: string; coords: number[] };
+
     const kbCfg = reactive<{
       layoutMap: Map<string, any>; // for keyboard layout
       offsetList: number[]; // keyboard row offset
       keyMap: any;
+      standerList: any[];
+      standerMap: Map<string, Pick<StandardKbItem, 'alt' | 'code'>>;
     }>({
       layoutMap: new Map(),
       offsetList: [],
-      keyMap: {}
+      keyMap: {},
+      standerList: [],
+      standerMap: new Map()
     });
 
     const { bool: hasConfig } = useBoolean(kbStg.get('hasConfig') === 'Y');
@@ -86,7 +92,32 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       });
       return data;
     };
-
+    const initStandKeyBoardData = async () => {
+      const chunkSize = 10;
+      let repeat = 0;
+      const updateMap = (list: StandardKbItem[]) => {
+        const start = repeat * chunkSize;
+        const end = start + chunkSize;
+        for (let index = start; index < end; index++) {
+          const { key, code, alt } = list[index] || {};
+          if (key !== undefined) {
+            kbCfg.standerMap.set(key, {
+              code,
+              alt
+            });
+          }
+        }
+        repeat += 1;
+        if (end <= list.length) {
+          return requestAnimationFrame(() => updateMap(list));
+        }
+        return '';
+      };
+      import('@/assets/files/standard-keyboard.json').then(res => {
+        kbCfg.standerList = res.default;
+        updateMap(res.default);
+      });
+    };
     const initKeyMap = () => {
       kbCfg.keyMap = keyMapJson;
       // optimize: dynammic import keyboard map
@@ -95,6 +126,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       // });
     };
     initKeyMap();
+    initStandKeyBoardData();
     return {
       initKeyboardData,
       kbCfg
@@ -574,7 +606,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     // push data
     const pushState = (data: ChangeKeyType) => {
       historyCtrl.value.push(data);
-      console.log('pushState trigger', historyCtrl.value);
       if (MAX_SIZE < historyCtrl.value.length) {
         historyCtrl.value.shift();
       }
