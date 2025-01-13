@@ -80,103 +80,103 @@
   {
     "key": "SYSRQ",
     "coords": [1981, 18, 2087, 122],
-    "alt": "PrscrnsysRq",
+    "alt": "Prcsrn sysrq",
     "code": 70
   },
   {
     "key": "SCROLLLOCK",
     "coords": [2107, 18, 2208, 124],
-    "alt": "ScrollLock",
+    "alt": "Scroll Lock",
     "code": 71
   },
   {
     "key": "PAUSE",
     "coords": [2233, 21, 2334, 122],
-    "alt": "PauseBreak",
+    "alt": "Pause Break",
     "code": 72
   },
   {
     "key": "GRAVE",
     "coords": [18, 169, 125, 279],
-    "alt": "~",
+    "alt": "~.",
     "code": 53
   },
   {
     "key": "1",
     "coords": [142, 167, 254, 276],
-    "alt": "!",
+    "alt": "!1",
     "code": 30
   },
   {
     "key": "2",
     "coords": [268, 170, 372, 276],
-    "alt": "@",
+    "alt": "@2",
     "code": 31
   },
   {
     "key": "3",
     "coords": [389, 170, 493, 276],
-    "alt": "#",
+    "alt": "#3",
     "code": 32
   },
   {
     "key": "4",
     "coords": [515, 172, 624, 273],
-    "alt": "￥",
+    "alt": "$4",
     "code": 33
   },
   {
     "key": "5",
     "coords": [639, 172, 745, 276],
-    "alt": "%",
+    "alt": "%5",
     "code": 34
   },
   {
     "key": "6",
     "coords": [765, 170, 869, 279],
-    "alt": "^",
+    "alt": "^6",
     "code": 35
   },
   {
     "key": "7",
     "coords": [886, 172, 995, 279],
-    "alt": "&",
+    "alt": "&7",
     "code": 36
   },
   {
     "key": "8",
     "coords": [1006, 170, 1116, 277],
-    "alt": "*",
+    "alt": "*8",
     "code": 37
   },
   {
     "key": "9",
     "coords": [1135, 167, 1242, 274],
-    "alt": "(",
+    "alt": "(9",
     "code": 38
   },
   {
     "key": "0",
     "coords": [1259, 167, 1366, 279],
-    "alt": ")",
+    "alt": ")0",
     "code": 39
   },
   {
     "key": "MINUS",
     "coords": [1383, 167, 1489, 279],
-    "alt": "_",
+    "alt": "_-",
     "code": 45
   },
   {
     "key": "EQUAL",
     "coords": [1506, 170, 1613, 274],
-    "alt": "=",
+    "alt": "=+",
     "code": 46
   },
   {
     "key": "BACKSPACE",
     "coords": [1627, 167, 1859, 275],
-    "alt": "BackSpace",
+    "alt": "Back",
     "code": 42
   },
   {
@@ -194,13 +194,13 @@
   {
     "key": "PAGEUP",
     "coords": [2225, 167, 2337, 274],
-    "alt": "PgUp",
+    "alt": "Pg Up",
     "code": 75
   },
   {
     "key": "NUMLOCK",
     "coords": [2455, 172, 2562, 273],
-    "alt": "NUMLock",
+    "alt": "Num Lock",
     "code": 83
   },
   {
@@ -290,19 +290,19 @@
   {
     "key": "LEFTBRACE",
     "coords": [1442, 286, 1548, 392],
-    "alt": "{",
+    "alt": "{[",
     "code": 47
   },
   {
     "key": "RIGHTBRACE",
     "coords": [1565, 290, 1671, 392],
-    "alt": "}",
+    "alt": "}]",
     "code": 48
   },
   {
     "key": "BACKSLASH",
     "coords": [1688, 290, 1859, 392],
-    "alt": "\\",
+    "alt": "\\|",
     "code": 49
   },
   {
@@ -320,7 +320,7 @@
   {
     "key": "PAGEDOWN",
     "coords": [2227, 286, 2330, 392],
-    "alt": "PgDn",
+    "alt": "Pg Dn",
     "code": 78
   },
   {
@@ -350,7 +350,7 @@
   {
     "key": "CAPSLOCK",
     "coords": [16, 406, 248, 515],
-    "alt": "CapsLock",
+    "alt": "Caps",
     "code": 57
   },
   {
@@ -410,13 +410,13 @@
   {
     "key": "SEMICOLON",
     "coords": [1378, 407, 1487, 516],
-    "alt": ":",
+    "alt": ";:",
     "code": 51
   },
   {
     "key": "APOSTROPHE",
     "coords": [1504, 411, 1610, 516],
-    "alt": "&quot;",
+    "alt": "'\"",
     "code": 52
   },
   {
@@ -494,25 +494,25 @@
   {
     "key": "COMMA",
     "coords": [1193, 530, 1302, 633],
-    "alt": ",",
+    "alt": ",<",
     "code": 54
   },
   {
     "key": "DOT",
     "coords": [1313, 525, 1425, 634],
-    "alt": "。",
+    "alt": ".>",
     "code": 55
   },
   {
     "key": "SLASH",
     "coords": [1436, 529, 1548, 635],
-    "alt": "、",
+    "alt": "/?",
     "code": 56
   },
   {
     "key": "RIGHTSHIFT",
     "coords": [1569, 525, 1859, 637],
-    "alt": "ShirftL",
+    "alt": "Shirft",
     "code": 229
   },
   {
@@ -542,7 +542,7 @@
   {
     "key": "NUM_ENTER",
     "coords": [2821, 525, 2934, 757],
-    "alt": "NUM_Enter",
+    "alt": "Enter",
     "code": 88
   },
   {
@@ -560,7 +560,7 @@
   {
     "key": "LEFTALT",
     "coords": [313, 648, 446, 758],
-    "alt": "Ait",
+    "alt": "Alt",
     "code": 226
   },
   {
@@ -572,7 +572,7 @@
   {
     "key": "RIGHTALT",
     "coords": [1285, 645, 1415, 758],
-    "alt": "Ait2",
+    "alt": "Alt",
     "code": 230
   },
   {
@@ -590,7 +590,7 @@
   {
     "key": "RIGHTCTRL",
     "coords": [1726, 648, 1862, 754],
-    "alt": "Ctrl2",
+    "alt": "Ctrl",
     "code": 228
   },
   {
@@ -608,7 +608,7 @@
   {
     "key": "RIGHT",
     "coords": [2227, 647, 2333, 760],
-    "alt": "right",
+    "alt": "Right",
     "code": 79
   },
   {
