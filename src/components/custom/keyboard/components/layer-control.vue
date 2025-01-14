@@ -36,7 +36,7 @@ function handleClick(e: MouseEvent) {
       :key="`l-${layerInfo.layer}`"
       :data-layer="layerInfo.layer"
       class="layer-control--item w-full inline-flex rounded-md bg-#232327 py-2 text-c-second hover:cursor-pointer"
-      :class="[{ 'layer-control--item__active text-white': layerInfo.layer === localLayer }]"
+      :class="[{ 'layer-control--item__active text-#3c8df4': layerInfo.layer === localLayer }]"
     >
       <span class="w-full text-center">{{ layerInfo.label }}</span>
     </div>
