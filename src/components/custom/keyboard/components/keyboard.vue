@@ -17,7 +17,6 @@ type KeyboardProps = {
 };
 const commonStore = useCommonStore();
 const injSelectedInfo = inject('selectedInfo') as any;
-
 const injResetSelectedInfo = inject('resetSelectedInfo') as any;
 const emit = defineEmits<{
   (e: 'update:keyId', preload: { keyId: string; idx: number; code: number; type: KeyTypeEnum }): void;
@@ -31,7 +30,6 @@ const props = withDefaults(defineProps<KeyboardProps>(), {
 const keyboardStore = useKeyboardStore();
 const kbCfg = toRef(keyboardStore, 'kbCfg');
 const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
-
 const layerOriginData = ref<any>({});
 
 watch(
@@ -208,8 +206,11 @@ function handleKeyClick(e: MouseEvent) {
     const keyId = targetElement.dataset.id;
     const disabled = targetElement.dataset.disabled === 'true';
     const idx = Number.parseInt(targetElement.dataset.idx || '-1', 10);
-
-    if (keyId !== undefined && !disabled) {
+    if (props.as === 'component' && disabled) {
+      window.$message?.info($t(`businessCommon.buttonDisableInfo`));
+      return;
+    }
+    if (keyId !== undefined) {
       xxx(keyId, idx);
     }
 
@@ -339,7 +340,7 @@ function handleLastKeyMounted() {
 </script>
 
 <template>
-  <div class="relative h-360px w-941px rounded-md low-layer-bg" @click="handleKeyClick">
+  <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick">
     <KeyboardKey
       v-for="(key, idx) in layoutList"
       :key="key"

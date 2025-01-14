@@ -7,6 +7,7 @@ import emitter, { EventNameEnum } from '@/utils/eventBus';
 import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
 import type { BaseKeyView } from '@/api/modules/combo';
 import { keyTypeEnumProxy } from '@/enum/keyType';
+import { $t } from '@/locales';
 import KeyLabel from './key-label.vue';
 const keyboardStore = useKeyboardStore();
 const commonStore = useCommonStore();
@@ -44,6 +45,9 @@ const keyDetail = computed(() => {
   }
   return keyboardStore.getKeyDetail({ code, type });
 });
+const isDisabled = computed(() => {
+  return !activeKeyLayer.value?.keys[props.keyId]?.enable;
+});
 const [keyInfo, resetKeyInfo] = useResttableReactiveFn(() => ({
   currentKey: {} as BaseKeyView,
   params: []
@@ -78,8 +82,14 @@ const originKeyLabel = computed(() => {
   return kbCfg.value.standerMap.get(props.keyId)?.alt || '';
 });
 async function handleDisableKey() {
-  await commonStore.setTargetKeyInfoById(props.keyId, { enable: 0 }, { isxx: true });
-  // optimize: add a notification to show the result
+  try {
+    const enable = Number(isDisabled.value);
+    await commonStore.setTargetKeyInfoById(props.keyId, { enable }, { isxx: true });
+    window.$message?.success($t('businessCommon.executeSuccess'));
+  } catch (error) {
+    console.log(error);
+    window.$message?.error($t(`businessCommon.executeFail`));
+  }
 }
 </script>
 
@@ -133,7 +143,7 @@ async function handleDisableKey() {
     </div>
     <div class="no-wrap flex gap-x-2">
       <NButton type="info" ghost size="small" @click="handleDisableKey">
-        {{ $t('baseKey.keyboard.bandKey') }}
+        {{ isDisabled ? $t('baseKey.keyboard.cancelBandKey') : $t('baseKey.keyboard.bandKey') }}
       </NButton>
       <NButton type="info" ghost size="small" @click="handleResetKey">{{ $t('baseKey.keyboard.recvoer') }}</NButton>
     </div>

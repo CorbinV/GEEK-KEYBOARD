@@ -143,28 +143,22 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
   <NTooltip trigger="hover" :disabled="true">
     <template #trigger>
       <div
-        class="inline-box absolute box-border h-50px w-50px border border-1 rounded-md base-light-bg text-c-primary hover:cursor-pointer"
+        class="inline-box absolute box-border h-50px w-50px border border-1 rounded-md base-light-bg text-c-primary"
         :style="keyStyle"
         :class="[
           isLightColor ? 'border-#2c2c3c' : 'border-#222227',
           {
             'bg-[#2c2c3c]': isLightColor,
             '!border-[#3C8DF4]': selected,
-            '!text-[#3C8DF4]': selected
+            '!text-[#3C8DF4]': selected,
+            'opacity-30': disabled
           }
         ]"
         :data-id="keyId"
         :data-idx="idx"
         :data-disabled="disabled"
       >
-        <div
-          class="relative h-full w-full flex flex-col items-center justify-center break-words"
-          :class="[
-            {
-              'cursor-not-allowed': disabled
-            }
-          ]"
-        >
+        <div class="relative h-full w-full flex flex-col items-center justify-center break-words">
           <template v-if="KeyView.type === 'mix'">
             <span class="inline-flex flex-row items-center justify-center">
               <i class="iconfont" :class="`icon-${KeyView.icon}`"></i>
