@@ -9,6 +9,7 @@ const lang: App.BusinessLanguage.Schema = {
     save: '保存',
     delSuccess: '删除成功',
     executeSuccess: '执行成功',
+    executeFail: '执行失败',
     delFailPlsUpdate: '删除失败, 请更新最新固件后重试',
     set: '设置',
 
@@ -28,6 +29,7 @@ const lang: App.BusinessLanguage.Schema = {
       exeRt: 'RT触发',
       resetRt: 'RT重置',
       bandKey: '禁用按钮',
+      cancelBandKey: '取消禁用',
       recvoer: '恢复默认',
       admin1: '默认 {total}',
       x7: '默认（{total}）',

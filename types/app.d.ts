@@ -474,6 +474,7 @@ declare namespace App {
         save: string;
         delSuccess: string;
         executeSuccess: string;
+        executeFail: string;
         delFailPlsUpdate: string;
         addSuccess: string;
         set: string;
@@ -491,6 +492,7 @@ declare namespace App {
           exeRt: string;
           resetRt: string;
           bandKey: string;
+          cancelBandKey: string;
           recvoer: string;
           admin1: string;
           x7: string;
