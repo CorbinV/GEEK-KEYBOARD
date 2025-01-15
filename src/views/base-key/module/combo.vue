@@ -60,7 +60,6 @@ async function updateGroupList() {
       if (itemName) {
         name = itemName;
       }
-      editItemName.value = name;
       return {
         base: { code, type, name },
         keyList: [] as any[]
@@ -171,6 +170,7 @@ function handleGroupItemRename(items: any, idx: number) {
   console.log('handleGroupItemRename', items, idx);
   listEditIndex.value = idx;
   showRenameModal.value = true;
+  editItemName.value = items?.base?.name || '';
 }
 
 async function handleReNameSave(data: { name: string }) {
