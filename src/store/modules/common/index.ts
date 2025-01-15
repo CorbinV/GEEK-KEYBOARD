@@ -48,8 +48,7 @@ function useKeyInfo() {
       const newVal = JSON.parse(JSON.stringify({ ...oldVal, ...data }));
       pushState({
         oldVal,
-        newVal,
-        fnc: setKeyInfo
+        newVal
       });
     }
     if (toDevice) {
