@@ -188,11 +188,23 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       }
       const codeMap = kbCfg.keyMap[type]?.code;
       if (!codeMap) {
-        throw new Error('get key detail info failed, beause no code map');
+        // throw new Error('get key detail info failed, beause no code map');
+        console.warn('get key detail info failed, beause no code map');
+        return {
+          icon: '',
+          type: 'str',
+          label: 'Error'
+        };
       }
       const codeDetail = codeMap[code];
       if (!codeDetail) {
-        throw new Error('get key detail info failed, beause no code detail');
+        console.warn('get key detail info failed, beause no code detail');
+        return {
+          icon: '',
+          type: 'str',
+          label: 'Error'
+        };
+        // throw new Error('get key detail info failed, beause no code detail');
       }
       return codeDetail;
     };
