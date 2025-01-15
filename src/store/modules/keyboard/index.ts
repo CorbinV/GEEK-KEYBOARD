@@ -171,7 +171,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       };
     };
     const getKeyDetail = ({ code, type }: Omit<BaseKey, 'key'>) => {
-      if (![KeyTypeEnum.None, KeyTypeEnum.Media, KeyTypeEnum.Normal, KeyTypeEnum.System].includes(type)) {
+      if (
+        ![KeyTypeEnum.None, KeyTypeEnum.Normal, KeyTypeEnum.System, KeyTypeEnum.Media, KeyTypeEnum.Special].includes(
+          type
+        )
+      ) {
         const detail = {
           icon: '',
           type: 'str',
