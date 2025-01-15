@@ -300,25 +300,29 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
       { finish = false, finishCb }: { skipIdx?: number; finish?: boolean; finishCb?: any }
     ) => {
-      if (finish) {
-        if (finishCb instanceof Function) {
-          finishCb();
-        }
-        return;
-      }
-      await updateLayerKeys({
-        config: configIdx,
-        layer: fetchIdx
-      });
-      window.requestAnimationFrame(() =>
-        updateAllLayerKeys(
-          { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
-          {
-            finish: fetchIdx === maxFetch,
-            finishCb
+      try {
+        if (finish) {
+          if (finishCb instanceof Function) {
+            finishCb();
           }
-        )
-      );
+          return;
+        }
+        await updateLayerKeys({
+          config: configIdx,
+          layer: fetchIdx
+        });
+        window.requestAnimationFrame(() =>
+          updateAllLayerKeys(
+            { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
+            {
+              finish: fetchIdx === maxFetch,
+              finishCb
+            }
+          )
+        );
+      } catch (error) {
+        throw error;
+      }
     };
     const updateDeviceCfgAndLayers = async (): Promise<void> => {
       const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
@@ -482,25 +486,37 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       mounted: Boolean(localStorage.getItem('device-mounted') || '')
     });
     const handleDevConn = async () => {
-      kbInfo.isLoad = true;
-      await updateDeviceCfgAndLayers();
-      await new Promise(resolve => {
-        updateAllLayerKeys(
-          { configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount },
-          { finishCb: resolve }
-        );
-      });
-      // set layer to  device current cfg
-      updateLayerKeys({
-        config: keyLayerInfo.configIndex,
-        layer: keyLayerInfo.configIndex
-      });
-      kbInfo.isLoad = false;
-      kbInfo.mounted = true;
+      try {
+        kbInfo.isLoad = true;
+        await updateDeviceCfgAndLayers();
+        await new Promise(async(resolve, reject) => {
+          try {
+           await updateAllLayerKeys(
+              { configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount },
+              { finishCb: resolve }
+            );
+          } catch (e) {
+            console.log('catch error when update config and layer', e);
+            reject(e);
+          }
+        });
+        // set layer to  device current cfg
+        updateLayerKeys({
+          config: keyLayerInfo.configIndex,
+          layer: keyLayerInfo.configIndex
+        });
+        kbInfo.isLoad = false;
+        kbInfo.mounted = true;
+      } catch (error) {
+        console.log('catch error when update config and layer', error);
+        kbInfo.isLoad = false;
+        kbInfo.mounted = false;
+      }
     };
 
     const handleDevDisConn = async () => {
       kbInfo.mounted = false;
+      kbInfo.isLoad = false;
       logger('device is disconnected');
     };
     watchEffect(() => {
@@ -675,14 +691,14 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       },
       disconnCb: () => {
         resetKeyLayerCfgCtrl();
-        resetKeyLayerCfgCtrl();
         resetRelatedSelectedKeysCtrl();
         resetKeyHistory();
         console.log('device disattch, data reset success');
       }
     });
-
-    watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], ([cfgIdx, layerIdx]) => {
+    let isWatching = false;
+    let stopWatchCb: any;
+    const cfgWatchCb = ([cfgIdx, layerIdx]: number[]) => {
       resetSelectedKeys();
       resetKeyHistory();
       updateDeviceCfgAndLayer({
@@ -699,7 +715,20 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
           window.$message?.error('设备响应异常');
           console.log(e);
         });
-    });
+    }
+    watch(
+      () => kbInfo.mounted,
+      monuted => {
+        if (monuted) {
+          if (!isWatching) {
+            stopWatchCb = watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], cfgWatchCb);
+            isWatching = true;
+          }
+        } else if (stopWatchCb) {
+          stopWatchCb();
+        }
+      }
+    );
   }
 
   // watch store

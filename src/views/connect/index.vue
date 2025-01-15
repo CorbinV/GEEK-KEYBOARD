@@ -5,11 +5,11 @@ import { useDeviceStore } from '@/store/modules/device';
 import { router } from '@/router';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 const deviceStore = useDeviceStore();
-const { isConnected } = toRefs(deviceStore);
 
 const keyboardStore = useKeyboardStore();
 const { kbInfo } = toRefs(keyboardStore);
 const route = useRoute();
+
 watchEffect(() => {
   if (!kbInfo.value.mounted) {
     return;
@@ -45,7 +45,7 @@ async function handleConnectBtnClicked() {
 <template>
   <div class="h-full w-full flex flex-col">
     <div class="background-image h-full w-full flex">
-      <NSpin :show="isConnected" class="h-100% w-100%">
+      <NSpin :show="kbInfo.isLoad" class="h-100% w-100%">
         <div class="flex flex-col items-center text-center">
           <span class="mt-125px text-[36px] text-[#fff] font-500">{{ $t('businessCommon.connectDev') }}</span>
           <span class="mt-6px w-173 text-#999999">{{ $t('businessCommon.connectHint') }}</span>
