@@ -10,6 +10,8 @@ import { useCommonStore } from '@/store/modules/common';
 import CircleShow from '@/components/custom/circle-show.vue';
 import Slider from '@/components/custom/zw-slider.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
+import GroupTitle from './group-title.vue';
+
 import { $t } from '@/locales';
 // import { getComboList } from '@/api/combo';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
@@ -303,100 +305,58 @@ getDevRate();
   <div>
     <NSpin :show="isLoading">
       <div class="flex-raw w-full flex gap-30px bg-[#171619] p-20px">
-        <div class="flex flex-col flex-1">
-          <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px">
-            <div class="flex-raw flex items-center">
-              <p class="vertical-bar"></p>
-              <p class="... text-18px">{{ $t('repidTrigger.showArg') }}</p>
-            </div>
 
-            <NSwitch v-model:value="argShow"></NSwitch>
-          </div>
-          <div class="flex-raw flex items-center justify-between border-b-1px border-[#232327] pb-10px pt-10px">
-            <div class="flex-raw flex items-center">
-              <p class="vertical-bar"></p>
-              <p class="... text-18px">{{ $t('repidTrigger.pollingRate') }}</p>
-            </div>
+        <div class="flex flex-col flex-1 gap-y-10px">
+          <GroupTitle :title="$t('repidTrigger.showArg')">
 
-            <NDropdown
-              :options="rateOption"
-              class="h-40px w-100px"
-              placement="bottom-start"
-              trigger="click"
-              @select="rateSelect"
-            >
-              <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton>
-            </NDropdown>
-          </div>
-          <div class="flex-raw flex items-center pt-10px">
-            <p class="vertical-bar"></p>
-            <p class="... text-18px">{{ $t('repidTrigger.exeDistance') }}</p>
-          </div>
+          </GroupTitle>
+          <GroupTitle :title="$t('repidTrigger.pollingRate')">
+            <template #end>
+              <NDropdown :options="rateOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                @select="rateSelect">
+                <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton>
+              </NDropdown>
+            </template>
+          </GroupTitle>
+          <GroupTitle :title="$t('repidTrigger.exeDistance')" :show-bottom-line="false" />
           <KeyMove v-model="exeDeadZoneValue" @stop-sliding="exeDeadSlidingStop"></KeyMove>
-          <!--
- <div class="flex-raw flex justify-center">
-          <button class="hollow-btn h-60px w-170px font-[18px]" @click="reset">{{ $t('repidTrigger.reset') }}</button>
-          <button
-            class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
-            @click="setAxosome"
-          >
-            {{ $t('repidTrigger.switchType') }}
-          </button>
-        </div>
--->
         </div>
 
         <div class="border-l-1px border-[#232327]"></div>
 
         <div class="position-relative flex-1">
           <div class="absolute z-2 flex flex-col">
-            <div class="flex-raw flex justify-between pb-10px">
-              <div class="flex-raw flex items-center">
-                <p class="vertical-bar"></p>
-                <p class="... text-18px">{{ $t('repidTrigger.fastTrigger') }}</p>
-              </div>
-
-              <!-- <NSwitch v-model:value="perf.quick"></NSwitch> -->
-              <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
-            </div>
-            <span class="... border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
+            <GroupTitle :title="$t('repidTrigger.fastTrigger')" :show-bottom-line="false">
+              <template #end>
+                <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
+              </template>
+            </GroupTitle>
+            <span class=" border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
               {{ $t('repidTrigger.fastTriggerDesc') }}
             </span>
-            <div class="flex-raw flex items-center pt-10px">
-              <p class="vertical-bar"></p>
-              <p class="... text-18px">{{ $t('repidTrigger.pressSensitivity') }}</p>
-            </div>
-            <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-            <Slider
-              :model-value="downLMD"
-              class="z-10 pt-10px"
-              @update:model-value="downLmdSlideUpdate"
-              @stop-sliding="downLmdValue"
-            ></Slider>
+            <GroupTitle :title="$t('repidTrigger.pressSensitivity')" :show-bottom-line="false"> </GroupTitle>
+            <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+            <Slider :model-value="downLMD" class="z-10 pt-10px" @update:model-value="downLmdSlideUpdate"
+              @stop-sliding="downLmdValue"></Slider>
 
             <div class="mt-10px flex flex-row items-center justify-center gap-5">
               <div class="h-1px w-20% bg-[#ccc]"></div>
 
-              <i
-                class="iconfont icon-container text-[25px] text-[#fff]"
-                :class="lmdLock ? 'icon-lock-solid' : 'icon-unlock-solid'"
-                @click="lock"
-              ></i>
+              <i class="iconfont icon-container text-[25px] text-[#fff]"
+                :class="lmdLock ? 'icon-lock-solid' : 'icon-unlock-solid'" @click="lock"></i>
               <div class="h-1px w-20% bg-[#ccc]"></div>
             </div>
-
-            <div class="flex-raw flex items-center">
-              <p class="vertical-bar"></p>
-              <p class="... text-18px">{{ $t('repidTrigger.liftSensitivity') }}</p>
-            </div>
-            <span class="... text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-            <Slider
-              :model-value="upLMD"
-              class="pt-10px"
-              @update:model-value="upLmdSlideUpdate"
-              @stop-sliding="upLmdSlide"
-            ></Slider>
-            <p class="... mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4" @click="showModal = true">
+            <GroupTitle :title="$t('repidTrigger.liftSensitivity')" :show-bottom-line="false">
+              <template #end>
+                <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
+              </template>
+            </GroupTitle>
+            <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+            <Slider :model-value="upLMD" class="pt-10px" @update:model-value="upLmdSlideUpdate"
+              @stop-sliding="upLmdSlide">
+            </Slider>
+            <p class=" mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4 hover:cursor-pointer"
+              @click="showModal = true">
               {{ $t('repidTrigger.advancedSettings') }}
             </p>
 
@@ -414,55 +374,36 @@ getDevRate();
                   <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
                     {{ $t('businessCommon.cancel') }}
                   </button>
-                  <button
-                    class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
-                    @click="showModal = false"
-                  >
+                  <button class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
+                    @click="showModal = false">
                     {{ $t('businessCommon.confirm1') }}
                   </button>
                 </div>
               </div>
             </NModal>
           </div>
-
-          <!-- <div class="z-1 h-100% w-100% flex bg-[#3c8df4]"></div> -->
         </div>
-
         <div class="border-l-1px border-[#232327]"></div>
-        <div class="flex flex-col flex-1">
-          <div class="flex-raw flex justify-between border-b-1px border-[#232327] pb-10px">
-            <div class="flex-raw flex items-center">
-              <p class="vertical-bar"></p>
-              <p class="... text-18px">{{ $t('repidTrigger.debounceOptimization') }}</p>
-            </div>
-
-            <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
-          </div>
-          <div class="flex-raw back flex justify-between border-b-1px border-[#232327] pb-10px pt-10px">
-            <div class="flex-raw flex items-center">
-              <p class="vertical-bar"></p>
-              <p class="... text-18px">{{ $t('repidTrigger.debounceLevel') }}</p>
-            </div>
-
-            <NDropdown
-              :options="shakeOption"
-              class="h-40px w-100px"
-              placement="bottom-start"
-              trigger="click"
-              @select="shakeSelect"
-            >
-              <NButton class="h-40px w-100px bg-[#222227]">{{ curShake.label }}</NButton>
-            </NDropdown>
-          </div>
-          <div class="flex-raw flex justify-between pb-10px pt-10px">
-            <div class="flex-raw flex items-center">
-              <p class="vertical-bar"></p>
-              <p class="... text-18px">
-                {{ $t('repidTrigger.keyLevelIllustration') }}
-                <span class="text-[14px] text-[#999999]">{{ $t('repidTrigger.keyLevelIllustration') }}</span>
-              </p>
-            </div>
-          </div>
+        <div class="flex flex-col flex-1 gap-y-10px">
+          <GroupTitle :title="$t('repidTrigger.debounceOptimization')" >
+            <template #end>
+              <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
+            </template>
+          </GroupTitle>
+          <GroupTitle :title="$t('repidTrigger.debounceLevel')" >
+            <template #end>
+              <NDropdown :options="shakeOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                @select="shakeSelect">
+                <NButton class="h-40px w-100px bg-[#222227]">{{ curShake.label }}</NButton>
+              </NDropdown>
+            </template>
+          </GroupTitle>
+          <GroupTitle :title="$t('repidTrigger.keyLevelIllustration')"
+            :sub-title="$t('repidTrigger.keyLevelIllustration')" >
+            <template #end>
+              <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
+            </template>
+          </GroupTitle>
           <div class="w-100%">
             <CircleShow></CircleShow>
           </div>
