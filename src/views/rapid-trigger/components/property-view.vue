@@ -20,6 +20,8 @@ const { triggerToPage, PageToTrigger, sensitivityToPage, PageToSensitivity } = u
 export type Opetion = { key: number; label: string };
 
 const commonStore = useCommonStore();
+const keyboardStore = useKeyboardStore();
+const { showKeyParams } = toRefs(keyboardStore);
 const EXE_DEAD_ZONE = 0;
 const RAPID_TRIGGER_SWITCH = 1;
 const DOWN_LMD_VALUE = 2;
@@ -41,7 +43,6 @@ const curKey = ref<string>('');
 const timeoutId = ref();
 
 const showModal = ref(false);
-const argShow = ref(true);
 const lmdLock = ref(true);
 const isLoading = ref(false);
 const selectedKey = ref<string[]>([]);
@@ -56,7 +57,6 @@ const curRate = ref({ key: 0, label: '' });
 const curShake = ref({ key: 0, label: '' });
 // const curRate = ref({});
 const shakelayerLabel = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('repidTrigger.high')];
-const keyboardStore = useKeyboardStore();
 const message = useMessage();
 function rateSelect(key: number) {
   console.log(key);
@@ -308,7 +308,9 @@ getDevRate();
 
         <div class="flex flex-col flex-1 gap-y-10px">
           <GroupTitle :title="$t('repidTrigger.showArg')">
-
+            <template #end>
+              <NSwitch v-model:value="showKeyParams"></NSwitch>
+            </template>
           </GroupTitle>
           <GroupTitle :title="$t('repidTrigger.pollingRate')">
             <template #end>
