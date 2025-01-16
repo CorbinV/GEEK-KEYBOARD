@@ -120,9 +120,15 @@ function setPerfIndex(index: number, value: number) {
 }
 emitter.on(EventNameEnum.selecteAll, () => {});
 const { selectedKeys, selectedKeysMap } = toRefs(keyboardStore);
+const showMask = ref(true);
 watch(
-  () => selectedKeysMap.value.keys(),
-  () => {
+  () => selectedKeysMap.value.size,
+  (len) => {
+    if (len > 0) {
+      showMask.value = false;
+    } else {
+      showMask.value = true;
+    }
     selectedKey.value = Object.keys(selectedKeys.value);
 
     Object.entries(selectedKeysMap.value).forEach(([newKey]) => {
@@ -304,113 +310,117 @@ getDevRate();
 <template>
   <div>
     <NSpin :show="isLoading">
-      <div class="flex-raw w-full flex gap-30px bg-[#171619] p-20px">
-
-        <div class="flex flex-col flex-1 gap-y-10px">
-          <GroupTitle :title="$t('repidTrigger.showArg')">
-            <template #end>
-              <NSwitch v-model:value="showKeyParams"></NSwitch>
-            </template>
-          </GroupTitle>
-          <GroupTitle :title="$t('repidTrigger.pollingRate')">
-            <template #end>
-              <NDropdown :options="rateOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
-                @select="rateSelect">
-                <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton>
-              </NDropdown>
-            </template>
-          </GroupTitle>
-          <GroupTitle :title="$t('repidTrigger.exeDistance')" :show-bottom-line="false" />
-          <KeyMove v-model="exeDeadZoneValue" @stop-sliding="exeDeadSlidingStop"></KeyMove>
-        </div>
-
-        <div class="border-l-1px border-[#232327]"></div>
-
-        <div class="position-relative flex-1">
-          <div class="absolute z-2 flex flex-col">
-            <GroupTitle :title="$t('repidTrigger.fastTrigger')" :show-bottom-line="false">
+      <div class=" w-full" :class="{
+        'mask': showMask
+      }">
+        <div class="flex-raw w-full flex gap-30px bg-[#171619] p-20px  box-border">
+          <div class="flex flex-col flex-1 gap-y-10px">
+            <GroupTitle :title="$t('repidTrigger.showArg')" class="z-60">
               <template #end>
-                <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
+                <NSwitch v-model:value="showKeyParams"></NSwitch>
               </template>
             </GroupTitle>
-            <span class=" border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
-              {{ $t('repidTrigger.fastTriggerDesc') }}
-            </span>
-            <GroupTitle :title="$t('repidTrigger.pressSensitivity')" :show-bottom-line="false"> </GroupTitle>
-            <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-            <Slider :model-value="downLMD" class="z-10 pt-10px" @update:model-value="downLmdSlideUpdate"
-              @stop-sliding="downLmdValue"></Slider>
-
-            <div class="mt-10px flex flex-row items-center justify-center gap-5">
-              <div class="h-1px w-20% bg-[#ccc]"></div>
-
-              <i class="iconfont icon-container text-[25px] text-[#fff]"
-                :class="lmdLock ? 'icon-lock-solid' : 'icon-unlock-solid'" @click="lock"></i>
-              <div class="h-1px w-20% bg-[#ccc]"></div>
-            </div>
-            <GroupTitle :title="$t('repidTrigger.liftSensitivity')" :show-bottom-line="false">
+            <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60">
               <template #end>
-                <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
+                <NDropdown :options="rateOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                  @select="rateSelect">
+                  <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton>
+                </NDropdown>
               </template>
             </GroupTitle>
-            <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
-            <Slider :model-value="upLMD" class="pt-10px" @update:model-value="upLmdSlideUpdate"
-              @stop-sliding="upLmdSlide">
-            </Slider>
-            <p class=" mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4 hover:cursor-pointer"
-              @click="showModal = true">
-              {{ $t('repidTrigger.advancedSettings') }}
-            </p>
-
-            <NModal v-model:show="showModal" class="h-500px w-34% rounded-[10px] bg-[#191b1d]">
-              <div class="model-bg flex flex-col items-center p-30px text-[22px]">
-                <p>{{ $t('repidTrigger.advancedSettings') }}</p>
-
-                <p class="mt-40px w-100% text-[18px]">{{ $t('repidTrigger.rtTopDeadZone') }}</p>
-                <Slider v-model="rtTopDeadValue" onsclass="mt-20px" @stop-sliding="rtTopDeadSlide"></Slider>
-
-                <p class="mt-20px w-100% text-[18px]">{{ $t('repidTrigger.rtBellowDeadZone') }}</p>
-                <Slider v-model="rtBelowDeadValue" class="mt-20px" @stop-sliding="rtBelowDeadSlide"></Slider>
-
-                <div class="mt-88px flex flex-row justify-center gap-70px">
-                  <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
-                    {{ $t('businessCommon.cancel') }}
-                  </button>
-                  <button class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
-                    @click="showModal = false">
-                    {{ $t('businessCommon.confirm1') }}
-                  </button>
-                </div>
-              </div>
-            </NModal>
+            <GroupTitle :title="$t('repidTrigger.exeDistance')" :show-bottom-line="false" />
+            <KeyMove v-model="exeDeadZoneValue" @stop-sliding="exeDeadSlidingStop"></KeyMove>
           </div>
-        </div>
-        <div class="border-l-1px border-[#232327]"></div>
-        <div class="flex flex-col flex-1 gap-y-10px">
-          <GroupTitle :title="$t('repidTrigger.debounceOptimization')" >
-            <template #end>
-              <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
-            </template>
-          </GroupTitle>
-          <GroupTitle :title="$t('repidTrigger.debounceLevel')" >
-            <template #end>
-              <NDropdown :options="shakeOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
-                @select="shakeSelect">
-                <NButton class="h-40px w-100px bg-[#222227]">{{ curShake.label }}</NButton>
-              </NDropdown>
-            </template>
-          </GroupTitle>
-          <GroupTitle :title="$t('repidTrigger.keyLevelIllustration')"
-            :sub-title="$t('repidTrigger.keyLevelIllustration')" >
-            <template #end>
-              <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
-            </template>
-          </GroupTitle>
-          <div class="w-100%">
-            <CircleShow></CircleShow>
+
+          <div class="border-l-1px border-[#232327]"></div>
+
+          <div class=" flex-1">
+            <div class="flex flex-col">
+              <GroupTitle :title="$t('repidTrigger.fastTrigger')" :show-bottom-line="false">
+                <template #end>
+                  <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
+                </template>
+              </GroupTitle>
+              <span class=" border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
+                {{ $t('repidTrigger.fastTriggerDesc') }}
+              </span>
+              <GroupTitle :title="$t('repidTrigger.pressSensitivity')" :show-bottom-line="false"> </GroupTitle>
+              <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+              <Slider :model-value="downLMD" class="pt-10px" @update:model-value="downLmdSlideUpdate"
+                @stop-sliding="downLmdValue"></Slider>
+
+              <div class="mt-10px flex flex-row items-center justify-center gap-5">
+                <div class="h-1px w-20% bg-[#ccc]"></div>
+
+                <i class="iconfont icon-container text-[25px] text-[#fff]"
+                  :class="lmdLock ? 'icon-lock-solid' : 'icon-unlock-solid'" @click="lock"></i>
+                <div class="h-1px w-20% bg-[#ccc]"></div>
+              </div>
+              <GroupTitle :title="$t('repidTrigger.liftSensitivity')" :show-bottom-line="false">
+                <template #end>
+                  <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
+                </template>
+              </GroupTitle>
+              <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+              <Slider :model-value="upLMD" class="pt-10px" @update:model-value="upLmdSlideUpdate"
+                @stop-sliding="upLmdSlide">
+              </Slider>
+              <p class=" mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4 hover:cursor-pointer"
+                @click="showModal = true">
+                {{ $t('repidTrigger.advancedSettings') }}
+              </p>
+
+              <NModal v-model:show="showModal" class="h-500px w-34% rounded-[10px] bg-[#191b1d]">
+                <div class="model-bg flex flex-col items-center p-30px text-[22px]">
+                  <p>{{ $t('repidTrigger.advancedSettings') }}</p>
+
+                  <p class="mt-40px w-100% text-[18px]">{{ $t('repidTrigger.rtTopDeadZone') }}</p>
+                  <Slider v-model="rtTopDeadValue" onsclass="mt-20px" @stop-sliding="rtTopDeadSlide"></Slider>
+
+                  <p class="mt-20px w-100% text-[18px]">{{ $t('repidTrigger.rtBellowDeadZone') }}</p>
+                  <Slider v-model="rtBelowDeadValue" class="mt-20px" @stop-sliding="rtBelowDeadSlide"></Slider>
+
+                  <div class="mt-88px flex flex-row justify-center gap-70px">
+                    <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">
+                      {{ $t('businessCommon.cancel') }}
+                    </button>
+                    <button class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]"
+                      @click="showModal = false">
+                      {{ $t('businessCommon.confirm1') }}
+                    </button>
+                  </div>
+                </div>
+              </NModal>
+            </div>
+          </div>
+          <div class="border-l-1px border-[#232327]"></div>
+          <div class="flex flex-col flex-1 gap-y-10px">
+            <GroupTitle :title="$t('repidTrigger.debounceOptimization')">
+              <template #end>
+                <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
+              </template>
+            </GroupTitle>
+            <GroupTitle :title="$t('repidTrigger.debounceLevel')">
+              <template #end>
+                <NDropdown :options="shakeOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                  @select="shakeSelect">
+                  <NButton class="h-40px w-100px bg-[#222227]">{{ curShake.label }}</NButton>
+                </NDropdown>
+              </template>
+            </GroupTitle>
+            <GroupTitle :title="$t('repidTrigger.keyLevelIllustration')"
+              :sub-title="$t('repidTrigger.keyLevelIllustration')">
+              <template #end>
+                <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
+              </template>
+            </GroupTitle>
+            <div class="w-100%">
+              <CircleShow></CircleShow>
+            </div>
           </div>
         </div>
       </div>
+
     </NSpin>
   </div>
 </template>
@@ -460,5 +470,16 @@ getDevRate();
 .hollow-btn:hover {
   background-color: #3c8df4; /* 悬停时的背景颜色 */
   color: white; /* 悬停时文字颜色 */
+.mask::before {
+  content: '';
+  position: absolute;
+  border-radius: 0.375rem;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  z-index: 50;
 }
 </style>
