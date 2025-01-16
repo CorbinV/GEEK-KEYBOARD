@@ -89,29 +89,22 @@ onUnmounted(() => {
 });
 </script>
 
-<!-- <i class="iconfont icon-hollow-remove text-center text-30px text-[#3C8DF4]"></i> -->
-
 <template>
   <!-- <div class="rlex-row w-100% flex"> -->
-  <div class="outer-container">
-    <i class="iconfont icon-hollow-remove" @click="valueRemove"></i>
+  <div class="outer-container items-center">
+    <div class="bg-#3c8df4 rounded-full flex justify-center items-center p-1.5 cursor-pointer" @click="valueRemove">
+      <SvgIcon local-icon="minus-bold"></SvgIcon>
+    </div>
 
     <div class="slider-container">
-      <input
-        v-model="sliderValue"
-        class="slider"
-        type="range"
-        min="0.01"
-        max="3"
-        step="0.01"
-        :style="{ background: sliderBackground }"
-        @input="updateValue"
-        @mousedown="startSliding"
-      />
+      <input v-model="sliderValue" class="slider" type="range" min="0.01" max="3" step="0.01"
+        :style="{ background: sliderBackground }" @input="updateValue" @mousedown="startSliding" />
       <span class="slider-value" :style="{ left: sliderPosition }">{{ sliderValue }}mm</span>
       <!-- 显示滑块值，位置动态绑定 -->
     </div>
-    <i class="iconfont icon-hollow-add" @click="valueAdd"></i>
+    <div class="bg-#3c8df4 rounded-full flex justify-center items-center p-1.5 cursor-pointer" @click="valueAdd">
+      <SvgIcon local-icon="plus-bold"></SvgIcon>
+    </div>
   </div>
   <!-- </div> -->
 </template>
@@ -125,6 +118,7 @@ onUnmounted(() => {
   text-align: center;
   color: #3c8df4;
 }
+
 /* 父父布局 */
 .outer-container {
   width: 100%;
@@ -144,11 +138,12 @@ onUnmounted(() => {
 input[type='range'] {
   -webkit-appearance: none;
   width: 100%;
-  height: 8px;
+  height: 4px;
   background: #ddd;
   border-radius: 5px;
   outline: none;
   transition: background 0.3s;
+  transform: translateY(-50%);
 }
 
 input[type='range']::-webkit-slider-thumb {
@@ -166,13 +161,13 @@ input[type='range']::-webkit-slider-thumb {
 .slider-value {
   position: absolute;
   z-index: 40;
-  bottom: -14px;
+  bottom: -20px;
   transform: translateX(-50%);
   /* background: #007bff; */
   color: #666;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 14px;
+  font-size: 13px;
   white-space: nowrap;
   pointer-events: none;
   transition: left 0.1s;
