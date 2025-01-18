@@ -34,6 +34,7 @@
     "@sa/device-transfer": "workspace:^",
     "@sa/hooks": "workspace:*",
     "@sa/materials": "workspace:*",
+    "@sa/ota": "workspace:^",
     "@sa/utils": "workspace:*",
     "@vueuse/core": "11.1.0",
     "clipboard": "2.0.11",
