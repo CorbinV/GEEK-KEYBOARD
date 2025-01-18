@@ -241,6 +241,7 @@ async function handleReNameSave(data: { name: string }) {
       :code-type="KeyTypeEnum.TGL"
       :fnc-generate-code="generateGroupCode"
       :need-import-key="true"
+      :wide="true"
       keyboard-type="standard"
       :desc="$t('businessCommon.plsSetSwitchKeys')"
       :edit-item="editItem"

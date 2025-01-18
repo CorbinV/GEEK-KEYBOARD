@@ -28,10 +28,12 @@ const props = withDefaults(
       keyList: any[];
       keyBaseList: any[];
     };
+    wide?: boolean;
   }>(),
   {
     keyboardType: 'base',
-    secondTitle: ''
+    secondTitle: '',
+    wide: false
   }
 );
 function useDialogController() {
@@ -225,7 +227,8 @@ function useTitle() {
     :title="undefined"
     :close-on-esc="false"
     :mask-closable="false"
-    class="h-80vh w-60% !bg-#191b1d"
+    class="h-80vh !bg-#191b1d min-w-1000px"
+    :class="`${wide ? 'w-80%': 'w-54%'}`"
     content-class="bg-#191b1d"
     size="large"
   >
@@ -273,10 +276,10 @@ function useTitle() {
     </template>
     <template #footer>
       <div class="flex items-center justify-center gap-x-8">
-        <NButton class="h-4rem w-12rem text-base" type="primary" ghost @click="closeDialog">
+        <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-base" type="primary" ghost @click="closeDialog">
           {{ $t('businessCommon.cancel') }}
         </NButton>
-        <NButton class="h-4rem w-12rem text-lg text-white" type="primary" @click="handleDialogComfirm">
+        <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-lg text-white" type="primary" @click="handleDialogComfirm">
           {{ $t('businessCommon.confirm1') }}
         </NButton>
       </div>

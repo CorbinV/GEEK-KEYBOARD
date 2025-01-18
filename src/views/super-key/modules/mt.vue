@@ -278,6 +278,7 @@ async function handleReNameSave(data: { name: string }) {
       :code-type="KeyTypeEnum.MT"
       :fnc-generate-code="generateGroupCode"
       :need-import-key="true"
+      :wide="true"
       keyboard-type="standard"
       :desc="$t('supperKey.setClickDowndown1down2')"
       :edit-item="editItem"
