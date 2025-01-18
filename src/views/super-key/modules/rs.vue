@@ -186,7 +186,7 @@ async function handleReNameSave(data: { name: string }) {
       :code-type="KeyTypeEnum.RS"
       :fnc-generate-code="generateGroupCode"
       :need-import-key="false"
-      keyboard-type="standard"
+      keyboard-type="base"
       second-title="监控两个按键，当两个按键同事按下时，触发按压更深的按键"
       desc="*例：设置AB键为RS键，当A键按压比D键更深时，A键触发，抬起A键后，D键将恢复触发"
       :edit-item="editItem"

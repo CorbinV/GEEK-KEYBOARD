@@ -196,7 +196,7 @@ async function handleReNameSave(data: { name: string }) {
       :code-type="KeyTypeEnum.SOCD"
       :fnc-generate-code="generateGroupCode"
       :need-import-key="false"
-      keyboard-type="standard"
+      keyboard-type="base"
       :desc="$t('repidTrigger.triggerDeadZone')"
       :edit-item="editItem"
       @create-group="handleGroupCreated"

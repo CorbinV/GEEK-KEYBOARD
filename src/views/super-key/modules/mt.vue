@@ -296,6 +296,7 @@ async function handleReNameSave(data: { name: string }) {
             :step="1"
             :precision="0"
             :show-button="false"
+            :autofocus="false"
             placeholder=""
           ></NInputNumber>
           <span class="ml-3 text-4 text-[#999999]">ms</span>
