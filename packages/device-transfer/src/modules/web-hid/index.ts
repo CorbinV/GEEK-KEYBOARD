@@ -97,11 +97,15 @@ export class HIDProtocolController extends EventTarget {
 
     const messageId = `${Date.now()}-${this.messageCounter++}`;
     // const name = data.name;
+    try {
+      return await this.sendWithRetry(messageId, data, this.options.retryAttempts || 1);
+    } catch (error) {
+      throw error;
+    }
 
-    return this.sendWithRetry(messageId, data, this.options.retryAttempts || 1);
   }
 
-  private async sendWithRetry(messageId: string, data: any, attemptsLeft: number): Promise<HIDResponse> {
+  private async sendWithRetry(messageId: string, data: any, attemptsLeft: number, withoutResponse?: boolean): Promise<HIDResponse> {
     try {
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
@@ -113,13 +117,15 @@ export class HIDProtocolController extends EventTarget {
           }
         }, this.options.timeout);
         console.log('sendWithRetry🟢', messageId, data);
-        this.messageQueue.add(messageId, {
-          name: data.name,
-          callback: (response: HIDResponse) => {
-            clearTimeout(timeoutId);
-            resolve(response);
-          }
-        });
+        if (!withoutResponse) {
+          this.messageQueue.add(messageId, {
+            name: data.name,
+            callback: (response: HIDResponse) => {
+              clearTimeout(timeoutId);
+              resolve(response);
+            }
+          });
+        }
 
         const outputReports = this.codec.encodeMessage(messageId, data);
         (async () => {
@@ -190,5 +196,17 @@ export class HIDProtocolController extends EventTarget {
     this.connected = false;
     this.messageQueue.clear();
     this.dispatchEvent(new CustomEvent('disconnected'));
+  }
+  // handle binary case
+  async sendBinary(data: Uint8Array, { withoutResponse }: { withoutResponse?: boolean }): Promise<any> {
+    try {
+      if (!this.connected || !this.device) {
+        throw new Error('Device not connected');
+      }
+      const messageId = `${Date.now()}-${this.messageCounter++}`;
+      await this.sendWithRetry(messageId, data, this.options.retryAttempts || 1, withoutResponse);
+    } catch (error) {
+      throw error;
+    }
   }
 }
