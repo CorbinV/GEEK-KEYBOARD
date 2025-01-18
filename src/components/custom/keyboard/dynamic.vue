@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, toRef } from 'vue';
+import { toRef, watch } from 'vue';
 import type { BaseKey } from '@/api/modules/combo';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
+import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import KeyControl from './components/key-control.vue';
 import LayerControl from './components/layer-control.vue';
 import Keyboard from './components/keyboard.vue';
@@ -30,10 +31,16 @@ const layerList = [
 ];
 
 const keyLayerInfo = toRef(keyboardStore, 'keyLayerInfo');
-const selectedKey = ref({
+const [selectedKey, resetSelectdKey] = useResttableRefFn(() => ({
   keyId: '',
   label: ''
-});
+}));
+watch(
+  () => keyLayerInfo.value.layerIndex,
+  () => {
+    resetSelectdKey();
+  }
+);
 function handleSelectKey(data: Omit<BaseKey, 'key'> & { idx: number; keyId: string }) {
   const { keyId, type, code } = data;
   selectedKey.value.keyId = keyId;
