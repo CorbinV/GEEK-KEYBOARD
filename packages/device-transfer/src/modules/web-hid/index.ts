@@ -98,20 +98,27 @@ export class HIDProtocolController extends EventTarget {
     const messageId = `${Date.now()}-${this.messageCounter++}`;
     // const name = data.name;
     try {
-      return await this.sendWithRetry(messageId, data, this.options.retryAttempts || 1);
+      return await this.sendWithRetry(messageId, data,
+        {
+          attemptsLeft: this.options.retryAttempts || 1,
+        }
+      );
     } catch (error) {
       throw error;
     }
 
   }
 
-  private async sendWithRetry(messageId: string, data: any, attemptsLeft: number, withoutResponse?: boolean): Promise<HIDResponse> {
+  private async sendWithRetry(messageId: string, data: any, ops: {
+    attemptsLeft?: number, withoutResponse?: boolean, isBinary?: boolean
+  }): Promise<HIDResponse> {
+    const { attemptsLeft = 1, withoutResponse = false, isBinary = false } = ops;
     try {
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
           this.messageQueue.remove(messageId);
           if (attemptsLeft > 1) {
-            resolve(this.sendWithRetry(messageId, data, attemptsLeft - 1));
+            resolve(this.sendWithRetry(messageId, data, { attemptsLeft: attemptsLeft - 1, withoutResponse, isBinary }));
           } else {
             reject(new Error('Request timeout'));
           }
@@ -127,7 +134,7 @@ export class HIDProtocolController extends EventTarget {
           });
         }
 
-        const outputReports = this.codec.encodeMessage(messageId, data);
+        const outputReports = this.codec[isBinary ? 'encodeBinaryMessage' : 'encodeMessage'](messageId, data);
         (async () => {
           for await (const outputReport of outputReports) {
             await this.device!.sendReport(0, outputReport);
@@ -204,7 +211,11 @@ export class HIDProtocolController extends EventTarget {
         throw new Error('Device not connected');
       }
       const messageId = `${Date.now()}-${this.messageCounter++}`;
-      await this.sendWithRetry(messageId, data, this.options.retryAttempts || 1, withoutResponse);
+      await this.sendWithRetry(messageId, data, {
+        attemptsLeft: this.options.retryAttempts || 1,
+        withoutResponse,
+        isBinary: true
+      });
     } catch (error) {
       throw error;
     }

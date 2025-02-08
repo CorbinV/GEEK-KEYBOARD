@@ -7,7 +7,10 @@ export class HIDMessageCodec {
     const packageList = packetize(sendBuf as Uint8Array, 64);
     return packageList;
   }
-
+  encodeBinaryMessage(data: any): Uint8Array[] {
+    const packageList = packetize(data as Uint8Array, 64);
+    return packageList;
+  }
   decodeMessage(data: DataView): any {
     try {
       const contentBuf = depacketize(new Uint8Array(data.buffer));
