@@ -1,4 +1,4 @@
-import log, { LogLevelDesc, LogLevelNames } from 'loglevel';
+import log, { LogLevelDesc, LogLevelNames, Logger } from 'loglevel';
 import config from '../config';
 
 const env = (process.env.NODE_ENV || 'development') as 'production' | 'development';
@@ -25,3 +25,7 @@ log.methodFactory = function (methodName: LogLevelNames, logLevel, loggerName) {
 log.setLevel(logLevel);
 const logger = log
 export default logger;
+export {
+  logger,
+};
+export interface Log extends Logger{ };
