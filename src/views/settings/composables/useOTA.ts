@@ -1,7 +1,6 @@
 import { ref } from 'vue';
 import { useMessage } from 'naive-ui';
-import { OTAEnd, OTAPacket, OTAStart } from '@/api/otaApi';
-
+import { useDeviceOta } from '@/hooks/business/useDeviceOta';
 export interface VersionInfo {
   version: number;
   main: string;
@@ -13,6 +12,14 @@ export interface VersionInfo {
 interface Result {
   list: VersionInfo[];
 }
+const { otaInstance, BIT_CONDITION } = useDeviceOta();
+function calcBufferSum(data: Uint8Array): number {
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) {
+    sum += data[i];
+  }
+  return sum;
+}
 export function useOTA() {
   const baseUrl = 'https://oss-sz-web.oss-cn-shenzhen.aliyuncs.com/ota';
   const model = ref('/RK-S75');
@@ -23,7 +30,7 @@ export function useOTA() {
   const showProgress = ref(false);
   const progress = ref(0);
   // mtu  从设备读取
-  const mtu = 64;
+  // const mtu = 64;
   // 当前固件版本 从设备读取
   const localVersion = ref(0);
   let isDownload = false;
@@ -48,58 +55,40 @@ export function useOTA() {
       setTimeout(resolve, ms);
     });
 
-  const sendFirmwareInChunks = async (firmware: Uint8Array) => {
-    const chunkSize = mtu;
-    const totalChunks = Math.ceil(firmware.length / chunkSize);
-    let currentChunkIndex = 0;
-
-    const chunks = Array.from({ length: totalChunks }, (_, i) => firmware.slice(i * chunkSize, (i + 1) * chunkSize));
-
-    try {
-      await chunks.reduce(async (previousPromise, chunk, _) => {
-        await previousPromise;
-        try {
-          await OTAPacket({ index: currentChunkIndex, data: chunk });
-          await delay(1);
-          currentChunkIndex += 1;
-          const current = Math.round((currentChunkIndex / totalChunks) * 100);
-          if (current !== progress.value) {
-            progress.value = current;
-          }
-        } catch (error) {
-          console.log('error', error);
-        }
-      }, Promise.resolve());
-
-      return true;
-    } catch (error) {
-      console.log('error', error);
-      return false;
-    }
-  };
-
-  const startOTA = async (firmware: Uint8Array) => {
+  const startOTA = async (firmware: Uint8Array, fileContentSum: number) => {
     showProgress.value = true;
     progress.value = 0;
 
     // start
     try {
-      await OTAStart({ ver: 1000, len: firmware.length, crc: 0 });
+      const fileByteSize = firmware.length;
+      otaInstance.setFileContent(firmware);
+      await otaInstance.enableOtaMode({
+        v: 1000, // feat: pending negotiation for access method
+        s1: fileContentSum & (0xffff >> 8),
+        s2: fileContentSum,
+        l1: fileByteSize > BIT_CONDITION ? fileByteSize & (0xff00 >> 8) : fileByteSize >> 8,
+        l2: fileByteSize
+      });
     } catch (error) {
       console.log('error', error);
       handleError('升级开始失败，请确认设备是否连接');
     }
 
     // send
-    const success = await sendFirmwareInChunks(firmware);
-    if (!success) {
+    const transferEnd = await otaInstance.transferContentData();
+    if (!transferEnd) {
       handleError('升级失败，请确认设备是否连接');
       return;
     }
 
     // end
     try {
-      await OTAEnd();
+      const upgradeSuccess = await otaInstance.checkOtaStatus();
+      if (!upgradeSuccess) {
+        handleError('升级失败，请确认设备是否连接');
+        return;
+      }
     } catch (error) {
       console.log('error', error);
       handleError('升级结束失败，请确认设备是否连接');
@@ -129,7 +118,9 @@ export function useOTA() {
       // 固件升级
       const arrayBuffer = await response.arrayBuffer();
       const firmware = new Uint8Array(arrayBuffer);
-      startOTA(firmware);
+
+      const sum = calcBufferSum(firmware);
+      startOTA(firmware, sum);
     }
   };
 
@@ -184,7 +175,8 @@ export function useOTA() {
       reader.onload = async e => {
         const arrayBuffer = e.target?.result as ArrayBuffer;
         const firmware = new Uint8Array(arrayBuffer);
-        startOTA(firmware);
+        const sum = calcBufferSum(firmware);
+        startOTA(firmware, sum);
       };
       reader.onerror = () => {
         handleError('读取文件失败');
