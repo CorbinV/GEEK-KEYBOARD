@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import './plugins/assets';
+import './plugins/log';
 import { setupDayjs, setupIconifyOffline, setupLoading, setupNProgress } from './plugins';
 import { setupStore } from './store';
 import { setupRouter } from './router';
