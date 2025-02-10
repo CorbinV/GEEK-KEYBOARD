@@ -61,26 +61,10 @@ async function handleConnectBtnClicked() {
   </div>
 </template>
 
-<!--
- <div class="mt-125px w-173 flex flex-col items-center text-center text-4">
-  <span class="text-[36px] text-[#fff] font-500">Connecting</span>
-  <span class="mt-6px text-#999999">
-    Explore unique Settings and personalize your device to your preferences. relaxed Access, configure easily,
-    save easily - win easily!
-  </span>
-
-  <button class="mt-62px h-60px w-168px rounded bg-[#3c8df4] text-[#fff]" @click="handleConnectBtnClicked">
-    连接设备
-  </button>
-</div>
-
-<img src="@/assets/img/connect_bg.png" class="block h-full w-full object-scale-down" draggable="false" />
-
-</div>
--->
 <style scoped>
 .background-image {
-  background-image: url('@/assets/img/connect_bg.png'); /* 设置背景图片 */
+  background-image: url('@/assets/img/connect_bg.png');
+  /* 设置背景图片 */
   background-size: cover;
   background-position: center;
 }

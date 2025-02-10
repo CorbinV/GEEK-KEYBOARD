@@ -50,7 +50,6 @@ export const useDeviceStore = defineStore('device', () => {
     connectionStatus,
     connect,
     getDeviceClient,
-    isTrueDevice,
-    initDevice
+    isTrueDevice
   };
 });

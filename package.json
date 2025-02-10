@@ -33,6 +33,7 @@
     "@sa/color": "workspace:*",
     "@sa/device-transfer": "workspace:^",
     "@sa/hooks": "workspace:*",
+    "@sa/log": "workspace:^",
     "@sa/materials": "workspace:*",
     "@sa/ota": "workspace:^",
     "@sa/utils": "workspace:*",

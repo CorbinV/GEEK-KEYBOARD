@@ -483,6 +483,7 @@ declare namespace App {
         plsSetSwitchKeys: string;
         switchSwitch: string;
         connectHint: string;
+        buttonDisableInfo: string;
         connectTimeout: string;
         connectDev: string;
       };

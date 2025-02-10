@@ -20,12 +20,21 @@ importers:
       '@sa/color':
         specifier: workspace:*
         version: link:packages/color
+      '@sa/device-transfer':
+        specifier: workspace:^
+        version: link:packages/device-transfer
       '@sa/hooks':
         specifier: workspace:*
         version: link:packages/hooks
+      '@sa/log':
+        specifier: workspace:^
+        version: link:packages/log
       '@sa/materials':
         specifier: workspace:*
         version: link:packages/materials
+      '@sa/ota':
+        specifier: workspace:^
+        version: link:packages/ota
       '@sa/utils':
         specifier: workspace:*
         version: link:packages/utils
@@ -188,6 +197,26 @@ importers:
         specifier: 2.9.3
         version: 2.9.3
 
+  packages/device-transfer:
+    dependencies:
+      '@sa/packetize':
+        specifier: workspace:^
+        version: link:../packetize
+    devDependencies:
+      '@types/w3c-web-hid':
+        specifier: ^1.0.6
+        version: 1.0.6
+
+  packages/device-transfor:
+    dependencies:
+      '@sa/packetize':
+        specifier: workspace:^
+        version: link:../packetize
+    devDependencies:
+      '@types/w3c-web-hid':
+        specifier: ^1.0.6
+        version: 1.0.6
+
   packages/hooks:
     dependencies:
       '@sa/axios':
@@ -196,6 +225,12 @@ importers:
       '@sa/utils':
         specifier: workspace:*
         version: link:../utils
+
+  packages/log:
+    dependencies:
+      loglevel:
+        specifier: ^1.9.2
+        version: 1.9.2
 
   packages/materials:
     dependencies:
@@ -215,6 +250,10 @@ importers:
       ofetch:
         specifier: 1.4.0
         version: 1.4.0
+
+  packages/ota: {}
+
+  packages/packetize: {}
 
   packages/scripts:
     devDependencies:
@@ -1080,6 +1119,9 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/w3c-web-hid@1.0.6':
+    resolution: {integrity: sha512-IWyssXmRDo6K7s31dxf+U+x/XUWuVsl9qUIYbJmpUHPcTv/COfBCKw/F0smI45+gPV34brjyP30BFcIsHgYWLA==}
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
@@ -2818,6 +2860,10 @@ packages:
   log-update@6.1.0:
     resolution: {integrity: sha512-9ie8ItPR6tjY5uYJh8K/Zrv/RMZ5VOlOWvtZdEHYSTFKZfIBPQa9tOAEeAWhd+AnIneLJ22w5fjOYtoutpWq5w==}
     engines: {node: '>=18'}
+
+  loglevel@1.9.2:
+    resolution: {integrity: sha512-HgMmCqIJSAKqo68l0rS2AanEWfkxaZ5wNiEFb5ggm08lDs9Xl2KxBlX3PTcaD2chBM1gXAYf491/M2Rv8Jwayg==}
+    engines: {node: '>= 0.6.0'}
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
@@ -4891,6 +4937,8 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
+  '@types/w3c-web-hid@1.0.6': {}
+
   '@types/web-bluetooth@0.0.20': {}
 
   '@typescript-eslint/eslint-plugin@8.4.0(@typescript-eslint/parser@8.4.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)':
@@ -6924,6 +6972,8 @@ snapshots:
       slice-ansi: 7.1.0
       strip-ansi: 7.1.0
       wrap-ansi: 9.0.0
+
+  loglevel@1.9.2: {}
 
   lru-cache@10.4.3: {}
 
