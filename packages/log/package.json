@@ -1,0 +1,17 @@
+{
+  "name": "@sa/log",
+  "version": "1.0.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
+  },
+  "dependencies": {
+    "loglevel": "^1.9.2"
+  }
+}
