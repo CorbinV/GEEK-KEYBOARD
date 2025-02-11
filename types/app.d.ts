@@ -476,6 +476,7 @@ declare namespace App {
         executeSuccess: string;
         executeFail: string;
         delFailPlsUpdate: string;
+        plsUpdate: string;
         addSuccess: string;
         set: string;
         addFailPlsUpdate: string;
