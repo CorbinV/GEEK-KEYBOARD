@@ -503,7 +503,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         // set layer to  device current cfg
         updateLayerKeys({
           config: keyLayerInfo.configIndex,
-          layer: keyLayerInfo.configIndex
+          layer: keyLayerInfo.layerIndex
         });
         kbInfo.isLoad = false;
         kbInfo.mounted = true;
