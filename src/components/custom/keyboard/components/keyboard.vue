@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
+import { computed, inject, nextTick, onMounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { useCommonStore } from '@/store/modules/common';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
+
 
 import { resetRt } from '@/api/keyConfig-rapid-trigger';
 import { $t } from '@/locales';
@@ -31,20 +32,17 @@ const keyboardStore = useKeyboardStore();
 const kbCfg = toRef(keyboardStore, 'kbCfg');
 const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
 const layerOriginData = ref<any>({});
+const tmp = ref<any>({});
 
-watch(
-  () => props.layer,
-  () => {
-    const data = activeKeyLayer.value;
-    if (!Object.keys(data?.xxx).length) {
-      return;
-    }
-    layerOriginData.value = data.xxx;
-  },
-  {
-    immediate: true
+
+function updateOriginData() {
+  const data = activeKeyLayer.value;
+  if (!Object.keys(data?.xxx).length) {
+    return;
   }
-);
+  layerOriginData.value = data.xxx;
+  tmp.value = activeKeyLayer.value.keys
+}
 const layoutList = computed(() => {
   const keys = kbCfg.value.layoutMap.keys();
   const arr = [];
@@ -308,6 +306,7 @@ async function handleApiResetRtFnc() {
     window.$message?.error($t('businessCommon.delFailPlsUpdate'));
   }
 }
+
 onMounted(() => {
   if (!storeMutipleModule.value) {
     return;
@@ -325,6 +324,13 @@ onMounted(() => {
     handleApiResetRtFnc();
   });
 });
+updateOriginData()
+
+emitter.on(EventNameEnum.layerOrConfigChange, () => {
+  updateOriginData()
+})
+
+
 watch(
   () => storeSelectedKeys.value,
   nVal => {
@@ -333,7 +339,6 @@ watch(
     }
   }
 );
-
 function handleLastKeyMounted() {
   kbCfg.value.offsetList = [];
 }
@@ -341,20 +346,10 @@ function handleLastKeyMounted() {
 
 <template>
   <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick">
-    <KeyboardKey
-      v-for="(key, idx) in layoutList"
-      :key="key"
-      :key-id="key"
-      :idx="idx"
-      :kb-length="layoutList.length"
-      :selected="selectedList[idx]"
-      :key-detail="layerOriginData?.keys[key]"
-      :disabled="layerOriginData?.disable.includes(key)"
-      :smart="layerOriginData?.smart[key]"
-      :sp="activeKeyLayer.superKeyMap[key]?.sp"
-      :mt="activeKeyLayer.superKeyMap[key]?.mt"
-      :dks="activeKeyLayer.superKeyMap[key]?.dks"
-      @last-key-mounted="handleLastKeyMounted"
-    />
+    <KeyboardKey v-for="(key, idx) in layoutList" :key="`${key}${layer}${config}`" :key-id="key" :idx="idx" :kb-length="layoutList.length"
+      :selected="selectedList[idx]" :key-detail="tmp[key]" :disabled="layerOriginData?.disable.includes(key)"
+      :smart="layerOriginData?.smart[key]" :sp="activeKeyLayer.superKeyMap[key]?.sp"
+      :mt="activeKeyLayer.superKeyMap[key]?.mt" :dks="activeKeyLayer.superKeyMap[key]?.dks"
+      @last-key-mounted="handleLastKeyMounted" />
   </div>
 </template>

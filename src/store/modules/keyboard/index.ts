@@ -11,9 +11,10 @@ import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } f
 import keyMapJson from '@/assets/files/key-map.json';
 import { formatLableSub3 } from '@/hooks/common/format';
 import type { KeyInfo, LayerKeysConfig } from '@/api/modules/keyboard';
-import { logger } from '@/utils/log';
 import { useDeviceStore } from '../device';
+import emitter, { EventNameEnum } from '@/utils/eventBus';
 
+import logger from '@sa/log'
 type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
   KeyTypeEnum.Normal | KeyTypeEnum.System | KeyTypeEnum.Media | KeyTypeEnum.Combo | KeyTypeEnum.Special
@@ -490,14 +491,14 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       try {
         kbInfo.isLoad = true;
         await updateDeviceCfgAndLayers();
-        await new Promise(async(resolve, reject) => {
+        await new Promise(async (resolve, reject) => {
           try {
-           await updateAllLayerKeys(
-              { configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount },
+            await updateAllLayerKeys(
+              { configIdx: 0, maxFetch: keyLayerInfo.layerCount },
               { finishCb: resolve }
             );
           } catch (e) {
-            console.log('catch error when update config and layer', e);
+            kbLogger.error('catch error when update config and layer', e);
             reject(e);
           }
         });
@@ -710,6 +711,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
           updateLayerKeys({
             config: cfgIdx,
             layer: layerIdx
+          }).then(() => {
+            emitter.emit(EventNameEnum.layerOrConfigChange, null);
           });
         })
         .catch(e => {
