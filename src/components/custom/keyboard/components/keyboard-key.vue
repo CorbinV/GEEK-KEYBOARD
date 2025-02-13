@@ -49,11 +49,11 @@ function useLayout(cfg: any) {
         left: `${left}px`,
         top: `${top}px`
       };
-      return
+      return;
     }
     const offset = cfg.value.offsetList?.[row] || base.gap;
-    keyInfo.value.left = offset + base.sGap * gap
-    keyInfo.value.top = kh * row + (row + 1) * base.gap
+    keyInfo.value.left = offset + base.sGap * gap;
+    keyInfo.value.top = kh * row + (row + 1) * base.gap;
 
     keyStyle.value = {
       width: `${kw}px`,
@@ -65,7 +65,7 @@ function useLayout(cfg: any) {
   }
 }
 const KeyView = reactive({
-  label: props.keyId,
+  label: 'Lost',
   icon: '',
   type: 'str'
 });
@@ -92,6 +92,8 @@ onMounted(async () => {
   };
   function updateKeyCfg(data: KeyCfg) {
     if (!data) {
+      const detail = keyboardStore.getKeyDetail({ code: -10, type: -1 as KeyTypeEnum });
+      updateKeyView(detail);
       return;
     }
     const { code, type } = data;
@@ -149,6 +151,9 @@ const showMt = computed(() => {
 watchEffect(() => {
   updateSpConfig(props.sp);
 });
+const localDisable = computed(() => {
+  return props.disabled || KeyView.label === 'Lost';
+});
 const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].includes(props.keyId);
 </script>
 
@@ -156,7 +161,7 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
   <NTooltip trigger="hover" :disabled="true">
     <template #trigger>
       <div
-        class="inline-box absolute box-border h-50px w-50px border border-1 rounded-md base-light-bg text-c-primary"
+        class="inline-box absolute box-border h-50px w-50px border-1 rounded-md base-light-bg text-c-primary"
         :style="keyStyle"
         :class="[
           isLightColor ? 'border-#2c2c3c' : 'border-#222227',
@@ -164,12 +169,13 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
             'bg-[#2c2c3c]': isLightColor,
             '!border-[#3C8DF4]': selected,
             '!text-[#3C8DF4]': selected,
-            'opacity-30': disabled
+            'opacity-30': localDisable,
+            'hover:cursor-pointer': !localDisable
           }
         ]"
         :data-id="keyId"
         :data-idx="idx"
-        :data-disabled="disabled"
+        :data-disabled="localDisable"
       >
         <div class="relative h-full w-full flex flex-col items-center justify-center break-words">
           <template v-if="KeyView.type === 'mix'">

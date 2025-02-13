@@ -2,6 +2,7 @@ import { effectScope, onScopeDispose, reactive, watch, watchEffect } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import { useEventListener } from '@vueuse/core';
 import { useBoolean } from '@sa/hooks';
+import logger from '@sa/log';
 import { SetupStoreId } from '@/enum';
 import { kbStg, keyboardforage } from '@/utils/storage';
 import { useResttableReactiveFn, useResttableRefFn } from '@/hooks/common/basicFnc';
@@ -11,10 +12,9 @@ import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } f
 import keyMapJson from '@/assets/files/key-map.json';
 import { formatLableSub3 } from '@/hooks/common/format';
 import type { KeyInfo, LayerKeysConfig } from '@/api/modules/keyboard';
-import { useDeviceStore } from '../device';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
+import { useDeviceStore } from '../device';
 
-import logger from '@sa/log'
 type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
   KeyTypeEnum.Normal | KeyTypeEnum.System | KeyTypeEnum.Media | KeyTypeEnum.Combo | KeyTypeEnum.Special
@@ -29,7 +29,7 @@ type CacheSuperKey = {
 
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
-
+  const kbLogger = logger.getLogger('kbStore');
   function useConfigData() {
     // optimize: dynammic import keyboard config(eg)
     // const kbCfg = reactive<any>({
@@ -172,13 +172,19 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         combo: false
       };
     };
-    const getKeyDetail = ({ code, type }: Omit<BaseKey, 'key'>) => {
-      if (
-        ![KeyTypeEnum.None, KeyTypeEnum.Normal, KeyTypeEnum.System, KeyTypeEnum.Media, KeyTypeEnum.Special].includes(
-          type
-        )
-      ) {
-        const detail = {
+    const getKeyDetail = ({ code, type }: Omit<BaseKey, 'key'>): BaseKeyView => {
+      const condition = [
+        KeyTypeEnum.Combo,
+        KeyTypeEnum.DKS,
+        KeyTypeEnum.Marco,
+        KeyTypeEnum.OKS,
+        KeyTypeEnum.SOCD,
+        KeyTypeEnum.MT,
+        KeyTypeEnum.TGL,
+        KeyTypeEnum.RS
+      ];
+      if (condition.includes(type)) {
+        const detail: BaseKeyView = {
           icon: '',
           type: 'str',
           label: ''
@@ -191,20 +197,20 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       const codeMap = kbCfg.keyMap[type]?.code;
       if (!codeMap) {
         // throw new Error('get key detail info failed, beause no code map');
-        console.warn('get key detail info failed, beause no code map');
+        kbLogger.warn('get key detail info failed, beause no code map');
         return {
           icon: '',
           type: 'str',
-          label: 'Error'
+          label: 'Lost'
         };
       }
       const codeDetail = codeMap[code];
       if (!codeDetail) {
-        console.warn('get key detail info failed, beause no code detail');
+        kbLogger.warn('get key detail info failed, beause no code detail', `code: ${code}, type: ${type}`);
         return {
           icon: '',
           type: 'str',
-          label: 'Error'
+          label: 'No Found'
         };
         // throw new Error('get key detail info failed, beause no code detail');
       }
@@ -254,8 +260,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       const managerId = `${config}-${layer}`;
       const layerInfo = dataManager.get(managerId);
 
-      logger('updateLayerKeys------', config, layer);
-
       if (layerInfo) {
         activeKeyLayer.superKeyMap = layerInfo.superKeyMap;
         activeKeyLayer.dksKeyMap = layerInfo.dksKeyMap;
@@ -270,7 +274,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         configIdx: config,
         layerIdx: layer
       });
-      logger('fetchData 🟩', cfgData);
+      kbLogger.debug(`Fetch Layer data by layer: ${layer} & config: ${config} 🟩`, cfgData);
       const superKeyMap: any = {};
       Object.keys(cfgData.smart).forEach((key: any) => {
         const superKey = generateSuperKey();
@@ -302,29 +306,25 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
       { finish = false, finishCb }: { skipIdx?: number; finish?: boolean; finishCb?: any }
     ) => {
-      try {
-        if (finish) {
-          if (finishCb instanceof Function) {
-            finishCb();
-          }
-          return;
+      if (finish) {
+        if (finishCb instanceof Function) {
+          finishCb();
         }
-        await updateLayerKeys({
-          config: configIdx,
-          layer: fetchIdx
-        });
-        window.requestAnimationFrame(() =>
-          updateAllLayerKeys(
-            { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
-            {
-              finish: fetchIdx === maxFetch,
-              finishCb
-            }
-          )
-        );
-      } catch (error) {
-        throw error;
+        return;
       }
+      await updateLayerKeys({
+        config: configIdx,
+        layer: fetchIdx
+      });
+      window.requestAnimationFrame(() =>
+        updateAllLayerKeys(
+          { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
+          {
+            finish: fetchIdx === maxFetch,
+            finishCb
+          }
+        )
+      );
     };
     const updateDeviceCfgAndLayers = async (): Promise<void> => {
       const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
@@ -491,16 +491,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       try {
         kbInfo.isLoad = true;
         await updateDeviceCfgAndLayers();
-        await new Promise(async (resolve, reject) => {
-          try {
-            await updateAllLayerKeys(
-              { configIdx: 0, maxFetch: keyLayerInfo.layerCount },
-              { finishCb: resolve }
-            );
-          } catch (e) {
+        await new Promise((resolve, reject) => {
+          updateAllLayerKeys({ configIdx: 0, maxFetch: keyLayerInfo.layerCount }, { finishCb: resolve }).catch(e => {
             kbLogger.error('catch error when update config and layer', e);
             reject(e);
-          }
+          });
         });
         // set layer to  device current cfg
         updateLayerKeys({
@@ -510,7 +505,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         kbInfo.isLoad = false;
         kbInfo.mounted = true;
       } catch (error) {
-        console.log('catch error when update config and layer', error);
+        kbLogger.error('catch error when update config and layer', error);
         kbInfo.isLoad = false;
         kbInfo.mounted = false;
       }
@@ -519,7 +514,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     const handleDevDisConn = async () => {
       kbInfo.mounted = false;
       kbInfo.isLoad = false;
-      logger('device is disconnected');
+      kbLogger.warn('Device is disconnected');
     };
     watchEffect(() => {
       if (!isConnected.value) {
@@ -689,13 +684,13 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     });
     watchDevConnStatus({
       connCb: () => {
-        console.log('connect ....');
+        kbLogger.debug('connect ....');
       },
       disconnCb: () => {
         resetKeyLayerCfgCtrl();
         resetRelatedSelectedKeysCtrl();
         resetKeyHistory();
-        console.log('device disattch, data reset success');
+        kbLogger.debug('device disattch, data reset success');
       }
     });
     let isWatching = false;
@@ -717,9 +712,9 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         })
         .catch(e => {
           window.$message?.error('设备响应异常');
-          console.log(e);
+          kbLogger.debug(e);
         });
-    }
+    };
     watch(
       () => kbInfo.mounted,
       monuted => {
