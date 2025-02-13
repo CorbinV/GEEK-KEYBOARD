@@ -71,10 +71,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         const data = await import('@/assets/files/rk-s75.json');
         // const keyMap: { [key: string]: any } = {};
         data.layout.keys.forEach(item => {
-          keyboardforage.setItem(item.id, item);
-          kbCfg.layoutMap.set(item.id, item);
+          const viewItem = Object.assign(item, { left: -1, top: -1 });
+          keyboardforage.setItem(item.id, viewItem);
+          kbCfg.layoutMap.set(item.id, viewItem);
         });
-        keyboardforage.setItem('base', data.layout.base);
+        keyboardforage.setItem('base', Object.assign(data.layout.base, { left: -1, top: -1 }));
         // keyMap.base = data.layout.base;
         kbCfg.layoutMap.set('base', data.layout.base);
         // update hasConfig value

@@ -36,17 +36,30 @@ function useLayout(cfg: any) {
       width,
       height,
       gap = 0,
+      left,
+      top,
       pos: [row]
     } = keyInfo.value;
-    const offset = cfg.value.offsetList?.[row] || base.gap;
     const kw = width || base.width || 0;
     const kh = height || base.height || 0;
+    if (top > -1 && top > -1) {
+      keyStyle.value = {
+        width: `${kw}px`,
+        height: `${kh}px`,
+        left: `${left}px`,
+        top: `${top}px`
+      };
+      return
+    }
+    const offset = cfg.value.offsetList?.[row] || base.gap;
+    keyInfo.value.left = offset + base.sGap * gap
+    keyInfo.value.top = kh * row + (row + 1) * base.gap
 
     keyStyle.value = {
       width: `${kw}px`,
       height: `${kh}px`,
-      left: `${offset + base.sGap * gap}px`,
-      top: `${kh * row + (row + 1) * base.gap}px`
+      left: `${keyInfo.value.left}px`,
+      top: `${keyInfo.value.top}px`
     };
     cfg.value.offsetList[row] = offset + kw + base.gap;
   }
