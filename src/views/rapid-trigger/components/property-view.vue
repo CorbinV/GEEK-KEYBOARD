@@ -46,9 +46,20 @@ const showModal = ref(false);
 const lmdLock = ref(true);
 const isLoading = ref(false);
 const selectedKey = ref<string[]>([]);
-
-// const triggerPoint = ref(66);
-const rateOption = ref();
+type RateOption = {
+  key: number;
+  label: string;
+  disabled?: boolean;
+}
+const rateCtrl = ref<{
+  val: RateOption;
+  ops: RateOption[];
+  idx: number;
+}>({
+  ops: [],
+  val: {} as RateOption,
+  idx: 0,
+})
 const shakeOption = ref();
 // const perf = ref<GetKeyPerf>;
 // 正确的 ref 定义方式
@@ -61,9 +72,9 @@ const message = useMessage();
 function rateSelect(key: number) {
   console.log(key);
   // curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
-  const index = rateOption.value.findIndex((item: { key: number }) => item.key === key);
+  const index = rateCtrl.value.ops.findIndex((item: { key: number }) => item.key === key);
 
-  curRate.value = rateOption.value[index];
+  curRate.value = rateCtrl.value.ops[index];
   setPerfIndex(SHAKE_LEAVE, index);
   console.log(index);
   setPerfIndex(SHAKE_LEAVE, key);
@@ -293,14 +304,23 @@ function upLmdSlide(value: number) {
   setDevPerf();
 }
 async function getDevRate() {
-  const data = await getRate();
-  const rate = data.rate;
-  const index = data.index;
-  rateOption.value = rate.map(num => ({
-    key: num,
-    label: `${num / 1000}K`
-  }));
-  curRate.value = rateOption.value[index];
+  try {
+    const data = await getRate();
+    const rate = data.rate;
+    const index = data.index;
+    rateCtrl.value.ops = rate.map(num => ({
+      key: num,
+      label: `${num / 1000}K`
+    }));
+    rateCtrl.value.val = rateCtrl.value.ops[index];
+  } catch (error) {
+    rateCtrl.value.ops = [{
+      key: 0,
+      label: $t('businessCommon.temporaryUnavailable'),
+      disabled: true
+    }]
+    window.$log!.error('Catch Error when get Device Rate', error);
+  }
 }
 // getComboList();
 // getDevPerf({ key: 'G' });
@@ -310,10 +330,10 @@ getDevRate();
 <template>
   <div>
     <NSpin :show="isLoading">
-      <div class=" w-full" :class="{
-        'mask': showMask
+      <div class="w-full" :class="{
+        mask: showMask
       }">
-        <div class="flex-raw w-full flex gap-30px bg-[#171619] p-20px  box-border">
+        <div class="flex-raw box-border w-full flex gap-30px bg-[#171619] p-20px">
           <div class="flex flex-col flex-1 gap-y-10px">
             <GroupTitle :title="$t('repidTrigger.showArg')" class="z-60">
               <template #end>
@@ -322,8 +342,8 @@ getDevRate();
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60">
               <template #end>
-                <NDropdown :options="rateOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
-                  @select="rateSelect">
+                <NDropdown :options="rateCtrl.ops" class="h-40px w-100px asd2222222 !cursor-not-allowed"
+                  placement="bottom-start" trigger="click" @select="rateSelect">
                   <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton>
                 </NDropdown>
               </template>
@@ -334,18 +354,18 @@ getDevRate();
 
           <div class="border-l-1px border-[#232327]"></div>
 
-          <div class=" flex-1">
+          <div class="flex-1">
             <div class="flex flex-col">
               <GroupTitle :title="$t('repidTrigger.fastTrigger')" :show-bottom-line="false">
                 <template #end>
                   <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
                 </template>
               </GroupTitle>
-              <span class=" border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
+              <span class="border-b-1px border-[#232327] pb-10px text-14px text-[#999]">
                 {{ $t('repidTrigger.fastTriggerDesc') }}
               </span>
-              <GroupTitle :title="$t('repidTrigger.pressSensitivity')" :show-bottom-line="false"> </GroupTitle>
-              <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+              <GroupTitle :title="$t('repidTrigger.pressSensitivity')" :show-bottom-line="false"></GroupTitle>
+              <span class="text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
               <Slider :model-value="downLMD" class="pt-10px" @update:model-value="downLmdSlideUpdate"
                 @stop-sliding="downLmdValue"></Slider>
 
@@ -361,11 +381,11 @@ getDevRate();
                   <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
                 </template>
               </GroupTitle>
-              <span class=" text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
+              <span class="text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
               <Slider :model-value="upLMD" class="pt-10px" @update:model-value="upLmdSlideUpdate"
                 @stop-sliding="upLmdSlide">
               </Slider>
-              <p class=" mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4 hover:cursor-pointer"
+              <p class="mt-20px pb-10px text-[#3C8DF4] underline underline-offset-4 hover:cursor-pointer"
                 @click="showModal = true">
                 {{ $t('repidTrigger.advancedSettings') }}
               </p>
@@ -420,7 +440,6 @@ getDevRate();
           </div>
         </div>
       </div>
-
     </NSpin>
   </div>
 </template>
