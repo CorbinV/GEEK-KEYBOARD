@@ -11,6 +11,7 @@ const lang: App.BusinessLanguage.Schema = {
     executeSuccess: '执行成功',
     executeFail: '执行失败',
     delFailPlsUpdate: '删除失败, 请更新最新固件后重试',
+    plsUpdate: "请更新最新固件后重试",
     set: '设置',
 
     addSuccess: '添加成功',

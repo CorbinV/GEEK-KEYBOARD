@@ -12,6 +12,7 @@ const lang: App.BusinessLanguage.Schema = {
     executeSuccess: 'Execute Success',
     executeFail: 'Execute Fail',
     delFailPlsUpdate: '"Deletion failed. Please update to the latest firmware and try again.',
+    plsUpdate: 'Please update to the latest firmware and try again.',
     set: 'Setting',
     addFailPlsUpdate: 'Addition failed, please update to the latest firmware and try again',
     addSwtich: 'Add switch',
