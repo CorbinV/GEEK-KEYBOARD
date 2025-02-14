@@ -485,6 +485,7 @@ declare namespace App {
         switchSwitch: string;
         connectHint: string;
         buttonDisableInfo: string;
+        temporaryUnavailable: string;
         connectTimeout: string;
         connectDev: string;
       };

@@ -23,7 +23,8 @@ const lang: App.BusinessLanguage.Schema = {
     connectDev: 'Connect Devices',
     connectHint:
       'Explore unlque settings, and personallze your device to your llking. Easy access, easy conlguratlon, easy saving - Easy to win!',
-    buttonDisableInfo: 'This button is disabled'
+    buttonDisableInfo: 'This button is disabled',
+    temporaryUnavailable: 'Temporarily unavailable for Maintenance'
   },
   baseKey: {
     keyboard: {
