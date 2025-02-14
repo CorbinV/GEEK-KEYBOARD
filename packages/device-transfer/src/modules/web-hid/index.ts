@@ -1,8 +1,9 @@
 /// <reference types="@types/w3c-web-hid" />
+import logger from '@sa/log';
 import { HIDMessageListener, HIDMessageQueue } from './message-queue';
 import type { FilterType, HIDProtocolOptions, HIDResponse } from './types';
 import { HIDMessageCodec } from './utils';
-
+const webHidLogger = logger.getLogger('web-hid');
 export class HIDProtocolController extends EventTarget {
   private device: HIDDevice | null = null;
   private messageQueue: HIDMessageQueue;
@@ -97,33 +98,33 @@ export class HIDProtocolController extends EventTarget {
 
     const messageId = `${Date.now()}-${this.messageCounter++}`;
     // const name = data.name;
-    try {
-      return await this.sendWithRetry(messageId, data,
-        {
-          attemptsLeft: this.options.retryAttempts || 1,
-        }
-      );
-    } catch (error) {
-      throw error;
-    }
-
+    return await this.sendWithRetry(messageId, data, {
+      attemptsLeft: this.options.retryAttempts || 1
+    });
   }
 
-  private async sendWithRetry(messageId: string, data: any, ops: {
-    attemptsLeft?: number, withoutResponse?: boolean, isBinary?: boolean
-  }): Promise<HIDResponse> {
+  private async sendWithRetry(
+    messageId: string,
+    data: any,
+    ops: {
+      attemptsLeft?: number;
+      withoutResponse?: boolean;
+      isBinary?: boolean;
+    }
+  ): Promise<HIDResponse> {
     const { attemptsLeft = 1, withoutResponse = false, isBinary = false } = ops;
     try {
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
           this.messageQueue.remove(messageId);
           if (attemptsLeft > 1) {
+            webHidLogger.debug('Requset retry 🟢', messageId, data);
             resolve(this.sendWithRetry(messageId, data, { attemptsLeft: attemptsLeft - 1, withoutResponse, isBinary }));
           } else {
             reject(new Error('Request timeout'));
           }
         }, this.options.timeout);
-        console.log('sendWithRetry🟢', messageId, data);
+        webHidLogger.debug('Requset 🟢', isBinary ? 'binary data' : data);
         if (!withoutResponse) {
           this.messageQueue.add(messageId, {
             name: data.name,
@@ -164,7 +165,6 @@ export class HIDProtocolController extends EventTarget {
       if (!message) {
         return;
       }
-      // console.log('handleInput', message)
       const { name } = message;
       if (!name) {
         return;
@@ -181,13 +181,11 @@ export class HIDProtocolController extends EventTarget {
       const [messageId, requestInfo] = matchingRequests || [];
       const callback = requestInfo?.callback;
       if (!callback) {
-        console.log('not matchingRequests', name);
         return;
       }
-      console.log('handleInput🟩', message);
+      webHidLogger.debug(`Received ${name} 🟩`, message);
       callback(message);
       this.messageQueue.remove(messageId!);
-      // }
 
       this.dispatchEvent(
         new CustomEvent('messageReceived', {
@@ -205,19 +203,16 @@ export class HIDProtocolController extends EventTarget {
     this.dispatchEvent(new CustomEvent('disconnected'));
   }
   // handle binary case
-  async sendBinary(data: Uint8Array, { withoutResponse }: { withoutResponse?: boolean }): Promise<any> {
-    try {
-      if (!this.connected || !this.device) {
-        throw new Error('Device not connected');
-      }
-      const messageId = `${Date.now()}-${this.messageCounter++}`;
-      await this.sendWithRetry(messageId, data, {
-        attemptsLeft: this.options.retryAttempts || 1,
-        withoutResponse,
-        isBinary: true
-      });
-    } catch (error) {
-      throw error;
+  async sendBinary(data: Uint8Array, { withoutResponse }: { withoutResponse?: boolean }): Promise<void> {
+    if (!this.connected || !this.device) {
+      throw new Error('Device not connected');
     }
+    const messageId = `${Date.now()}-${this.messageCounter}`;
+    this.messageCounter += 1;
+    await this.sendWithRetry(messageId, data, {
+      attemptsLeft: this.options.retryAttempts || 1,
+      withoutResponse,
+      isBinary: true
+    });
   }
 }
