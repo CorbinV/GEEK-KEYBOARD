@@ -41,7 +41,7 @@ const superTitle = computed(() => {
 const keyDetail = computed(() => {
   const { code, type } = (activeKeyLayer.value?.keys as any)[props.keyId] || {};
   if (code === undefined || type === undefined) {
-    return {};
+    return {} as BaseKeyView;
   }
   return keyboardStore.getKeyDetail({ code, type });
 });

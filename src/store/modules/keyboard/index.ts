@@ -492,18 +492,19 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         kbInfo.isLoad = true;
         await updateDeviceCfgAndLayers();
         await new Promise((resolve, reject) => {
-          updateAllLayerKeys({ configIdx: 0, maxFetch: keyLayerInfo.layerCount }, { finishCb: resolve }).catch(e => {
+          updateAllLayerKeys({ configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount }, { finishCb: resolve }).catch(e => {
             kbLogger.error('catch error when update config and layer', e);
             reject(e);
           });
-        });
-        // set layer to  device current cfg
+        }).then(()=>{
+          // set layer to  device current cfg
         updateLayerKeys({
           config: keyLayerInfo.configIndex,
           layer: keyLayerInfo.layerIndex
         });
         kbInfo.isLoad = false;
         kbInfo.mounted = true;
+        });
       } catch (error) {
         kbLogger.error('catch error when update config and layer', error);
         kbInfo.isLoad = false;
@@ -573,13 +574,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     >(() => {
       return new Map();
     });
-    const [selectedKeysTemp, resetSelectedKeysTemp] = useResttableRefFn<{
-      [key: string]: {
-        base: { code: number; type: number };
-        detail: any;
-        config: any;
-      };
-    }>(() => ({}));
     const [allowMutipleSelect, resetAllowMutipleSelect] = useResttableRefFn(() => false);
     const [showKeyParams] = useResttableRefFn(() => false);
 
@@ -590,7 +584,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     const resetRelatedSelectedKeysCtrl = () => {
       resetSelectedKeys();
       resetSelectedKeysMap();
-      resetSelectedKeysTemp();
     };
     watchEffect(() => {
       // feat: when allow mutiple select value change, the selected keys should be reset
@@ -606,8 +599,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       resetSelectedKeys,
       allowMutipleSelect,
       resetAllowMutipleSelect,
-      selectedKeysTemp,
-      resetSelectedKeysTemp,
       selectedKeysMap,
       resetSelectedKeysMap,
       emitResetSelectedKeys,

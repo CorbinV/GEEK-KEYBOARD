@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, onMounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
+import { computed, inject, onMounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { useCommonStore } from '@/store/modules/common';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 
-
 import { resetRt } from '@/api/keyConfig-rapid-trigger';
 import { $t } from '@/locales';
+import type { BaseKeyView } from '@/api/modules/combo';
 import KeyboardKey from './keyboard-key.vue';
 type KeyboardProps = {
   module?: string; // device module
@@ -32,8 +32,6 @@ const keyboardStore = useKeyboardStore();
 const kbCfg = toRef(keyboardStore, 'kbCfg');
 const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
 const layerOriginData = ref<any>({});
-const tmp = ref<any>({});
-
 
 function updateOriginData() {
   const data = activeKeyLayer.value;
@@ -41,7 +39,6 @@ function updateOriginData() {
     return;
   }
   layerOriginData.value = data.xxx;
-  tmp.value = activeKeyLayer.value.keys
 }
 const layoutList = computed(() => {
   const keys = kbCfg.value.layoutMap.keys();
@@ -71,12 +68,12 @@ function useStoreData() {
 }
 function useKeySelectAndNotify() {
   const { storeSelectedKeys, storeMutipleModule, storeSelectedKeyMap } = useStoreData();
-  const selectedDetail = ref<null | {
-    label: string;
-    icon: string;
-    type: number;
-    keyId: string;
-  }>(null);
+  const selectedDetail = ref<
+    | null
+    | (BaseKeyView & {
+      keyId: string;
+    })
+  >(null);
 
   /** @param selectedIdxObj only use when storeMutipleModule = true */
   const [selectedIdxObj, resetSelectedIdxObj] = useResttableRefFn<{
@@ -93,9 +90,11 @@ function useKeySelectAndNotify() {
       const type = injSelectedInfo.value.type as KeyTypeEnum;
       const code = injSelectedInfo.value.code as number;
       const detail = keyboardStore.getKeyDetail({ code, type });
-      detail.keyId = clickedKey.value.keyId;
-      keyboardStore.updateKeyBaseWhenKeyChange({ keyId: detail.keyId, type, code, layer: props.layer });
-      selectedDetail.value = detail;
+      keyboardStore.updateKeyBaseWhenKeyChange({ keyId: clickedKey.value.keyId, type, code, layer: props.layer });
+      selectedDetail.value = {
+        ...detail,
+        keyId: clickedKey.value.keyId
+      };
     }
     if (injSelectedInfo.value?.type >= 0) {
       setTimeout(injResetSelectedInfo);
@@ -324,12 +323,10 @@ onMounted(() => {
     handleApiResetRtFnc();
   });
 });
-updateOriginData()
-
+updateOriginData();
 emitter.on(EventNameEnum.layerOrConfigChange, () => {
-  updateOriginData()
-})
-
+  updateOriginData();
+});
 
 watch(
   () => storeSelectedKeys.value,
@@ -346,10 +343,15 @@ function handleLastKeyMounted() {
 
 <template>
   <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick">
-    <KeyboardKey v-for="(key, idx) in layoutList" :key="`${key}${layer}${config}`" :key-id="key" :idx="idx" :kb-length="layoutList.length"
-      :selected="selectedList[idx]" :key-detail="tmp[key]" :disabled="layerOriginData?.disable.includes(key)"
-      :smart="layerOriginData?.smart[key]" :sp="activeKeyLayer.superKeyMap[key]?.sp"
-      :mt="activeKeyLayer.superKeyMap[key]?.mt" :dks="activeKeyLayer.superKeyMap[key]?.dks"
+    <KeyboardKey v-for="(key, idx) in layoutList" :key="`${key}${layer}${config}`" :key-id="key" :idx="idx"
+      :kb-length="layoutList.length"
+      :selected="selectedList[idx]"
+      :key-detail="layerOriginData?.keys?.[key]"
+      :disabled="layerOriginData?.disable?.includes(key)"
+      :smart="layerOriginData?.smart?.[key]"
+      :sp="activeKeyLayer.superKeyMap[key]?.sp"
+      :mt="activeKeyLayer.superKeyMap[key]?.mt"
+      :dks="activeKeyLayer.superKeyMap[key]?.dks"
       @last-key-mounted="handleLastKeyMounted" />
   </div>
 </template>
