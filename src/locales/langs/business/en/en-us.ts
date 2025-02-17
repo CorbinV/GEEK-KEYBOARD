@@ -25,7 +25,8 @@ const lang: App.BusinessLanguage.Schema = {
       'Explore unlque settings, and personallze your device to your llking. Easy access, easy conlguratlon, easy saving - Easy to win!',
     buttonDisableInfo: 'This button is disabled',
     temporaryUnavailable: 'Temporarily unavailable for Maintenance',
-    btnSelectRequired: 'Button selection required'
+    btnSelectRequired: 'Button selection required',
+    confirmToReset: 'Are you sure you want to reset these settings?',
   },
   baseKey: {
     keyboard: {

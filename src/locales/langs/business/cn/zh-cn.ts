@@ -26,6 +26,7 @@ const lang: App.BusinessLanguage.Schema = {
     buttonDisableInfo: '此按钮已禁用使用，请解禁后再操作',
     temporaryUnavailable: '功能维护中',
     btnSelectRequired: '请选择按钮',
+    confirmToReset: '您确定要重置吗？',
   },
   baseKey: {
     keyboard: {

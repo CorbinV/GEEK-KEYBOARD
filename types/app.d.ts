@@ -303,6 +303,7 @@ declare namespace App {
           yes: string;
           no: string;
         };
+        warning: string;
       };
       request: {
         logout: string;
@@ -442,8 +443,8 @@ declare namespace App {
     } & BusinessLanguage.Schema;
     type GetI18nKey<T extends Record<string, unknown>, K extends keyof T = keyof T> = K extends string
       ? T[K] extends Record<string, unknown>
-        ? `${K}.${GetI18nKey<T[K]>}`
-        : K
+      ? `${K}.${GetI18nKey<T[K]>}`
+      : K
       : never;
 
     type I18nKey = GetI18nKey<Schema>;
@@ -490,6 +491,7 @@ declare namespace App {
         connectTimeout: string;
         connectDev: string;
         btnSelectRequired: string;
+        confirmToReset: string;
       };
       baseKey: {
         keyboard: {

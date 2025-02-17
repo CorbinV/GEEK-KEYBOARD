@@ -44,7 +44,8 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     yesOrNo: {
       yes: '是',
       no: '否'
-    }
+    },
+    warning: '警告',
   },
   request: {
     logout: '请求失败后登出用户',
