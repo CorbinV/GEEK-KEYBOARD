@@ -41,7 +41,7 @@ export const getCalibration = {
     switch: true
   }
 };
-export const resetRt = {
+export const resetRT = {
   name: 'resetRT',
   code: 0
 };
