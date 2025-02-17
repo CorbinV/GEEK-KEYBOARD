@@ -40,6 +40,7 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     update: '更新',
     updateSuccess: '更新成功',
     userCenter: '个人中心',
+    featureTurnOff: '当前模式此功能禁用',
     yesOrNo: {
       yes: '是',
       no: '否'

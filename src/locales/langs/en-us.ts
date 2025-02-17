@@ -40,6 +40,7 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     update: 'Update',
     updateSuccess: 'Update Success',
     userCenter: 'User Center',
+    featureTurnOff: 'This feature is turned off',
     yesOrNo: {
       yes: 'Yes',
       no: 'No'

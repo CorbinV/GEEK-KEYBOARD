@@ -25,6 +25,7 @@ const lang: App.BusinessLanguage.Schema = {
     connectHint: '探索独特的设置，并根据您的喜好个性化您的设备。轻松访问、轻松配置、轻松保存、轻松获胜!',
     buttonDisableInfo: '此按钮已禁用使用，请解禁后再操作',
     temporaryUnavailable: '功能维护中',
+    btnSelectRequired: '请选择按钮',
   },
   baseKey: {
     keyboard: {

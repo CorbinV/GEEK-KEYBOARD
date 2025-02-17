@@ -298,6 +298,7 @@ declare namespace App {
         update: string;
         updateSuccess: string;
         userCenter: string;
+        featureTurnOff: string;
         yesOrNo: {
           yes: string;
           no: string;
@@ -488,6 +489,7 @@ declare namespace App {
         temporaryUnavailable: string;
         connectTimeout: string;
         connectDev: string;
+        btnSelectRequired: string;
       };
       baseKey: {
         keyboard: {

@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<KeyControlProps>(), {
   keyId: ''
 });
 const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
+const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
 const kbCfg = toRef(keyboardStore, 'kbCfg');
 const rtConfig = computed(() => {
   return activeKeyLayer.value.rtLabelMap.get(props.keyId);
@@ -71,17 +72,44 @@ watchEffect(async () => {
   const data = await commonStore.getTargetKeyInfo(props.keyId);
   updateKeyInfo(data);
 });
+const originKeyLabel = computed(() => {
+  return kbCfg.value.standerMap.get(props.keyId)?.alt || '';
+});
+
+// function allowClickFnc(): [boolean, string] {
+//   if (allowMutipleSelect.value) {
+//     return [false, $t('common.featureTurnOff')]
+//   }
+//   if (Boolean(props.keyId)) {
+//     return [true, '']
+//   }
+//   return [false, $t('businessCommon.btnSelectRequired')]
+// }
+
+const disableToClick = computed(()=>{
+  if(allowMutipleSelect.value){
+    return true
+  }
+  return !Boolean(props.keyId)
+})
 async function handleResetKey() {
+  //  const [allowClick, message] = allowClickFnc()
+  // if (!allowClick) {
+  //   message && window.$message?.info(message);
+  //   return
+  // }
   const data = await commonStore.restoreTargetKeyInfoById(props.keyId);
   updateKeyInfo(data);
   // optimize: add a notification to show the result
   if (props.keyId === '') return;
   emitter.emit(EventNameEnum.resetKey, props.keyId);
 }
-const originKeyLabel = computed(() => {
-  return kbCfg.value.standerMap.get(props.keyId)?.alt || '';
-});
 async function handleDisableKey() {
+  // const [allowClick, message] = allowClickFnc()
+  // if (!allowClick) {
+  //   message && window.$message?.info(message);
+  //   return
+  // }
   try {
     const enable = Number(isDisabled.value);
     await commonStore.setTargetKeyInfoById(props.keyId, { enable }, { isxx: true });
@@ -142,10 +170,10 @@ async function handleDisableKey() {
       </div>
     </div>
     <div class="no-wrap flex gap-x-2">
-      <NButton type="info" ghost size="small" @click="handleDisableKey">
+      <NButton type="info" ghost size="small" :disabled="disableToClick" @click="handleDisableKey" >
         {{ isDisabled ? $t('baseKey.keyboard.cancelBandKey') : $t('baseKey.keyboard.bandKey') }}
       </NButton>
-      <NButton type="info" ghost size="small" @click="handleResetKey">{{ $t('baseKey.keyboard.recvoer') }}</NButton>
+      <NButton type="info" ghost size="small" :disabled="disableToClick" @click="handleResetKey">{{ $t('baseKey.keyboard.recvoer') }}</NButton>
     </div>
   </div>
 </template>
