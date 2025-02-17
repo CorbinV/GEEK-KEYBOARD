@@ -325,6 +325,16 @@ async function getDevRate() {
 // getComboList();
 // getDevPerf({ key: 'G' });
 getDevRate();
+
+function handleMaskClick(e: MouseEvent) {
+  if (!showMask.value) {
+    return
+  }
+  const targetElement = (e.target as Element).closest('[data-tag]');
+  if (!targetElement) {
+    window?.$message!.info($t('businessCommon.btnSelectRequired'))
+  }
+}
 </script>
 
 <template>
@@ -332,15 +342,15 @@ getDevRate();
     <NSpin :show="isLoading">
       <div class="w-full" :class="{
         mask: showMask
-      }">
+      }" @click.prevent="handleMaskClick">
         <div class="flex-raw box-border w-full flex gap-30px bg-[#171619] p-20px">
           <div class="flex flex-col flex-1 gap-y-10px">
-            <GroupTitle :title="$t('repidTrigger.showArg')" class="z-60">
+            <GroupTitle :title="$t('repidTrigger.showArg')" class="z-60" data-tag="showArg">
               <template #end>
                 <NSwitch v-model:value="showKeyParams"></NSwitch>
               </template>
             </GroupTitle>
-            <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60">
+            <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60" data-tag="pollingRate">
               <template #end>
                 <NDropdown :options="rateCtrl.ops" class="h-40px w-100px asd2222222 !cursor-not-allowed"
                   placement="bottom-start" trigger="click" @select="rateSelect">
