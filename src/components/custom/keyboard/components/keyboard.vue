@@ -197,7 +197,7 @@ function xxx(keyId: string, idx: number) {
     emit('update:keyId', { keyId, idx, ...keyCfgInfo });
   }
 }
-function handleKeyClick(e: MouseEvent) {
+async function handleKeyClick(e: MouseEvent) {
   const targetElement = (e.target as Element).closest('[data-id]');
   if (targetElement && targetElement instanceof HTMLElement) {
     const keyId = targetElement.dataset.id;
@@ -208,6 +208,7 @@ function handleKeyClick(e: MouseEvent) {
       return;
     }
     if (keyId !== undefined) {
+      await commonStore.getTargetKeyInfo(keyId);
       xxx(keyId, idx);
     }
 
@@ -302,7 +303,7 @@ async function handleApiResetRtFnc() {
     window.$message?.success($t('businessCommon.executeSuccess'));
   } catch (error) {
     console.error(error);
-    window.$message?.error($t('businessCommon.delFailPlsUpdate'));
+    window.$message?.error($t('businessCommon.executeFail'));
   }
 }
 
@@ -344,14 +345,9 @@ function handleLastKeyMounted() {
 <template>
   <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick">
     <KeyboardKey v-for="(key, idx) in layoutList" :key="`${key}${layer}${config}`" :key-id="key" :idx="idx"
-      :kb-length="layoutList.length"
-      :selected="selectedList[idx]"
-      :key-detail="layerOriginData?.keys?.[key]"
-      :disabled="layerOriginData?.disable?.includes(key)"
-      :smart="layerOriginData?.smart?.[key]"
-      :sp="activeKeyLayer.superKeyMap[key]?.sp"
-      :mt="activeKeyLayer.superKeyMap[key]?.mt"
-      :dks="activeKeyLayer.superKeyMap[key]?.dks"
-      @last-key-mounted="handleLastKeyMounted" />
+      :kb-length="layoutList.length" :selected="selectedList[idx]" :key-detail="layerOriginData?.keys?.[key]"
+      :disabled="layerOriginData?.disable?.includes(key)" :smart="layerOriginData?.smart?.[key]"
+      :sp="activeKeyLayer.superKeyMap[key]?.sp" :mt="activeKeyLayer.superKeyMap[key]?.mt"
+      :dks="activeKeyLayer.superKeyMap[key]?.dks" @last-key-mounted="handleLastKeyMounted" />
   </div>
 </template>
