@@ -296,10 +296,9 @@ async function handleApiReverseSelete() {
   firstSelectInfo.detail = keyDetail;
   firstSelectInfo.config = emitData;
 }
-async function handleApiResetRtFnc() {
+async function handleApiResetRtFnc(selectKeyList: string[]) {
   try {
-    const selectKeyList = storeSelectedKeyMap.value.keys();
-    await resetRt(Array.from(selectKeyList));
+    await resetRt(selectKeyList);
     window.$message?.success($t('businessCommon.executeSuccess'));
   } catch (error) {
     console.error(error);
@@ -320,8 +319,15 @@ onMounted(() => {
   emitter.on(EventNameEnum.reverseSelect, () => {
     handleApiReverseSelete();
   });
-  emitter.on(EventNameEnum.rtFncReset, () => {
-    handleApiResetRtFnc();
+  emitter.on(EventNameEnum.rtFncReset, async () => {
+    const selectKeyList = Array.from(storeSelectedKeyMap.value.keys());
+
+    await handleApiResetRtFnc(selectKeyList);
+    const tary= activeKeyLayer.value.xxx?.def?.tary  || []
+    selectKeyList.forEach(key=>{
+      activeKeyLayer.value.xxx[key].tary = tary
+    })
+    commonStore.updateTaryDataCache(selectKeyList)
   });
 });
 updateOriginData();

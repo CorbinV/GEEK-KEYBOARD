@@ -145,7 +145,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       keys: any;
       xxx: any;
     };
-    type CacheLayerKeysConfig = Pick<LayerKeysConfig, 'keys' | 'disable' | 'smart'>;
+    type CacheLayerKeysConfig = Pick<LayerKeysConfig, 'keys' | 'disable' | 'smart'| 'def'>;
     const dataManager = new Map<string, CacheLayerKeysSpConfig>(); // `${config}-${layer}`
     const [activeKeyLayer, resetActiveKeyLayer] = useResttableReactiveFn<CacheLayerKeysSpConfig>(
       () =>
@@ -238,7 +238,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
             keys: { ...prevData.keys, ...result.keys },
             smart: { ...prevData.smart, ...result.smart },
             disable: [...prevData.disable, ...result.disable],
-            len: result.len
+            len: result.len,
+            def: {... prevData.def, ...result.def }
           }
         : result;
       onProgress?.(pageNo * pageSize, result.len);
