@@ -6,6 +6,7 @@ export enum EventNameEnum {
   selecteClear,
   rtFncReset,
   layerOrConfigChange, // => update keyboard view data
+  updateKeyCtrl
 }
 export type MittEvents = {
   [EventNameEnum.resetKey]: string;
@@ -14,6 +15,7 @@ export type MittEvents = {
   [EventNameEnum.selecteClear]: null;
   [EventNameEnum.rtFncReset]: null;
   [EventNameEnum.layerOrConfigChange]: null;
+  [EventNameEnum.updateKeyCtrl]: string;
 };
 
 const emitter = mitt<MittEvents>();

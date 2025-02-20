@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRef, watchEffect } from 'vue';
+import { computed, nextTick, ref, toRef, watch, watchEffect } from 'vue';
 import type { KeyInfo } from '@/api/modules/keyboard';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
@@ -21,15 +21,20 @@ const props = withDefaults(defineProps<KeyControlProps>(), {
 const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
 const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
 const kbCfg = toRef(keyboardStore, 'kbCfg');
+
+const localKeyId = ref(props.keyId);
+watch(() => props.keyId, (val: string) => {
+  localKeyId.value = val;
+})
 const rtConfig = computed(() => {
-  return activeKeyLayer.value.rtLabelMap.get(props.keyId);
+  return activeKeyLayer.value.rtLabelMap.get(localKeyId.value);
 });
 const mtConfig = computed(() => {
-  return activeKeyLayer.value.superKeyMap[props.keyId]?.mt;
+  return activeKeyLayer.value.superKeyMap[localKeyId.value]?.mt;
 });
 const superTitle = computed(() => {
   // get key type
-  const sp = activeKeyLayer.value.superKeyMap[props.keyId]?.sp;
+  const sp = activeKeyLayer.value.superKeyMap[localKeyId.value]?.sp;
   if (sp) {
     let keyStr = keyTypeEnumProxy.getKey(sp[0]) || '';
     if (keyStr?.length > 3) {
@@ -40,14 +45,14 @@ const superTitle = computed(() => {
   return '';
 });
 const keyDetail = computed(() => {
-  const { code, type } = (activeKeyLayer.value?.keys as any)[props.keyId] || {};
+  const { code, type } = (activeKeyLayer.value?.keys as any)[localKeyId.value] || {};
   if (code === undefined || type === undefined) {
     return {} as BaseKeyView;
   }
   return keyboardStore.getKeyDetail({ code, type });
 });
 const isDisabled = computed(() => {
-  return !activeKeyLayer.value?.keys[props.keyId]?.enable;
+  return !activeKeyLayer.value?.keys[localKeyId.value]?.enable;
 });
 const [keyInfo, resetKeyInfo] = useResttableReactiveFn(() => ({
   currentKey: {} as BaseKeyView,
@@ -65,15 +70,15 @@ function updateKeyInfo(data: KeyInfo) {
 }
 // optimize: add a notification to show the result
 watchEffect(async () => {
-  if (props.keyId === '') {
+  if (localKeyId.value === '') {
     resetKeyInfo();
     return;
   }
-  const data = await commonStore.getTargetKeyInfo(props.keyId);
+  const data = await commonStore.getTargetKeyInfo(localKeyId.value);
   updateKeyInfo(data);
 });
 const originKeyLabel = computed(() => {
-  return kbCfg.value.standerMap.get(props.keyId)?.alt || '';
+  return kbCfg.value.standerMap.get(localKeyId.value)?.alt || '';
 });
 
 // function allowClickFnc(): [boolean, string] {
@@ -86,11 +91,11 @@ const originKeyLabel = computed(() => {
 //   return [false, $t('businessCommon.btnSelectRequired')]
 // }
 
-const disableToClick = computed(()=>{
-  if(allowMutipleSelect.value){
+const disableToClick = computed(() => {
+  if (allowMutipleSelect.value) {
     return true
   }
-  return !Boolean(props.keyId)
+  return !Boolean(localKeyId.value)
 })
 async function handleResetKey() {
   //  const [allowClick, message] = allowClickFnc()
@@ -98,11 +103,11 @@ async function handleResetKey() {
   //   message && window.$message?.info(message);
   //   return
   // }
-  const data = await commonStore.restoreTargetKeyInfoById(props.keyId);
+  const data = await commonStore.restoreTargetKeyInfoById(localKeyId.value);
   updateKeyInfo(data);
   // optimize: add a notification to show the result
-  if (props.keyId === '') return;
-  emitter.emit(EventNameEnum.resetKey, props.keyId);
+  if (localKeyId.value === '') return;
+  emitter.emit(EventNameEnum.resetKey, localKeyId.value);
 }
 async function handleDisableKey() {
   // const [allowClick, message] = allowClickFnc()
@@ -118,6 +123,24 @@ async function handleDisableKey() {
     console.log(error);
     window.$message?.error($t(`businessCommon.executeFail`));
   }
+}
+emitter.on(EventNameEnum.updateKeyCtrl, (key) => {
+  if (key === localKeyId.value) {
+    localKeyId.value = ''
+  }
+  nextTick(() => {
+    localKeyId.value = key
+    updateKeyInfoByEmit(key)
+  })
+});
+async function updateKeyInfoByEmit(key: string) {
+  if (key === '') {
+    resetKeyInfo();
+    return;
+  }
+  const data = await commonStore.getTargetKeyInfo(key);
+  localKeyId.value = key;
+  updateKeyInfo(data);
 }
 </script>
 
@@ -170,10 +193,11 @@ async function handleDisableKey() {
       </div>
     </div>
     <div class="no-wrap flex gap-x-2">
-      <NButton type="info" ghost size="small" :disabled="disableToClick" @click="handleDisableKey" >
+      <NButton type="info" ghost size="small" :disabled="disableToClick" @click="handleDisableKey">
         {{ isDisabled ? $t('baseKey.keyboard.cancelBandKey') : $t('baseKey.keyboard.bandKey') }}
       </NButton>
-      <NButton type="info" ghost size="small" :disabled="disableToClick" @click="handleResetKey">{{ $t('baseKey.keyboard.recvoer') }}</NButton>
+      <NButton type="info" ghost size="small" :disabled="disableToClick" @click="handleResetKey">{{
+        $t('baseKey.keyboard.recvoer') }}</NButton>
     </div>
   </div>
 </template>

@@ -1,27 +1,26 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
-// import { getPerf, getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
 import { useMessage } from 'naive-ui';
 import useConver from '@/utils/conver';
-import { getRate, setPerf, setRate } from '@/api/keyConfig-rapid-trigger';
+import { getRate, setRate } from '@/api/keyConfig-rapid-trigger';
 import { useCommonStore } from '@/store/modules/common';
 
 import CircleShow from '@/components/custom/circle-show.vue';
 import Slider from '@/components/custom/zw-slider.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-import GroupTitle from './group-title.vue';
 
 import { $t } from '@/locales';
-// import { getComboList } from '@/api/combo';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
+import GroupTitle from './group-title.vue';
 import KeyMove from './key-move.vue';
 const { triggerToPage, PageToTrigger, sensitivityToPage, PageToSensitivity } = useConver();
 export type Opetion = { key: number; label: string };
 
 const commonStore = useCommonStore();
 const keyboardStore = useKeyboardStore();
-const { showKeyParams } = toRefs(keyboardStore);
+const { showKeyParams, selectedKeys, selectedKeysMap } = toRefs(keyboardStore);
+
 const EXE_DEAD_ZONE = 0;
 const RAPID_TRIGGER_SWITCH = 1;
 const DOWN_LMD_VALUE = 2;
@@ -129,12 +128,11 @@ function rtBelowDeadSlide(value: number) {
 function setPerfIndex(index: number, value: number) {
   perfArr.value[index] = value;
 }
-emitter.on(EventNameEnum.selecteAll, () => {});
-const { selectedKeys, selectedKeysMap } = toRefs(keyboardStore);
+emitter.on(EventNameEnum.selecteAll, () => { });
 const showMask = ref(true);
 watch(
   () => selectedKeysMap.value.size,
-  (len) => {
+  len => {
     if (len > 0) {
       showMask.value = false;
     } else {
@@ -143,24 +141,6 @@ watch(
     selectedKey.value = Object.keys(selectedKeys.value);
 
     Object.entries(selectedKeysMap.value).forEach(([newKey]) => {
-      commonStore.getTargetKeyInfo(newKey).then(data => {
-        if (newKey === '0') {
-          // 如果需要遍历某个数据结构中的键
-          Object.entries(data).forEach(([keykey]) => {
-            curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
-          });
-          getDevPerf(data.tary); // 假设的功能调用
-        }
-      });
-    });
-  }
-);
-watch(
-  () => Object.keys(selectedKeys.value),
-  () => {
-    selectedKey.value = Object.keys(selectedKeys.value);
-
-    Object.entries(selectedKey.value).forEach(([newKey]) => {
       commonStore.getTargetKeyInfo(newKey).then(data => {
         if (newKey === '0') {
           // 如果需要遍历某个数据结构中的键
@@ -225,8 +205,6 @@ async function getDevPerf(tary: number[]) {
   downLMD.value = Number(sensitivityToPage(getPerfIndex(DOWN_LMD_VALUE)));
   upLMD.value = Number(sensitivityToPage(getPerfIndex(UP_LMD_VALUE)));
 
-  console.log(downLMD.value);
-  console.log(upLMD.value);
   shakeLeaveValue.value = getPerfIndex(SHAKE_LEAVE);
 
   rtTopDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_TOP_DEAD_ZONE)));
@@ -247,7 +225,6 @@ async function getDevPerf(tary: number[]) {
   curShake.value.label = shakelayerLabel[shakeLeaveValue.value];
 }
 async function setDevPerf() {
-  const perf = { key: selectedKey.value, tary: perfArr.value };
   isLoading.value = true;
 
   timeoutId.value = setTimeout(() => {
@@ -256,8 +233,14 @@ async function setDevPerf() {
       duration: 2000 // 持续时间
     });
   }, 3000);
-  await setPerf(perf);
-
+  const sendData = selectedKey.value.map((key) => {
+    return {
+      key: key,
+      tary: perfArr.value
+    }
+  })
+  await commonStore.setKeyInfoByList(sendData)
+  emitter.emit(EventNameEnum.updateKeyCtrl, selectedKey.value[0]);
   isLoading.value = false;
 
   if (timeoutId.value) {
