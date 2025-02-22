@@ -124,7 +124,8 @@ async function handleDisableKey() {
     window.$message?.error($t(`businessCommon.executeFail`));
   }
 }
-emitter.on(EventNameEnum.updateKeyCtrl, (key) => {
+emitter.on(EventNameEnum.updateKeyCtrl, (keys:string[]) => {
+  const key = keys[0];
   if (key === localKeyId.value) {
     localKeyId.value = ''
   }
@@ -138,8 +139,8 @@ async function updateKeyInfoByEmit(key: string) {
     resetKeyInfo();
     return;
   }
-  const data = await commonStore.getTargetKeyInfo(key);
   localKeyId.value = key;
+  const data = await commonStore.getTargetKeyInfo(key);
   updateKeyInfo(data);
 }
 </script>

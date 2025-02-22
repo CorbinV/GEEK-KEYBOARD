@@ -323,11 +323,13 @@ onMounted(() => {
     const selectKeyList = Array.from(storeSelectedKeyMap.value.keys());
 
     await handleApiResetRtFnc(selectKeyList);
-    const tary= activeKeyLayer.value.xxx?.def?.tary  || []
-    selectKeyList.forEach(key=>{
-      activeKeyLayer.value.xxx[key].tary = tary
+    const tary = activeKeyLayer.value.xxx?.def?.tary || []
+    selectKeyList.forEach(key => {
+      console.log(key, activeKeyLayer.value.xxx)
+      activeKeyLayer.value.xxx.keys[key].tary = tary
     })
-    commonStore.updateTaryDataCache(selectKeyList)
+    await commonStore.updateTaryDataCache(selectKeyList)
+    emitter.emit(EventNameEnum.updateKeyCtrl, selectKeyList)
   });
 });
 updateOriginData();

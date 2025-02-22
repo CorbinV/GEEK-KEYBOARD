@@ -15,7 +15,7 @@ export type MittEvents = {
   [EventNameEnum.selecteClear]: null;
   [EventNameEnum.rtFncReset]: null;
   [EventNameEnum.layerOrConfigChange]: null;
-  [EventNameEnum.updateKeyCtrl]: string;
+  [EventNameEnum.updateKeyCtrl]: string[];
 };
 
 const emitter = mitt<MittEvents>();

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
-import { useMessage } from 'naive-ui';
+import { useMessage, SelectOption } from 'naive-ui';
 import useConver from '@/utils/conver';
 import { getRate, setRate } from '@/api/keyConfig-rapid-trigger';
 import { useCommonStore } from '@/store/modules/common';
@@ -19,7 +19,7 @@ export type Opetion = { key: number; label: string };
 
 const commonStore = useCommonStore();
 const keyboardStore = useKeyboardStore();
-const { showKeyParams, selectedKeys, selectedKeysMap } = toRefs(keyboardStore);
+const { showKeyParams, selectedKeysMap, activeKeyLayer } = toRefs(keyboardStore);
 
 const EXE_DEAD_ZONE = 0;
 const RAPID_TRIGGER_SWITCH = 1;
@@ -132,26 +132,28 @@ const showMask = ref(true);
 watch(
   () => selectedKeysMap.value.size,
   len => {
-    if (len > 0) {
-      showMask.value = false;
-    } else {
+    selectedKey.value = Array.from(selectedKeysMap.value.keys())
+    if (len === 0) {
       showMask.value = true;
+      return
     }
-    selectedKey.value = Object.keys(selectedKeys.value);
-
-    Object.entries(selectedKeysMap.value).forEach(([newKey]) => {
-      commonStore.getTargetKeyInfo(newKey).then(data => {
-        if (newKey === '0') {
-          // 如果需要遍历某个数据结构中的键
-          Object.entries(data).forEach(([keykey]) => {
-            curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
-          });
-          getDevPerf(data.tary); // 假设的功能调用
-        }
-      });
-    });
+    showMask.value = false
+    updatView()    // selectedKey.value.forEach((newKey) => {
   }
 );
+function updateViewToDefault() {
+  const defaultTary = activeKeyLayer.value.xxx.def.tary;
+  getDevPerf(defaultTary);
+}
+function updatView() {
+  const fristKey = selectedKey.value[0];
+  commonStore.getTargetKeyInfo(fristKey).then(data => {
+    Object.entries(data).forEach(([keykey]) => {
+      curKey.value = keykey;
+    });
+    getDevPerf(data.tary);
+  });
+}
 // watch(
 //   () => selectedKeys.value,
 //       console.log('11111111111', Object.keys(selectedKeys.value));
@@ -192,9 +194,6 @@ watch(
 // 1. 创建一个 Apple 实例并使其响应式
 // async function getDevPerf(data: { key: string }) {
 async function getDevPerf(tary: number[]) {
-  // console.log(11111111);
-  // console.log(data);
-  //  const x = await getPerf(data);
   perfArr.value = tary;
 
   rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
@@ -208,15 +207,7 @@ async function getDevPerf(tary: number[]) {
 
   rtTopDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_TOP_DEAD_ZONE)));
   rtBelowDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_BELOW_DEAD_ZONE)));
-  // // console.log(calibration.value);
-  // // 当前最大轮询率
-  // console.log('滑动中，当前值:', perfArr.value);
-  // // rateOption.value = perf.value.rate.map(num => ({
-  // //   key: num,
-  // //   label: `${num / 1000}K`
-  // // }));
-  // curRate.value = rateOption.value.find((item: Opetion) => item.key === perf.value.curRate);
-  // 当前防抖等级
+
   shakeCtrl.value.ops = shakelayerLabel.map((label, index) => ({
     value: index,
     label
@@ -224,11 +215,10 @@ async function getDevPerf(tary: number[]) {
 }
 async function setDevPerf() {
   isLoading.value = true;
-
   timeoutId.value = setTimeout(() => {
     isLoading.value = false;
     message.error('写入失败', {
-      duration: 2000 // 持续时间
+      duration: 1000
     });
   }, 3000);
   const sendData = selectedKey.value.map((key) => {
@@ -238,14 +228,13 @@ async function setDevPerf() {
     }
   })
   await commonStore.setKeyInfoByList(sendData)
-  emitter.emit(EventNameEnum.updateKeyCtrl, selectedKey.value[0]);
+  emitter.emit(EventNameEnum.updateKeyCtrl, selectedKey.value);
+  setTimeout(updateViewToDefault, 50)
   isLoading.value = false;
 
   if (timeoutId.value) {
-    clearTimeout(timeoutId.value); // 清除之前的定时器
+    clearTimeout(timeoutId.value);
   }
-
-  //  await addOks({ code, keys, name });
 }
 
 function exeDeadSlidingStop(value: number) {

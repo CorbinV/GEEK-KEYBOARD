@@ -86,6 +86,7 @@ function useKeyInfo() {
     data.forEach(item => {
       const { key, ...rest } = item;
       keyConfigMap.value[key] = { ...(keyConfigMap.value[key] || {}), ...rest } as any;
+      fetchTargetKeyInfo(key);
     });
   }
   async function restoreTargetKeyInfoById(key: string) {
@@ -156,36 +157,63 @@ function useKeyInfo() {
     });
   }
   async function updateTaryDataCache(keys?: string[]) {
-    let exeKeys: string[];
-    if (!keys?.length) {
-      exeKeys = Object.keys(keyConfigMap.value.keys);
-    } else {
-      exeKeys = keys;
-    }
-    let idx = 0;
-    const chunkSize = 10;
-    const handle = () => {
-      const end = Math.min(idx + chunkSize, exeKeys.length);
-      for (let i = idx; i < end; i++) {
-        const key = exeKeys[idx];
-        const data = keyConfigMap.value[key].tary;
-        const [triggerPoint, enableRt, rtTrigger, rtReset] = data;
-        const cache = {
-          trigPt: triggerPoint ? triggerToPage(triggerPoint) : '',
-          enableRt,
-          rtTrig: rtTrigger ? sensitivityToPage(rtTrigger) : '',
-          rtReset: rtReset ? sensitivityToPage(rtReset) : ''
+    return new Promise((resolve, reject) => {
+      try {
+        if (!keyConfigMap?.value) {
+          throw new Error('keyConfigMap is not initialized');
+        }
+
+        const exeKeys = !keys?.length
+          ? Object.keys(keyConfigMap.value.keys)
+          : keys;
+
+        let idx = 0;
+        const chunkSize = 10;
+
+        const processChunk = (i: number, end: number) => {
+          for (let i = idx; i < end; i++) {
+            const key = exeKeys[i]; // 修复：使用正确的索引
+            const data = keyConfigMap.value[key]?.tary;
+
+            if (!Array.isArray(data) || data.length < 4) {
+              console.warn(`Invalid tary data for key: ${key}`);
+              continue;
+            }
+
+            const [triggerPoint, enableRt, rtTrigger, rtReset] = data;
+            const cache = {
+              trigPt: triggerPoint ? triggerToPage(triggerPoint) : '',
+              enableRt,
+              rtTrig: rtTrigger ? sensitivityToPage(rtTrigger) : '',
+              rtReset: rtReset ? sensitivityToPage(rtReset) : ''
+            };
+
+            activeKeyLayer.value.rtLabelMap.set(key, cache);
+          }
         };
-        activeKeyLayer.value.rtLabelMap.set(key, {
-          ...cache
-        });
-      }
-      idx = end;
-      if (idx < exeKeys.length) {
+
+        const handle = () => {
+          try {
+            const end = Math.min(idx + chunkSize, exeKeys.length);
+            processChunk(idx, end);
+            idx = end;
+
+            if (idx < exeKeys.length) {
+              requestAnimationFrame(handle);
+            } else {
+              resolve(void 0);
+            }
+          } catch (error) {
+            reject(error);
+          }
+        };
+
         requestAnimationFrame(handle);
+      } catch (error) {
+        reject(error);
       }
-    };
-    requestAnimationFrame(handle);
+    });
+
   }
   return {
     keyConfigMap,
@@ -203,13 +231,13 @@ function useKeyInfo() {
 export const useCommonStore = defineStore(SetupStoreId.Common, () => {
   const scope = effectScope();
   const { keyConfigMap, ...restFnc } = useKeyInfo();
-  async function init() {}
+  async function init() { }
 
   // watch store
-  scope.run(() => {});
+  scope.run(() => { });
 
   // cache mixSiderFixed
-  useEventListener(window, 'beforeunload', () => {});
+  useEventListener(window, 'beforeunload', () => { });
 
   /** On scope dispose */
   onScopeDispose(() => {
