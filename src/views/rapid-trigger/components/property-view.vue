@@ -45,35 +45,35 @@ const showModal = ref(false);
 const lmdLock = ref(true);
 const isLoading = ref(false);
 const selectedKey = ref<string[]>([]);
-type RateOption = {
-  key: number;
-  label: string;
-  disabled?: boolean;
-}
+
 const rateCtrl = ref<{
-  val: RateOption;
-  ops: RateOption[];
+  val: SelectOption;
+  ops: SelectOption[];
   idx: number;
 }>({
   ops: [],
-  val: {} as RateOption,
+  val: {} as SelectOption,
   idx: 0,
 })
-const shakeOption = ref();
+const shakeCtrl = ref<{
+  val: SelectOption;
+  ops: SelectOption[];
+  idx: number;
+}>({
+  ops: [],
+  val: {} as SelectOption,
+  idx: 0,
+})
 // const perf = ref<GetKeyPerf>;
 // 正确的 ref 定义方式
 const perfArr = ref<number[]>([0, 0, 0, 0, 0, 0, 0, 0]); // perfArr 应该是一个 Ref 类型
-const curRate = ref({ key: 0, label: '' });
-const curShake = ref({ key: 0, label: '' });
-// const curRate = ref({});
+
 const shakelayerLabel = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('repidTrigger.high')];
 const message = useMessage();
-function rateSelect(key: number) {
-  console.log(key);
-  // curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
-  const index = rateCtrl.value.ops.findIndex((item: { key: number }) => item.key === key);
+function rateSelect(key: number, option: SelectOption) {
+  const index = rateCtrl.value.ops.findIndex(item => item.value === key);
 
-  curRate.value = rateCtrl.value.ops[index];
+  rateCtrl.value.val = rateCtrl.value.ops[index];
   setPerfIndex(SHAKE_LEAVE, index);
   console.log(index);
   setPerfIndex(SHAKE_LEAVE, key);
@@ -82,9 +82,8 @@ function rateSelect(key: number) {
 }
 function shakeSelect(key: number) {
   console.log(key);
-  // curShake.value = shakeOption.value.find((item: Opetion) => item.key === key);
-  const index = shakeOption.value.findIndex((item: { key: number }) => item.key === key);
-  curShake.value = shakeOption.value[index];
+  const index = shakeCtrl.value.ops.findIndex(item => item.value === key);
+  shakeCtrl.value.val = shakeCtrl.value.ops[index];
   setPerfIndex(SHAKE_LEAVE, index);
   setDevPerf();
 }
@@ -218,11 +217,10 @@ async function getDevPerf(tary: number[]) {
   // // }));
   // curRate.value = rateOption.value.find((item: Opetion) => item.key === perf.value.curRate);
   // 当前防抖等级
-  shakeOption.value = shakelayerLabel.map((label, index) => ({
-    key: index,
+  shakeCtrl.value.ops = shakelayerLabel.map((label, index) => ({
+    value: index,
     label
   }));
-  curShake.value.label = shakelayerLabel[shakeLeaveValue.value];
 }
 async function setDevPerf() {
   isLoading.value = true;
@@ -292,13 +290,13 @@ async function getDevRate() {
     const rate = data.rate;
     const index = data.index;
     rateCtrl.value.ops = rate.map(num => ({
-      key: num,
+      value: num,
       label: `${num / 1000}K`
     }));
     rateCtrl.value.val = rateCtrl.value.ops[index];
   } catch (error) {
     rateCtrl.value.ops = [{
-      key: 0,
+      value: 0,
       label: $t('businessCommon.temporaryUnavailable'),
       disabled: true
     }]
@@ -335,10 +333,9 @@ function handleMaskClick(e: MouseEvent) {
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60" data-tag="pollingRate">
               <template #end>
-                <NDropdown :options="rateCtrl.ops" class="h-40px w-100px asd2222222 !cursor-not-allowed"
-                  placement="bottom-start" trigger="click" @select="rateSelect">
-                  <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton>
-                </NDropdown>
+                <NSelect :options="rateCtrl.ops" class="h-40px w-100px !cursor-not-allowed" placement="bottom-start"
+                  trigger="click" @update-value="rateSelect">
+                </NSelect>
               </template>
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.exeDistance')" :show-bottom-line="false" />
@@ -415,10 +412,8 @@ function handleMaskClick(e: MouseEvent) {
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.debounceLevel')">
               <template #end>
-                <NDropdown :options="shakeOption" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                <NSelect :options="shakeCtrl.ops" class="h-40px w-100px" placement="bottom-start" trigger="click"
                   @select="shakeSelect">
-                  <NButton class="h-40px w-100px bg-[#222227]">{{ curShake.label }}</NButton>
-                </NDropdown>
               </template>
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.keyLevelIllustration')"
