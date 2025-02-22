@@ -128,6 +128,9 @@ function setPerfIndex(index: number, value: number) {
   perfArr.value[index] = value;
 }
 emitter.on(EventNameEnum.selecteAll, () => { });
+emitter.on(EventNameEnum.rtFncReset, () => {
+  updateViewToDefault()
+});
 const showMask = ref(true);
 watch(
   () => selectedKeysMap.value.size,
@@ -229,7 +232,7 @@ async function setDevPerf() {
   })
   await commonStore.setKeyInfoByList(sendData)
   emitter.emit(EventNameEnum.updateKeyCtrl, selectedKey.value);
-  setTimeout(updateViewToDefault, 50)
+  setTimeout(updatView, 50)
   isLoading.value = false;
 
   if (timeoutId.value) {
@@ -254,23 +257,23 @@ function downLmdSlideUpdate(value: number) {
 }
 // 滑动中事件处理
 function downLmdValue(value: number) {
-  const downValue = Number(PageToSensitivity(value));
-
-  setPerfIndex(DOWN_LMD_VALUE, downValue);
+  const taryValue = Number(PageToSensitivity(value));
+  setPerfIndex(DOWN_LMD_VALUE, taryValue);
+  downLMD.value = value;
   if (lmdLock.value) {
     upLMD.value = value;
-    setPerfIndex(UP_LMD_VALUE, upLMD.value);
+    setPerfIndex(UP_LMD_VALUE, taryValue);
   }
   setDevPerf();
 }
 function upLmdSlide(value: number) {
-  const upValue = Number(PageToSensitivity(value));
-  setPerfIndex(UP_LMD_VALUE, upValue);
+  const taryValue = Number(PageToSensitivity(value));
+  setPerfIndex(UP_LMD_VALUE, taryValue);
+  upLMD.value = value;
   if (lmdLock.value) {
     downLMD.value = value;
-    setPerfIndex(DOWN_LMD_VALUE, downLMD.value);
+    setPerfIndex(DOWN_LMD_VALUE, taryValue);
   }
-
   setDevPerf();
 }
 async function getDevRate() {
