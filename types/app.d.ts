@@ -505,6 +505,7 @@ declare namespace App {
           x7: string;
           current: string;
           keyboardHint: string;
+          removeSpkeyChange: string;
         };
         tab: {
           basic: string;

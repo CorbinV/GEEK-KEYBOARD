@@ -39,7 +39,8 @@ const lang: App.BusinessLanguage.Schema = {
       admin1: '默认 {total}',
       x7: '默认（{total}）',
       current: '当前',
-      keyboardHint: '选中键盘上按键后，再选中下方需要替换的键'
+      keyboardHint: '选中键盘上按键后，再选中下方需要替换的键',
+      removeSpkeyChange: "改键会导致绑定的超级键失效，继续吗？"
     },
     tab: {
       basic: '基础',

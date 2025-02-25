@@ -39,7 +39,8 @@ const lang: App.BusinessLanguage.Schema = {
       admin1: 'Default {total}',
       x7: 'Default（{total}）',
       current: 'current',
-      keyboardHint: 'Select a key on the keyboard, then choose the key below to replace it'
+      keyboardHint: 'Select a key on the keyboard, then choose the key below to replace it',
+      removeSpkeyChange: "This may deactivate your Super Key functions. Conntinue?"
     },
     tab: {
       basic: 'Basic',
