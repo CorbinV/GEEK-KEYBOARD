@@ -8,6 +8,7 @@ import { KeyTypeEnum } from '@/enum/keyType';
 import { getPerf } from '@/api/keyConfig-rapid-trigger';
 import useConver from '@/utils/conver';
 import { useKeyboardStore } from '../keyboard/index';
+import { deleteMTByCode, deleteSpByCode } from '@/api/super-key';
 
 function useKeyInfo() {
   const keyboardStore = useKeyboardStore();
@@ -215,8 +216,41 @@ function useKeyInfo() {
     });
 
   }
+  async function removeKeySpsById(keyId: string) {
+    const keyInfo = activeKeyLayer.value.keys[keyId];
+    if (!keyInfo) {
+      return;
+    }
+    const { super: superx, mt } = keyInfo;
+    const promiseArr = [];
+    if (mt?.length) {
+      const [_, mtCode] = mt
+      promiseArr.push(
+        deleteMTByCode({ code: mtCode })
+      )
+    }
+    if (superx?.length) {
+      const [spType, spCode] = superx;
+      promiseArr.push(
+        deleteSpByCode({ type: spType, code: spCode })
+      )
+    }
+    await Promise.all(promiseArr);
+    keyInfo.super = [];
+    keyInfo.mt = [];
+  }
+  function forceUpdateSpOriginById(keyId: string, spInfo: { superx?: number[]; mt?: number }) {
+    const keyInfo = activeKeyLayer.value.keys[keyId];
+    if (!keyInfo) {
+      return;
+    }
+    const { superx, mt } = spInfo;
+    superx && (activeKeyLayer.value.keys[keyId].super = superx);
+    mt && (activeKeyLayer.value.keys[keyId].mt = mt);
+  }
   return {
     keyConfigMap,
+    activeKeyLayer,
     fetchTargetKeyInfo,
     getTargetKeyInfo,
     restoreTargetKeyInfoById,
@@ -225,7 +259,9 @@ function useKeyInfo() {
     updateComboKeyTag,
     updateDksKeyTag,
     updateAllKeyTary,
-    updateTaryDataCache
+    updateTaryDataCache,
+    removeKeySpsById,
+    forceUpdateSpOriginById
   };
 }
 export const useCommonStore = defineStore(SetupStoreId.Common, () => {
