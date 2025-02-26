@@ -11,6 +11,7 @@ import { $t } from '@/locales';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
+import { useCommonStore } from '@/store/modules/common';
 
 const oksGroupList = ref<any>([]);
 const editVisible = ref(false);
@@ -75,6 +76,7 @@ function handleAddClicked() {
 function updateGroupEffect(key: string, moduleType: KeyTypeEnum) {
   updateSuperKey(key!, { moduleType });
 }
+const commonStore = useCommonStore()
 async function updateGroupList() {
   const { oks } = await getOksList();
   console.log('oks', JSON.stringify(oks));
@@ -85,6 +87,10 @@ async function updateGroupList() {
       keyList: item.keys.map(keyBase => {
         const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
         updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value));
+
+        commonStore.forceUpdateSpOriginById(keyBase.key!, {
+          superx: [type, code]
+        });
         return res;
       }),
       keyBaseList: item.keys.map(keyBase => {
