@@ -21,6 +21,7 @@ import type {
   TGLList
 } from './modules/super-key';
 import type { BaseKey } from './modules/combo';
+import { KeyTypeEnum } from '@/enum/keyType';
 export function getOksList() {
   return requestClient.send<OksList>({
     name: 'getOKSList'
@@ -206,5 +207,42 @@ export function addDks(data: DksItem) {
   return requestClient.send<never>({
     name: 'setDKS',
     data
+  });
+}
+export function deleteSpByCode(data: { type: KeyTypeEnum; code: number }) {
+  let name = '';
+  switch (data.type) {
+    case KeyTypeEnum.Combo:
+      name = 'delOKS';
+      break;
+    case KeyTypeEnum.DKS:
+      name = 'delDKS';
+      break;
+    case KeyTypeEnum.MT:
+      name = 'delMT';
+      break;
+    case KeyTypeEnum.RS:
+      name = 'delRS';
+      break;
+    case KeyTypeEnum.TGL:
+      name = 'delTGL';
+      break;
+    case KeyTypeEnum.SOCD:
+      name = 'delSOCD';
+      break;
+    case KeyTypeEnum.Combo:
+      name = 'delShortcut';
+      break;
+    default:
+      break;
+  }
+  if(!name){
+    return Promise.reject('ILINVALID_PARAM');
+  }
+  return requestClient.send<never>({
+    name,
+    data: {
+      code: data.code
+    }
   });
 }
