@@ -47,33 +47,34 @@ const isLoading = ref(false);
 const selectedKey = ref<string[]>([]);
 
 const rateCtrl = ref<{
-  val: SelectOption;
+  val: number;
   ops: SelectOption[];
-  idx: number;
 }>({
   ops: [],
-  val: {} as SelectOption,
-  idx: 0,
+  val: 0,
 })
 const shakeCtrl = ref<{
-  val: SelectOption;
+  val: number;
   ops: SelectOption[];
-  idx: number;
 }>({
   ops: [],
-  val: {} as SelectOption,
-  idx: 0,
+  val: 0,
 })
 // const perf = ref<GetKeyPerf>;
 // 正确的 ref 定义方式
 const perfArr = ref<number[]>([0, 0, 0, 0, 0, 0, 0, 0]); // perfArr 应该是一个 Ref 类型
 
 const shakelayerLabel = [$t('repidTrigger.low'), $t('repidTrigger.medium'), $t('repidTrigger.high')];
+shakeCtrl.value.ops = shakelayerLabel.map((label, index) => ({
+    value: index,
+    label
+  }));
 const message = useMessage();
 function rateSelect(key: number, option: SelectOption) {
   const index = rateCtrl.value.ops.findIndex(item => item.value === key);
 
-  rateCtrl.value.val = rateCtrl.value.ops[index];
+  rateCtrl.value.val = rateCtrl.value.ops[index].value! as number;
+
   setPerfIndex(SHAKE_LEAVE, index);
   console.log(index);
   setPerfIndex(SHAKE_LEAVE, key);
@@ -83,7 +84,7 @@ function rateSelect(key: number, option: SelectOption) {
 function shakeSelect(key: number) {
   console.log(key);
   const index = shakeCtrl.value.ops.findIndex(item => item.value === key);
-  shakeCtrl.value.val = shakeCtrl.value.ops[index];
+  shakeCtrl.value.val = shakeCtrl.value.ops[index].value! as number;
   setPerfIndex(SHAKE_LEAVE, index);
   setDevPerf();
 }
@@ -210,11 +211,6 @@ async function getDevPerf(tary: number[]) {
 
   rtTopDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_TOP_DEAD_ZONE)));
   rtBelowDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_BELOW_DEAD_ZONE)));
-
-  shakeCtrl.value.ops = shakelayerLabel.map((label, index) => ({
-    value: index,
-    label
-  }));
 }
 async function setDevPerf() {
   isLoading.value = true;
@@ -285,7 +281,7 @@ async function getDevRate() {
       value: num,
       label: `${num / 1000}K`
     }));
-    rateCtrl.value.val = rateCtrl.value.ops[index];
+    rateCtrl.value.val = rateCtrl.value.ops[index].value! as number;
   } catch (error) {
     rateCtrl.value.ops = [{
       value: 0,
@@ -325,8 +321,10 @@ function handleMaskClick(e: MouseEvent) {
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60" data-tag="pollingRate">
               <template #end>
-                <NSelect :options="rateCtrl.ops" class="h-40px w-100px !cursor-not-allowed" placement="bottom-start"
-                  trigger="click" @update-value="rateSelect">
+                <NSelect v-model:value="rateCtrl.val" :options="rateCtrl.ops"
+                  class="h-40px w-100px !cursor-not-allowed" placement="bottom-start" trigger="click"
+                  @update-value="rateSelect">
+                  <!-- <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton> -->
                 </NSelect>
               </template>
             </GroupTitle>
@@ -359,9 +357,6 @@ function handleMaskClick(e: MouseEvent) {
                 <div class="h-1px w-20% bg-[#ccc]"></div>
               </div>
               <GroupTitle :title="$t('repidTrigger.liftSensitivity')" :show-bottom-line="false">
-                <template #end>
-                  <NSwitch v-model:value="rapidTiggerSwitch" @update:value="rapidSwitch"></NSwitch>
-                </template>
               </GroupTitle>
               <span class="text-14px text-[#999]">{{ $t('repidTrigger.pressSensitivityDesc') }}</span>
               <Slider :model-value="upLMD" class="pt-10px" @update:model-value="upLmdSlideUpdate"
@@ -404,8 +399,9 @@ function handleMaskClick(e: MouseEvent) {
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.debounceLevel')">
               <template #end>
-                <NSelect :options="shakeCtrl.ops" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                <NSelect v-model:value="shakeCtrl.val" :options="shakeCtrl.ops" class="h-40px w-100px" placement="bottom-start" trigger="click"
                   @select="shakeSelect">
+                </NSelect>
               </template>
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.keyLevelIllustration')"
