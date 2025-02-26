@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { provide, readonly, ref } from 'vue';
+import { provide, readonly, ref, toRefs } from 'vue';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
 import { useCommonStore } from '@/store/modules/common';
+import { useKeyboardStore } from '@/store/modules/keyboard';
+import { useDialog, useMessage } from 'naive-ui'
 import { $t } from '@/locales';
 import Dynamic from './dynamic.vue';
 type SelectedInfo = {
@@ -15,9 +17,12 @@ const [selectedInfo, resetSelectedInfo] = useResttableRefFn<SelectedInfo>(() => 
   keyId: ''
 }));
 const commonStore = useCommonStore();
+const kbStore = useKeyboardStore()
 const currentKeyFromKeyboard = ref({
   keyId: ''
 });
+const { activeKeyLayer } = toRefs(kbStore)
+const dialog = useDialog()
 function handleKeyEmit(data: { keyId: string; code: number; type: number }, { toDevice } = { toDevice: true }) {
   const keyId = currentKeyFromKeyboard.value.keyId;
   if (!keyId) {
@@ -29,18 +34,27 @@ function handleKeyEmit(data: { keyId: string; code: number; type: number }, { to
     code: data.code,
     keyId: data.keyId
   };
+  const keyOriginInfo = activeKeyLayer.value.keys[keyId]
+  if (keyOriginInfo?.mt.length > 0 || keyOriginInfo?.super.length > 0) {
+    dialog.warning({
+      title: $t('common.warning'),
+      content: $t('baseKey.keyboard.removeSpkeyChange'),
+      positiveText: $t('common.confirm'),
+      negativeText: $t('common.cancel'),
+      onPositiveClick: () => {
+        commonStore.removeKeySpsById(data.keyId)
+      }
+    })
 
-  if (currentKeyFromKeyboard.value.keyId) {
-    commonStore.setTargetKeyInfoById(
-      keyId,
-      {
-        type: data.type,
-        code: data.code
-      },
-      { toDevice, isxx: true }
-    );
-    // optimize: add some notify to show the key config has been changed
   }
+  commonStore.setTargetKeyInfoById(
+    keyId,
+    {
+      type: data.type,
+      code: data.code
+    },
+    { toDevice, isxx: true }
+  );
 }
 provide('selectedInfo', readonly(selectedInfo));
 provide('resetSelectedInfo', resetSelectedInfo);
