@@ -159,7 +159,7 @@ function checkKeyComfirm() {
     window.$message!.info('请选择不同的按键');
     return true;
   }
-  return checkKeyInput(selectedKeyInfo.list[0].base.key ?? '') || checkKeyInput(selectedKeyInfo.list[1].base.key ?? '');
+  return false;
 }
 
 async function handleDialogComfirm() {
@@ -188,7 +188,6 @@ async function handleDialogComfirm() {
   }
 }
 function handleKeyClickedx(data: { type: KeyTypeEnum; code: number; keyId: string }) {
-  console.log('handleKeyClickedx data', selectedKeyInfo.idx, data);
   if (checkKeyInput(data.keyId)) {
     return;
   }
