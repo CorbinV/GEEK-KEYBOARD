@@ -6,13 +6,14 @@ export type Page = {
   pageSize: number;
 };
 
-export type OksItem = BaseKey & {
-  keys: BaseKey[];
-};
-export type ResetOksName = {
+export type ReName = {
   code: number;
   name: string;
 };
+export type OksItem = BaseKey & {
+  keys: BaseKey[];
+};
+
 export type OksBase = Omit<OksItem, 'type'>;
 export type OksList = {
   oks: OksItem[];
@@ -22,10 +23,6 @@ export type OksList = {
 export type SOCDItem = BaseKey & {
   name: string;
   keys: BaseKey[];
-};
-export type ResetSOCDName = {
-  code: number;
-  name: string;
 };
 export type SOCDBase = Omit<SOCDItem, 'type'> & {
   trigger: number;
@@ -38,10 +35,6 @@ export type SOCDList = {
 export type RSItem = BaseKey & {
   keys: BaseKey[];
 };
-export type ResetRSName = {
-  code: number;
-  name: string;
-};
 export type RSBase = Omit<RSItem, 'type'>;
 export type RSList = {
   len: number;
@@ -52,10 +45,6 @@ export type RSList = {
 export type MTItem = BaseKey & {
   time: number;
   keys: BaseKey[];
-};
-export type ResetMTName = {
-  code: number;
-  name: string;
 };
 export type MTBase = Omit<MTItem, 'type'> & {
   time: number;
@@ -69,10 +58,6 @@ export type MTList = {
 export type TGLItem = BaseKey & {
   keys: BaseKey[];
 };
-export type ResetTGLName = {
-  code: number;
-  name: string;
-};
 export type TGLBase = Omit<TGLItem, 'type'>;
 export type TGLList = {
   len: number;
@@ -80,10 +65,6 @@ export type TGLList = {
 };
 
 // dks
-export type ResetDksName = {
-  code: number;
-  name: string;
-};
 export type DksKey = {
   code: number;
   key: string;

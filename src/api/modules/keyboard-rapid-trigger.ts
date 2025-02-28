@@ -37,5 +37,5 @@ export type Rate = {
 };
 
 export type RateIndex = {
-  index: 0;
+  index: number;
 };

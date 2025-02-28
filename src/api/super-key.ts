@@ -9,12 +9,7 @@ import type {
   Page,
   RSItem,
   RSList,
-  ResetDksName,
-  ResetMTName,
-  ResetOksName,
-  ResetRSName,
-  ResetSOCDName,
-  ResetTGLName,
+  ReName,
   SOCDBase,
   SOCDList,
   TGLItem,
@@ -27,7 +22,7 @@ export function getOksList() {
     name: 'getOKSList'
   });
 }
-export function resetOksName(data: ResetOksName) {
+export function resetOksName(data: ReName) {
   return requestClient.send<never>({
     name: 'setOKSName',
     data
@@ -58,7 +53,7 @@ export function getSOCDList() {
     name: 'getSOCDList'
   });
 }
-export function resetSOCDName(data: ResetSOCDName) {
+export function resetSOCDName(data: ReName) {
   return requestClient.send<never>({
     name: 'setSOCDName',
     data
@@ -90,7 +85,7 @@ export function getRSList(data: Page) {
     data
   });
 }
-export function resetRSName(data: ResetRSName) {
+export function resetRSName(data: ReName) {
   return requestClient.send<never>({
     name: 'setRSName',
     data
@@ -122,7 +117,7 @@ export function getMTList(data: Page) {
     data
   });
 }
-export function resetMTName(data: ResetMTName) {
+export function resetMTName(data: ReName) {
   return requestClient.send<never>({
     name: 'setMTName',
     data
@@ -154,7 +149,7 @@ export function getTGLList(data: Page) {
     data
   });
 }
-export function resetTGLName(data: ResetTGLName) {
+export function resetTGLName(data: ReName) {
   return requestClient.send<never>({
     name: 'setTGLName',
     data
@@ -185,7 +180,7 @@ export function getDksList() {
     name: 'getDKSList'
   });
 }
-export function resetDksName(data: ResetDksName) {
+export function resetDksName(data: ReName) {
   return requestClient.send<never>({
     name: 'setDKSName',
     data
