@@ -29,6 +29,7 @@ const props = withDefaults(
       keyBaseList: any[];
     };
     wide?: boolean;
+    isEdit: boolean
   }>(),
   {
     keyboardType: 'base',
@@ -151,7 +152,6 @@ function checkKeyComfirm() {
     window.$message!.info('请选择按键');
     return true;
   }
-  console.log('selectedKeyInfo.list', JSON.stringify(selectedKeyInfo.list));
   if (
     selectedKeyInfo.list[0].base.type === selectedKeyInfo.list[1].base.type &&
     selectedKeyInfo.list[0].base.code === selectedKeyInfo.list[1].base.code
@@ -168,7 +168,7 @@ async function handleDialogComfirm() {
   }
   const sendData = {
     type: props.codeType,
-    code: props.fncGenerateCode(),
+    code: props.isEdit ? props.editItem!.base.code : props.fncGenerateCode(),
     name: localTitle.value,
     keys: selectedKeyInfo.list.map((item: any) => item.base)
   };
