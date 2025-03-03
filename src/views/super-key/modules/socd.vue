@@ -1,225 +1,101 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import { reactive, ref, toRaw, toRef } from 'vue';
+import { ref } from 'vue';
 import { NSelect } from 'naive-ui';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
-import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
-import { addSOCD, deleteSOCDByCode, getSOCDList, resetSOCDName } from '@/api/super-key';
+import { addSOCD, deleteSOCDByCode, getSOCDList, getTargetSOCD, resetSOCDName } from '@/api/super-key';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { $t } from '@/locales';
 import EditTemplate from '../components/edit-template.vue';
 import GroupMenu from '../components/group-menu.vue';
 import { SOCDTriggerOps } from '../config';
-const socdGroupList = ref<any>([]);
-const editVisible = ref(false);
+import { formatGroupItem, GroupItem, useModuleLogic, utilGenerateGroupCode } from '../hooks';
+
+const MAX_GORUP_CNT = 8;
+const CURRENT_MODULE_TYPE = KeyTypeEnum.SOCD;
+
+
+const groupList = ref<GroupItem[]>([]);
 const modalTitle = ref('SOCD');
-const MAC_GORUP_CNT = 8;
+
+const { groupCreated, groupItemDelete, groupRename, editCtrl, renameCtrl, updateEditCache, beforeEditModalOpen } = useModuleLogic(groupList, {
+  delFnc: deleteSOCDByCode,
+  addFnc: <any>addSOCD,
+  getGroupFnc: getTargetSOCD,
+  renameFnc: resetSOCDName,
+}, {
+  CURRENT_MODULE_TYPE
+})
+
+
+
 const emit = defineEmits(['key-clicked']);
-const keyboardStore = useKeyboardStore();
-const { getKeyDetail, updateSuperKey } = keyboardStore;
-const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
+
 // 优先触发
 const trigger = ref<number>(0);
 const socdList = ref<any>([]);
-let editItem = reactive<{
-  base: { code: number; type: KeyTypeEnum; name: string };
-  keyList: any[];
-  keyBaseList: any[];
-}>({ base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] });
-
-const showRenameModal = ref(false);
-const renameIndex = ref(-1);
 
 function handleAddClicked() {
-  if (socdGroupList.value.length >= MAC_GORUP_CNT) {
-    window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAC_GORUP_CNT }));
+  if (groupList.value.length >= MAX_GORUP_CNT) {
+    window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAX_GORUP_CNT }));
     return;
   }
-  editItem = { base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] };
-  trigger.value = 0;
-  editVisible.value = true;
-}
-function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
-  if (currentSuperKeyType.value === KeyTypeEnum.MT) {
-    const formatLable = (obj: any) => {
-      if (obj.type !== 'str') return obj;
-
-      const label = obj.label.trim() as string;
-
-      if (label.includes(' ')) {
-        const formatted = label
-          .split(' ')
-          .filter(word => word.length > 0)
-          .map(word => word[0])
-          .join('');
-        return { ...obj, label: formatted };
-      }
-      const formatted = label.length > 2 ? label.slice(0, 2) : label;
-      return { ...obj, label: formatted };
-    };
-    const mtCfg = formatLable(res);
-    updateSuperKey(key!, { moduleType, mtCfg });
-  } else {
-    updateSuperKey(key!, { moduleType });
-  }
+  editCtrl.item = { base: { code: -1, type: KeyTypeEnum.None, name: '' }, keyList: [], keyBaseList: [] };
+  editCtrl.isEdit = false;
+  editCtrl.show = true;
 }
 async function updateGroupList() {
   const { socd } = await getSOCDList();
   socdList.value = socd;
-  socdGroupList.value = socd.map(item => {
-    const { code, type, name } = item;
-    return {
-      base: { code, type, name },
-      keyList: item.keys.map(keyBase => {
-        const res = getKeyDetail({ code: keyBase.code, type: keyBase.type });
-        updateGroupEffect(keyBase.key!, toRaw(currentSuperKeyType.value), res);
-        return res;
-      }),
-      keyBaseList: item.keys.map(keyBase => {
-        return keyBase;
-      })
-    };
+  groupList.value = socd.map(item => {
+    return formatGroupItem(Object.assign({}, item, { name: 'SOCD' })) as GroupItem;
   });
 }
 updateGroupList();
-async function handleGroupCreated({ code, keys, name, listDetail }: any) {
-  try {
-    await addSOCD({ code, trigger: trigger.value, keys, name });
-    socdGroupList.value.push({
-      base: {
-        code,
-        name
-      },
-      keyList: listDetail.map((item: any) => {
-        return item.detail;
-      })
-    });
-    window.$message!.success($t('businessCommon.delSuccess'));
-  } catch (e) {
-    window.$message!.error($t('businessCommon.addFailPlsUpdate'));
-    console.error(e);
-  }
-}
-
-function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeEnum.SOCD } }) {
-  const { code, type } = base;
+function handleGroupItemClicked(item: GroupItem) {
+  const { base: { code, type } } = item;
   emit('key-clicked', {
     code,
     type
   });
 }
-async function handleGroupItemDelete(item: { code: number }, idx: number) {
-  try {
-    await deleteSOCDByCode({ code: item.code });
-    socdGroupList.value.splice(idx, 1);
-    window.$message!.success($t('businessCommon.delSuccess'));
-  } catch (error) {
-    window.$message!.error($t('businessCommon.delFailPlsUpdate'));
-    console.error(error);
-  }
-}
 async function handleGroupItemEdit(items: any, idx: number) {
-  // feat: open edit modal(dialog), and transform data
-  console.log('handleGroupItemEdit', items, idx);
-  editItem = items;
+  await beforeEditModalOpen(items, idx);
   trigger.value = socdList.value[idx].trigger;
-  editVisible.value = true;
-}
-async function handleGroupItemRename(items: any, idx: number) {
-  // feat: rename group name
-  console.log('handleGroupItemRename', items, idx);
-  editItem = items;
-  renameIndex.value = idx;
-  showRenameModal.value = true;
 }
 function generateGroupCode() {
-  if (socdGroupList.value.length === 0) return 1;
-  const usedCodes = new Set(socdGroupList.value.map((group: { base: { code: number } }) => group.base.code));
-  let newCode = 1;
-  while (usedCodes.has(newCode)) {
-    newCode++;
-  }
-  return newCode;
+  if (groupList.value.length === 0) return 0;
+  return utilGenerateGroupCode(groupList.value)
 }
 
-function handleTrigger(value: number) {
-  trigger.value = value;
-  console.log('handleTrigger', value);
-}
-
-async function handleReNameSave(data: { name: string }) {
-  console.log('handleReNameSave', data.name);
-  if (data.name === '') return;
-  try {
-    await resetSOCDName({ code: editItem.base.code, name: data.name });
-    editItem.base.name = data.name;
-    showRenameModal.value = false;
-    socdGroupList.value[renameIndex.value].base.name = data.name;
-  } catch (error) {
-    console.log('error', error);
-  }
-}
 </script>
 
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd v-if="socdGroupList.length < 8" icon="add" desc="添加SOCD按键" @click="handleAddClicked" />
-      <BasicGroupItem
-        v-for="(item, idx) in socdGroupList"
-        :key="item.code"
-        :base="item.base"
-        :key-list="item.keyList"
-        code-preffix="S"
-        class="hover:cursor-pointer"
-        @click="handleGroupItemClicked(item)"
-      >
+      <BasicGroupAdd v-if="groupList.length < 8" icon="add" :desc="`${$t('common.add')} SOCD`" @click="handleAddClicked" />
+      <BasicGroupItem v-for="(item, idx) in groupList" :key="item.viewId" :base="item.base" :key-list="item.keyList"
+        code-preffix="S" class="hover:cursor-pointer" @click="handleGroupItemClicked(item)">
         <template #menu>
-          <GroupMenu
-            :group-item="item"
-            :idx="idx"
-            :enable-edit="true"
-            :enable-rename="true"
-            @group-item-delete="handleGroupItemDelete"
-            @group-item-edit="handleGroupItemEdit"
-            @group-item-rename="handleGroupItemRename"
-            @click.stop
-          />
+          <GroupMenu :group-item="item" :idx="idx" :enable-edit="true" :enable-rename="true"
+            @group-item-delete="groupItemDelete" @group-item-edit="handleGroupItemEdit" @group-item-rename="updateEditCache"
+            @click.stop />
         </template>
       </BasicGroupItem>
     </div>
-    <EditTemplate
-      v-model:visible="editVisible"
-      v-model:title="modalTitle"
-      :code-type="KeyTypeEnum.SOCD"
-      :fnc-generate-code="generateGroupCode"
-      :need-import-key="false"
-      keyboard-type="base"
-      :desc="$t('repidTrigger.triggerDeadZone')"
-      :edit-item="editItem"
-      @create-group="handleGroupCreated"
-    >
+    <EditTemplate v-model:visible="editCtrl.show" v-model:title="modalTitle" :code-type="KeyTypeEnum.SOCD"
+      :fnc-generate-code="generateGroupCode" :need-import-key="false" keyboard-type="base"
+      :desc="$t('repidTrigger.triggerDeadZone')" :edit-item="editCtrl.item" @create-group="groupCreated">
       <template #header-extra>
         <div class="flex items-center">
-          <span class="text-4 text-[#999999]">{{ $t('repidTrigger.priorityExe') }}</span>
-          <NSelect
-            v-model:value="trigger"
-            class="ml-3 w-45"
-            size="large"
-            :options="SOCDTriggerOps"
-            @update:value="handleTrigger"
-          ></NSelect>
+          <span class="text-4 text-[#999999]">{{ $t('supperKey.priorityExe') }}</span>
+          <NSelect v-model:value="trigger" class="ml-3 w-45" size="large" :options="SOCDTriggerOps"
+            ></NSelect>
         </div>
       </template>
     </EditTemplate>
-    <RenameModal
-      :show="showRenameModal"
-      :list-edit-index="renameIndex"
-      :name="editItem.base.name"
-      @update:show="showRenameModal = $event"
-      @rename="handleReNameSave"
-    />
+    <RenameModal :show="renameCtrl.show" :list-edit-index="renameCtrl.idx" :name="editCtrl.item.base.name"
+      @update:show="renameCtrl.show = $event" @rename="groupRename" />
   </div>
 </template>
