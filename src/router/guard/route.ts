@@ -68,6 +68,14 @@ export function createRouteGuard(router: Router) {
           });
         }
       },
+      {
+        condition: !isConnected.value && to.name !== connectRoute,
+        callback: () => {
+          return next({
+            name: connectRoute
+          });
+        }
+      },
       // if it is login route when logged in, then switch to the root page
       {
         condition: isLogin && to.name === loginRoute,
