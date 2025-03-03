@@ -14,7 +14,7 @@ watchEffect(() => {
   if (!kbInfo.value.mounted) {
     return;
   }
-  const redirctPath = route.query.redirect as string;
+  const redirctPath =localStorage.getItem('redirectFrom') || route.query.redirect as string;
   if (redirctPath) {
     router.push(redirctPath);
   } else {

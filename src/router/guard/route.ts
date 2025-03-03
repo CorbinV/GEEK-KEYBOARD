@@ -5,6 +5,8 @@ import type {
   RouteLocationRaw,
   Router
 } from 'vue-router';
+import { useRoute } from 'vue-router'
+
 import type { RouteKey, RoutePath } from '@elegant-router/types';
 import { toRef, watch } from 'vue';
 import { useAuthStore } from '@/store/modules/auth';
@@ -23,11 +25,13 @@ export function createRouteGuard(router: Router) {
   const isConnected = toRef(deviceStore, 'isConnected');
   const isTrueDevice = toRef(deviceStore, 'isTrueDevice');
   const routerMode = VITE_ROUTER_HISTORY_MODE === 'history';
+
+  const rootRoute: RouteKey = 'root';
+  const loginRoute: RouteKey = 'login';
+  const connectRoute: RouteKey = 'connect';
+  const noAuthorizationRoute: RouteKey = '403';
+
   router.beforeEach(async (to, from, next) => {
-    const rootRoute: RouteKey = 'root';
-    const loginRoute: RouteKey = 'login';
-    const connectRoute: RouteKey = 'connect';
-    const noAuthorizationRoute: RouteKey = '403';
     if (routerMode && to.fullPath.includes('index.html')) {
       next({ name: rootRoute });
     }
@@ -108,6 +112,11 @@ export function createRouteGuard(router: Router) {
 
       return condition;
     });
+  });
+  router.afterEach((to, from) => {
+    if (to.fullPath === `/${connectRoute}` && from.fullPath !== '/') {
+      localStorage.setItem('redirectFrom', from.fullPath);
+    }
   });
   watch(
     () => isConnected.value,
