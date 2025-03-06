@@ -1,8 +1,8 @@
 import requestClient from './config';
-import type { KeyboardSetting, ResetKeyboard, SetKeyboardSetting } from './modules/keyboard-setting';
+import type { KeyboardSetting, SetKeyboardSetting, DeviceInfo } from './modules/keyboard-setting';
 
 export function getKeyboardSetting() {
-  return requestClient.send<{ [key: string]: KeyboardSetting }>({
+  return requestClient.send<KeyboardSetting>({
     name: 'getKeyboardSetting'
   });
 }
@@ -15,7 +15,13 @@ export function setKeyboardSetting(data: SetKeyboardSetting) {
 }
 
 export function resetKeyboard() {
-  return requestClient.send<{ [key: string]: ResetKeyboard }>({
+  return requestClient.send<never>({
     name: 'resetKeyboard'
+  });
+}
+
+export function getDeviceInfo() {
+  return requestClient.send<DeviceInfo>({
+    name: 'getDeviceInfo'
   });
 }
