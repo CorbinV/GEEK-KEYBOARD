@@ -9,8 +9,6 @@ export const useDeviceStore = defineStore('device', () => {
   // base status
   const isConnected = ref(false);
   const connectionError = ref<Error | null>(null);
-  const deviceInfo = ref<any>(null);
-
   const connectionStatus = computed(() => {
     if (connectionError.value) return 'error';
     return isConnected.value ? 'connected' : 'disconnected';
@@ -29,7 +27,10 @@ export const useDeviceStore = defineStore('device', () => {
       isConnected.value = false;
     }
   }
-
+  async function disconnect(){
+    await connectionManager.deviceDisconnect();
+    isConnected.value = false;
+  }
   function getDeviceClient() {
     return connectionManager.getDeviceClient();
   }
@@ -46,9 +47,9 @@ export const useDeviceStore = defineStore('device', () => {
   return {
     isConnected,
     connectionError,
-    deviceInfo,
     connectionStatus,
     connect,
+    disconnect,
     getDeviceClient,
     isTrueDevice
   };

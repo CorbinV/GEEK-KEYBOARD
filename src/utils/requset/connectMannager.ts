@@ -25,4 +25,7 @@ export class ConnectionManager {
   onDeviceDisconnect(cb: any) {
     return this.hidController.addEventListener('disconnected', cb);
   }
+  deviceDisconnect() {
+    this.hidController.disconnect();
+  }
 }
