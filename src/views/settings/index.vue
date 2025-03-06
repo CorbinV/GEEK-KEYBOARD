@@ -1,79 +1,156 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useMessage } from 'naive-ui';
-import { getKeyboardSetting, setKeyboardSetting } from '@/api/keyConfig-setting';
+import { ref, toRef, onMounted, toRaw } from 'vue';
+import { SelectOption, useMessage } from 'naive-ui';
+import { KeyboardSetting } from '@/api/modules/keyboard-setting';
+import GroupTitle from '@/components/custom/group-title.vue';
+import List from './components/list.vue';
+
+import { getKeyboardSetting, setKeyboardSetting, resetKeyboard } from '@/api/keyConfig-setting';
 import keyboardImg from '@/assets/img/keyboard_img.png';
 import { $t } from '@/locales';
-// import RestoreFactoryModal from '@/views/settings/components/reset-modal.vue';
+import { useDialog } from 'naive-ui'
+
 import OtaProgress from './components/ota-progress.vue';
 import OtaVersion from './components/ota-version.vue';
 import { useOTA } from './composables/useOTA';
+import { useKeyboardStore } from '@/store/modules/keyboard';
+import { useDeviceStore } from '@/store/modules/device';
+const keyboardStore = useKeyboardStore();
+const deviceStore = useDeviceStore();
+const kbInfo = toRef(keyboardStore, 'kbInfo');
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const { loading, showVersion, versionInfo, progress, showProgress, fetchVersion, upgrade, fileImport, fileExport } =
   useOTA();
 
-async function getSet() {
-  const x = await getKeyboardSetting();
-  console.log(x);
+const dialog = useDialog();
+function useKbSettingCtrl() {
+  const kbSettingInfo = ref<KeyboardSetting>({
+    "allKey": 1,
+    "wakeUp": 1,
+    "wpDistance": 1,
+    "wpDistances": [1, 2, 3, 4],
+    "deepSleep": 30,
+    "ds": [15, 30, 60]
+  })
+  const deepSleepOps = ref<SelectOption[]>([])
+  const wakeupDistanceOps = ref<{
+    label: string;
+    value: number;
+  }[]>([])
+  const updateCtrlInfo = async () => {
+    try {
+      const data = await getKeyboardSetting();
+      kbSettingInfo.value = data;
+      updateDeepSleepOps(false);
+      updateWpDistanceOps(false);
+    } catch (error) {
+      updateDeepSleepOps(true);
+      updateWpDistanceOps(true);
+    }
+  }
+  const updateDeepSleepOps = (isError: boolean) => {
+    if (isError) {
+      return
+    }
+    deepSleepOps.value = kbSettingInfo.value.ds.map((item, index) => {
+      return {
+        label: `${item}min`,
+        value: item
+      }
+    })
+  }
+  const updateWpDistanceOps = (isError: boolean) => {
+    if (isError) {
+      // wakeupDistanceOps.value = [{
+      //   value: 0,
+      //   label: $t('businessCommon.temporaryUnavailable'),
+      //   disabled: true
+      // }]
+      return
+    }
+    wakeupDistanceOps.value = kbSettingInfo.value.wpDistances.map((item, index) => {
+      return {
+        label: `${item}cm`,
+        value: item
+      }
+    })
+  }
+  onMounted(async () => {
+    await updateCtrlInfo();
+  })
+  return {
+    kbSettingInfo,
+    deepSleepOps,
+    wakeupDistanceOps
+  }
 }
-const versionCode = ref('1.2.0');
-const fullKeyRolloverSwitch = ref(true);
-const wakeUpSwitch = ref(true);
+const { kbSettingInfo, deepSleepOps, wakeupDistanceOps } = useKbSettingCtrl();
+
 const message = useMessage();
 const onCheckUpdateClick = () => {
   fetchVersion();
 };
 
 const onReceiverPairClick = () => {
-  console.log('2.4g接收器配对按钮被点击');
-  // 这里可以加入接收器配对的逻辑
+  message.info("该功能暂未开放，敬请期待!");
+  // feat: wait for next version
+  return
 };
-function getVersion() {}
-const onFactoryResetClick = () => {
-  message.success($t('setting.restoreSucess'), {
-    duration: 3000 // 持续时间
-  });
-  // 这里可以加入恢复出厂设置的逻辑
+const onFactoryResetClick = async () => {
+  dialog.warning({
+    title: $t('common.warning'),
+    content: $t('businessCommon.confirmToReset'),
+    positiveText: $t('common.confirm'),
+    negativeText: $t('common.cancel'),
+    onPositiveClick: async () => {
+      try {
+        await resetKeyboard()
+        message.success($t('setting.restoreSucess'));
+        await deviceStore.disconnect()
+      } catch (e) {
+        message.error(`${$t('businessCommon.executeFail')}, ${$t('businessCommon.plsUpdate')}`);
+        window?.$log!.error(`Reset device failed`, e);
+      }
+    }
+  })
+
 };
 
 // 处理全键无冲开关点击事件
-const onFullKeyRolloverChange = (newValue: boolean) => {
-  if (newValue) {
-    message.success($t('setting.allKeyOpenHint'), {
-      duration: 3000 // 持续时间
-    });
-  } else {
-    message.error($t('setting.allKeyCloseHint'), {
-      duration: 3000 // 持续时间
-    });
+const handleFullKeyChange = async (newValue: boolean) => {
+  const [status, errorInfo] = await handleValueChange()
+  if (!status) {
+    message.success($t('businessCommon.executeFail'));
+    window?.$log!.error(`Executed error when fullKeyChange`, errorInfo);
+    return
   }
-
-  // setDevPerf();
+  const text = newValue ? $t('setting.allKeyOpenHint') : $t('setting.allKeyCloseHint');
+  message.success(text);
 };
-
-// 处理感应唤醒开关点击事件
-const onWakeUpSwitchChange = (newValue: boolean) => {
-  if (newValue) {
-    message.success($t('setting.wakeUpOpenHint'), {
-      duration: 3000 // 持续时间
-    });
-  } else {
-    message.error($t('setting.wakeUpClosenHint'), {
-      duration: 3000 // 持续时间
-    });
+async function handleValueChange() {
+  const res: [boolean, Error | null] = [false, null]
+  try {
+    const { ds, wpDistances, ...sendData } = toRaw(kbSettingInfo.value);
+    await setKeyboardSetting(sendData)
+    res[0] = true;
+  } catch (e: Error | any) {
+    res[1] = e
   }
-  setDevPerf();
-  // 在这里可以添加逻辑，比如同步到服务器或其他操作
-};
-async function setDevPerf() {
-  await setKeyboardSetting({ allKey: fullKeyRolloverSwitch.value ? 1 : 0, wakeUp: wakeUpSwitch.value ? 1 : 0 });
-  //  await addOks({ code, keys, name });
+  return res;
 }
 
-getVersion();
-getSet();
-
+// 处理感应唤醒开关点击事件
+const onWakeUpSwitchChange = async (newValue: boolean) => {
+  const [status, errorInfo] = await handleValueChange()
+  if (!status) {
+    message.error($t('businessCommon.executeFail'));
+    window?.$log!.error(`Executed error when wakeUpSwitchChange`, errorInfo);
+    return
+  }
+  const text = newValue ? $t('setting.wakeUpOpenHint') : $t('setting.wakeUpClosenHint');
+  message.success(text);
+};
 const triggerFileImport = () => {
   if (fileInputRef.value) {
     fileInputRef.value.click();
@@ -82,65 +159,62 @@ const triggerFileImport = () => {
 </script>
 
 <template>
-  <!-- 引用 public 目录下的图片 -->
   <div class="h-full w-full flex flex-col items-center">
-    <img :src="keyboardImg" alt="Logo" class="h-324px w-804px" />
-
-    <div class="mt-20px h-520px w-976px flex flex-col items-center rounded-md bg-[#171619] p-30px">
-      <h1 class="text-[22px]">{{ $t('setting.devName', { total: 'NB99' }) }}</h1>
-      <!-- <div class="li-title">连接模式</div> -->
-
-      <div class="h-66px w-full flex flex items-center justify-between border-b-1px border-[#232327] text-[18px]">
-        {{ $t('setting.connectMode') }}
-        <div>USB</div>
-      </div>
-
-      <div class="h-66px w-full flex items-center justify-between border-b-1px border-[#232327] text-[18px]">
-        {{ $t('setting.allKeyNot') }}
-        <NSwitch v-model:value="fullKeyRolloverSwitch" @update:value="onFullKeyRolloverChange" />
-      </div>
-      <div class="h-110px w-full flex flex-col justify-between border-b-1px border-[#232327] pb-20px pt-20px">
-        <div class="h-110px w-full flex justify-between text-[18px]">
-          {{ $t('setting.wakeUp') }}
-          <NSwitch v-model:value="wakeUpSwitch" onupdate @update:value="onWakeUpSwitchChange" />
+    <img :src="keyboardImg" alt="Logo" class="h-324px w-804px min-804px" />
+    <div class="mt-20px h-520px w-976px flex flex-col   rounded-md bg-[#171619] p-30px pt-4">
+      <h1 class="text-[22px] text-center">{{ $t('setting.devName', { total: kbInfo.hd?.model || 'kb001' }) }}</h1>
+      <div class="flex flex-col gap-y-2">
+        <GroupTitle :title="$t('setting.connectMode')">
+          <template #end>
+            <span>{{ kbInfo.hd!.connect || 'USB' }}</span>
+          </template>
+        </GroupTitle>
+        <GroupTitle :title="$t('setting.allKeyNot')">
+          <template #end>
+            <NSwitch v-model:value="kbSettingInfo.allKey" :checked-value="1" :unchecked-value="0"
+              @update:value="handleFullKeyChange" />
+          </template>
+        </GroupTitle>
+        <div class="pb-3 border-b-1 border-#232327">
+          <GroupTitle :title="$t('setting.wakeUp')" :sub-title="$t('setting.wakeUpHint')" :show-bottom-line="false">
+            <template #end>
+              <NSwitch v-model:value="kbSettingInfo.wakeUp" :checked-value="1" :unchecked-value="0"
+                @update:value="onWakeUpSwitchChange" />
+            </template>
+          </GroupTitle>
+          <div class="flex items-center justify-between -pt-2 p-1 rounded-md bg-[#19191d]">
+            <div class="text-lg ml-2.5">{{ $t('setting.wakeUpDistance') }}</div>
+            <List :list="wakeupDistanceOps" v-model:selected-idx="kbSettingInfo.wpDistance" />
+          </div>
         </div>
-        <div class="text-[16px] text-[#999]">
-          {{ $t('setting.wakeUpHint') }}
-        </div>
-      </div>
-      <div
-        class="flex-raw h-110px w-full flex justify-between border-b-1px border-[#232327] pb-20px pt-20px text-[18px]"
-      >
-        <div class="flex flex-col">
+        <GroupTitle :title="$t('setting.deepSleep')" :sub-title="$t('setting.deepSleepHint')">
+          <template #end>
+            <NSelect v-model:value="kbSettingInfo.deepSleep" :options="deepSleepOps"
+              class="h-40px w-120px !cursor-not-allowed" placement="bottom-start" trigger="click" size="large" />
+          </template>
+        </GroupTitle>
+        <div class="flex justify-between pb-2 border-b-1 border-#232327">
           <div>
-            {{ $t('setting.gjUpdate') }}
-            <span class="text-14px text-[#999]">{{ versionCode }}</span>
+            <GroupTitle :title="$t('setting.gjUpdate')" :sub-title="`v${kbInfo.hd.version || '0.0.1'}`"
+              :show-bottom-line="false">
+            </GroupTitle>
+            <div class="-mt-2">
+              <i class="iconfont icon-file-export text-[20px] text-[#3C8DF4] cursor-pointer" @click="fileExport"></i>
+              <i class="iconfont icon-file-import ml-30px text-[20px] text-[#3C8DF4] cursor-pointer"
+                @click="triggerFileImport"></i>
+              <input ref="fileInputRef" type="file" accept=".bin,.ufw" style="display: none" @change="fileImport" />
+            </div>
           </div>
-          <div class="mt-10px">
-            <i class="iconfont icon-shezhi-daoru text-[28px] text-[#3C8DF4]" @click="fileExport"></i>
-            <i class="iconfont icon-shezhi-daochu ml-30px text-[28px] text-[#3C8DF4]" @click="triggerFileImport"></i>
-            <input ref="fileInputRef" type="file" accept=".bin,.ufw" style="display: none" @change="fileImport" />
-          </div>
+          <NButton :loading="loading" icon-placement="right"
+            class="h-90% w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
+            {{ $t('setting.checkUpdate') }}
+          </NButton>
         </div>
-        <!--
- <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
-          {{ $t('setting.checkUpdate') }}
-        </button>
--->
-        <NButton
-          :loading="loading"
-          icon-placement="right"
-          class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]"
-          @click="onCheckUpdateClick"
-        >
-          {{ $t('setting.checkUpdate') }}
-        </NButton>
       </div>
       <div class="flex-raw w-full flex justify-between rounded-md pt-20px">
         <button class="hollow-btn h-60px w-170px" @click="onReceiverPairClick">{{ $t('setting.pair24') }}</button>
         <button class="hollow-btn h-60px w-170px" @click="onFactoryResetClick">{{ $t('setting.restore') }}</button>
       </div>
-      <!-- <RestoreFactoryModal></RestoreFactoryModal> -->
     </div>
     <OtaVersion :show="showVersion" :versioninfo="versionInfo" @update:show="showVersion = $event" @upgrade="upgrade" />
     <OtaProgress :show="showProgress" :progress="progress" @update:show="showProgress = $event" />
@@ -150,24 +224,33 @@ const triggerFileImport = () => {
 <style scoped>
 .hollow-btn {
   background-color: transparent;
-  color: #3c8df4; /* 按钮文字颜色 */
-  border: 1px solid #3c8df4; /* 边框颜色 */
-  border-radius: 8px; /* 圆角边框 */
+  color: #3c8df4;
+  /* 按钮文字颜色 */
+  border: 1px solid #3c8df4;
+  /* 边框颜色 */
+  border-radius: 8px;
+  /* 圆角边框 */
   padding: 10px 20px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
 .hollow-btn:hover {
-  background-color: #3c8df4; /* 悬停时的背景颜色 */
-  color: white; /* 悬停时文字颜色 */
+  background-color: #3c8df4;
+  /* 悬停时的背景颜色 */
+  color: white;
+  /* 悬停时文字颜色 */
 }
+
 .li-title {
   position: relative;
   text-align: left;
   font-size: 18px;
-  padding-left: 8px; /* 给文本留出空间避免和线条重叠 */
-  box-shadow: -4px 3px 0 0 #3c8df4; /* 创建蓝色竖线 */
+  padding-left: 8px;
+  /* 给文本留出空间避免和线条重叠 */
+  box-shadow: -4px 3px 0 0 #3c8df4;
+  /* 创建蓝色竖线 */
 }
 </style>
