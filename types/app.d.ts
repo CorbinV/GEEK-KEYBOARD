@@ -708,6 +708,9 @@ declare namespace App {
         allKeyOpenHint: string;
         allKeyCloseHint: string;
         restoreSucess: string;
+        deepSleep: string;
+        deepSleepHint: string;
+        wakeUpDistance: string
       };
       global_Setting: {
         version: string;

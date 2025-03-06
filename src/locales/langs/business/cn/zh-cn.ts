@@ -236,7 +236,7 @@ const lang: App.BusinessLanguage.Schema = {
     allKeyNot: '全键无冲',
     wakeUp: '感应唤醒',
     wakeUpHint:
-      '电感轴可以感知双手是否离开键盘，从而进入低功耗模式，当双手靠近键盘时立即唤醒键盘，从而达到降低功耗，和极大的续航',
+      '(当双手靠近键盘后，将会自动将键盘唤醒)',
     gjUpdate: '固件更新',
     checkUpdate: '检查更新',
 
@@ -247,8 +247,10 @@ const lang: App.BusinessLanguage.Schema = {
     allKeyOpenHint: '全键无冲已开启',
     allKeyCloseHint: '全键无冲已关闭',
     restoreSucess: '恢复出厂成功',
-
-    pair24: '2.4g接收器配对'
+    pair24: '2.4g接收器配对',
+    deepSleep: '深度休眠',
+    deepSleepHint: '(键盘进入深度休眠后，将会断开无线连接，按键等功能进入待机状态，从而大幅提高续航时间)',
+    wakeUpDistance: '感应距离',
   },
   global_Setting: {
     version: '版本号：{total}',

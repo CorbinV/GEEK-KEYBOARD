@@ -239,7 +239,7 @@ const lang: App.BusinessLanguage.Schema = {
     allKeyNot: 'NKRO',
     wakeUp: 'Sensor Wake',
     wakeUpHint:
-      'The inductive switch can detect whether both hands have left the keyboard, enabling it to enter a low-power mode. When the hands approach the keyboard, it wakes up instantly, reducing power consumption and significantly extending battery life.',
+      'The keyboard wakes up automatically when hands approach.',
     gjUpdate: 'Firmware Update',
     checkUpdate: 'Check for Updates',
     restore: 'Restore Factory Settings',
@@ -248,7 +248,11 @@ const lang: App.BusinessLanguage.Schema = {
     wakeUpClosenHint: 'Sensor Wake disabled',
     allKeyOpenHint: 'NKRO enabled',
     restoreSucess: 'Factory reset successful',
-    allKeyCloseHint: 'NKRO disabled'
+    allKeyCloseHint: 'NKRO disabled',
+    deepSleep: 'Deep Sleep',
+    deepSleepHint: 'In Deep Sleep Mode, the keyboard disconnects wirelessly and deactivates key functions to significantly extend battery life.',
+    wakeUpDistance: 'Detection Distance',
+
   },
   global_Setting: {
     version: 'Version：{total}',
