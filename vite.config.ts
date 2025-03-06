@@ -29,7 +29,8 @@ export default defineConfig(configEnv => {
     },
     plugins: setupVitePlugins(viteEnv, buildTime),
     define: {
-      BUILD_TIME: JSON.stringify(buildTime)
+      BUILD_TIME: JSON.stringify(buildTime),
+      'process.env.LOG_LEVEL': JSON.stringify(viteEnv.VITE_LOG_LEVEL)
     },
     server: {
       host: '0.0.0.0',
