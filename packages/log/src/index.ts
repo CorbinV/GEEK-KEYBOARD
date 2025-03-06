@@ -1,8 +1,5 @@
 import log, { LogLevelDesc, LogLevelNames, Logger } from 'loglevel';
-import config from '../config';
-
-const env = (process.env.NODE_ENV || 'development') as 'production' | 'development';
-const logLevel: LogLevelDesc = config[env]?.logLevel || 'warn';
+const logLevel: LogLevelDesc = (process.env.LOG_LEVEL as LogLevelDesc) || 'warn';
 const logColors = {
   debug: 'color: gray',
   info: 'color: blue',
