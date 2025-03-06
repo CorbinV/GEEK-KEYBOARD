@@ -80,6 +80,17 @@ export class HIDProtocolController extends EventTarget {
       throw error;
     }
   }
+  async disconnect(device?: HIDDevice) {
+    if (!this.connected) {
+      return
+    }
+    if(device) {
+      await device?.close();
+    }else{
+      await this.device?.close();
+    }
+    this.handleDisconnect();
+  }
   async pairedDeviceByFilter(filters: FilterType) {
     const deviceList = await navigator.hid.getDevices();
     const device = deviceList.find(dev => {
