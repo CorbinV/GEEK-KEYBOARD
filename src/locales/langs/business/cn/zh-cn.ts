@@ -27,6 +27,7 @@ const lang: App.BusinessLanguage.Schema = {
     temporaryUnavailable: '功能维护中',
     btnSelectRequired: '请选择按钮',
     confirmToReset: '您确定要重置吗？',
+    devErr: "设备异常，请重启设备或刷新重试"
   },
   baseKey: {
     keyboard: {

@@ -14,6 +14,8 @@ import { formatLableSub3 } from '@/hooks/common/format';
 import type { KeyInfo, LayerKeysConfig } from '@/api/modules/keyboard';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 import { useDeviceStore } from '../device';
+import { useMessage } from 'naive-ui';
+import { $t } from '@/locales';
 
 type CurrentSuperKeyType = Omit<
   KeyTypeEnum,
@@ -510,6 +512,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         kbLogger.error('catch error when update config and layer', error);
         kbInfo.isLoad = false;
         kbInfo.mounted = false;
+        message.error($t('businessCommon.devErr'));
       }
     };
 

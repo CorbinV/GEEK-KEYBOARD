@@ -492,6 +492,7 @@ declare namespace App {
         connectDev: string;
         btnSelectRequired: string;
         confirmToReset: string;
+        devErr: string;
       };
       baseKey: {
         keyboard: {
@@ -506,6 +507,7 @@ declare namespace App {
           current: string;
           keyboardHint: string;
           removeSpkeyChange: string;
+          devErr: string;
         };
         tab: {
           basic: string;
