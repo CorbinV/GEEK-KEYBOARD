@@ -15,7 +15,6 @@ watchEffect(() => {
     return;
   }
   const redirctPath = localStorage.getItem('redirectFrom') || route.query.redirect as string;
-  console.log('redirctPath', redirctPath);
   if (redirctPath) {
     router.push(redirctPath.substring(1));
   } else {
