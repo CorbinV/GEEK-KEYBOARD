@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { description, version } from '@/../package.json';
-// import { ref } from 'vue';
 
 defineOptions({
   name: 'GlobalSetting'
 });
 const showModal = ref(false);
-console.log(version);
+const websiteInfo = JSON.parse(import.meta.env.VITE_WEBSITE);
+const productionInfo = JSON.parse(import.meta.env.VITE_PRODUCTION);
 </script>
 
 <template>
@@ -15,7 +15,7 @@ console.log(version);
     <SvgIcon local-icon="setting" />
   </ButtonIcon>
 
-  <NModal v-model:show="showModal" class="h-550px w-34% rounded-[10px] bg-[#191b1d]">
+  <NModal v-model:show="showModal" class="h-550px min-w-40% rounded-[10px] bg-[#191b1d]">
     <div class="model-bg flex flex-col justify-between p-30px text-[22px]">
       <div class="flex flex-col">
         <p class="w-100% text-center text-22px text-[#fff]">{{ $t('businessCommon.set') }}</p>
@@ -45,11 +45,11 @@ console.log(version);
           <div class="flex-raw mt-20px flex items-center justify-between text-16px">
             <p>
               {{ $t('global_Setting.officialWeb') }}
-              <span class="text-#3C8DF4">www.geekwontek.com</span>
+              <a class="text-#3C8DF4 hover:text-blue duration-150" :href="websiteInfo?.url" target="_blank">{{ websiteInfo?.name }}
+              </a>
             </p>
             <p>
               {{ $t('global_Setting.wechart') }}
-
               <span class="text-#3C8DF4">www.geekwontek.com</span>
             </p>
           </div>
@@ -58,12 +58,14 @@ console.log(version);
         <div class="item-style flex flex-col b-b-1px b-b-[#232327]">
           <div class="flex-raw flex items-center">
             <p class="vertical-bar"></p>
-            <p class="... text-lg">{{ $t('global_Setting.moreProduct') }}</p>
+            <p class="text-lg">{{ $t('global_Setting.moreProduct') }}</p>
           </div>
           <div class="flex-raw mt-20px flex items-center justify-between text-16px">
             <p>
               {{ $t('global_Setting.officialWeb') }}
-              <span class="text-#3C8DF4">www.geekwontek.com</span>
+              <a class="text-#3C8DF4 hover:text-blue duration-150" :href="productionInfo?.url" target="_blank">
+                {{ productionInfo?.name }}
+              </a>
             </p>
             <p>
               {{ $t('global_Setting.wechart') }}
@@ -75,8 +77,7 @@ console.log(version);
       </div>
 
       <div class="mt-30px flex flex-row justify-center gap-70px">
-        <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">取消</button>
-        <button class="h-60px w-170px rounded-md bg-[#3c8df4] text-[18px] c-white hover:bg-[#3c8df4]">确定</button>
+        <button class="hollow-btn h-60px w-170px font-[18px]" @click="showModal = false">{{ $t('common.close') }}</button>
       </div>
     </div>
   </NModal>
