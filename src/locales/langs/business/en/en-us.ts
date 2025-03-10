@@ -27,6 +27,7 @@ const lang: App.BusinessLanguage.Schema = {
     temporaryUnavailable: 'Temporarily unavailable for Maintenance',
     btnSelectRequired: 'Button selection required',
     confirmToReset: 'Are you sure you want to reset these settings?',
+    devErr: "Device error detected. Please restart or refresh to retry."
   },
   baseKey: {
     keyboard: {
@@ -41,7 +42,6 @@ const lang: App.BusinessLanguage.Schema = {
       current: 'current',
       keyboardHint: 'Select a key on the keyboard, then choose the key below to replace it',
       removeSpkeyChange: "This may deactivate your Super Key functions. Conntinue?",
-      devErr: "Device error detected. Please restart or refresh to retry."
     },
     tab: {
       basic: 'Basic',
