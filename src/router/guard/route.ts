@@ -122,7 +122,9 @@ export function createRouteGuard(router: Router) {
     });
   });
   router.afterEach((to, from) => {
-    if (to.fullPath === `/${connectRoute}` && from.fullPath !== '/') {
+    // 记录用户离开的路由
+    const condition = [from.name !== connectRoute,  to.fullPath === `/${connectRoute}`, from.fullPath !== '/']
+    if (condition.every(item => item)) {
       localStorage.setItem('redirectFrom', from.fullPath);
     }
   });

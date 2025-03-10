@@ -14,9 +14,10 @@ watchEffect(() => {
   if (!kbInfo.value.mounted) {
     return;
   }
-  const redirctPath =localStorage.getItem('redirectFrom') || route.query.redirect as string;
+  const redirctPath = localStorage.getItem('redirectFrom') || route.query.redirect as string;
+  console.log('redirctPath', redirctPath);
   if (redirctPath) {
-    router.push(redirctPath);
+    router.push(redirctPath.substring(1));
   } else {
     router.push('base-key');
   }
