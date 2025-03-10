@@ -6,15 +6,16 @@ import logger from '@sa/log';
 import { SetupStoreId } from '@/enum';
 import { kbStg, keyboardforage } from '@/utils/storage';
 import { useResttableReactiveFn, useResttableRefFn } from '@/hooks/common/basicFnc';
-import { KeyTypeEnum, keyTypeEnumProxy } from '@/enum/keyType';
+import { DeviceLinkEnum, deviceLinkEnumProxy, KeyTypeEnum, keyTypeEnumProxy } from '@/enum/keyType';
 import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
+import type { DeviceInfo } from '@/api/modules/keyboard-setting';
 import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } from '@/api/keyConfig';
 import keyMapJson from '@/assets/files/key-map.json';
 import { formatLableSub3 } from '@/hooks/common/format';
 import type { KeyInfo, LayerKeysConfig } from '@/api/modules/keyboard';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 import { useDeviceStore } from '../device';
-import { useMessage } from 'naive-ui';
+import { getDeviceInfo } from '@/api/keyConfig-setting';
 import { $t } from '@/locales';
 
 type CurrentSuperKeyType = Omit<
@@ -147,7 +148,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       keys: any;
       xxx: any;
     };
-    type CacheLayerKeysConfig = Pick<LayerKeysConfig, 'keys' | 'disable' | 'smart'| 'def'>;
+    type CacheLayerKeysConfig = Pick<LayerKeysConfig, 'keys' | 'disable' | 'smart' | 'def'>;
     const dataManager = new Map<string, CacheLayerKeysSpConfig>(); // `${config}-${layer}`
     const [activeKeyLayer, resetActiveKeyLayer] = useResttableReactiveFn<CacheLayerKeysSpConfig>(
       () =>
@@ -237,12 +238,12 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       });
       const currentData = prevData
         ? {
-            keys: { ...prevData.keys, ...result.keys },
-            smart: { ...prevData.smart, ...result.smart },
-            disable: [...prevData.disable, ...result.disable],
-            len: result.len,
-            def: {... prevData.def, ...result.def }
-          }
+          keys: { ...prevData.keys, ...result.keys },
+          smart: { ...prevData.smart, ...result.smart },
+          disable: [...prevData.disable, ...result.disable],
+          len: result.len,
+          def: { ...prevData.def, ...result.def }
+        }
         : result;
       onProgress?.(pageNo * pageSize, result.len);
       if (pageNo * pageSize >= result.len) {
@@ -486,10 +487,17 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   function useDeviceInfo() {
     const deviceStore = useDeviceStore();
     const { isConnected } = storeToRefs(deviceStore);
-    const kbInfo = reactive({
+    const kbInfo = reactive<{
+      hd: DeviceInfo
+    } & {
+      isLoad: boolean,
+      mounted: boolean
+      connect: DeviceLinkEnum
+    }>({
       isLoad: false,
-      mounted: Boolean(localStorage.getItem('device-mounted') || '')
-    });
+      mounted: Boolean(localStorage.getItem('device-mounted') || ''),
+      hd: {}
+    } as any);
     const handleDevConn = async () => {
       try {
         kbInfo.isLoad = true;
@@ -499,20 +507,20 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
             kbLogger.error('catch error when update config and layer', e);
             reject(e);
           });
-        }).then(()=>{
+        }).then(() => {
           // set layer to  device current cfg
-        updateLayerKeys({
-          config: keyLayerInfo.configIndex,
-          layer: keyLayerInfo.layerIndex
-        });
-        kbInfo.isLoad = false;
-        kbInfo.mounted = true;
+          updateLayerKeys({
+            config: keyLayerInfo.configIndex,
+            layer: keyLayerInfo.layerIndex
+          });
+          kbInfo.isLoad = false;
+          kbInfo.mounted = true;
         });
       } catch (error) {
         kbLogger.error('catch error when update config and layer', error);
-        kbInfo.isLoad = false;
-        kbInfo.mounted = false;
-        message.error($t('businessCommon.devErr'));
+        handleDevDisConn()
+        await deviceStore.disconnect()
+        window?.$message!.warning($t('businessCommon.devErr'));
       }
     };
 
@@ -521,6 +529,16 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       kbInfo.isLoad = false;
       kbLogger.warn('Device is disconnected');
     };
+
+    const updateDeviceInfo = async () => {
+      try {
+        const data = await getDeviceInfo();
+        data.connect = deviceLinkEnumProxy.getKey(data.connect || 0)
+        kbInfo.hd = data;
+      } catch (error) {
+        kbLogger.error('catch error when update device info', error);
+      }
+    }
     watchEffect(() => {
       if (!isConnected.value) {
         kbInfo.mounted = false;
@@ -554,10 +572,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     return {
       kbInfo,
       updateAllLayerKeys,
-      watchDevConnStatus
+      watchDevConnStatus,
+      updateDeviceInfo
     };
   }
-  const { kbInfo, watchDevConnStatus } = useDeviceInfo();
+  const { kbInfo, watchDevConnStatus, updateDeviceInfo } = useDeviceInfo();
   function useRelatedSelectedKeys() {
     const [selectedKeys, resetSelectedKeys] = useResttableRefFn<{
       [key: string]: {
