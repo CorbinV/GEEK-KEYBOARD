@@ -16,7 +16,7 @@ withDefaults(
     <div class="flex-raw flex items-center">
       <div class="vertical-bar rounded-md"></div>
       <p class=" text-18px">{{ title }}</p>
-      <span v-if="subTitle" class="text-[14px] text-[#999999]">{{ subTitle }}</span>
+      <span v-if="subTitle" class="ml-1 text-[14px] text-[#999999]">{{ subTitle }}</span>
     </div>
     <slot name="end"></slot>
   </div>

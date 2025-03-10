@@ -3,7 +3,7 @@ import { computed, onUnmounted, toRef } from 'vue';
 import type { MittEvents } from '@/utils/eventBus';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-import { useDialog, useMessage } from 'naive-ui'
+import { useDialog } from 'naive-ui'
 import { $t } from '@/locales';
 const keyboardStore = useKeyboardStore();
 const selectedKeysMap = toRef(keyboardStore, 'selectedKeysMap');

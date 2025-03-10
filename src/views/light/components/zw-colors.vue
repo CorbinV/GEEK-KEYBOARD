@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineEmits, onMounted, reactive, ref, watchEffect } from 'vue';
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue';
 import { NInputNumber } from 'naive-ui';
 import { hslToRgb, rgbToHsl } from '@/utils/tools';
 
