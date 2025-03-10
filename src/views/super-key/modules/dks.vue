@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { onUnmounted, ref, toRaw, toRef, watchEffect } from 'vue';
+import { onUnmounted, ref, toRaw, toRef, watchEffect, onMounted } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -9,13 +9,20 @@ import { addDks, deleteDksByCode, getDksList } from '@/api/super-key';
 import { formatLableSub3 } from '@/hooks/common/format';
 import DksEdit from '../components/dks-edit.vue';
 import GroupMenu from '../components/group-menu.vue';
-const oksGroupList = ref<any>([]);
+import emitter, { EventNameEnum } from "@/utils/eventBus";
+import { GroupItem } from '../hooks';
+import { $t } from '@/locales';
+import { useCommonStore } from '@/store/modules/common';
+const CURRENT_MODULE_TYPE = KeyTypeEnum.DKS;
+const groupList = ref<any>([]);
 const editVisible = ref(false);
 const modalTitle = ref('动态键程按键');
-const MAC_GORUP_CNT = 8;
+const MAX_GORUP_CNT = 8;
 const emit = defineEmits(['key-clicked']);
 const keyboardStore = useKeyboardStore();
-const { getKeyDetail, updateSuperKey } = keyboardStore;
+const commonStore = useCommonStore()
+
+const { getKeyDetail, updateSuperKey,removeSuperKey } = keyboardStore;
 const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
 function useSimulate() {
   const enableSimulate = ref<0 | 1>(0); // enbale simulate
@@ -56,8 +63,8 @@ function useSimulate() {
 }
 const { enableSimulate, simulateStatus, simulateOps, simulateDelayTimes } = useSimulate();
 function handleAddClicked() {
-  if (oksGroupList.value.length >= MAC_GORUP_CNT) {
-    window.$message!.warning(`最多只能添加${MAC_GORUP_CNT}个`);
+  if (groupList.value.length >= MAX_GORUP_CNT) {
+    window.$message!.warning(`最多只能添加${MAX_GORUP_CNT}个`);
     return;
   }
   editVisible.value = true;
@@ -72,7 +79,7 @@ function updateGroupEffect(key: string, moduleType: KeyTypeEnum, res?: any) {
 }
 async function updateGroupList() {
   const { shortcuts } = await getDksList();
-  oksGroupList.value = shortcuts.map(item => {
+  groupList.value = shortcuts.map(item => {
     const { code, type, name, simulation, range } = item;
     return {
       base: { code, type, name },
@@ -106,7 +113,7 @@ async function handleGroupCreated({ code, keys, name, range, listDetail }: any) 
   console.log(sendData);
   try {
     await addDks(sendData);
-    oksGroupList.value.push({
+    groupList.value.push({
       base: {
         code,
         name
@@ -133,7 +140,7 @@ async function handleGroupItemDelete(item: { code: number }, idx: number) {
   try {
     await deleteDksByCode({ code: item.code });
     // feat: delete releted key info about super key
-    oksGroupList.value.splice(idx, 1);
+    groupList.value.splice(idx, 1);
     window.$message!.success('删除成功');
   } catch (error) {
     window.$message!.error('删除失败，请更新最新固件后重试');
@@ -149,52 +156,71 @@ async function handleGroupItemRename(items: any, idx: number) {
   console.log('handleGroupItemRename', items, idx);
 }
 function generateGroupCode() {
-  if (oksGroupList.value.length === 0) return 0;
-  const usedCodes = new Set(oksGroupList.value.map((group: { code: number }) => group.code));
+  if (groupList.value.length === 0) return 0;
+  const usedCodes = new Set(groupList.value.map((group: { code: number }) => group.code));
   let newCode = 0;
   while (usedCodes.has(newCode)) {
     newCode++;
   }
-  console.log('newCode', oksGroupList.value.length, newCode);
+  console.log('newCode', groupList.value.length, newCode);
   return newCode;
 }
+
+async function groupItemDelete(item: any, idx: number) {
+    let isPass = false
+    try {
+      await deleteDksByCode({ code: item.base.code });
+      groupList.value.splice(idx, 1);
+      item.keyBaseList.forEach((listItem: any) => {
+        removeSuperKey(listItem.key!, { moduleType: currentSuperKeyType.value });
+        commonStore.getTargetKeyInfo(listItem.key!, true)
+      });
+      window.$message!.success($t('businessCommon.delSuccess'));
+      isPass = true
+    } catch (error) {
+      window.$message!.error($t('businessCommon.delFailPlsUpdate'));
+      console.error(error);
+    }
+  }
+function resetKeyByEvent(key: string, groupList: GroupItem[], deleteCallback: (item: GroupItem, index: number) => void) {
+  const itemIndex = groupList.findIndex(item =>
+    item.keyBaseList.some(keyBase => keyBase.key === key)
+  );
+
+  if (itemIndex !== -1) {
+    deleteCallback(groupList[itemIndex], itemIndex);
+  }
+};
+function resetKeyCb(key: string) {
+  if (!key || currentSuperKeyType.value !== CURRENT_MODULE_TYPE) {
+    return;
+  }
+  resetKeyByEvent(key, groupList.value, groupItemDelete)
+}
+onMounted(() => {
+  emitter.on(EventNameEnum.resetKey, resetKeyCb);
+})
+onUnmounted(() => {
+  emitter.on(EventNameEnum.resetKey, resetKeyCb);
+})
 </script>
 
 <template>
   <div>
     <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd v-if="oksGroupList.length < 8" icon="add" desc="添加动态键程按键" @click="handleAddClicked" />
-      <BasicGroupItem
-        v-for="(item, idx) in oksGroupList"
-        :key="item.code"
-        :base="item.base"
-        :key-list="item.keyList"
-        code-preffix="D"
-        @click="handleGroupItemClicked(item)"
-      >
+      <BasicGroupAdd v-if="groupList.length < 8" icon="add" desc="添加动态键程按键" @click="handleAddClicked" />
+      <BasicGroupItem v-for="(item, idx) in groupList" :key="item.code" :base="item.base" :key-list="item.keyList"
+        code-preffix="D" @click="handleGroupItemClicked(item)">
         <template #menu>
-          <GroupMenu
-            :group-item="item"
-            :idx="idx"
-            :enable-edit="false"
-            @group-item-delete="handleGroupItemDelete"
-            @group-item-edit="handleGroupItemEdit"
-            @group-item-rename="handleGroupItemRename"
-            @click.stop
-          />
+          <GroupMenu :group-item="item" :idx="idx" :enable-edit="false" @group-item-delete="handleGroupItemDelete"
+            @group-item-edit="handleGroupItemEdit" @group-item-rename="handleGroupItemRename" @click.stop />
         </template>
       </BasicGroupItem>
     </div>
 
-    <DksEdit
-      v-model:visible="editVisible"
-      v-model:title="modalTitle"
-      :code-type="KeyTypeEnum.OKS"
-      :fnc-generate-code="generateGroupCode"
-      :need-import-key="false"
-      keyboard-type="standard"
-      @create-group="handleGroupCreated"
-    >
+    <DksEdit v-model:visible="editVisible" v-model:title="modalTitle" :code-type="KeyTypeEnum.OKS"
+      :fnc-generate-code="generateGroupCode" :need-import-key="false" keyboard-type="standard"
+      @create-group="handleGroupCreated">
       <template #header-extra>
         <div class="flex flex-row items-center text-base text-[#999999]">
           <span class="mr-2">开启仿真：</span>
