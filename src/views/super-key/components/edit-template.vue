@@ -29,7 +29,7 @@ const props = withDefaults(
       keyBaseList: any[];
     };
     wide?: boolean;
-    isEdit: boolean
+    isEdit?: boolean
   }>(),
   {
     keyboardType: 'base',
@@ -69,35 +69,27 @@ const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableReactiveFn<{
   idx: props.needImportKey ? 1 : 0,
   list: []
 }));
-
+const dialogCtxRef = ref();
 onMounted(() => {
   watch(
     () => props.editItem,
     editItem => {
+      if (!props.visible) {
+        return
+      }
       if (editItem) {
         const { keyBaseList: baseList, keyList: detailList } = editItem;
-        selectedKeyInfo.list = [];
-        baseList.forEach((item, index) => {
-          selectedKeyInfo.list.push({
-            base: item,
-            detail: detailList[index]
-          });
-        });
+        selectedKeyInfo.list =
+          baseList.map((item, index) => {
+            return ({
+              base: item,
+              detail: detailList[index]
+            });
+          })
       }
     },
     { immediate: true }
   );
-  if (props.needImportKey) {
-    watch(
-      () => selectedKeys.value,
-      newSelectedKeys => {
-        const keys = Object.keys(newSelectedKeys);
-        if (keys?.[0]) {
-          selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
-        }
-      }
-    );
-  }
 });
 const [localTitle] = useTitle();
 
@@ -219,18 +211,9 @@ function useTitle() {
 </script>
 
 <template>
-  <NModal
-    v-model:show="dialogControl.visible"
-    preset="card"
-    :closable="false"
-    :title="undefined"
-    :close-on-esc="false"
-    :mask-closable="false"
-    class="h-80vh !bg-#191b1d min-w-1000px"
-    :class="`${wide ? 'w-80%': 'w-54%'}`"
-    content-class="bg-#191b1d"
-    size="large"
-  >
+  <NModal v-model:show="dialogControl.visible" preset="card" :closable="false" :title="undefined" :close-on-esc="false"
+    :mask-closable="false" class="h-80vh !bg-#191b1d min-w-1000px" :class="`${wide ? 'w-80%' : 'w-54%'}`"
+    content-class="bg-#191b1d" size="large">
     <template #header>
       <div class="flex flex-row justify-between text-xl">
         <div></div>
@@ -241,25 +224,16 @@ function useTitle() {
       </div>
     </template>
     <template #default>
-      <div class="h-full w-full flex flex-col">
+      <div class="h-full w-full flex flex-col" ref="dialogCtxRef">
         <NDivider class="!mt-0" />
-
         <div class="flex flex-col gap-y-6">
           <h2 v-if="secondTitle" class="text-wihte text-center text-lg">{{ secondTitle }}</h2>
           <p class="text-center text-base text-c-second">{{ desc }}</p>
           <div class="flex flex-row justify-center gap-x-12">
-            <div
-              v-for="(_, idx) in new Array(2)"
-              :key="`d-groups-${idx}`"
-              class="flex flex-col gap-y-4"
-              @click="handleBaseKeyClicked"
-            >
-              <BaseKeyWrapper
-                :base="selectedKeyInfo.list?.[idx]?.base"
-                :detail="selectedKeyInfo.list?.[idx]?.detail"
-                :selected="selectedKeyInfo.idx === idx"
-                :data-idx="idx"
-              ></BaseKeyWrapper>
+            <div v-for="(_, idx) in new Array(2)" :key="`d-groups-${idx}`" class="flex flex-col gap-y-4"
+              @click="handleBaseKeyClicked">
+              <BaseKeyWrapper :base="selectedKeyInfo.list?.[idx]?.base" :detail="selectedKeyInfo.list?.[idx]?.detail"
+                :selected="selectedKeyInfo.idx === idx" :data-idx="idx"></BaseKeyWrapper>
               <div class="text-center text-c-second">{{ idx + 1 }}</div>
             </div>
           </div>
@@ -278,7 +252,8 @@ function useTitle() {
         <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-base" type="primary" ghost @click="closeDialog">
           {{ $t('businessCommon.cancel') }}
         </NButton>
-        <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-lg text-white" type="primary" @click="handleDialogComfirm">
+        <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-lg text-white" type="primary"
+          @click="handleDialogComfirm">
           {{ $t('businessCommon.confirm1') }}
         </NButton>
       </div>
