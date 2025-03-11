@@ -406,9 +406,6 @@ function handleMaskClick(e: MouseEvent) {
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.keyLevelIllustration')"
               :sub-title="$t('repidTrigger.keyLevelIllustration')">
-              <template #end>
-                <NSwitch v-model:value="breakOptimize" @update:value="breakOptimizeSwitch"></NSwitch>
-              </template>
             </GroupTitle>
             <div class="w-100%">
               <CircleShow></CircleShow>
