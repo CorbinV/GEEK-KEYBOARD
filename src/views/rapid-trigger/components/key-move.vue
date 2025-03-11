@@ -99,7 +99,7 @@ onUnmounted(() => {
     <div class="ml-80px flex flex-col items-center justify-center">
       <!-- 滑杆条 -->
       <!-- 显示当前值 -->
-      <div class="value-display">{{ sliderValue }}mm</div>
+      <div class="value-display select-none">{{ sliderValue }}mm</div>
 
       <!-- 滑块 -->
 
@@ -114,7 +114,7 @@ onUnmounted(() => {
         @mousedown="startSliding"
       />
     </div>
-    <div class="relative h-190px w-145px overflow-hidden pt-30px">
+    <div class="relative h-190px w-145px overflow-hidden pt-30px select-none">
       <!-- 背景层 -->
 
       <div class="background-layer absolute">
