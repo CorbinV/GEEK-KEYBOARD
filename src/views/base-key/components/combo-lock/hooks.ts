@@ -21,6 +21,7 @@ export function useComboLock() {
   const keyboardStore = useKeyboardStore();
   const { getKeyDetail } = keyboardStore;
   const moduleName = ref(ModuleNameEnum.default);
+  const comboLockUsefly = ref<boolean>(false)
   const [selectedKeyIndex, resetSelectedKeyIndex] = useResttableRefFn<SelectedKeyIndex>(() => ({
     groupIndex: -1,
     keyIndex: -1
@@ -50,55 +51,67 @@ export function useComboLock() {
     const { defaultLock, customLock } = await getComboLock();
     const keyType = KeyTypeEnum.Normal;
     const x1 = new Promise((res, rej) => {
-      defaultLock.forEach((item, index) => {
-        try {
-          defaultGroups.value[index] = {
-            keys: [],
-            enable: item.enable
-          };
-          item.keys.forEach(code => {
-            const base = { code, type: keyType };
-            const detail = getKeyDetail(base);
-            defaultGroups.value[index].keys.push({
-              base,
-              detail
+      try {
+        defaultLock.forEach((item, index) => {
+
+            defaultGroups.value[index] = {
+              keys: [],
+              enable: item.enable
+            };
+            item.keys.forEach(code => {
+              const base = { code, type: keyType };
+              const detail = getKeyDetail(base);
+              defaultGroups.value[index].keys.push({
+                base,
+                detail
+              });
             });
-          });
-          if (index === defaultLock.length - 1) {
-            res('');
-          }
-        } catch (error) {
-          rej(error);
-        }
-      });
+            if (index === defaultLock.length - 1) {
+              res('');
+            }
+        });
+      } catch (error) {
+        rej(error);
+      }
+
     });
     const x2 = new Promise((res, rej) => {
-      customLock.forEach((item, index) => {
-        try {
-          customGroups.value[index] = {
-            keys: [],
-            enable: item.enable
-          };
-          item.keys.forEach(code => {
-            const base = { code, type: keyType };
-            const detail = getKeyDetail(base);
-            customGroups.value[index].keys.push({
-              base,
-              detail
+      try {
+        customLock.forEach((item, index) => {
+          try {
+            customGroups.value[index] = {
+              keys: [],
+              enable: item.enable
+            };
+            item.keys.forEach(code => {
+              const base = { code, type: keyType };
+              const detail = getKeyDetail(base);
+              customGroups.value[index].keys.push({
+                base,
+                detail
+              });
             });
-          });
-          if (index === customLock.length - 1) {
-            res('');
+            if (index === customLock.length - 1) {
+              res('');
+            }
+          } catch (error) {
+            rej(error);
           }
-        } catch (error) {
-          rej(error);
-        }
-      });
+        });
+      } catch (error) {
+        rej(error);
+      }
     });
     return Promise.all([x1, x2]);
   };
   nextTick(async () => {
-    await initxx();
+    try {
+      await initxx();
+      comboLockUsefly.value = true;
+    } catch (error: any) {
+      comboLockUsefly.value = false;
+      window?.$log!.error('ComboLock init error', error);
+    }
   });
   watch(
     () => moduleName.value,
@@ -112,6 +125,7 @@ export function useComboLock() {
     customGroups,
     updateKeySelect,
     moduleName,
-    setComboLockToDevice
+    setComboLockToDevice,
+    comboLockUsefly
   };
 }

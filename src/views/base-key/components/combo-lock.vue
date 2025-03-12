@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { reactive, toRaw, watchEffect } from 'vue';
+import { computed, onMounted, reactive, toRaw, watch, watchEffect } from 'vue';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { StandardKeyboard } from '@/components/custom/keyboard';
 import { ModuleNameEnum, useComboLock } from './combo-lock/hooks';
 import KeyGroupList from './combo-lock/key-group-list.vue';
+import { $t } from '@/locales';
 const props = defineProps<{
   visible: boolean;
 }>();
 const emit = defineEmits(['update:visible']);
 
 const keyboardStore = useKeyboardStore();
+const { defaultGroups, customGroups, selectedKeyIndex, updateKeySelect, moduleName, setComboLockToDevice, comboLockUsefly } =
+  useComboLock();
 function useDialogController() {
   const control = reactive({
     visible: true
   });
 
-  watchEffect(() => {
-    control.visible = props.visible;
-  });
   return {
     dialogControl: control,
     openDialog: () => {
@@ -30,9 +30,10 @@ function useDialogController() {
     }
   };
 }
-const { dialogControl, closeDialog } = useDialogController();
-const { defaultGroups, customGroups, selectedKeyIndex, updateKeySelect, moduleName, setComboLockToDevice } =
-  useComboLock();
+
+const { closeDialog } = useDialogController();
+
+
 function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEnum; keyId: string }) {
   const { groupIndex, keyIndex } = toRaw(selectedKeyIndex.value);
   if ([groupIndex, keyIndex].includes(-1)) {
@@ -84,47 +85,48 @@ async function handleDialogComfirm() {
     window.$message?.error(`Update lock shortcuts fail`);
   }
 }
+const dialogVisible = computed(() => {
+  return comboLockUsefly.value && props.visible
+})
+
+function handleDialogChange(val: boolean) {
+  // emit('update:visible', val);
+  // if (!val) {
+  //   emit('update:visible', false);
+  // }
+}
+onMounted(()=>{
+
+watch(() => props.visible, (val) => {
+  if (!comboLockUsefly.value && val) {
+    window?.$message?.info($t("common.featWaitSoon"))
+    closeDialog()
+  }
+},{deep:true})
+})
 </script>
 
 <template>
-  <NModal
-    v-model:show="dialogControl.visible"
-    preset="card"
-    :closable="false"
-    :title="undefined"
-    :close-on-esc="false"
-    :mask-closable="false"
-    class="w-90% !h-86vh !bg-#191b1d"
-    content-class="bg-#191b1d"
-    size="large"
-  >
+  <NModal :show="dialogVisible" @update-show="handleDialogChange" preset="card" :closable="false" :title="undefined"
+    :close-on-esc="false" :mask-closable="false" class="w-90% !h-86vh !bg-#191b1d" content-class="bg-#191b1d"
+    size="large">
     <template #header>
       <div class="text-center text-xl">锁组合按键设置</div>
     </template>
     <template #default>
       <div class="h-full flex flex-col">
         <NDivider class="!mt-0" />
-        <NTabs
-          v-model:value="moduleName"
-          type="line"
-          animated
-          justify-content="space-evenly"
-          class="max-content-tab flex-1 -mt-4"
-        >
+        <NTabs v-model:value="moduleName" type="line" animated justify-content="space-evenly"
+          class="max-content-tab flex-1 -mt-4">
           <NTabPane :name="ModuleNameEnum.default">
             <template #tab>
               <span class="text-xl">默认锁定组合键</span>
               <span class="text-base">（固定不可修改）</span>
             </template>
             <div class="h-full w-full flex items-center justify-center py-4">
-              <KeyGroupList
-                class="h-full w-full"
-                :groups="defaultGroups"
-                :selected-key-index="selectedKeyIndex"
-                :disable-change-key="true"
-                @select-key-change="updateKeySelect"
-                @enable-change="handleGroupEnableChange"
-              />
+              <KeyGroupList class="h-full w-full" :groups="defaultGroups" :selected-key-index="selectedKeyIndex"
+                :disable-change-key="true" @select-key-change="updateKeySelect"
+                @enable-change="handleGroupEnableChange" />
             </div>
           </NTabPane>
           <NTabPane :name="ModuleNameEnum.custom">
@@ -133,13 +135,8 @@ async function handleDialogComfirm() {
               <span class="text-base">（可设置单个或多个）</span>
             </template>
             <div class="h-full w-full flex items-center justify-center py-4">
-              <KeyGroupList
-                class="h-full w-full"
-                :groups="customGroups"
-                :selected-key-index="selectedKeyIndex"
-                @select-key-change="updateKeySelect"
-                @enable-change="handleGroupEnableChange"
-              />
+              <KeyGroupList class="h-full w-full" :groups="customGroups" :selected-key-index="selectedKeyIndex"
+                @select-key-change="updateKeySelect" @enable-change="handleGroupEnableChange" />
             </div>
           </NTabPane>
         </NTabs>
