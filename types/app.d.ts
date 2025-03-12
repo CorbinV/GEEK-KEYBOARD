@@ -304,6 +304,7 @@ declare namespace App {
           no: string;
         };
         warning: string;
+        featWaitSoon: string;
       };
       request: {
         logout: string;
