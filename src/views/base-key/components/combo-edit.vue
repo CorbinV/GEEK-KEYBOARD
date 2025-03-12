@@ -80,12 +80,18 @@ function handleKeyClicked(e: MouseEvent) {
     }
   }
 }
+const MAX_KEY_COUNT = 4;
 function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEnum; keyId: string }) {
   const selectedData = {
     base: { code, type, key: keyId },
     detail: keyboardStore.getKeyDetail({ code, type })
   };
   selectedKeyInfo.list[selectedKeyInfo.idx] = selectedData;
+  if (selectedKeyInfo.idx < MAX_KEY_COUNT - 1) {
+    selectedKeyInfo.idx += 1;
+  } else {
+    selectedKeyInfo.idx = 0
+  }
 }
 async function handleDialogComfirm() {
   if (selectedKeyInfo.list.length < 1) {
@@ -127,19 +133,27 @@ function handleSelecteKeyRemove(idx: number) {
     base: {} as any,
     detail: {}
   };
+  if (idx < 0) {
+    return
+  }
+  let index = -1;
+  for (let i = selectedKeyInfo.list.length - 1; i >= 0; i--) {
+    if (selectedKeyInfo.list[i] && i < idx) {
+      index = i;
+      break;
+    }
+  }
+  if (index === -1) {
+    selectedKeyInfo.idx = 0;
+    return
+  }
+  selectedKeyInfo.idx = index;
 }
 </script>
 
 <template>
-  <NModal
-    v-model:show="dialogControl.visible"
-    preset="card"
-    :closable="false"
-    :title="undefined"
-    class="w-90% !h-86vh !bg-#191b1d"
-    content-class="bg-#191b1d"
-    size="large"
-  >
+  <NModal v-model:show="dialogControl.visible" preset="card" :closable="false" :title="undefined"
+    class="w-90% !h-86vh !bg-#191b1d" content-class="bg-#191b1d" size="large">
     <template #header>
       <div class="text-center text-xl">组合按键 {{ groupLength }}</div>
     </template>
@@ -150,20 +164,11 @@ function handleSelecteKeyRemove(idx: number) {
           <div class="flex flex-col gap-y-5">
             <p class="text-center text-base text-c-second">{{ $t('baseKey.combination.plsSelctKeyComb') }}</p>
             <div class="flex flex-row justify-center gap-x-12" @click="handleKeyClicked">
-              <div
-                v-for="(_, idx) in new Array(4)"
-                :key="`d-groups-${idx}`"
-                class="flex flex-col gap-y-2"
-                :data-idx="idx"
-              >
-                <BaseKeyWrapper
-                  :base="selectedKeyInfo.list?.[idx]?.base"
-                  :detail="selectedKeyInfo.list?.[idx]?.detail"
-                  :selected="selectedKeyInfo.idx === idx"
-                  :allow-clear="true"
-                  :idx="idx"
-                  @remove="handleSelecteKeyRemove"
-                ></BaseKeyWrapper>
+              <div v-for="(_, idx) in new Array(MAX_KEY_COUNT)" :key="`d-groups-${idx}`" class="flex flex-col gap-y-2"
+                :data-idx="idx">
+                <BaseKeyWrapper :base="selectedKeyInfo.list?.[idx]?.base" :detail="selectedKeyInfo.list?.[idx]?.detail"
+                  :selected="selectedKeyInfo.idx === idx" :allow-clear="true" :idx="idx"
+                  @remove="handleSelecteKeyRemove"></BaseKeyWrapper>
                 <div class="text-center text-c-second">{{ idx + 1 }}</div>
               </div>
             </div>
