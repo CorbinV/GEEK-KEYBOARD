@@ -30,11 +30,13 @@ const props = withDefaults(
     };
     wide?: boolean;
     isEdit?: boolean
+    maxLen?: number;
   }>(),
   {
     keyboardType: 'base',
     secondTitle: '',
-    wide: false
+    wide: false,
+    maxLen: 2
   }
 );
 function useDialogController() {
@@ -110,6 +112,13 @@ function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEn
     selectedKeyInfo.list[1] = selectedData;
   } else {
     selectedKeyInfo.list[selectedKeyInfo.idx] = selectedData;
+    setTimeout(()=>{
+      if(selectedKeyInfo.idx +1 >= props.maxLen) {
+        selectedKeyInfo.idx -=1
+      } else{
+        selectedKeyInfo.idx +=1
+      }
+    })
   }
 }
 function showInfoMessage(message: string): void {

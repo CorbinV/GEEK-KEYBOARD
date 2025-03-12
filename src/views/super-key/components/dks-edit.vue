@@ -118,11 +118,13 @@ function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEn
     base: { code, type, key: keyId },
     detail: getKeyDetail({ code, type })
   };
+  let i;
   if (props.needImportKey) {
-    selectedKeyInfo.list[1] = selectedData;
+    i  = 1
   } else {
-    selectedKeyInfo.list[selectedKeyInfo.idx] = selectedData;
+    i = selectedKeyInfo.idx
   }
+  selectedKeyInfo.list[i] = selectedData as any;
 }
 async function handleDialogComfirm() {
   const sendData = {
@@ -178,6 +180,17 @@ function useTitle() {
 function handleRemoveKey(idx: number) {
   resetKeyRange(idx);
   selectedKeyInfo.list.splice(idx, 1);
+  if (idx < 0) {
+    return
+  }
+  const index = selectedKeyInfo.list.findIndex((item, iidx)=> {
+    return item && iidx < idx;
+  })
+  if(index === -1){
+    selectedKeyInfo.idx = 0;
+    return
+  }
+  selectedKeyInfo.idx = index;
 }
 onUnmounted(() => {
   resetSelectedKeyInfo();
