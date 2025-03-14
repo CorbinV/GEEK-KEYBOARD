@@ -85,9 +85,10 @@ export function useModuleLogic(groupList: Ref<any>, fncObj: {
   async function groupItemDelete(item: any, idx: number) {
     let isPass = false
     try {
+      const bak = JSON.parse(JSON.stringify(item))
       await fncObj.delFnc({ code: item.base.code });
       groupList.value.splice(idx, 1);
-      item.keyBaseList.forEach((listItem: any) => {
+      bak.keyBaseList.forEach((listItem: any) => {
         removeSuperKey(listItem.key!, { moduleType: currentSuperKeyType.value });
         commonStore.getTargetKeyInfo(listItem.key!, true)
       });
@@ -152,7 +153,7 @@ export function useModuleLogic(groupList: Ref<any>, fncObj: {
     renameCtrl.show = true;
   }
   async function beforeEditModalOpen(items: any, idx: number) {
-    editCtrl.item = items;
+    editCtrl.item = JSON.parse(JSON.stringify(items));
     editCtrl.isEdit = true;
     editCtrl.show = true;
   }
