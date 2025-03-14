@@ -27,7 +27,7 @@ const { groupCreated, groupItemDelete, groupRename, editCtrl, renameCtrl, update
 
 function handleAddClicked() {
   if (groupList.value.length >= MAX_GORUP_CNT) {
-    window.$message!.warning(`最多只能添加${MAX_GORUP_CNT}个组合键`);
+    window.$message!.warning($t('supperKey.maxAddCombinKey', { total: MAX_GORUP_CNT }));
     return;
   }
   // if (Object.keys(selectedKeys.value).length === 0) {
