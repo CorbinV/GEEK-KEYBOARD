@@ -39,11 +39,11 @@ const handleSave = async () => {
     <div class="rounded-log flex flex-col items-center justify-center gap-7 bg-[#191B1D] p-7 text-center">
       <span>{{ $t('businessCommon.rename') }}</span>
       <NInput v-model:value="inputReName" type="text" size="large" placeholder="最长六个字符" maxlength="6" />
-      <div>
-        <button class="h-15 w-42 border border-[#3c8df4] rounded bg-transparent text-[#3C8DF4]" @click="handleCancel">
+      <div class="flex flex-row justify-center gap-x-7 ">
+        <NButton type="info" ghost class="h-15 w-42 text-lg sm:!text-base" @click="handleCancel">
           {{ $t('businessCommon.cancel') }}
-        </button>
-        <button class="ml-7 h-15 w-42 rounded bg-[#3c8df4]" @click="handleSave">{{ $t('businessCommon.save') }}</button>
+        </NButton>
+        <NButton type="primary" class="h-15 w-42 text-lg sm:!text-base" :disabled="!Boolean(inputReName.length)" @click="handleSave">{{ $t('businessCommon.save') }}</NButton>
       </div>
     </div>
   </NModal>
