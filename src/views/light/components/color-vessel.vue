@@ -103,7 +103,7 @@ getDevLight();
         <p class="vertical-bar"></p>
         <p class="text-lg">{{ $t('light.modeSelect') }}</p>
       </div>
-      <div class="grid-container grid mb-20px mt-20px h-40px gap-x-55px gap-y-30px">
+      <div class="grid-container grid mb-20px mt-20px gap-x-55px gap-y-30px">
         <div
           v-for="(item, index) in items"
           :key="index"
