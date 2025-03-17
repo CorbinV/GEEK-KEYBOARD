@@ -11,6 +11,7 @@ import type { BaseKey, BaseKeyView } from '@/api/modules/combo';
 import type { DeviceInfo } from '@/api/modules/keyboard-setting';
 import { getDeviceConfigAndLayer, getKeysCfgByLayer, updateDeviceCfgAndLayer } from '@/api/keyConfig';
 import keyMapJson from '@/assets/files/key-map.json';
+import StandardKeyJsom from '@/assets/files/standard-key.json'
 import { formatLableSub3 } from '@/hooks/common/format';
 import type { KeyInfo, LayerKeysConfig } from '@/api/modules/keyboard';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
@@ -46,12 +47,14 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       keyMap: any;
       standerList: any[];
       standerMap: Map<string, Pick<StandardKbItem, 'alt' | 'code'>>;
+      standardKeyMap: any; // standard key label
     }>({
       layoutMap: new Map(),
       offsetList: [],
       keyMap: {},
       standerList: [],
-      standerMap: new Map()
+      standerMap: new Map(),
+      standardKeyMap: {}
     });
 
     const { bool: hasConfig } = useBoolean(kbStg.get('hasConfig') === 'Y');
@@ -130,7 +133,12 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       //   kbCfg.keyMap = res.default;
       // });
     };
+    const initStandarKey = ()=>{
+      kbCfg.standardKeyMap = StandardKeyJsom;
+
+    }
     initKeyMap();
+    initStandarKey();
     initStandKeyBoardData();
     return {
       initKeyboardData,
