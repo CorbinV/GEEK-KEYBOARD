@@ -234,30 +234,15 @@ export const getMTList = {
         type: 9,
         code: 0,
         time: 100,
-        key: 'A',
         keys: [
           {
+            key: 'J',
             code: 13,
             type: 0
           },
           {
+            key: 'K',
             code: 14,
-            type: 0
-          }
-        ]
-      },
-      {
-        type: 9,
-        code: 1,
-        time: 200,
-        key: 'B',
-        keys: [
-          {
-            code: 15,
-            type: 0
-          },
-          {
-            code: 18,
             type: 0
           }
         ]
