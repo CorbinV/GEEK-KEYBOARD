@@ -7,7 +7,8 @@ export class WCH_OTA extends OTAProtocolController {
   constructor() {
     super();
   }
-  async transferContentData() {
+  async transferContentData(ops?: { onProgress?: (progress: number) => void }) {
+    const { onProgress } = ops || {};
     let result = false;
     try {
       if (!this.sendFnc || !this.fileContent) {
@@ -22,6 +23,8 @@ export class WCH_OTA extends OTAProtocolController {
 
       const buffer = new ArrayBuffer(outMut);
       const u8a = new Uint8Array(buffer);
+      const onePercent = cLen / 100;
+      let progress = 1;
       u8a[0] = CMD_ENUM.H;
       u8a[1] = outMut;
       u8a[2] = CMD_ENUM.T_D;
@@ -48,6 +51,10 @@ export class WCH_OTA extends OTAProtocolController {
         if (offset < cLen) {
           if (sendFlag === outMut - 4) {
             await sendCmd(sum + fixedNum, outMut)
+            if(onProgress && (offset >= onePercent * progress)) {
+              progress++;
+              onProgress?.(progress);
+            }
           }
         } else {
           if (sendFlag > 0) {
@@ -56,6 +63,7 @@ export class WCH_OTA extends OTAProtocolController {
             let sendCmdStr = "";
             u8a.forEach(v => (sendCmdStr += `${v.toString(16)} `));
             console.log(`last package cmd: ${sendCmdStr}, offset: ${offset}, sendFlag: ${sendFlag}, checksum: ${u8a[outMut - 1].toString(16)}`);
+            onProgress?.(100)
           }
         }
       }
