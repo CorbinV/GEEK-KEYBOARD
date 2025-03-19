@@ -31,7 +31,7 @@ const showLogo = computed(() => !isVerticalMix.value && !isHorizontalMix.value);
       <GlobalLogo :show-title="false" :style="{ height: themeStore.header.height + 'px' }" />
     </VerticalMixMenu>
     <HorizontalMixMenu v-else-if="isHorizontalMix" />
-    <VerticalMenu v-else :dark-theme="darkMenu" :menus="routeStore.menus" class="mt-4" />
+    <VerticalMenu v-else :dark-theme="darkMenu" :menus="routeStore.menus" />
     <div class="w-full flex justify-center py-12">
       <slot name="bottom"></slot>
     </div>

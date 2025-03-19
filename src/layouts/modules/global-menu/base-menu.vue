@@ -19,7 +19,7 @@ interface Props {
   menus: App.Global.Menu[];
 }
 const x: MenuThemeOverrides = {
-  fontSize: '16px'
+  fontSize: '20px',
 };
 const props = withDefaults(defineProps<Props>(), {
   mode: 'vertical'
@@ -92,8 +92,19 @@ watch(
   </SimpleScrollbar>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 :deep(.n-menu--horizontal) {
   --n-item-height: v-bind(headerHeight) !important;
+}
+:deep(.n-menu ){
+  .n-menu-item{
+    margin: 15px 0;
+  }
+  .n-menu-item-content{
+    padding-left: 48px !important;
+    .n-menu-item-content__icon{
+      margin-right: 16px !important;
+    }
+  }
 }
 </style>
