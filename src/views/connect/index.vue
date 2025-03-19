@@ -51,7 +51,7 @@ async function handleConnectBtnClicked() {
           <span class="mt-6px w-173 text-#999999">{{ $t('businessCommon.connectHint') }}</span>
 
           <button class="mt-62px h-60px w-168px rounded bg-[#3c8df4] text-[#fff]" @click="handleConnectBtnClicked">
-            连接设备
+            {{ $t('businessCommon.connectDev') }}
           </button>
         </div>
 
