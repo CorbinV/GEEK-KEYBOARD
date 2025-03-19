@@ -82,7 +82,11 @@ export function useOTA(localVersion: Ref<number>) {
       return false
     }
     // send
-    const transferEnd = await otaInstance.transferContentData();
+    const transferEnd = await otaInstance.transferContentData({
+      onProgress:(process:number)=>{
+      otaCtrl.value.progress = process
+    }
+    });
     if (!transferEnd) {
       otaCtrl.value.status = OtaStatusEnum.UPGRADE_FAIL
       otaCtrl.value.errMsg = '升级失败，请确认设备是否正常'
@@ -136,8 +140,8 @@ export function useOTA(localVersion: Ref<number>) {
   // };
   const fetchLastVersion = async () => {
     const url = `${baseUrl}${otaEnv}${model.value}${verJson}`;
+    loading.value = true;
     const response = await fetch(url);
-    loading.value = false;
     if (!response.ok) {
       return [false, '获取版本信息失败'];
     }
