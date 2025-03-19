@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, toRef, onMounted, toRaw } from 'vue';
+import { ref, toRef, onMounted, toRaw, nextTick } from 'vue';
 import { SelectOption, useMessage } from 'naive-ui';
 import { KeyboardSetting } from '@/api/modules/keyboard-setting';
 import GroupTitle from '@/components/custom/group-title.vue';
@@ -20,10 +20,14 @@ const deviceStore = useDeviceStore();
 const kbInfo = toRef(keyboardStore, 'kbInfo');
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-const { loading, showVersion, versionInfo, progress, showProgress, fetchVersion, upgrade, fileImport, fileExport } =
-  useOTA();
+const deviceVersion = ref(1) // excapt kbInfo.value.hd.version
+const { loading, remoteVersionInfo, quickOTAStart, versionCheck, doUpgrade, fileImport, fileExport, otaCtrl } =
+  useOTA(deviceVersion);
 
 const dialog = useDialog();
+const showVersion = ref(false)
+const showProgress = ref(false);
+
 function useKbSettingCtrl() {
   const kbSettingInfo = ref<KeyboardSetting>({
     "allKey": 1,
@@ -88,13 +92,27 @@ function useKbSettingCtrl() {
 const { kbSettingInfo, deepSleepOps, wakeupDistanceOps } = useKbSettingCtrl();
 
 const message = useMessage();
-const onCheckUpdateClick = () => {
-  fetchVersion();
+const onCheckUpdateClick = async() => {
+  try {
+    const [needUpgrade, checkMsg] = await versionCheck();
+    if(!needUpgrade){
+      message.info(checkMsg as string);
+      return
+    }
+    showProgress.value = true;
+    const [otaRes] = await quickOTAStart();
+    if(!otaRes && otaCtrl.value.errMsg){
+      window?.$message!.error(otaCtrl.value.errMsg);
+    }
+
+  } catch (error) {
+    window?.$log!.error('Catch Error when check update', error);
+  }
 };
 
 const onReceiverPairClick = () => {
-  message.info("该功能暂未开放，敬请期待!");
   // feat: wait for next version
+  message.info($t('common.featCommingSoon'));
   return
 };
 const onFactoryResetClick = async () => {
@@ -156,6 +174,17 @@ const triggerFileImport = () => {
     fileInputRef.value.click();
   }
 };
+async function handleUpgrade() {
+  try {
+    showVersion.value = false;
+    nextTick(() => {
+      showProgress.value = true;
+    })
+    await doUpgrade()
+  } catch (error) {
+    window?.$log!.error(`Upgrade failed`, error);
+  }
+}
 </script>
 
 <template>
@@ -184,7 +213,8 @@ const triggerFileImport = () => {
           </GroupTitle>
           <div class="flex items-center justify-between -pt-2 p-1 rounded-md bg-[#19191d]">
             <div class="text-lg ml-2.5">{{ $t('setting.wakeUpDistance') }}</div>
-            <List :list="wakeupDistanceOps" v-model:selected-idx="kbSettingInfo.wpDistance" />
+            <List v-if="wakeupDistanceOps.length" :list="wakeupDistanceOps" v-model:selected-idx="kbSettingInfo.wpDistance" />
+            <p v-eles class="text-#666666">{{ $t("common.featCommingSoon") }}</p>
           </div>
         </div>
         <GroupTitle :title="$t('setting.deepSleep')" :sub-title="$t('setting.deepSleepHint')">
@@ -205,9 +235,9 @@ const triggerFileImport = () => {
               <input ref="fileInputRef" type="file" accept=".bin,.ufw" style="display: none" @change="fileImport" />
             </div>
           </div>
-          <NButton :loading="loading" icon-placement="right"
+          <NButton type="info" :loading="loading" icon-placement="right" :disabled="remoteVersionInfo.isLastVersion"
             class="h-90% w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
-            {{ $t('setting.checkUpdate') }}
+            {{ remoteVersionInfo.isLastVersion ? $t('setting.latestVersion') : $t('setting.checkUpdate') }}
           </NButton>
         </div>
       </div>
@@ -216,8 +246,10 @@ const triggerFileImport = () => {
         <button class="hollow-btn h-60px w-170px" @click="onFactoryResetClick">{{ $t('setting.restore') }}</button>
       </div>
     </div>
-    <OtaVersion :show="showVersion" :versioninfo="versionInfo" @update:show="showVersion = $event" @upgrade="upgrade" />
-    <OtaProgress :show="showProgress" :progress="progress" @update:show="showProgress = $event" />
+    <OtaVersion :show="showVersion" :versioninfo="remoteVersionInfo" @update:show="showVersion = $event"
+      @upgrade="handleUpgrade" />
+    <OtaProgress :show="showProgress" :status="otaCtrl.status" :progress="otaCtrl.progress"
+      @update:show="showProgress = $event" />
   </div>
 </template>
 
