@@ -27,7 +27,11 @@ const lang: App.BusinessLanguage.Schema = {
     temporaryUnavailable: 'Temporarily unavailable for Maintenance',
     btnSelectRequired: 'Button selection required',
     confirmToReset: 'Are you sure you want to reset these settings?',
-    devErr: "Device error detected. Please restart or refresh to retry."
+    devErr: "Device error detected. Please restart or refresh to retry.",
+    tooSmallToDislay: 'The window is too small to display.',
+    upgradeSuccess: 'Upgrade Success',
+    upgradeFail: 'Upgrade Fail',
+    latestVersion: 'Latest Version',
   },
   baseKey: {
     keyboard: {
@@ -253,7 +257,9 @@ const lang: App.BusinessLanguage.Schema = {
     deepSleep: 'Deep Sleep',
     deepSleepHint: 'In Deep Sleep Mode, the keyboard disconnects wirelessly and deactivates key functions to significantly extend battery life.',
     wakeUpDistance: 'Detection Distance',
-
+    upgradeAgain: "Upgrade Again",
+    upgradeNotice1: "Do not turn off the device or close the browser during the upgrade process.",
+    upgradeNotice2: "A notification will appear once the upgrade is complete. Please wait patiently.",
   },
   global_Setting: {
     version: 'Version：{total}',

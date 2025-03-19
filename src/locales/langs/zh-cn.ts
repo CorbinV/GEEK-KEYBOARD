@@ -46,7 +46,10 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
       no: '否'
     },
     warning: '警告',
-    featWaitSoon: '此功能即将上线，敬请期待！'
+    featWaitSoon: '此功能即将上线，敬请期待！',
+    back: '返回',
+    featCommingSoon: '该功能暂未开放，敬请期待!',
+
   },
   request: {
     logout: '请求失败后登出用户',

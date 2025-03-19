@@ -305,6 +305,8 @@ declare namespace App {
         };
         warning: string;
         featWaitSoon: string;
+        back: string;
+        featCommingSoon: string;
       };
       request: {
         logout: string;
@@ -494,6 +496,10 @@ declare namespace App {
         btnSelectRequired: string;
         confirmToReset: string;
         devErr: string;
+        tooSmallToDislay: string;
+        upgradeSuccess: string;
+        upgradeFail: string;
+        latestVersion: string;
       };
       baseKey: {
         keyboard: {
@@ -713,6 +719,9 @@ declare namespace App {
         deepSleep: string;
         deepSleepHint: string;
         wakeUpDistance: string
+        upgradeAgain: string
+        upgradeNotice1: string
+        upgradeNotice2: string
       };
       global_Setting: {
         version: string;

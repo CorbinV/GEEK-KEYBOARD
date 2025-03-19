@@ -27,7 +27,11 @@ const lang: App.BusinessLanguage.Schema = {
     temporaryUnavailable: '功能维护中',
     btnSelectRequired: '请选择按钮',
     confirmToReset: '您确定要重置吗？',
-    devErr: "设备异常，请重启设备或刷新重试"
+    devErr: "设备异常，请重启设备或刷新重试",
+    tooSmallToDislay: '屏幕太小而无法展示',
+    upgradeSuccess: '升级成功',
+    upgradeFail: '升级失败',
+    latestVersion: '最新版本',
   },
   baseKey: {
     keyboard: {
@@ -252,6 +256,10 @@ const lang: App.BusinessLanguage.Schema = {
     deepSleep: '深度休眠',
     deepSleepHint: '(键盘进入深度休眠后，将会断开无线连接，按键等功能进入待机状态，从而大幅提高续航时间)',
     wakeUpDistance: '感应距离',
+    upgradeAgain: '重新升级',
+    upgradeNotice1: '升级过程中，请勿关闭设备以及网页',
+    upgradeNotice2: '升级成功后会有提示，请耐心等待～',
+
   },
   global_Setting: {
     version: '版本号：{total}',
