@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
+import { computed, inject, onMounted,onUnmounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
@@ -305,8 +305,8 @@ async function handleApiResetRtFnc(selectKeyList: string[]) {
     window.$message?.error($t('businessCommon.executeFail'));
   }
 }
-
 onMounted(() => {
+  emitter.on(EventNameEnum.layerOrConfigChange, updateOriginData);
   if (!storeMutipleModule.value) {
     return;
   }
@@ -325,16 +325,17 @@ onMounted(() => {
     await handleApiResetRtFnc(selectKeyList);
     const tary = activeKeyLayer.value.xxx?.def?.tary || []
     selectKeyList.forEach(key => {
-      console.log(key, activeKeyLayer.value.xxx)
       activeKeyLayer.value.xxx.keys[key].tary = tary
     })
     await commonStore.updateTaryDataCache(selectKeyList)
     emitter.emit(EventNameEnum.updateKeyCtrl, selectKeyList)
   });
+
 });
+
 updateOriginData();
-emitter.on(EventNameEnum.layerOrConfigChange, () => {
-  updateOriginData();
+onUnmounted(() => {
+  emitter.off(EventNameEnum.layerOrConfigChange, updateOriginData);
 });
 
 watch(
@@ -351,7 +352,7 @@ function handleLastKeyMounted() {
 </script>
 
 <template>
-  <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick">
+  <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick" :key="`${layer}${config}`">
     <KeyboardKey v-for="(key, idx) in layoutList" :key="`${key}${layer}${config}`" :key-id="key" :idx="idx"
       :kb-length="layoutList.length" :selected="selectedList[idx]" :key-detail="layerOriginData?.keys?.[key]"
       :disabled="layerOriginData?.disable?.includes(key)" :smart="layerOriginData?.smart?.[key]"
