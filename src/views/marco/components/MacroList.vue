@@ -46,7 +46,7 @@ function handleMacrosMenu(key: string | number, item: Macro) {
       </div>
     </div>
 -->
-    <BasicGroupAdd v-if="canAddMacro" icon="add" :desc="$t('businessCommon.addSwtich')" @click="handleNewMacro" />
+    <BasicGroupAdd v-if="canAddMacro" icon="add" :desc="$t('macro.addMacroKey')" @click="handleNewMacro" />
 
     <!-- item -->
     <div v-for="item in macroList" :key="item.code" class="flex flex-col">
