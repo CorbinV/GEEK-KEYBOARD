@@ -656,20 +656,20 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     });
     // push data
     const pushState = (data: ChangeKeyType) => {
-      historyCtrl.value.push(data);
+      historyCtrl.value.unshift(data);
       if (MAX_SIZE < historyCtrl.value.length) {
-        historyCtrl.value.shift();
+        historyCtrl.value.pop();
       }
       current.value = data;
       resetFutureCtrl();
     };
-    // undo
+    // undo // 后退
     const undo = () => {
       if (!historyCtrl.value.length) {
         return null;
       }
-      futureCtrl.value.push(current.value);
-      current.value = historyCtrl.value.pop()!;
+      current.value = historyCtrl.value.shift()!;
+      futureCtrl.value.unshift(current.value);
       return current.value;
     };
     // redo
@@ -677,8 +677,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       if (!futureCtrl.value.length) {
         return null;
       }
-      historyCtrl.value.push(current.value);
-      current.value = futureCtrl.value.pop()!;
+      current.value = futureCtrl.value.shift()!;
+      historyCtrl.value.unshift(current.value);
 
       return current.value;
     };
