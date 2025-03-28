@@ -17,9 +17,9 @@ export class HIDProtocolController extends EventTarget {
   constructor(options: HIDProtocolOptions = {}) {
     super();
     this.options = {
-      timeout: 5000,
+      timeout: 1500,
       retryAttempts: 1,
-      retryDelay: 1000,
+      retryDelay: 800,
       ...options
     };
     this.messageQueue = new HIDMessageQueue();
@@ -84,9 +84,9 @@ export class HIDProtocolController extends EventTarget {
     if (!this.connected) {
       return
     }
-    if(device) {
+    if (device) {
       await device?.close();
-    }else{
+    } else {
       await this.device?.close();
     }
     this.handleDisconnect();
@@ -107,11 +107,15 @@ export class HIDProtocolController extends EventTarget {
       throw new Error('Device not connected');
     }
 
-    const messageId = `${Date.now()}-${this.messageCounter++}`;
-    // const name = data.name;
-    return await this.sendWithRetry(messageId, data, {
-      attemptsLeft: this.options.retryAttempts || 1
-    });
+    try {
+      const messageId = `${Date.now()}-${this.messageCounter++}`;
+      // const name = data.name;
+      return await this.sendWithRetry(messageId, data, {
+        attemptsLeft: this.options.retryAttempts || 1
+      });
+    } catch (error) {
+      throw error
+    }
   }
 
   private async sendWithRetry(
