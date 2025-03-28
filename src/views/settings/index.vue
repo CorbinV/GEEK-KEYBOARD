@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, toRef, onMounted, toRaw, nextTick } from 'vue';
-import { SelectOption, useMessage } from 'naive-ui';
+import { SelectOption, useLoadingBar, useMessage } from 'naive-ui';
 import { KeyboardSetting } from '@/api/modules/keyboard-setting';
 import GroupTitle from '@/components/custom/group-title.vue';
 import List from './components/list.vue';
@@ -9,7 +9,7 @@ import { getKeyboardSetting, setKeyboardSetting, resetKeyboard } from '@/api/key
 import keyboardImg from '@/assets/img/keyboard_img.png';
 import { $t } from '@/locales';
 import { useDialog } from 'naive-ui'
-
+const loadingBar = useLoadingBar()
 import OtaProgress from './components/ota-progress.vue';
 import OtaVersion from './components/ota-version.vue';
 import { useOTA } from './composables/useOTA';
@@ -123,12 +123,15 @@ const onFactoryResetClick = async () => {
     negativeText: $t('common.cancel'),
     onPositiveClick: async () => {
       try {
+        loadingBar.start()
         await resetKeyboard()
         message.success($t('setting.restoreSucess'));
         await deviceStore.disconnect()
       } catch (e) {
         message.error(`${$t('businessCommon.executeFail')}, ${$t('businessCommon.plsUpdate')}`);
         window?.$log!.error(`Reset device failed`, e);
+      }finally {
+        loadingBar.finish()
       }
     }
   })
