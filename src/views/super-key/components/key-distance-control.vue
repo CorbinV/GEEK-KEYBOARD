@@ -46,7 +46,7 @@ defineExpose({
         :step="0.1"
         :show-button="false"
       >
-        <template #suffix>ms</template>
+        <template #suffix>mm</template>
       </NInputNumber>
     </div>
   </div>
