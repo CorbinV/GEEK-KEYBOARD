@@ -279,7 +279,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         activeKeyLayer.rtLabelMap = layerInfo.rtLabelMap;
         activeKeyLayer.keys = layerInfo.keys;
         activeKeyLayer.xxx = layerInfo.xxx;
-        return activeKeyLayer;
+        return Promise.resolve(activeKeyLayer);
       }
 
       const cfgData = await fetchLayerKeys({
@@ -400,7 +400,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       disabled: boolean
     ) => {
       const managerId = `${keyLayerInfo.configIndex}-${layer || keyLayerInfo.layerIndex}`;
-      const layerInfo = layer ? activeKeyLayer.keys : dataManager.get(managerId);
+      const layerInfo = layer ? activeKeyLayer : dataManager.get(managerId);
       const idx = layerInfo?.xxx.disable.indexOf(keyId);
       if (disabled) {
         if (idx === -1) {
