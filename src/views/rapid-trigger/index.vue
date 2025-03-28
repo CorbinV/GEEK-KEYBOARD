@@ -43,16 +43,11 @@ useMutipleKeysControl();
       <template #default>
         <div class="h-full flex flex-col items-center">
           <div class="w-full flex-1">
-            <PropertyView v-if="tabName === 0"></PropertyView>
-            <AdjustView v-if="tabName === 1"></AdjustView>
+            <AdjustView v-show="tabName"></AdjustView>
+            <PropertyView v-show="!tabName"></PropertyView>
           </div>
-          <NTabs
-            v-model:value="tabName"
-            type="segment"
-            animated
-            style="width: 476px"
-            @update:value="handleKeyEventTabs"
-          >
+          <NTabs v-model:value="tabName" type="segment" animated style="width: 476px"
+            @update:value="handleKeyEventTabs">
             <NTab name="0" :tab="$t('repidTrigger.property')" />
             <NTab name="1" :tab="$t('repidTrigger.adjust')" />
           </NTabs>
