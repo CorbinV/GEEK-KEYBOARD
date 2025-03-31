@@ -153,7 +153,14 @@ export class HIDProtocolController extends EventTarget {
         const outputReports = this.codec[isBinary ? 'encodeBinaryMessage' : 'encodeMessage'](messageId, data);
         (async () => {
           for await (const outputReport of outputReports) {
-            await this.device!.sendReport(0, outputReport);
+            await new Promise((resolve, reject) => {
+              this.device!.sendReport(0, outputReport)
+                .then(() => {
+                  resolve(true);
+                }).catch(err => {
+                  reject(err);
+                });
+            });
           }
 
           this.dispatchEvent(
