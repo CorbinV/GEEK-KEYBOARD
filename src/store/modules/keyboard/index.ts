@@ -133,7 +133,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       //   kbCfg.keyMap = res.default;
       // });
     };
-    const initStandarKey = ()=>{
+    const initStandarKey = () => {
       kbCfg.standardKeyMap = StandardKeyJsom;
 
     }
@@ -238,12 +238,17 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       onProgress?: (current: number, total: number) => void
     ): Promise<CacheLayerKeysConfig> => {
       const { configIdx, layerIdx, pageSize = 25, prevData, pageNo = 1 } = params;
-      const result = await getKeysCfgByLayer({
-        config: configIdx,
-        layer: layerIdx,
-        pageNo,
-        pageSize
-      });
+      let result: LayerKeysConfig;
+      try {
+        result = await getKeysCfgByLayer({
+          config: configIdx,
+          layer: layerIdx,
+          pageNo,
+          pageSize
+        });
+      } catch (error) {
+        throw error;
+      }
       const currentData = prevData
         ? {
           keys: { ...prevData.keys, ...result.keys },
@@ -281,11 +286,15 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         activeKeyLayer.xxx = layerInfo.xxx;
         return Promise.resolve(activeKeyLayer);
       }
-
-      const cfgData = await fetchLayerKeys({
-        configIdx: config,
-        layerIdx: layer
-      });
+      let cfgData
+      try {
+        cfgData = await fetchLayerKeys({
+          configIdx: config,
+          layerIdx: layer
+        });
+      } catch (error) {
+        throw error;
+      }
       kbLogger.debug(`Fetch Layer data by layer: ${layer} & config: ${config} 🟩`, cfgData);
       const superKeyMap: any = {};
       Object.keys(cfgData.smart).forEach((key: any) => {
@@ -316,7 +325,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     };
     const updateAllLayerKeys = async (
       { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
-      { finish = false, finishCb }: { skipIdx?: number; finish?: boolean; finishCb?: any }
+      { finish = false, finishCb, errCb }: { skipIdx?: number; finish?: boolean; finishCb?: any; errCb?: any }
     ) => {
       if (finish) {
         if (finishCb instanceof Function) {
@@ -324,19 +333,27 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         }
         return;
       }
-      await updateLayerKeys({
-        config: configIdx,
-        layer: fetchIdx
-      });
-      window.requestAnimationFrame(() =>
+      try {
+        await updateLayerKeys({
+          config: configIdx,
+          layer: fetchIdx
+        });
+      } catch (error) {
+        if(errCb instanceof Function){
+          return errCb(error);
+        }
+        return Promise.reject(error);
+      }
+      setTimeout(() => {
         updateAllLayerKeys(
           { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
           {
             finish: fetchIdx === maxFetch,
-            finishCb
+            finishCb,
+            errCb
           }
         )
-      );
+      })
     };
     const updateDeviceCfgAndLayers = async (): Promise<void> => {
       const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
@@ -511,19 +528,22 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         kbInfo.isLoad = true;
         await updateDeviceCfgAndLayers();
         await new Promise((resolve, reject) => {
-          updateAllLayerKeys({ configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount }, { finishCb: resolve }).catch(e => {
-            kbLogger.error('catch error when update config and layer', e);
-            reject(e);
-          });
-        }).then(() => {
-          // set layer to  device current cfg
-          updateLayerKeys({
-            config: keyLayerInfo.configIndex,
-            layer: keyLayerInfo.layerIndex
-          });
-          kbInfo.isLoad = false;
-          kbInfo.mounted = true;
+          updateAllLayerKeys(
+            { configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount },
+            { finishCb: resolve, errCb: reject }
+          )
+            .catch(e => {
+              kbLogger.error('catch error when update config and layer', e);
+              reject(e);
+            });
+        })
+        await updateLayerKeys({
+          config: keyLayerInfo.configIndex,
+          layer: keyLayerInfo.layerIndex
         });
+        kbInfo.isLoad = false;
+        kbInfo.mounted = true;
+        // });
       } catch (error) {
         kbLogger.error('catch error when update config and layer', error);
         handleDevDisConn()
@@ -757,7 +777,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   // });
 
   // cache mixSiderFixed
-  useEventListener(window, 'beforeunload', () => {});
+  useEventListener(window, 'beforeunload', () => { });
 
   /** On scope dispose */
   onScopeDispose(() => {
