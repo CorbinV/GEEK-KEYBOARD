@@ -17,6 +17,9 @@ const hasFocus = ref(false); // 用于计算时间间隔
 
 // 添加一个按键输出的函数
 const addKey = (event: KeyboardEvent) => {
+  if (event.repeat) {
+    return
+  }
   event.preventDefault();
   event.stopPropagation();
   const currentTime = Date.now();
