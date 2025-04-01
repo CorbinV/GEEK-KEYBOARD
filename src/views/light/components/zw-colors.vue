@@ -31,6 +31,12 @@ const rgbHex = computed(() => {
 const mouseIsMove = ref(false);
 const isRGB = ref(props.isRgb);
 const colorCanvas = ref<HTMLCanvasElement | null>(null); // canvas 引用
+const colorCanvasInfo = {
+  width: 0,
+  height: 0,
+  radius: 0,
+  gap:0
+}
 const dotCanvas = ref<HTMLCanvasElement | null>(null); // canvas 引用
 
 watchEffect(() => {
@@ -48,8 +54,9 @@ const drawColorWheel = () => {
   if (!colorCanvas.value) return; // 检查 canvas 是否存在
   const ctx = colorCanvas.value.getContext('2d');
   if (!ctx) return; // 确保获取到绘图上下文
-
-  const radius = colorCanvas.value.width / 2;
+  colorCanvasInfo.width = colorCanvas.value.width -colorCanvasInfo.gap;
+  colorCanvasInfo.height = colorCanvas.value.height-colorCanvasInfo.gap;
+  const radius = colorCanvasInfo.width / 2;
 
   // 使用 createConicGradient 来创建圆形渐变
   const gradient = ctx.createConicGradient(0, radius, radius);
@@ -114,7 +121,7 @@ const handleMouseMove = (event: MouseEvent) => {
   // 计算大圆的半径
   const maxRadius = dotCanvas.value.width / 2 - insideSizeRadius;
 
-  if (maxRadius > dotYdistance) {
+  if (maxRadius>= dotYdistance) {
     // 计算角度，调整为顺时针
     const angle = Math.atan2(y, x);
 
@@ -135,8 +142,6 @@ const handleMouseMove = (event: MouseEvent) => {
     ctx.lineWidth = insideSizeRadius;
     ctx.fillStyle = `hsl(${hue}, 100%, 45%)`;
     ctx.fill();
-  } else {
-    handleMouseUp();
   }
 };
 
@@ -144,11 +149,11 @@ const handleMouseMove = (event: MouseEvent) => {
 const selectColor = (event: MouseEvent) => {
   if (!colorCanvas.value) return; // 确保 canvas 存在
   const rect = colorCanvas.value.getBoundingClientRect();
-  const x = event.clientX - rect.left - colorCanvas.value.width / 2;
-  const y = event.clientY - rect.top - colorCanvas.value.height / 2;
+  const x = event.clientX - rect.left - colorCanvasInfo.width / 2;
+  const y = event.clientY - rect.top - colorCanvasInfo.height / 2;
   const distance = Math.sqrt(x * x + y * y);
 
-  if (distance < colorCanvas.value.width / 2) {
+  if (distance < colorCanvasInfo.width / 2) {
     // 计算角度，调整为顺时针
     const angle = Math.atan2(y, x);
     let hue = (angle * 180) / Math.PI + 180; // 调整角度范围
