@@ -179,18 +179,7 @@ function useTitle() {
 }
 function handleRemoveKey(idx: number) {
   resetKeyRange(idx);
-  selectedKeyInfo.list.splice(idx, 1);
-  if (idx < 0) {
-    return
-  }
-  const index = selectedKeyInfo.list.findIndex((item, iidx)=> {
-    return item && iidx < idx;
-  })
-  if(index === -1){
-    selectedKeyInfo.idx = 0;
-    return
-  }
-  selectedKeyInfo.idx = index;
+  selectedKeyInfo.list.splice(idx, 1, {} as any);
 }
 onUnmounted(() => {
   resetSelectedKeyInfo();
@@ -198,17 +187,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <NModal
-    v-model:show="dialogControl.visible"
-    preset="card"
-    :closable="false"
-    :title="undefined"
-    :close-on-esc="false"
-    :mask-closable="false"
-    class="h-90vh w-80% !bg-#191b1d"
-    content-class="bg-#191b1d"
-    size="large"
-  >
+  <NModal v-model:show="dialogControl.visible" preset="card" :closable="false" :title="undefined" :close-on-esc="false"
+    :mask-closable="false" class="h-90vh w-80% !bg-#191b1d" content-class="bg-#191b1d" size="large">
     <template #header>
       <div class="flex flex-row justify-between text-xl">
         <div></div>
@@ -226,18 +206,10 @@ onUnmounted(() => {
           <h2 v-if="secondTitle" class="text-wihte text-center text-lg">{{ secondTitle }}</h2>
           <p v-if="desc" class="text-center text-base text-c-second">{{ desc }}</p>
           <div class="flex flex-row justify-center gap-x-12">
-            <div
-              v-for="(_, idx) in dksGroupList"
-              :key="`d-groups-${idx}`"
-              class="flex flex-col gap-y-4"
-              @click="handleBaseKeyClicked"
-            >
-              <DksKeyControl
-                :seleted-idx="selectedKeyInfo.idx"
-                :key-idx="idx"
-                :selected-key="selectedKeyInfo.list?.[idx]"
-                @remove-key="handleRemoveKey"
-              />
+            <div v-for="(_, idx) in dksGroupList" :key="`d-groups-${idx}`" class="flex flex-col gap-y-4"
+              @click="handleBaseKeyClicked">
+              <DksKeyControl :seleted-idx="selectedKeyInfo.idx" :key-idx="idx"
+                :selected-key="selectedKeyInfo.list?.[idx]" @remove-key="handleRemoveKey" />
             </div>
             <KeyDistanceControl ref="keyDistanceControlRef" />
           </div>
