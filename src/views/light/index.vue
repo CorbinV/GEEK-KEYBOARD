@@ -26,7 +26,10 @@ import { KeyboardContainer } from '@/components/custom/keyboard/index';
   </div>
 -->
   <div>
-    <KeyboardContainer><ColorVessel class="h-full w-full flex flex-1 rounded-md" /></KeyboardContainer>
+    <KeyboardContainer>
+      <template #keyboardBottom></template>
+      <ColorVessel class="h-full w-full flex flex-1 rounded-md" />
+    </KeyboardContainer>
   </div>
 </template>
 
