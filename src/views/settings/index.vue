@@ -217,7 +217,7 @@ async function handleUpgrade() {
           <div class="flex items-center justify-between -pt-2 p-1 rounded-md bg-[#19191d]">
             <div class="text-lg ml-2.5">{{ $t('setting.wakeUpDistance') }}</div>
             <List v-if="wakeupDistanceOps.length" :list="wakeupDistanceOps" v-model:selected-idx="kbSettingInfo.wpDistance" />
-            <p v-eles class="text-#666666">{{ $t("common.featCommingSoon") }}</p>
+            <p v-else class="text-#666666">{{ $t("common.featCommingSoon") }}</p>
           </div>
         </div>
         <GroupTitle :title="$t('setting.deepSleep')" :sub-title="$t('setting.deepSleepHint')">
