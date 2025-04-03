@@ -46,9 +46,29 @@ export default defineConfig(configEnv => {
     },
     build: {
       reportCompressedSize: false,
-      sourcemap: viteEnv.VITE_SOURCE_MAP === 'Y',
+      sourcemap: process.env.NODE_ENV === 'production' ? false : viteEnv.VITE_SOURCE_MAP === 'Y',
       commonjsOptions: {
         ignoreTryCatch: false
+      },
+      minify: process.env.NODE_ENV === 'production' ? 'esbuild' : false,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('src')) {
+              return
+            }
+            let tempId = id
+            if (tempId.includes('.pnpm')) {
+              tempId = tempId.split('node_modules/.pnpm/').pop() || ''
+            }
+            if (tempId.match(/^naive-ui*/)) {
+              return 'uiframe'
+            }
+            if(tempId.match(/^@?vue[-\+@]/)) {
+              return 'vue'
+            }
+          }
+        }
       }
     }
   };
