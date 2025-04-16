@@ -1,22 +1,48 @@
 import type { Request } from './types';
 export class HIDMessageQueue {
-  private queue: Map<string, Request> = new Map();
-
+  private queue: Map<string, Request> | Array<[string, Request]>;
+  constructor(queueType?: 'map' | 'arrary') {
+    if (queueType && queueType === 'arrary') {
+      this.queue = []
+    } else {
+      this.queue = new Map()
+    }
+  }
   add(messageId: string, data: Request): void {
+    if (this.queue instanceof Array) {
+      this.queue.push([messageId, data])
+      return
+    }
     this.queue.set(messageId, data);
   }
 
   remove(messageId: string): void {
+    if (this.queue instanceof Array) {
+      const idx = this.queue.findIndex(([id]) => id === messageId)
+      if (idx < 0) {
+        return
+      }
+      this.queue.splice(idx, 0)
+      return
+    }
     this.queue.delete(messageId);
   }
 
   get(messageId: string): Request | undefined {
+    if (this.queue instanceof Array) {
+      const [_, data] = this.queue.find(([id]) => id === messageId) || []
+      return data
+    }
     return this.queue.get(messageId);
   }
   entries() {
     return this.queue.entries();
   }
   clear(): void {
+    if (this.queue instanceof Array) {
+      this.queue = []
+      return
+    }
     this.queue.clear();
   }
 }
