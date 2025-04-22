@@ -36,6 +36,9 @@ export class HIDMessageQueue {
     return this.queue.get(messageId);
   }
   entries() {
+    // if (this.queue instanceof Array) {
+    //   return this.queue.entries()
+    // }
     return this.queue.entries();
   }
   clear(): void {

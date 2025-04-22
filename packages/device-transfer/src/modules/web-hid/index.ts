@@ -7,6 +7,7 @@ const webHidLogger = logger.getLogger('web-hid');
 export class HIDProtocolController extends EventTarget {
   private device: HIDDevice | null = null;
   private messageQueue: HIDMessageQueue;
+  private binMessageQueue: HIDMessageQueue;
   private listenerMap: HIDMessageListener;
   private codec: HIDMessageCodec;
   private messageCounter: number = 0;
@@ -23,6 +24,7 @@ export class HIDProtocolController extends EventTarget {
       ...options
     };
     this.messageQueue = new HIDMessageQueue();
+    this.binMessageQueue = new HIDMessageQueue('arrary');
     this.codec = new HIDMessageCodec();
     this.listenerMap = new HIDMessageListener();
   }
@@ -142,7 +144,7 @@ export class HIDProtocolController extends EventTarget {
         webHidLogger.debug('Requset 🟢', isBinary ? 'binary data' : data);
         if (!withoutResponse) {
           this.messageQueue.add(messageId, {
-            name: data.name,
+            name: data?.name || 'bin',
             callback: (response: HIDResponse) => {
               clearTimeout(timeoutId);
               resolve(response);
@@ -150,7 +152,7 @@ export class HIDProtocolController extends EventTarget {
           });
         }
 
-        const outputReports = this.codec[isBinary ? 'encodeBinaryMessage' : 'encodeMessage'](messageId, data);
+        const outputReports = this.codec['encodeMessage'](messageId, data);
         (async () => {
           for await (const outputReport of outputReports) {
             await new Promise((resolve, reject) => {
@@ -175,6 +177,7 @@ export class HIDProtocolController extends EventTarget {
       throw error;
     }
   }
+
   async on(name: string, callback: (data?: any) => void) {
     this.listenerMap.dispathOn(name, callback);
   }
@@ -183,31 +186,49 @@ export class HIDProtocolController extends EventTarget {
   }
   private async handleInput(event: HIDInputReportEvent) {
     try {
-      const message = this.codec.decodeMessage(event.data);
-      if (!message) {
-        return;
+      const binaryTypeList = [0x86, 0x88]
+      let message: Uint8Array | any; // object: code, name, data?
+      const [eventHead, _, eventType] = new Uint8Array(event.data.buffer)
+      // binary case
+      if (binaryTypeList.includes(eventType) && eventHead == 0xa5) {
+        message = event.data
+        // use type to match cb
+        const messageId = eventType + '';
+        const requestInfo = this.binMessageQueue.get(messageId);
+        if (requestInfo?.callback) {
+          requestInfo.callback(message);
+          this.binMessageQueue.remove(messageId);
+        }
       }
-      const { name } = message;
-      if (!name) {
-        return;
+      // default
+      else {
+        message = this.codec.decodeMessage(event.data);
+        if (!message) {
+          return;
+        }
+        const { name } = message;
+        if (!name) {
+          return;
+        }
+        const listeners = this.listenerMap.get(name);
+        if (listeners) {
+          const promiseArr = listeners.map(cb => cb(message));
+          await Promise.all(promiseArr);
+          return;
+        }
+        // @ts-ignore
+        const matchingRequests = Array.from((this.messageQueue).entries()).find(([_, request]) => {
+          return request.name === name;
+        });
+        const [messageId, requestInfo] = matchingRequests || [];
+        const callback = requestInfo?.callback;
+        if (!callback) {
+          return;
+        }
+        webHidLogger.debug(`Received ${name} 🟩`, message);
+        callback(message);
+        this.messageQueue.remove(messageId!);
       }
-      const listeners = this.listenerMap.get(name);
-      if (listeners) {
-        const promiseArr = listeners.map(cb => cb(message));
-        await Promise.all(promiseArr);
-        return;
-      }
-      const matchingRequests = Array.from(this.messageQueue.entries()).find(([_, request]) => {
-        return request.name === name;
-      });
-      const [messageId, requestInfo] = matchingRequests || [];
-      const callback = requestInfo?.callback;
-      if (!callback) {
-        return;
-      }
-      webHidLogger.debug(`Received ${name} 🟩`, message);
-      callback(message);
-      this.messageQueue.remove(messageId!);
 
       this.dispatchEvent(
         new CustomEvent('messageReceived', {
@@ -218,10 +239,10 @@ export class HIDProtocolController extends EventTarget {
       this.dispatchEvent(new CustomEvent('error', { detail: error }));
     }
   }
-
   private handleDisconnect() {
     this.connected = false;
     this.messageQueue.clear();
+    this.binMessageQueue.clear();
     this.dispatchEvent(new CustomEvent('disconnected'));
   }
   // handle binary case
@@ -229,12 +250,67 @@ export class HIDProtocolController extends EventTarget {
     if (!this.connected || !this.device) {
       throw new Error('Device not connected');
     }
-    const messageId = `${Date.now()}-${this.messageCounter}`;
+    const messageId = data[2] + ''; // use type as cbId
+    // const messageId = `${Date.now()}-${this.messageCounter}`;
     this.messageCounter += 1;
-    await this.sendWithRetry(messageId, data, {
+    await this.sendWithRetryBin(messageId, data, {
       attemptsLeft: this.options.retryAttempts || 1,
-      withoutResponse,
-      isBinary: true
+      withoutResponse
     });
+  }
+  private async sendWithRetryBin(messageId: string,
+    data: any,
+    ops: {
+      attemptsLeft?: number;
+      withoutResponse?: boolean;
+    }
+  ): Promise<HIDResponse | void> {
+    const { attemptsLeft = 1, withoutResponse = false } = ops;
+    try {
+      return new Promise((resolve, reject) => {
+
+        const outputReports = this.codec['encodeBinaryMessage'](messageId, data);
+        webHidLogger.debug('Requset 🟢', 'binary data', data);
+        let timeoutId = setTimeout(() => {
+          console.log('setimeout exec')
+          this.binMessageQueue.remove(messageId);
+          if (attemptsLeft > 1) {
+            webHidLogger.debug('Requset retry 🟢', messageId, data);
+            resolve(this.sendWithRetryBin(messageId, data, { attemptsLeft: attemptsLeft - 1, withoutResponse }));
+          } else {
+            reject(new Error('Request timeout'));
+          }
+        }, this.options.timeout);
+        if (!withoutResponse) {
+          this.binMessageQueue.add(messageId, {
+            name: data?.name || 'bin',
+            callback: (response: HIDResponse) => {
+              clearTimeout(timeoutId);
+              resolve(response);
+            }
+          });
+        }
+        (async () => {
+          await new Promise((res, rej) => {
+            for (const report of outputReports) {
+              this.device!.sendReport(0, report)
+                .then(() => {
+                  res(true);
+                }).catch(err => {
+                  rej(err);
+                });
+            }
+          });
+        })().then(() => {
+          if (withoutResponse) {
+            clearTimeout(timeoutId);
+            resolve()
+          }
+        }).catch(reject);
+      });
+    } catch (error) {
+      this.binMessageQueue.remove(messageId);
+      throw error;
+    }
   }
 }
