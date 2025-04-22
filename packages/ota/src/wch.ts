@@ -31,11 +31,9 @@ export class WCH_OTA extends OTAProtocolController {
       const sendCmd = async (cs: number, len: number = outMut, ops?: { withoutResponse: boolean }) => {
         try {
           u8a[1] = len;
-          u8a[outMut - 1] = cs;
-          let strx = ''
-          u8a.forEach(v => (strx += `${v.toString(16)} `));
+          u8a[len - 1] = cs;
 
-          const res = await this.sendFnc!(u8a, true);
+          const res = await this.sendFnc!(u8a, ops);
           sum = 0;
           sendFlag = 0;
           return res;
@@ -50,11 +48,12 @@ export class WCH_OTA extends OTAProtocolController {
         offset++;
         if (offset < cLen) {
           if (sendFlag === outMut - 4) {
-            await sendCmd(sum + fixedNum, outMut)
-            if(onProgress && (offset >= onePercent * progress)) {
+            await sendCmd(sum + fixedNum, outMut, { withoutResponse: true })
+            if (onProgress && (offset >= onePercent * progress)) {
               progress++;
               onProgress?.(progress);
             }
+            u8a.fill(0x00, 3)
           }
         } else {
           if (sendFlag > 0) {
@@ -84,7 +83,7 @@ export class WCH_OTA extends OTAProtocolController {
       if (!this.sendFnc) {
         throw new Error('sendFnc is null');
       }
-      const res = await this.sendFnc(u8, false);
+      const res = await this.sendFnc(u8, { withoutResponse: true });
       const ret = res?.getUint8(3);
       result = Number(!ret);
 
@@ -96,8 +95,10 @@ export class WCH_OTA extends OTAProtocolController {
   }
   async checkOtaStatus() {
     let result = true;
-    const u8n = new Uint8Array([CMD_ENUM.H, 4, CMD_ENUM.T_D, CMD_ENUM.H + CMD_ENUM.T_D + 4]);
-    const res = await this.sendFnc!(u8n, false);
+    const buffer = new ArrayBuffer(this.outMtu);
+    const u8a = new Uint8Array(buffer);
+    u8a.set([CMD_ENUM.H, 4, CMD_ENUM.T_D, CMD_ENUM.H + CMD_ENUM.T_D + 4]);
+    const res = await this.sendFnc!(u8a);
     const ret = res?.getUint8(3);
     if (ret !== 0) {
       result = false
@@ -110,7 +111,7 @@ export class WCH_OTA extends OTAProtocolController {
     fileByteSize: number,
     fileContent: Uint8Array,
     outMtu: number
-    fnc: (data: any, withoutResponse?: boolean) => Promise<any> | null
+    fnc: (data: any, { withoutResponse }?: { withoutResponse?: boolean }) => Promise<any> | null
   }) {
     const {
       fnc,
@@ -127,11 +128,13 @@ export class WCH_OTA extends OTAProtocolController {
       if (!this.sendFnc || !this.fileContent) {
         throw new Error('sendFnc or fileContent is null');
       }
+      const s1 = fileContentSum & (0xffff >> 8);
+      const l1 = fileByteSize > BIT_CONDITION ? fileByteSize & (0xff00 >> 8) : fileByteSize >> 8;
       await this.enableOtaMode({
         v: VERSION,
-        s1: fileContentSum & 0xffff >> 8,
+        s1: fileContentSum & (0xffff >> 8),
         s2: fileContentSum,
-        l1: fileByteSize > BIT_CONDITION ? fileByteSize & 0xff00 >> 8 : fileByteSize >> 8,
+        l1: fileByteSize > BIT_CONDITION ? fileByteSize & (0xff00 >> 8) : fileByteSize >> 8,
         l2: fileByteSize,
       });
       console.log('enable ota mode success');

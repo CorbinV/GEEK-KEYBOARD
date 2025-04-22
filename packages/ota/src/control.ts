@@ -1,13 +1,13 @@
 import { SendFncType } from "./types";
 import mitt from 'mitt';
-export abstract class OTAProtocolController  {
+export abstract class OTAProtocolController {
   protected sendFnc: (SendFncType | null) | null = null;
   protected fileContent: Uint8Array | null = null; // bytesStream
   protected outMtu: number = 0;
   protected emitter = mitt<{
     [key: string]: any
   }>()
-  setSendFnc(fnc: (data: any, withoutResponse?: boolean) => Promise<any> | null) {
+  setSendFnc(fnc: (data: any, { withoutResponse }?: { withoutResponse?: boolean }) => Promise<any> | null) {
     this.sendFnc = fnc;
   }
   setFileContent(fileContent: Uint8Array) {

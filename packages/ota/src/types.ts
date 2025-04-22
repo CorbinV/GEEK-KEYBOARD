@@ -1,1 +1,1 @@
-export type SendFncType = (data: any, withoutResponse?: boolean) => Promise<any> | null;
+export type SendFncType = (data: any, { withoutResponse }?: { withoutResponse?: boolean }) => Promise<any> | null;
