@@ -22,9 +22,10 @@ export type SetKeyPerf = {
 };
 export type DeviceInfo = {
   zkm: number
-  model: string;
-  version: string;
+  // model: string;
+  // version: string;
   connect: number;
+  firmwares: { version: number; id: number; type: number; model: string }[]
   battery: number;
   bleMtu: number;
   bleOtaMtu: number;

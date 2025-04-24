@@ -339,7 +339,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
           layer: fetchIdx
         });
       } catch (error) {
-        if(errCb instanceof Function){
+        if (errCb instanceof Function) {
           return errCb(error);
         }
         return Promise.reject(error);
@@ -513,7 +513,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     const deviceStore = useDeviceStore();
     const { isConnected } = storeToRefs(deviceStore);
     const kbInfo = reactive<{
-      hd: DeviceInfo
+      hd: DeviceInfo & { model: string, version: string }
     } & {
       isLoad: boolean,
       mounted: boolean
@@ -562,7 +562,25 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       try {
         const data = await getDeviceInfo();
         data.connect = deviceLinkEnumProxy.getKey(data.connect || 0)
-        kbInfo.hd = data;
+        let model: string = '';
+        const generateModelName = (firmware: DeviceInfo['firmwares'][number]) => {
+          if (firmware.id === 0) {
+            return firmware.model
+          }
+          return firmware.model.split('*').shift()!
+        }
+        const versionList = Array.from({ length: 3 }).fill('0') as string[]
+        data.firmwares.forEach((firmware) => {
+          if (!model) {
+            model = generateModelName(firmware)
+          }
+          if (versionList[firmware.id] !== undefined) {
+            versionList[firmware.id] = (firmware.version || 0).toString(16)
+          } else {
+            versionList.splice(firmware.id, 0, (firmware.version || 0).toString(16))
+          }
+        })
+        kbInfo.hd = { ...data, model, version: versionList.join('.') };
       } catch (error) {
         kbLogger.error('catch error when update device info', error);
       }
