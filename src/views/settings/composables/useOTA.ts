@@ -1,16 +1,17 @@
 import { Ref, ref } from 'vue';
 import { useMessage } from 'naive-ui';
 import { useDeviceOta } from '@/hooks/business/useDeviceOta';
+import { DeviceInfo } from '@/api/modules/keyboard-setting';
 export interface VersionInfo {
+  journal_cn: string;
+  journal_en: string;
   version: number;
-  main: string;
-  mcu: string;
-  desc_cn: string;
-  desc_en: string;
+  [key: `${number}`]: string
 }
 
 interface Result {
-  list: VersionInfo[];
+  otaList: VersionInfo[];
+  versionList: number[],
 }
 const { otaInstance, BIT_CONDITION } = useDeviceOta();
 function calcBufferSum(data: Uint8Array): number {
@@ -26,11 +27,11 @@ export enum OtaStatusEnum {
   UPGRADE_SUCCESS,
   UPGRADE_FAIL
 }
-export function useOTA(localVersion: Ref<number>) {
-  const baseUrl = 'https://oss-sz-web.oss-cn-shenzhen.aliyuncs.com/ota';
-  const model = ref('/RK-S75');
-  const otaEnv = '/test';
-  const verJson = '/ota.json';
+export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }) {
+  const baseUrl = 'https://ota-public.oss-cn-shenzhen.aliyuncs.com';
+  const model = ref(deviceHd.model);
+  const otaEnv = `/${import.meta.env.VITE_OTA_TYPE}`;
+  const verJson = '/release_ota_update_android.json';
   const loading = ref(false);
   // const showVersion = ref(false);
   // const showProgress = ref(false);
@@ -39,12 +40,11 @@ export function useOTA(localVersion: Ref<number>) {
   // const mtu = 64;
   const remoteVersionInfo = ref<VersionInfo & { isLastVersion: boolean }>({
     version: 0,
-    main: '',
-    mcu: '',
-    desc_cn: '',
-    desc_en: '',
+    journal_cn: '',
+    journal_en: '',
     isLastVersion: false
   });
+  const updateFirmwareId: `${number}`[] = []
 
   const otaCtrl = ref({
     status: OtaStatusEnum.IDLE,
@@ -57,20 +57,21 @@ export function useOTA(localVersion: Ref<number>) {
     message.error(msg, { duration: 3000 });
   };
 
-  const startOTA = async (firmware: Uint8Array, fileContentSum: number) => {
+  const startOTA = async (firmware: Uint8Array, fileContentSum: number, upgradeId = 0) => {
     otaCtrl.value.progress = 0;
     // start
     try {
       const fileByteSize = firmware.length;
       otaInstance.setFileContent(firmware);
-     const enableSuccess = await otaInstance.enableOtaMode({
+      const enableSuccess = await otaInstance.enableOtaMode({
         v: remoteVersionInfo.value.version,
-        s1: fileContentSum & (0xffff >> 8),
+        s1: (fileContentSum >> 8) & 0xff,
         s2: fileContentSum,
-        l1: fileByteSize > BIT_CONDITION ? fileByteSize & (0xff00 >> 8) : fileByteSize >> 8,
-        l2: fileByteSize
+        l1: fileByteSize > BIT_CONDITION ? (fileByteSize >> 8) & 0xff : fileByteSize >> 8,
+        l2: fileByteSize,
+        id: upgradeId
       });
-      if(!enableSuccess){
+      if (!enableSuccess) {
         throw new Error('Enable ota mode failed')
       }
     } catch (error) {
@@ -82,10 +83,12 @@ export function useOTA(localVersion: Ref<number>) {
       return false
     }
     // send
+    const upgradeListLen = updateFirmwareId.length
     const transferEnd = await otaInstance.transferContentData({
-      onProgress:(process:number)=>{
-      otaCtrl.value.progress = process
-    }
+      onProgress: (process: number) => {
+        console.log('current process', process)
+        otaCtrl.value.progress = process / upgradeListLen
+      }
     });
     if (!transferEnd) {
       otaCtrl.value.status = OtaStatusEnum.UPGRADE_FAIL
@@ -139,24 +142,38 @@ export function useOTA(localVersion: Ref<number>) {
   //   }
   // };
   const fetchLastVersion = async () => {
-    const url = `${baseUrl}${otaEnv}${model.value}${verJson}`;
+    const url = `${baseUrl}${otaEnv}/${model.value}${verJson}`;
+
     loading.value = true;
     const response = await fetch(url);
     if (!response.ok) {
       return [false, '获取版本信息失败'];
     }
     loading.value = false;
-    const data: Result = await response.json();
-    if (data.list.length === 0) {
+    const { version_list: versionList, ota_list: otaList } = await response.json() as any; // Result
+    const data = { versionList, otaList } as Result
+    if (data.otaList.length === 0) {
       return [false, '无版本信息'];
     }
-    remoteVersionInfo.value = Object.assign({}, data.list[0],
+    remoteVersionInfo.value = Object.assign({}, data.otaList[0],
       {
-        isLastVersion: data.list[0].version <= localVersion.value
+        isLastVersion: (() => {
+          // notice: hard code!
+          const localVerList = deviceHd.version.split('.').map(i => parseInt(i))
+          const remoteVerList = [Math.floor(data.otaList[0].version / 100), data.otaList[0].version % 100]
+          localVerList.forEach((lv, idx: number) => {
+            if (lv === 0x00) {
+              return
+            }
+            if (remoteVerList[idx] >= lv) {
+              updateFirmwareId.push(`${idx}`)
+            }
+          })
+          return !Boolean(updateFirmwareId.length)
+        })()
       }
     );
-    console.log(remoteVersionInfo.value, remoteVersionInfo.value.isLastVersion, remoteVersionInfo.value.version <= localVersion.value);
-    remoteVersionInfo.value.desc_cn = remoteVersionInfo.value.desc_cn.replace(/\n/g, '<br>');
+    remoteVersionInfo.value.journal_cn = remoteVersionInfo.value.journal_cn.replace(/\n/g, '<br>');
     return [true, null]
   }
 
@@ -211,19 +228,31 @@ export function useOTA(localVersion: Ref<number>) {
     return [true, null]
   }
   const quickOTAStart = async () => {
-    let res:[boolean, null | string]
-    const url = `${baseUrl}${otaEnv}${model.value}/${remoteVersionInfo.value.main}`;
-    const [otaInfo, downloadErrMsg] = await downLoadFirmwareAsUint8(url)
-    if (!otaInfo) {
-      res= [false, downloadErrMsg]
-      return res;
+    const res: [boolean, null | string][] = []
+    for await (const id of updateFirmwareId) {
+      const firmwareUri = remoteVersionInfo.value[id]
+      if (!firmwareUri) {
+        continue
+      }
+      const url = `${baseUrl}${otaEnv}/${model.value}/${firmwareUri}`;
+      const [otaInfo, downloadErrMsg] = await downLoadFirmwareAsUint8(url)
+      if (!otaInfo) {
+        res.push([false, downloadErrMsg])
+        break
+      }
+      const firmwareBuf = otaInfo as Uint8Array;
+      const sum = calcBufferSum(firmwareBuf);
+      const otaRes = await startOTA(firmwareBuf, sum, parseInt(id));
+      res.push([otaRes, otaRes ? null : '固件升级失败'])
     }
-    const firmwareBuf = otaInfo as Uint8Array;
-    const sum = calcBufferSum(firmwareBuf);
-    // showProgress.value = true;
-    const otaRes = await startOTA(firmwareBuf, sum);
-    res= [otaRes, otaRes ? null : '固件升级失败']
-    return res;
+    let msg = ''
+    const hasError = res.some(([status, errMsg]) => {
+      if (!status) {
+        msg = errMsg!
+        return true
+      }
+    })
+    return [hasError, msg];
   }
   // const fetchVersion = async (download: boolean = false) => {
   //   let result = [true, '']
@@ -259,17 +288,7 @@ export function useOTA(localVersion: Ref<number>) {
   // };
 
   const doUpgrade = async () => {
-    // showVersion.value = false;
-    const url = `${baseUrl}${otaEnv}${model.value}/${remoteVersionInfo.value.main}`;
-    const [otaInfo, downloadErrMsg] = await downLoadFirmwareAsUint8(url)
-    if (!otaInfo) {
-      return [false, downloadErrMsg]
-    }
-    const firmwareBuf = otaInfo as Uint8Array;
-    const sum = calcBufferSum(firmwareBuf);
-    // showProgress.value = true;
-    const otaRes = await startOTA(firmwareBuf, sum);
-    return [otaRes, otaRes ? null : '固件升级失败']
+    return quickOTAStart()
   };
 
   const fileImport = (event: Event) => {
