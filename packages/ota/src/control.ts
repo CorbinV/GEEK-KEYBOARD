@@ -25,6 +25,7 @@ export abstract class OTAProtocolController {
     s2: number,
     l1: number,
     l2: number,
+    id: number
   }): Promise<number>
   abstract transferContentData(ops?: { onProgress?: (progress: number) => void }): Promise<boolean>
   abstract checkOtaStatus(): Promise<boolean>
