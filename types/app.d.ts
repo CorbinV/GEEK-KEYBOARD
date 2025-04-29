@@ -731,7 +731,20 @@ declare namespace App {
         moreProduct: string;
         officialWeb: string;
         wechart: string;
-      };
+      },
+      otaHooks: {
+        upgradeFailDevice: string;
+        enableOtaModeFail: string;
+        fetchVersionFail: string;
+        noVersionInfo: string;
+        fetchFirmwareFail: string;
+        firmwareIsLatest: string;
+        firmwareUpgradeFail: string;
+        wrongFileType: string;
+        wrongFileFormat: string;
+        noFirmwareNeedUpgrade: string;
+        downloadFileFail: string;
+      }
     };
   }
   /** Service namespace */

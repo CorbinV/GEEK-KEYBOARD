@@ -269,6 +269,19 @@ const lang: App.BusinessLanguage.Schema = {
     moreProduct: 'More Products',
     officialWeb: 'Official Website： {total}',
     wechart: 'Official Account： {total}'
+  },
+  otaHooks:  {
+    upgradeFailDevice: 'Upgrade failed, please confirm the device is working properly',
+    enableOtaModeFail: 'Enable OTA mode failed',
+    fetchVersionFail: 'Failed to get version information',
+    noVersionInfo: 'No version information available',
+    fetchFirmwareFail: 'Failed to get firmware',
+    firmwareIsLatest: 'The current firmware is already the latest version',
+    firmwareUpgradeFail: 'Firmware upgrade failed',
+    wrongFileType: 'Wrong file type',
+    wrongFileFormat: 'Wrong file format',
+    noFirmwareNeedUpgrade: 'No firmware needs to be upgraded',
+    downloadFileFail: 'Download file failed',
   }
 };
 export default lang;

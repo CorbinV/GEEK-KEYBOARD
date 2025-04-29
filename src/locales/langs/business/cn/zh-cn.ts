@@ -269,6 +269,19 @@ const lang: App.BusinessLanguage.Schema = {
     moreProduct: '更多产品',
     officialWeb: '官网：',
     wechart: '公众号：'
+  },
+  otaHooks: {
+    upgradeFailDevice: '升级失败，请确认设备是否正常',
+    enableOtaModeFail: 'Enable ota mode failed',
+    fetchVersionFail: '获取版本信息失败',
+    noVersionInfo: '无版本信息',
+    fetchFirmwareFail: '获取固件失败',
+    firmwareIsLatest: '当前固件已是最新版本',
+    firmwareUpgradeFail: '固件升级失败',
+    wrongFileType: '文件类型错误',
+    wrongFileFormat: '文件格式错误',
+    noFirmwareNeedUpgrade: '没有需要升级的固件',
+    downloadFileFail: '文件下载失败',
   }
 };
 export default lang;
