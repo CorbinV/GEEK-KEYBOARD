@@ -20,9 +20,8 @@ const deviceStore = useDeviceStore();
 const kbInfo = toRef(keyboardStore, 'kbInfo');
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-const deviceVersion = ref(1) // excapt kbInfo.value.hd.version
-const { loading, remoteVersionInfo, quickOTAStart, versionCheck, doUpgrade, fileImport, fileExport, otaCtrl } =
-  useOTA(deviceVersion);
+const { loading, remoteVersionInfo, onlineOta, versionCheck, doUpgrade, fileImport, fileExport, otaCtrl } =
+  useOTA(kbInfo.value.hd);
 
 const dialog = useDialog();
 const showVersion = ref(false)
@@ -92,16 +91,16 @@ function useKbSettingCtrl() {
 const { kbSettingInfo, deepSleepOps, wakeupDistanceOps } = useKbSettingCtrl();
 
 const message = useMessage();
-const onCheckUpdateClick = async() => {
+const onCheckUpdateClick = async () => {
   try {
     const [needUpgrade, checkMsg] = await versionCheck();
-    if(!needUpgrade){
+    if (!needUpgrade) {
       message.info(checkMsg as string);
       return
     }
     showProgress.value = true;
-    const [otaRes] = await quickOTAStart();
-    if(!otaRes && otaCtrl.value.errMsg){
+    const [otaRes] = await onlineOta();
+    if (!otaRes && otaCtrl.value.errMsg) {
       window?.$message!.error(otaCtrl.value.errMsg);
     }
 
@@ -109,7 +108,21 @@ const onCheckUpdateClick = async() => {
     window?.$log!.error('Catch Error when check update', error);
   }
 };
-
+async function handleLocalUpgrade(e: InputEvent) {
+  try {
+    showProgress.value = true
+    const [status, msg] = (await fileImport(e)) ?? [false, null];
+    if (!status) {
+      if (typeof msg === 'string') {
+        message.error($t(msg as any));
+      }
+      return
+    }
+  } catch (error) {
+    window?.$log!.error('catch error when local upgrade', error);
+    message.error($t('businessCommon.executeFail'));
+  }
+}
 const onReceiverPairClick = () => {
   // feat: wait for next version
   message.info($t('common.featCommingSoon'));
@@ -130,7 +143,7 @@ const onFactoryResetClick = async () => {
       } catch (e) {
         message.error(`${$t('businessCommon.executeFail')}, ${$t('businessCommon.plsUpdate')}`);
         window?.$log!.error(`Reset device failed`, e);
-      }finally {
+      } finally {
         loadingBar.finish()
       }
     }
@@ -191,7 +204,7 @@ async function handleUpgrade() {
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col items-center">
+  <div class="h-full w-full flex flex-col items-center select-none">
     <img :src="keyboardImg" alt="Logo" class="h-324px w-804px min-804px" />
     <div class="mt-20px h-520px w-976px flex flex-col   rounded-md bg-[#171619] p-30px pt-4">
       <h1 class="text-[22px] text-center">{{ $t('setting.devName', { total: kbInfo.hd?.model || 'kb001' }) }}</h1>
@@ -216,14 +229,17 @@ async function handleUpgrade() {
           </GroupTitle>
           <div class="flex items-center justify-between -pt-2 p-1 rounded-md bg-[#19191d]">
             <div class="text-lg ml-2.5">{{ $t('setting.wakeUpDistance') }}</div>
-            <List v-if="wakeupDistanceOps.length" :list="wakeupDistanceOps" v-model:selected-idx="kbSettingInfo.wpDistance" />
+            <List v-if="wakeupDistanceOps.length" :list="wakeupDistanceOps"
+              v-model:selected-idx="kbSettingInfo.wpDistance" />
             <p v-else class="text-#666666">{{ $t("common.featCommingSoon") }}</p>
           </div>
         </div>
         <GroupTitle :title="$t('setting.deepSleep')" :sub-title="$t('setting.deepSleepHint')">
           <template #end>
-            <NSelect v-model:value="kbSettingInfo.deepSleep" :options="deepSleepOps"
+            <NSelect v-if="deepSleepOps.length" v-model:value="kbSettingInfo.deepSleep" :options="deepSleepOps"
               class="h-40px w-120px !cursor-not-allowed" placement="bottom-start" trigger="click" size="large" />
+
+            <p v-else class="text-#666666">{{ $t("common.featCommingSoon") }}</p>
           </template>
         </GroupTitle>
         <div class="flex justify-between pb-2 border-b-1 border-#232327">
@@ -235,12 +251,13 @@ async function handleUpgrade() {
               <i class="iconfont icon-file-export text-[20px] text-[#3C8DF4] cursor-pointer" @click="fileExport"></i>
               <i class="iconfont icon-file-import ml-30px text-[20px] text-[#3C8DF4] cursor-pointer"
                 @click="triggerFileImport"></i>
-              <input ref="fileInputRef" type="file" accept=".bin,.ufw" style="display: none" @change="fileImport" />
+              <input ref="fileInputRef" type="file" accept=".zip" style="display: none"
+                @change="(e) => handleLocalUpgrade(e as InputEvent)" />
             </div>
           </div>
           <NButton type="info" :loading="loading" icon-placement="right" :disabled="remoteVersionInfo.isLastVersion"
             class="h-90% w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]" @click="onCheckUpdateClick">
-            {{ remoteVersionInfo.isLastVersion ? $t('setting.latestVersion') : $t('setting.checkUpdate') }}
+            {{ remoteVersionInfo.isLastVersion ? $t('businessCommon.latestVersion') : $t('setting.checkUpdate') }}
           </NButton>
         </div>
       </div>
