@@ -163,7 +163,7 @@ function handleSelecteKeyRemove(idx: number) {
 
 <template>
   <NModal v-model:show="dialogControl.visible" preset="card" :closable="false" :title="undefined"
-    class="w-90% !h-86vh !bg-#191b1d" content-class="bg-#191b1d" size="large">
+    class="w-90% !bg-#191b1d" content-class="bg-#191b1d" size="large">
     <template #header>
       <div class="text-center text-xl">组合按键 {{ groupLength }}</div>
     </template>

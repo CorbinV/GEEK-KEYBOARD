@@ -108,7 +108,7 @@ watch(() => props.visible, (val) => {
 
 <template>
   <NModal :show="dialogVisible" @update-show="handleDialogChange" preset="card" :closable="false" :title="undefined"
-    :close-on-esc="false" :mask-closable="false" class="w-90% !h-86vh !bg-#191b1d" content-class="bg-#191b1d"
+    :close-on-esc="false" :mask-closable="false" class="w-90% !bg-#191b1d" content-class="bg-#191b1d"
     size="large">
     <template #header>
       <div class="text-center text-xl">锁组合按键设置</div>

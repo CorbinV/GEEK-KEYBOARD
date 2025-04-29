@@ -221,7 +221,7 @@ function useTitle() {
 
 <template>
   <NModal v-model:show="dialogControl.visible" preset="card" :closable="false" :title="undefined" :close-on-esc="false"
-    :mask-closable="false" class="h-80vh !bg-#191b1d min-w-1000px" :class="`${wide ? 'w-80%' : 'w-54%'}`"
+    :mask-closable="false" class="!bg-#191b1d !min-w-1000px max-w-1560px" :class="`${wide ? 'w-80%' : 'w-54%'}`"
     content-class="bg-#191b1d" size="large">
     <template #header>
       <div class="flex flex-row justify-between text-xl">

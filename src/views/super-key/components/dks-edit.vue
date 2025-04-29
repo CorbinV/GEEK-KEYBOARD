@@ -188,7 +188,7 @@ onUnmounted(() => {
 
 <template>
   <NModal v-model:show="dialogControl.visible" preset="card" :closable="false" :title="undefined" :close-on-esc="false"
-    :mask-closable="false" class="h-90vh w-80% !bg-#191b1d" content-class="bg-#191b1d" size="large">
+    :mask-closable="false" class="w-80% !bg-#191b1d" content-class="bg-#191b1d" size="large">
     <template #header>
       <div class="flex flex-row justify-between text-xl">
         <div></div>
