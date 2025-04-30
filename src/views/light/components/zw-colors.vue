@@ -97,55 +97,54 @@ const handleMouseUp = () => {
     return;
   }
   mouseIsMove.value = false;
-
   emit('stopSliding', colorVal.r, colorVal.g, colorVal.b); // 触发更新外部值
 };
 const handleMouseDown = (_event: MouseEvent) => {
   mouseIsMove.value = true;
 };
 const handleMouseMove = (event: MouseEvent) => {
-  if (!dotCanvas.value) return; // 确保 canvas 存在
-  if (!mouseIsMove.value) return;
+  requestAnimationFrame(() => {
+    if (!dotCanvas.value) return; // 确保 canvas 存在
+    if (!mouseIsMove.value) return;
+    const ctx = dotCanvas.value.getContext('2d');
+    if (!ctx) return; // 确保获取到绘图上下文
 
-  const ctx = dotCanvas.value.getContext('2d');
-  if (!ctx) return; // 确保获取到绘图上下文
+    const rect = dotCanvas.value.getBoundingClientRect();
 
-  const rect = dotCanvas.value.getBoundingClientRect();
+    const x = (event.clientX - rect.left) * (dotCanvas.value.width / rect.width) - dotCanvas.value.width / 2;
+    const y = (event.clientY - rect.top) * (dotCanvas.value.height / rect.height) - dotCanvas.value.width / 2;
 
-  const x = (event.clientX - rect.left) * (dotCanvas.value.width  / rect.width)- dotCanvas.value.width / 2;
-  const y = (event.clientY - rect.top ) * (dotCanvas.value.height / rect.height)- dotCanvas.value.width / 2;
+    const insideSize = 8; // 控制圆的半径
+    const insideSizeRadius = insideSize / 2; // 控制圆的半径
+    const dotX = x + dotCanvas.value.width / 2; // 控制圆的半径
+    const dotY = y + dotCanvas.value.height / 2; // 控制圆的半径
 
-  const insideSize = 8; // 控制圆的半径
-  const insideSizeRadius = insideSize / 2; // 控制圆的半径
-  const dotX = x + dotCanvas.value.width / 2; // 控制圆的半径
-  const dotY = y + dotCanvas.value.height / 2; // 控制圆的半径
+    const dotYdistance = Math.sqrt(x * x + y * y) + insideSizeRadius;
+    // 计算大圆的半径
+    const maxRadius = dotCanvas.value.width / 2 - insideSizeRadius;
+    if (maxRadius >= dotYdistance) {
+      // 计算角度，调整为顺时针
+      const angle = Math.atan2(y, x);
 
-  const dotYdistance = Math.sqrt(x * x + y * y) + insideSizeRadius;
-  // 计算大圆的半径
-  const maxRadius = dotCanvas.value.width / 2 - insideSizeRadius;
+      const hue = (angle * 180) / Math.PI + 180; // 调整角度范围
+      ctx.clearRect(0, 0, dotCanvas.value.width, dotCanvas.value.height);
+      const rgb = hslToRgb(hue, 100, 50);
 
-  if (maxRadius >= dotYdistance) {
-    // 计算角度，调整为顺时针
-    const angle = Math.atan2(y, x);
+      colorVal.r = rgb[0]; // 转换为十六进制
+      colorVal.g = rgb[1]; // 转换为十六进制
+      colorVal.b = rgb[2]; // 转换为十六进制
+      initValue();
 
-    const hue = (angle * 180) / Math.PI + 180; // 调整角度范围
-    ctx.clearRect(0, 0, dotCanvas.value.width, dotCanvas.value.height);
-    const rgb = hslToRgb(hue, 100, 50);
-
-    colorVal.r = rgb[0]; // 转换为十六进制
-    colorVal.g = rgb[1]; // 转换为十六进制
-    colorVal.b = rgb[2]; // 转换为十六进制
-    initValue();
-
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, insideSize, 0, 2 * Math.PI);
-    ctx.closePath();
-    ctx.stroke(); // 描边
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = insideSizeRadius;
-    ctx.fillStyle = `hsl(${hue}, 100%, 45%)`;
-    ctx.fill();
-  }
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, insideSize, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.stroke(); // 描边
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = insideSizeRadius;
+      ctx.fillStyle = `hsl(${hue}, 100%, 45%)`;
+      ctx.fill();
+    }
+  })
 };
 
 // 处理点击事件，选中颜色
@@ -224,55 +223,27 @@ initValue();
     <div class="flex-raw mb-30px mt-30px w-100% flex justify-center">
       <div class="position-relative h-200px w-200px">
         <canvas ref="colorCanvas" width="200px" height="200px" class="absolute" @click="selectColor"></canvas>
-        <canvas
-          ref="dotCanvas"
-          width="200px"
-          height="200px"
-          class="absolute z-40 h-200px w-200px"
-          @mousemove="handleMouseMove"
-          @mousedown="handleMouseDown"
-          @mouseup="handleMouseUp"
-        ></canvas>
+        <canvas ref="dotCanvas" width="200px" height="200px" class="absolute z-40 h-200px w-200px"
+          @mousemove="handleMouseMove" @mousedown="handleMouseDown" @mouseup="handleMouseUp"></canvas>
       </div>
     </div>
     <div class="flex flex-row items-center justify-center gap-20px">
       <p class="justify-center text-lg text-[#fff]">R</p>
       <p class="h-36px w-44px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999]">
-        <NInputNumber
-          v-model:value="colorVal.r"
-          :show-button="false"
-          maxlength="3"
-          max="255"
-          min="0"
-          placeholder=""
-          @update-value="handleInput($event, 'r')"
-        ></NInputNumber>
+        <NInputNumber v-model:value="colorVal.r" :show-button="false" maxlength="3" max="255" min="0" placeholder=""
+          @update-value="handleInput($event, 'r')"></NInputNumber>
       </p>
 
       <p class="text-lg text-[#fff]">G</p>
       <p class="h-36px w-44px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999]">
-        <NInputNumber
-          v-model:value="colorVal.g"
-          :show-button="false"
-          maxlength="3"
-          max="255"
-          min="0"
-          placeholder=""
-          @update-value="handleInput($event, 'g')"
-        ></NInputNumber>
+        <NInputNumber v-model:value="colorVal.g" :show-button="false" maxlength="3" max="255" min="0" placeholder=""
+          @update-value="handleInput($event, 'g')"></NInputNumber>
       </p>
 
       <p class="text-lg text-[#fff]">B</p>
       <p class="h-36px w-44px flex items-center justify-center rounded-[6px] bg-[#222227] text-[#999999] !text-base">
-        <NInputNumber
-          v-model:value="colorVal.b"
-          :show-button="false"
-          maxlength="3"
-          max="255"
-          min="0"
-          placeholder=""
-          @update-value="handleInput($event, 'b')"
-        ></NInputNumber>
+        <NInputNumber v-model:value="colorVal.b" :show-button="false" maxlength="3" max="255" min="0" placeholder=""
+          @update-value="handleInput($event, 'b')"></NInputNumber>
       </p>
     </div>
   </div>
