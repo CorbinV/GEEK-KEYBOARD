@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watchEffect } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watchEffect } from 'vue';
 import { NInputNumber } from 'naive-ui';
 import { hslToRgb, rgbToHsl } from '@/utils/tools';
 
@@ -35,7 +35,7 @@ const colorCanvasInfo = {
   width: 0,
   height: 0,
   radius: 0,
-  gap:0
+  gap: 0
 }
 const dotCanvas = ref<HTMLCanvasElement | null>(null); // canvas 引用
 
@@ -48,14 +48,14 @@ watchEffect(() => {
 watchEffect(() => {
   colorVal.bs = colorVal.b.toString(16).padStart(2, '0').toUpperCase();
 });
-function initValue() {}
+function initValue() { }
 // 绘制色轮
 const drawColorWheel = () => {
   if (!colorCanvas.value) return; // 检查 canvas 是否存在
   const ctx = colorCanvas.value.getContext('2d');
   if (!ctx) return; // 确保获取到绘图上下文
-  colorCanvasInfo.width = colorCanvas.value.width -colorCanvasInfo.gap;
-  colorCanvasInfo.height = colorCanvas.value.height-colorCanvasInfo.gap;
+  colorCanvasInfo.width = colorCanvas.value.width - colorCanvasInfo.gap;
+  colorCanvasInfo.height = colorCanvas.value.height - colorCanvasInfo.gap;
   const radius = colorCanvasInfo.width / 2;
 
   // 使用 createConicGradient 来创建圆形渐变
@@ -93,12 +93,14 @@ const drawColorWheel = () => {
 };
 
 const handleMouseUp = () => {
+  if (!mouseIsMove.value) {
+    return;
+  }
   mouseIsMove.value = false;
 
   emit('stopSliding', colorVal.r, colorVal.g, colorVal.b); // 触发更新外部值
 };
-const handleMouseDown = (event: MouseEvent) => {
-  console.log(event);
+const handleMouseDown = (_event: MouseEvent) => {
   mouseIsMove.value = true;
 };
 const handleMouseMove = (event: MouseEvent) => {
@@ -109,8 +111,9 @@ const handleMouseMove = (event: MouseEvent) => {
   if (!ctx) return; // 确保获取到绘图上下文
 
   const rect = dotCanvas.value.getBoundingClientRect();
-  const x = event.clientX - rect.left - dotCanvas.value.width / 2;
-  const y = event.clientY - rect.top - dotCanvas.value.height / 2;
+
+  const x = (event.clientX - rect.left) * (dotCanvas.value.width  / rect.width)- dotCanvas.value.width / 2;
+  const y = (event.clientY - rect.top ) * (dotCanvas.value.height / rect.height)- dotCanvas.value.width / 2;
 
   const insideSize = 8; // 控制圆的半径
   const insideSizeRadius = insideSize / 2; // 控制圆的半径
@@ -121,7 +124,7 @@ const handleMouseMove = (event: MouseEvent) => {
   // 计算大圆的半径
   const maxRadius = dotCanvas.value.width / 2 - insideSizeRadius;
 
-  if (maxRadius>= dotYdistance) {
+  if (maxRadius >= dotYdistance) {
     // 计算角度，调整为顺时针
     const angle = Math.atan2(y, x);
 
@@ -149,8 +152,8 @@ const handleMouseMove = (event: MouseEvent) => {
 const selectColor = (event: MouseEvent) => {
   if (!colorCanvas.value) return; // 确保 canvas 存在
   const rect = colorCanvas.value.getBoundingClientRect();
-  const x = event.clientX - rect.left - colorCanvasInfo.width / 2;
-  const y = event.clientY - rect.top - colorCanvasInfo.height / 2;
+  const x = (event.clientX - rect.left) * (colorCanvas.value.width / rect.width);
+  const y = (event.clientY - rect.top) * (colorCanvas.value.height / rect.height);
   const distance = Math.sqrt(x * x + y * y);
 
   if (distance < colorCanvasInfo.width / 2) {
@@ -185,14 +188,16 @@ const handleInput = (e: any, key: 'r' | 'g' | 'b') => {
   //   // 如果不合法，只保留合法的部分
   //   colorVal[key] = `${colorVal[key]}`.slice(0, 2);
   // }
-  console.log('2222222', colorVal[key]);
 };
 // 初始化色轮
 
 onMounted(() => {
   drawColorWheel();
+  document.addEventListener('mouseup', handleMouseUp)
 });
-
+onUnmounted(() => {
+  document.removeEventListener('mouseup', handleMouseUp)
+})
 const isRgbSwitch = (value: boolean) => {
   emit('isRgbSwitch', value);
 };
