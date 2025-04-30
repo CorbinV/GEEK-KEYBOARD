@@ -6,6 +6,7 @@ import { setupStore } from './store';
 import { setupRouter } from './router';
 import { setupI18n } from './locales';
 import App from './App.vue';
+import autofit from 'autofit.js'
 
 async function setupApp() {
   setupLoading();
@@ -25,6 +26,13 @@ async function setupApp() {
   setupI18n(app);
 
   app.mount('#app');
+
+  autofit.init({
+    dh: 1080,
+    dw: 1920,
+    el: "body",
+    resize: true,
+  });
 }
 
 setupApp();
