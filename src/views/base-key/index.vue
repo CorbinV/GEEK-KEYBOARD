@@ -69,17 +69,16 @@ const currentContent = computed(() => {
         <div class="h-full flex flex-col">
           <TopBanner v-if="currentContent.needBanner" />
           <div class="flex-1">
-            <component
-              :is="currentContent.component"
-              :key="currentContent.label"
-              class="h-full w-full"
-              :type="currentContent.type"
-              @key-clicked="handleKeyEmit"
-            ></component>
+            <component :is="currentContent.component" :key="currentContent.label" class="h-full w-full"
+              :type="currentContent.type" @key-clicked="handleKeyEmit"></component>
           </div>
 
-          <NTabs v-model:value="tabName" type="segment" animated @update:value="handleKeyEventTabs">
-            <NTab v-for="item in xList" :key="item.label" :name="item.type" :tab="$t(item.label)"></NTab>
+          <NTabs v-model:value="tabName" type="segment" class="custom-segment-tabs " animated @update:value="handleKeyEventTabs">
+            <NTab v-for="item in xList" :key="item.label" :name="item.type">
+              <span :class="`${tabName == item.type ? 'text-#3C8DF4' : 'text-#999999'} text-lg`">
+                {{$t(item.label) }}
+              </span>
+            </NTab>
           </NTabs>
         </div>
       </template>
@@ -87,4 +86,11 @@ const currentContent = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.custom-segment-tabs {
+  :deep(.n-tabs-tab) {
+    margin: 3px 12px
+  }
+}
+
+</style>
