@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TabsProps } from 'naive-ui';
-import { nextTick, reactive, ref, toRefs, watch, watchEffect } from 'vue';
+import { computed, nextTick, reactive, ref, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import BaseKeyWrapper from '@/components/custom/keyboard/components/base-key-wrapper.vue';
@@ -159,6 +159,37 @@ function handleSelecteKeyRemove(idx: number) {
   }
   selectedKeyInfo.idx = index;
 }
+const paneList = [
+  {
+    component: StandardKeyboard,
+    name: 'Keyboard',
+    type: undefined,
+    title: 'baseKey.tab.basic',
+    fnc: handleFncClicked
+  }, {
+    component: ModuleTemplate,
+    name: 'System',
+    type: KeyTypeEnum.System,
+    title: 'baseKey.tab.system',
+    fnc: handleFncClicked
+  },
+  {
+    component: ModuleTemplate,
+    name: 'Media',
+    type: KeyTypeEnum.Media,
+    title: 'baseKey.tab.media',
+    fnc: handleFncClicked
+  }
+]
+
+const tabName = ref(paneList[0].name);
+const currentContent = computed(() => {
+  const res = paneList.find(item => item.name === tabName.value)!;
+  return res;
+});
+const handleKeyEventTabs = (value: string | number) => {
+  tabName.value = value as string;
+};
 </script>
 
 <template>
@@ -183,19 +214,21 @@ function handleSelecteKeyRemove(idx: number) {
               </div>
             </div>
           </div>
-          <!-- tabs -->
-          <div>
-            <NTabs :theme-overrides="tabsThemeOverrides" tab-class="asdasf !text-xl">
-              <NTabPane name="Keyboard" :tab="$t('baseKey.tab.basic')">
-                <StandardKeyboard @key-clicked="handleFncClicked" />
-              </NTabPane>
-              <NTabPane name="System" :tab="$t('baseKey.tab.system')">
-                <ModuleTemplate :type="KeyTypeEnum.System" @key-clicked="handleFncClicked" />
-              </NTabPane>
-              <NTabPane name="Media" :tab="$t('baseKey.tab.media')">
-                <ModuleTemplate :type="KeyTypeEnum.Media" @key-clicked="handleFncClicked" />
-              </NTabPane>
+          <div class="flex flex-col gap-y-2 mt-2">
+            <NTabs :theme-overrides="tabsThemeOverrides" type="segment" class="custom-segment-tabs-1" @active-name-change="handleKeyEventTabs"
+              style="width: 50%; margin: 0 auto">
+              <NTab v-for="item in paneList" :key="item.name" :name="item.name">
+                <span :class="`${tabName == item.name ? 'text-#3C8DF4' : 'text-#999999'} text-lg`">
+                  {{ $t(item.title) }}
+                </span>
+              </NTab>
             </NTabs>
+            <KeepAlive>
+              <div class="flex-1">
+                <component :is="currentContent.component" :type="currentContent.type" @key-clicked="handleFncClicked">
+                </component>
+              </div>
+            </KeepAlive>
           </div>
         </NSpin>
       </div>
@@ -212,3 +245,13 @@ function handleSelecteKeyRemove(idx: number) {
     </template>
   </NModal>
 </template>
+<style scoped>
+.custom-segment-tabs-1 {
+  &.n-tabs {
+    --n-color-segment: #222226 !important;
+  }
+  :deep(.n-tabs-tab) {
+    margin: 3px 12px
+  }
+}
+</style>
