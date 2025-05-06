@@ -651,6 +651,7 @@ declare namespace App {
         c6: string;
         c7: string;
         c8: string;
+        c9: string;
         singleKeyStop: string;
         addClickDown: string;
         setClickDowndown1down2: string;

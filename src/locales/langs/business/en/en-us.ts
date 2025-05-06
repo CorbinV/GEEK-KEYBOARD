@@ -195,7 +195,8 @@ const lang: App.BusinessLanguage.Schema = {
     c5: ' RS smart trigger',
     c6: 'Please select the first and second buttons, by binding it, the action of lifting the first button can stop the triggering of the first button and trigger the second button at the same time, enabling emergency stop with per key in some games.',
     c7: 'When two keys are pressed together, activate the one with greater key travel.',
-    c8: 'Example: Assign AB to RS. If A is pressed harder than D, A activates first. Lifting A will switch back to D.'
+    c8: 'Example: Assign AB to RS. If A is pressed harder than D, A activates first. Lifting A will switch back to D.',
+    c9: 'SOCD'
   },
   macro: {
     addMacroKey: 'Add Macro Key',
