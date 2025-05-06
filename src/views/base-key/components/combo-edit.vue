@@ -86,13 +86,12 @@ function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEn
     base: { code, type, key: keyId },
     detail: keyboardStore.getKeyDetail({ code, type })
   };
-  if(type === KeyTypeEnum.Media){
-    const mediaFncList = selectedKeyInfo.list.map(({base})=>base.type === KeyTypeEnum.Media)
-    console.log(mediaFncList.length)
-    if(mediaFncList.length > 1){
-      window?.$message!.info(`媒体功能最大支持2个键位`,{
+  if (type === KeyTypeEnum.Media) {
+    const mediaFncList = selectedKeyInfo.list.filter(({ base }) => base.type === KeyTypeEnum.Media)
+    if (mediaFncList.length > 1) {
+      window?.$message!.info(`媒体功能最大支持2个键位`, {
         duration: 5000
-      } )  // expact i18n
+      })  // expact i18n
       return
     }
   }
