@@ -1,30 +1,20 @@
 <script setup lang="ts">
-import { onUnmounted, ref, toRef } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import AdjustView from './components/adjust-view.vue';
 import PropertyView from './components/property-view.vue';
 import ButtonGroup from './components/button-group.vue';
-// const allSelct = () => {
-//   console.log('2.4g接收器配对按钮被点击');
-//   // 这里可以加入接收器配对的逻辑
-// };
-
-// const invertSelect = () => {
-//   console.log('invertSelect');
-//   // 这里可以加入恢复出厂设置的逻辑
-// };
-// const clean = () => {
-//   console.log('clean');
-//   // 这里可以加入恢复出厂设置的逻辑
-// };
-
+const tabNameEnum = {
+  property: 0,
+  adjust: 1
+};
 const tabName = ref(0);
 function handleKeyEventTabs(value: string | number) {
   tabName.value = Number(value);
 }
+const keyboardStore = useKeyboardStore();
 function useMutipleKeysControl() {
-  const keyboardStore = useKeyboardStore();
   const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
   allowMutipleSelect.value = true;
   onUnmounted(() => {
@@ -32,6 +22,9 @@ function useMutipleKeysControl() {
   });
 }
 useMutipleKeysControl();
+const isPropertyView = computed(() => {
+  return tabName.value === tabNameEnum.property;
+});
 </script>
 
 <template>
@@ -46,10 +39,14 @@ useMutipleKeysControl();
             <AdjustView v-show="tabName"></AdjustView>
             <PropertyView v-show="!tabName"></PropertyView>
           </div>
-          <NTabs v-model:value="tabName" type="segment" animated style="width: 476px"
+          <NTabs v-model:value="tabName" type="segment" class="custom-segment-tabs" animated style="width: 476px"
             @update:value="handleKeyEventTabs">
-            <NTab name="0" :tab="$t('repidTrigger.property')" />
-            <NTab name="1" :tab="$t('repidTrigger.adjust')" />
+            <NTab :name="tabNameEnum.property">
+              <span :class="`${isPropertyView ? 'text-#3C8DF4' : 'text-#999999'} text-xl`">{{ $t('repidTrigger.property') }}</span>
+            </NTab>
+            <NTab :name="tabNameEnum.adjust">
+              <span :class="`${!isPropertyView ? 'text-#3C8DF4' : 'text-#999999'} text-xl`">{{ $t('repidTrigger.adjust') }}</span>
+            </NTab>
           </NTabs>
         </div>
       </template>
@@ -58,30 +55,9 @@ useMutipleKeysControl();
 </template>
 
 <style scoped>
-.app {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* 让应用占满整个视口高度 */
-}
-
-VerticalLayout {
-  margin-top: auto; /* 将 VerticalLayout 移到父容器的底部 */
-}
-.hollow-btn {
-  background-color: transparent;
-  color: #3c8df4;
-  border: 1px solid #3c8df4;
-  border-radius: 6px;
-  width: 120px;
-  height: 40px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.hollow-btn:hover {
-  background-color: #3c8df4; /* 悬停时的背景颜色 */
-  color: white; /* 悬停时文字颜色 */
+.custom-segment-tabs {
+  :deep(.n-tabs-tab) {
+    margin: 3px 12px
+  }
 }
 </style>
