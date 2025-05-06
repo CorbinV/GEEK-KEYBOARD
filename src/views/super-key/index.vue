@@ -22,32 +22,32 @@ onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
 const paneList = [
   {
     name: KeyTypeEnum.DKS,
-    label: 'DKS动态键程',
+    label: 'supperKey.c1',
     component: Dks
   },
   {
     name: KeyTypeEnum.OKS,
-    label: 'OKS单键急停',
+    label: 'supperKey.c2',
     component: Oks
   },
   {
     name: KeyTypeEnum.SOCD,
-    label: 'SOCD',
+    label: 'supperKey.c9',
     component: Socd
   },
   {
     name: KeyTypeEnum.MT,
-    label: 'MT单击/按住',
+    label: 'supperKey.c3',
     component: MT
   },
   {
     name: KeyTypeEnum.TGL,
-    label: 'TGL切换开关',
+    label: 'supperKey.c4',
     component: TGL
   },
   {
     name: KeyTypeEnum.RS,
-    label: 'RS',
+    label: 'supperKey.c5',
     component: Rs
   }
 ];
@@ -58,31 +58,16 @@ const paneList = [
     <KeyboardContainer>
       <template #keyboardBottom></template>
       <template #default="{ handleKeyEmit }">
-        <!-- <div>点击测试按键</div> -->
-
-        <!--
- <NTabs size="large" justify-content="space-evenly" placement="bottom" class="h-full" pane-class="h-full">
-          <NTabPane v-for="pane in paneList" :key="pane.name" :name="pane.name" :tab="pane.label">
-            <component :is="pane.component" @key-clicked="handleKeyEmit" />
-          </NTabPane>
-        </NTabs>
--->
-
         <div class="h-full flex flex-col">
           <div class="flex-1">
-            <component
-              :is="paneList.find(item => item.name === currentSuperKeyType)?.component"
-              @key-clicked="handleKeyEmit"
-            />
+            <component :is="paneList.find(item => item.name === currentSuperKeyType)?.component"
+              @key-clicked="handleKeyEmit" />
           </div>
-
-          <NTabs v-model:value="currentSuperKeyType" type="segment" animated>
-            <NTab :name="KeyTypeEnum.DKS" :tab="$t('supperKey.c1')" />
-            <NTab :name="KeyTypeEnum.OKS" :tab="$t('supperKey.c2')" />
-            <NTab :name="KeyTypeEnum.SOCD" tab="SOCD" />
-            <NTab :name="KeyTypeEnum.MT" :tab="$t('supperKey.c3')" />
-            <NTab :name="KeyTypeEnum.TGL" :tab="$t('supperKey.c4')" />
-            <NTab :name="KeyTypeEnum.RS" :tab="$t('supperKey.c5')" />
+          <NTabs v-model:value="currentSuperKeyType" class="custom-segment-tabs" type="segment" animated>
+            <NTab v-for="pane in paneList" :key="pane.name" :name="pane.name" class="text-xl text-#3C8DF4">
+              <span :class="`${currentSuperKeyType == pane.name ? 'text-#3C8DF4' : 'text-#999999'} text-lg`">{{
+                $t(pane.label) }}</span>
+            </NTab>
           </NTabs>
         </div>
       </template>
@@ -90,4 +75,10 @@ const paneList = [
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.custom-segment-tabs {
+  :deep(.n-tabs-tab) {
+    margin: 3px 12px
+  }
+}
+</style>
