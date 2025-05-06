@@ -147,7 +147,8 @@ function handleSelecteKeyRemove(idx: number) {
   }
   let index = -1;
   for (let i = selectedKeyInfo.list.length - 1; i >= 0; i--) {
-    if (selectedKeyInfo.list[i] && i < idx) {
+    const hasValue = selectedKeyInfo.list[i]?.base?.key;
+    if (hasValue && i < idx) {
       index = i;
       break;
     }
