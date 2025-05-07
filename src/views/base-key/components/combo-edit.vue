@@ -225,7 +225,7 @@ const handleKeyEventTabs = (value: string | number) => {
             </NTabs>
             <KeepAlive>
               <div class="flex-1">
-                <component :is="currentContent.component" :type="currentContent.type" @key-clicked="handleFncClicked">
+                <component :is="currentContent.component" :key="currentContent.name" :type="currentContent.type" @key-clicked="handleFncClicked">
                 </component>
               </div>
             </KeepAlive>
@@ -249,6 +249,7 @@ const handleKeyEventTabs = (value: string | number) => {
 .custom-segment-tabs-1 {
   &.n-tabs {
     --n-color-segment: #222226 !important;
+    --n-tab-color-segment: #2A2A31 !important;
   }
   :deep(.n-tabs-tab) {
     margin: 3px 12px
