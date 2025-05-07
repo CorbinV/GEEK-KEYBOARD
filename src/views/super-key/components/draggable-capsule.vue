@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 
 interface DragConstraints {
   minY: number;
   maxY: number;
 }
+// Props 定义
 const props = withDefaults(
   defineProps<{
     initialHeight: number;
@@ -35,12 +36,23 @@ const position = ref(0);
 const isDragging = ref(false);
 const startY = ref(0);
 const startPosition = ref(0);
-let hasDraged = false;
+let afterDraged = false;
+const startDrag = (e: MouseEvent) => {
+  if (props.disabled) return;
+  startY.value = e.clientY;
+  startPosition.value = position.value;
+  isDragging.value = true;
+  // e.currentTarget.style.zIndex=20
+  document.body.style.cursor = 'grabbing !important';
+};
 const handleDrag = (e: MouseEvent) => {
-  hasDraged = true;
   if (!isDragging.value) return;
-
   const deltaY = e.clientY - startY.value;
+  if (deltaY === 0) {
+    // exit: click event
+    return
+  }
+  afterDraged = true;
   let newPosition = startPosition.value + deltaY;
   newPosition = Math.max(props.dragConstraints.minY, Math.min(newPosition, props.dragConstraints.maxY));
 
@@ -53,11 +65,16 @@ const handleDrag = (e: MouseEvent) => {
 };
 
 const stopDrag = () => {
-  isDragging.value = false;
+  if (isDragging.value) {
+    isDragging.value = false;
+    // document.removeEventListener('mousemove', handleDrag);
+    // document.removeEventListener('mouseup', stopDrag);
+    // 发出停止拖动事件，让父组件处理位置检查
+    emit('drag-end', props.index, position.value);
+    document.body.style.cursor = 'initial';
+    return;
+  }
 
-  document.removeEventListener('mousemove', handleDrag);
-  document.removeEventListener('mouseup', stopDrag);
-  emit('drag-end', props.index, position.value);
 };
 
 const updateConstraints = (newConstraints: DragConstraints) => {
@@ -76,44 +93,42 @@ const generatePath = computed(() => {
     Z
   `;
 });
-const startDrag = (e: MouseEvent) => {
-  if (props.disabled) return;
-
-  startY.value = e.clientY;
-  startPosition.value = position.value;
-  nextTick(() => {
-    isDragging.value = true;
-  });
-  document.addEventListener('mousemove', handleDrag);
-  document.addEventListener('mouseup', stopDrag);
-};
 function handleClick() {
-  if (!hasDraged) {
+  if (isDragging.value || !props.isAboveMask) {
+    return
+  }
+  if (!afterDraged) {
     emit('update:isAboveMask', false);
-    position.value = 0;
-    startPosition.value = 0;
     emit('update:height', props.initialHeight);
     emit('position-change', props.index, 0);
+    nextTick(() => {
+      position.value = 0;
+      startPosition.value = 0;
+    });
   }
-  hasDraged = false;
+  afterDraged = false;
 }
+onMounted(() => {
+  document.addEventListener('mousemove', handleDrag);
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('mouseleave', stopDrag);
+})
+onUnmounted(() => {
+  document.removeEventListener('mousemove', handleDrag);
+  document.removeEventListener('mouseleave', stopDrag);
+})
 defineExpose({
-  updateConstraints
+  updateConstraints,
+  isDragging
 });
 </script>
 
 <template>
-  <svg
-    :width="width"
-    :height="height"
-    class="capsule-container absolute"
-    :style="{
-      cursor: disabled ? 'default' : 'grab'
-    }"
-    @mousedown="startDrag"
-    @click="handleClick"
-  >
+  <svg :width="width" :height="height" class="capsule-container absolute" :style="{
+    // cursor: disabled ? 'default' : 'grab'
+  }" @mousedown="startDrag" @click="handleClick">
     <path :d="generatePath" :fill="color" class="capsule" />
+    <!-- <path :d="arcPath" :fill="'white'" class="capsule" /> -->
   </svg>
 </template>
 
