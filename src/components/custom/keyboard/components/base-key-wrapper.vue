@@ -53,7 +53,7 @@ function handleRemoveClick() {
     />
     <template v-if="allowClear && hasValue">
       <i
-        class="iconfont icon-add absolute rotate-45 text-lg color-red-700 -right-3.5 -top-3.5 hover:cursor-pointer"
+        class="iconfont icon-add absolute rotate-45 text-lg color-red-700 -right-1.5 -top-2.5 hover:cursor-pointer"
         @click.stop="handleRemoveClick"
       ></i>
     </template>
