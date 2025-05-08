@@ -38,7 +38,7 @@ const startY = ref(0);
 const startPosition = ref(0);
 let afterDraged = false;
 const startDrag = (e: MouseEvent) => {
-  if (props.disabled) return;
+  if (props.disabled || !props.isAboveMask || isDragging.value) return;
   startY.value = e.clientY;
   startPosition.value = position.value;
   isDragging.value = true;
@@ -46,7 +46,7 @@ const startDrag = (e: MouseEvent) => {
   document.body.style.cursor = 'grabbing !important';
 };
 const handleDrag = (e: MouseEvent) => {
-  if (!isDragging.value) return;
+  if (!isDragging.value || !props.isAboveMask) return;
   const deltaY = e.clientY - startY.value;
   if (deltaY === 0) {
     // exit: click event
@@ -115,6 +115,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   document.removeEventListener('mousemove', handleDrag);
+  document.removeEventListener('mouseup', stopDrag);
   document.removeEventListener('mouseleave', stopDrag);
 })
 defineExpose({
@@ -124,7 +125,7 @@ defineExpose({
 </script>
 
 <template>
-  <svg :width="width" :height="height" class="capsule-container absolute" :style="{
+  <svg :width="width" :height="height" class="capsule-container" :style="{
     // cursor: disabled ? 'default' : 'grab'
   }" @mousedown="startDrag" @click="handleClick">
     <path :d="generatePath" :fill="color" class="capsule" />

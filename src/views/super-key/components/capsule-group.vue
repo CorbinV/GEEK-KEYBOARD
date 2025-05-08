@@ -124,67 +124,43 @@ const handleDragEnd = (index: number, position: number) => {
     items[index].to = overlapIndex + 1;
   }
   const item = items[index];
-  item.currentHeight = targetPosition;
+  item.currentHeight = targetPosition - props.gap * 0.2;
   updateCapsulePosition(index, targetPosition);
 };
 </script>
 
 <template>
-  <div ref="groupRef" class="relative px-4">
-    <div
-      v-for="(item, index) in items"
-      :key="index"
-      class="capsule-item"
-      :style="{
-        height: initialHeight + 'px',
-        marginBottom: items.length === index + 1 ? '16px' : gap + 'px'
-      }"
-    >
-      <div
-        class="mask z-1"
-        :class="item.isAboveMask ? 'opacity-0' : 'opacity-100'"
-        :style="{
-          width: width + 'px',
-          height: initialHeight + 'px'
-        }"
-        @click="handleMaskClick(index)"
-      >
-        <i class="iconfont icon-add text-2xl hover:cursor-pointer"></i>
+  <div ref="groupRef" class="flex flex-col gap-y-8 px-4 ">
+    <div v-for="(item, index) in items" :key="index" class="w-full relative" :style="{
+      height: initialHeight + 'px',
+      width: width + 'px',
+      // marginBottom: items.length === index + 1 ? '16px' : gap + 'px'
+      zIndex: item.isAboveMask ? 9 : 0
+    }">
+      <!-- 胶囊根据状态显示/隐藏 -->
+      <!-- {{ item.isAboveMask }} -->
+      <!-- v-show="item.isAboveMask" -->
+      <DraggableCapsule v-show="item.isAboveMask" :ref="el => (capsuleRefs[index] = el)"
+        v-model:height="item.currentHeight" v-model:is-above-mask="item.isAboveMask" :initial-height="initialHeight"
+        :width="width" :color="item.color" :disabled="index === items.length - 1" :index="index"
+        :drag-constraints="getDragConstraints(index)" :style="{
+
+        }" @position-change="updateCapsulePosition" @drag-end="handleDragEnd" />
+      <!-- 蒙版始终显示在固定位置 -->
+      <div v-if="!item.isAboveMask" class="mask absolute flex justify-center items-center " :style="{
+        width: width + 'px',
+        height: initialHeight + 'px'
+      }" @click="handleMaskClick(index)">
+        <i class="iconfont icon-add text-2xl leading-0  rounded-full"
+          :class="capsuleRefs[index]?.isDragging ? `hover:cursor-grab` : `hover:cursor-pointer`"></i>
       </div>
-      <DraggableCapsule
-        v-show="item.isAboveMask"
-        :ref="el => (capsuleRefs[index] = el)"
-        v-model:height="item.currentHeight"
-        v-model:is-above-mask="item.isAboveMask"
-        :initial-height="initialHeight"
-        :width="width"
-        :color="item.color"
-        :disabled="index === items.length - 1"
-        :index="index"
-        :drag-constraints="getDragConstraints(index)"
-        :style="{
-          zIndex: item.isAboveMask ? 2 : 0
-        }"
-        @position-change="updateCapsulePosition"
-        @drag-end="handleDragEnd"
-      />
+
     </div>
   </div>
 </template>
 
 <style scoped>
-.capsule-group {
-  position: relative;
-  padding: 16px;
-}
-
-.capsule-item {
-  position: relative;
-  width: 100%;
-}
-
 .mask {
-  position: absolute;
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 25px;
   cursor: pointer;
