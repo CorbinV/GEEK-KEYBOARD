@@ -199,10 +199,10 @@ onUnmounted(() => {
       </div>
     </template>
     <template #default>
-      <div class="h-full w-full flex flex-col">
+      <div class="h-full w-full flex flex-col mb-6">
         <NDivider class="!mt-0" />
 
-        <div class="flex flex-col gap-y-6">
+        <div class="flex flex-col gap-y-6 mb-6">
           <h2 v-if="secondTitle" class="text-wihte text-center text-lg">{{ secondTitle }}</h2>
           <p v-if="desc" class="text-center text-base text-c-second">{{ desc }}</p>
           <div class="flex flex-row justify-center gap-x-12">
