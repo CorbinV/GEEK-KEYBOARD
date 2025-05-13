@@ -99,7 +99,7 @@ export function useModuleLogic(groupList: Ref<any>, fncObj: {
       console.error(error);
     }
   }
-  async function groupCreated({ code, keys, name, listDetail }: any) {
+  async function groupCreated({ code, keys, name, listDetail }: any, otherProps: { [key: string]: any } = {}) {
     window?.$log!.debug('groupCreated', { code, keys, name, listDetail });
     let pass = false;
     let tmpCode = code;
@@ -108,7 +108,7 @@ export function useModuleLogic(groupList: Ref<any>, fncObj: {
         removeSuperKey(listItem.key!, { moduleType: currentSuperKeyType.value });
       });
     }
-    const sendData = { type: currentSuperKeyType.value, code: tmpCode, keys };
+    const sendData = { type: currentSuperKeyType.value, code: tmpCode, keys , ...otherProps};
     try {
       await fncObj.addFnc(sendData);
       pass = true;
