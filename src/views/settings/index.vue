@@ -95,13 +95,15 @@ const onCheckUpdateClick = async () => {
   try {
     const [needUpgrade, checkMsg] = await versionCheck();
     if (!needUpgrade) {
-      message.info(checkMsg as string);
+      if (checkMsg) {
+        message.info($t(checkMsg as any));
+      }
       return
     }
     showProgress.value = true;
     const [otaRes] = await onlineOta();
     if (!otaRes && otaCtrl.value.errMsg) {
-      window?.$message!.error(otaCtrl.value.errMsg);
+      window?.$message!.error($t(otaCtrl.value.errMsg as any));
     }
 
   } catch (error) {
