@@ -619,10 +619,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       kbInfo,
       updateAllLayerKeys,
       watchDevConnStatus,
-      updateDeviceInfo
+      updateDeviceInfo,
+      AfterDevConn: handleDevConn
     };
   }
-  const { kbInfo, watchDevConnStatus, updateDeviceInfo } = useDeviceInfo();
+  const { kbInfo, watchDevConnStatus, AfterDevConn, updateDeviceInfo } = useDeviceInfo();
   function useRelatedSelectedKeys() {
     const [selectedKeys, resetSelectedKeys] = useResttableRefFn<{
       [key: string]: {
@@ -724,10 +725,18 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       resetFutureCtrl();
       resetHistoryCtrl();
     };
+    const allowUndo = computed(() => {
+      return historyCtrl.value.length
+    })
+    const allowRedo = computed(() => {
+      return futureCtrl.value.length
+    })
     return {
       pushState,
       undo,
       redo,
+      allowUndo,
+      allowRedo,
       historyCtrl,
       futureCtrl,
       resetKeyHistory,
@@ -788,7 +797,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         }
       }
     );
-  }
 
   // watch store
   // scope.run(() => {
@@ -817,6 +825,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     ...keyLayerCfgFnc,
     ...configDataFnc,
     ...restRelatedSelectedData,
-    ...keyHistoryFnc
+    ...keyHistoryFnc,
+    afterDeviceReset
   };
 });
