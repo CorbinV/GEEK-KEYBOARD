@@ -14,7 +14,8 @@ import { formatGroupItem, GroupItem, useModuleLogic, utilGenerateGroupCode } fro
 
 const MAX_GORUP_CNT = 8;
 const CURRENT_MODULE_TYPE = KeyTypeEnum.MT;
-
+const MAX_DELAY_MS = 2000;
+const MIN_DELAY_MS = 1;
 const groupList = ref<GroupItem[]>([]);
 const modalTitle = ref('单击/按住');
 
@@ -92,6 +93,14 @@ function generateGroupCode() {
   if (groupList.value.length === 0) return 0;
   return utilGenerateGroupCode(groupList.value)
 }
+function hadleGrouCreate(item: any) {
+  if (!Number.isInteger(inputTime.value) || inputTime.value < MIN_DELAY_MS || inputTime.value > MAX_DELAY_MS) {
+    window.$message!.error($t('supperKey.timeIntervalError', { min: MIN_DELAY_MS, max: MAX_DELAY_MS, unit: 'ms' }));
+    return;
+  }
+  groupCreated(item, { time: inputTime.value });
+}
+
 </script>
 
 <template>
@@ -110,22 +119,11 @@ function generateGroupCode() {
     </div>
     <EditTemplate v-model:visible="editCtrl.show" v-model:title="modalTitle" :code-type="CURRENT_MODULE_TYPE"
       :fnc-generate-code="generateGroupCode" :need-import-key="true" :wide="true" keyboard-type="standard"
-      :desc="$t('supperKey.setClickDowndown1down2')" :edit-item="editCtrl.item" @create-group="groupCreated"
-      :is-edit="editCtrl.isEdit">
+      :desc="$t('supperKey. ')" :edit-item="editCtrl.item" @create-group="hadleGrouCreate" :is-edit="editCtrl.isEdit">
       <template #extra>
         <div class="flex items-center justify-center">
-          <NInputNumber
-          v-model:value="inputTime"
-          style="width: 60px"
-          type="text"
-          size="large"
-          :min="1"
-          :max="2000"
-            :step="1"
-            :precision="0"
-            :show-button="false"
-            :autofocus="false"
-            placeholder="">
+          <NInputNumber v-model:value="inputTime" style="width: 60px" type="text" size="large" :min="MIN_DELAY_MS"
+            :max="MAX_DELAY_MS" :step="1" :precision="0" :show-button="false" :autofocus="false" placeholder="">
           </NInputNumber>
           <span class="ml-3 text-4 text-[#999999]">ms</span>
         </div>
