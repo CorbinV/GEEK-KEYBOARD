@@ -45,7 +45,8 @@ const lang: App.BusinessLanguage.Schema = {
       x7: '默认（{total}）',
       current: '当前',
       keyboardHint: '选中键盘上按键后，再选中下方需要替换的键',
-      removeSpkeyChange: "改键会导致绑定的超级键失效，继续吗？"
+      removeSpkeyChange: "改键会导致绑定的超级键失效，继续吗？",
+      beginKeyTest: '点击按键测试'
     },
     tab: {
       basic: '基础',
@@ -192,7 +193,8 @@ const lang: App.BusinessLanguage.Schema = {
     c6: '请选择两个按键，当其中一个按键被抬起时，立马触发一另一个按键，在一些游戏中实现单个按键 的快速急停',
     c7: "监控两个按键，当两个按键同时按下时，触发按压更深的按键",
     c8: '例：设置AB键为RS键，当A键按压比D键更深时，A键触发，抬起A键后，D键将恢复触发',
-    c9: 'SOCD'
+    c9: 'SOCD',
+    timeIntervalError: '时间取值范围应在{min}{unit}-{max}{unit}之间',
   },
   // {{ $t('light.modeSelect') }}
   macro: {

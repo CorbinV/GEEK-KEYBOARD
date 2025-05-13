@@ -46,6 +46,7 @@ const lang: App.BusinessLanguage.Schema = {
       current: 'current',
       keyboardHint: 'Select a key on the keyboard, then choose the key below to replace it',
       removeSpkeyChange: "This may deactivate your Super Key functions. Conntinue?",
+      beginKeyTest: "Click to Begin Key Test"
     },
     tab: {
       basic: 'Basic',
@@ -196,7 +197,8 @@ const lang: App.BusinessLanguage.Schema = {
     c6: 'Please select the first and second buttons, by binding it, the action of lifting the first button can stop the triggering of the first button and trigger the second button at the same time, enabling emergency stop with per key in some games.',
     c7: 'When two keys are pressed together, activate the one with greater key travel.',
     c8: 'Example: Assign AB to RS. If A is pressed harder than D, A activates first. Lifting A will switch back to D.',
-    c9: 'SOCD'
+    c9: 'SOCD',
+    timeIntervalError: 'The time value should be between {min}{unit} and {max}{unit}.',
   },
   macro: {
     addMacroKey: 'Add Macro Key',

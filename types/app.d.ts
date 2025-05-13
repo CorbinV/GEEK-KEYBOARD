@@ -514,6 +514,7 @@ declare namespace App {
           current: string;
           keyboardHint: string;
           removeSpkeyChange: string;
+          beginKeyTest: string;
         };
         tab: {
           basic: string;
@@ -660,6 +661,7 @@ declare namespace App {
         keyBinedDKSFunc: string;
         keyBinedOtherFunc: string;
         maxAddCombinKey: string;
+        timeIntervalError: string;
       };
       macro: {
         addMacroKey: string;
