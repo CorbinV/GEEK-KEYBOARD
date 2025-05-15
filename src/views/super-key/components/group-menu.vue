@@ -30,7 +30,7 @@ function handleGroupItemRename() {
 
 <template>
   <div class="rounded-md higth-light-bg px-3 hover:cursor-pointer">
-    <NPopover :style="popoverStyle">
+    <NPopover :style="popoverStyle" trigger="hover"  to="#popover-portal">
       <template #trigger>
         <div class="py-1 text-c-primary">
           <SvgIcon icon="tabler:dots" />
