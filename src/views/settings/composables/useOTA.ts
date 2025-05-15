@@ -115,7 +115,7 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
     return true
   };
   const isLastVersion = (localVersion: string, remoteVersion: number, updateFirmwareId: string[], islocal?: boolean): boolean => {
-    const localVerList = localVersion.split('.').map(i => parseInt(i));
+    const localVerList = localVersion?.split('.').map(i => parseInt(i));
     const remoteVerList = [Math.floor(remoteVersion / 100), remoteVersion % 100];
     localVerList.forEach((lv, idx) => {
       if (lv) {
@@ -219,6 +219,9 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
     }
   }
   const doUpgrade = async () => {
+    if(!updateFirmwareId.length){
+      return [false, 'otaHooks.noFirmwareNeedUpgrade'];
+    }
     return onlineOta()
   };
   const afterUpgrade = () => {
@@ -286,7 +289,9 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
       const decoder = new TextDecoder('utf-8');
       const content = decoder.decode(manifestFile.data);
       const manifestData = JSON.parse(content) as VersionInfo;
-
+      if(!deviceHd.version){
+        return [false, 'otaHooks.noVersionInfo'];
+      }
       remoteVersionInfo.value = Object.assign({}, manifestData,
         {
           isLastVersion: isLastVersion(deviceHd.version, manifestData.version, updateFirmwareId, true),
@@ -294,6 +299,9 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
           journal_en: manifestData?.journal_en.replace(/\n/g, '<br>'),
         }
       );
+      if(!updateFirmwareId.length){
+        return [false, 'otaHooks.noFirmwareNeedUpgrade'];
+      }
       return await localOta(unzippedFiles)
     } catch (error) {
       window.$log?.error('Catch error in fileImport', error);
