@@ -9,8 +9,6 @@ defineEmits(['key-clicked']);
 <template>
   <div class="h-full w-full flex flex-col">
     <TopBanner></TopBanner>
-    <div class="flex-1"></div>
     <StandardKeyboard :edit="false" @key-clicked="data => $emit('key-clicked', data)" />
-    <div class="flex-1"></div>
   </div>
 </template>

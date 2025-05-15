@@ -59,7 +59,7 @@ const paneList = [
       <template #keyboardBottom></template>
       <template #default="{ handleKeyEmit }">
         <div class="h-full flex flex-col">
-          <div class="flex-1">
+          <div class="flex-1 bg-#171619 rounded-md mb-2">
             <component :is="paneList.find(item => item.name === currentSuperKeyType)?.component"
               @key-clicked="handleKeyEmit" />
           </div>
