@@ -28,10 +28,14 @@ async function setupApp() {
   app.mount('#app');
 
   autofit.init({
-    dh: 1080,
-    dw: 1920,
     el: "body",
     resize: true,
+    ignore: [
+      {
+        // @ts-ignore
+       dom: "#popover-portal",
+      },
+   ]
   });
 }
 
