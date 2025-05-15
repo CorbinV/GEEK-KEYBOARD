@@ -48,7 +48,14 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
     progress: 0,
     errMsg: ''
   })
-
+  const resetOtaCtrl = () => {
+    const originOtaCtrl = {
+      status: OtaStatusEnum.IDLE,
+      progress: 0,
+      errMsg: ''
+    }
+    otaCtrl.value = Object.assign({}, originOtaCtrl);
+  }
   const startOTA = async (firmware: Uint8Array, fileContentSum: number, upgradeId = 0) => {
     const remoteVerList = [Math.floor(remoteVersionInfo.value.version / 100), remoteVersionInfo.value.version % 100];
 
@@ -178,6 +185,8 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
   const onlineOta = async () => {
     try {
       const res: [boolean, null | string][] = []
+      resetOtaCtrl()
+      otaCtrl.value.status = OtaStatusEnum.UPGRADE
       for await (const id of updateFirmwareId) {
         const firmwareUri = remoteVersionInfo.value[id]
         if (!firmwareUri) {
@@ -220,6 +229,8 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
     data: ArrayBuffer;
   }[]) => {
     const res: [boolean, null | string][] = []
+    resetOtaCtrl()
+    otaCtrl.value.status = OtaStatusEnum.UPGRADE
     for await (const id of updateFirmwareId) {
       const firmwareName = remoteVersionInfo.value[id]
       const fileInfo = unzippedFiles.find((file) => {
@@ -254,7 +265,6 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
     return [true, null]
   }
   const fileImport = async (event: Event) => {
-
     try {
       const input = event.target as HTMLInputElement;
       if (!input.files?.length) return;
@@ -281,11 +291,16 @@ export function useOTA(deviceHd: DeviceInfo & { model: string, version: string }
         {
           isLastVersion: isLastVersion(deviceHd.version, manifestData.version, updateFirmwareId, true),
           journal_cn: manifestData.journal_cn.replace(/\n/g, '<br>'),
+          journal_en: manifestData?.journal_en.replace(/\n/g, '<br>'),
         }
       );
       return await localOta(unzippedFiles)
     } catch (error) {
       window.$log?.error('Catch error in fileImport', error);
+      if (!otaCtrl.value.errMsg) {
+        otaCtrl.value.errMsg = 'otaHooks.upgradeFailDevice'
+      }
+      otaCtrl.value.status = OtaStatusEnum.UPGRADE_FAIL
       return [false, 'otaHooks.firmwareUpgradeFail']
     } finally {
       afterUpgrade()
