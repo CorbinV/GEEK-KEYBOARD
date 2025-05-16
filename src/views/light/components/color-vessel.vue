@@ -39,24 +39,6 @@ const sleepTimeitems = ref([
   $t('light.minute', { total: 30 }),
   $t('light.interaction', { total: 1 })
 ]);
-// const selectedSleepTime = ref<number | null>(null);
-// const lightLevel = ref(10);
-// const vLevel = ref(10);
-// 定义滑块的数值
-// const sliderValue = ref(10);
-// // 计算滑块的百分比位置，用于定位百分比值的显示
-// const sliderPosition = computed(() => sliderValue.value);
-
-// // 动态计算背景色，已滑动部分为蓝色，未滑动部分为灰色
-// const sliderBackground = computed(() => {
-//   return `linear-gradient(to right, #3C8DF4 ${sliderValue.value}%, #ddd ${sliderValue.value}%)`;
-// });
-
-// // 更新数值
-// const updateValue = () => {
-//   sliderValue.value = Math.min(Math.max(sliderValue.value, 0), 100);
-// };
-// 选中项的处理函数
 function selectItem(index: number) {
   light.value.pattern = index;
   setLight(light.value);

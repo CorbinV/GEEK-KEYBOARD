@@ -71,7 +71,6 @@ const stopDrag = () => {
     // document.removeEventListener('mouseup', stopDrag);
     // 发出停止拖动事件，让父组件处理位置检查
     emit('drag-end', props.index, position.value);
-    document.body.style.cursor = 'initial';
     return;
   }
 
