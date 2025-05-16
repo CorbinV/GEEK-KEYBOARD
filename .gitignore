@@ -35,3 +35,6 @@ yarn.lock
 .VSCodeCounter
 types/elegant-router.d.ts
 types/components.d.ts
+v
+release/
+stats.html
