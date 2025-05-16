@@ -198,33 +198,35 @@ function handleLockCombo() {
 </script>
 
 <template>
-  <div>
+  <div class="w-full h-full">
     <TopBanner>
       <template #right-extra>
         <NButton size="large" type="info" ghost class="ml-4" @click="handleLockCombo">锁组合按键</NButton>
       </template>
     </TopBanner>
-    <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4">
-      <BasicGroupAdd icon="add" :desc="$t('baseKey.combination.addCombKey')" @click="handleAddClicked" />
-      <BasicGroupItem
-        v-for="(item, idx) in groupList"
-        :key="item.id"
-        :base="item.base"
-        code-preffix="C"
-        @click="handleGroupItemClicked(item)"
-      >
-        <template #menu>
-          <GroupMenu
-            :group-item="item"
-            :idx="idx"
-            :enable-edit="true"
-            :enable-rename="true"
-            @group-item-delete="handleGroupItemDelete"
-            @group-item-edit="handleGroupItemEdit"
-            @group-item-rename="handleGroupItemRename"
-          />
-        </template>
-      </BasicGroupItem>
+    <div>
+      <div class="grid grid-cols-4 mx-auto my-0 gap-x-4 gap-y-8 p-4 bg-#171619 rounded-md">
+        <BasicGroupAdd icon="add" :desc="$t('baseKey.combination.addCombKey')" @click="handleAddClicked" />
+        <BasicGroupItem
+          v-for="(item, idx) in groupList"
+          :key="item.id"
+          :base="item.base"
+          code-preffix="C"
+          @click="handleGroupItemClicked(item)"
+        >
+          <template #menu>
+            <GroupMenu
+              :group-item="item"
+              :idx="idx"
+              :enable-edit="true"
+              :enable-rename="true"
+              @group-item-delete="handleGroupItemDelete"
+              @group-item-edit="handleGroupItemEdit"
+              @group-item-rename="handleGroupItemRename"
+            />
+          </template>
+        </BasicGroupItem>
+    </div>
     </div>
     <ComboEdit
       v-model:visible="editVisible"

@@ -399,7 +399,7 @@ function handleMaskClick(e: MouseEvent) {
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.debounceLevel')">
               <template #end>
-                <NSelect v-model:value="shakeCtrl.val" :options="shakeCtrl.ops" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                <NSelect v-model:value="shakeCtrl.val" :options="shakeCtrl.ops"  to="#popover-portal" class="h-40px w-100px" placement="bottom-start" trigger="click"
                   @select="shakeSelect">
                 </NSelect>
               </template>

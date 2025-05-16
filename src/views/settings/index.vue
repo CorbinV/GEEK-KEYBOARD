@@ -238,7 +238,7 @@ async function handleUpgrade() {
         </div>
         <GroupTitle :title="$t('setting.deepSleep')" :sub-title="$t('setting.deepSleepHint')">
           <template #end>
-            <NSelect v-if="deepSleepOps.length" v-model:value="kbSettingInfo.deepSleep" :options="deepSleepOps"
+            <NSelect v-if="deepSleepOps.length" v-model:value="kbSettingInfo.deepSleep"  to="#popover-portal" :options="deepSleepOps"
               class="h-40px w-120px !cursor-not-allowed" placement="bottom-start" trigger="click" size="large" />
 
             <p v-else class="text-#666666">{{ $t("common.featCommingSoon") }}</p>

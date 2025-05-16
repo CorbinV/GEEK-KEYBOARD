@@ -345,6 +345,7 @@ async function handleSave() {
               class="ml-3 w-45"
               size="large"
               :options="MacroType.TriggerOps"
+              to="#popover-portal"
               @update:value="handleTrigger"
             ></NSelect>
             <NInputNumber
@@ -380,6 +381,7 @@ async function handleSave() {
               v-model:value="stopType"
               class="ml-3 w-45"
               size="large"
+              to="#popover-portal"
               :options="MacroType.QuitOps"
               @update:value="handleStopType"
             ></NSelect>

@@ -228,7 +228,7 @@ onUnmounted(() => {
             <NSwitch v-model:value="enableSimulate" :checked-value="1" :unchecked-value="0" />
             <div v-if="enableSimulate" class="flex flex-row items-center gap-x-4">
               <span class="">触发:</span>
-              <NSelect v-model:value="simulateStatus" :options="simulateOps" style="width: 84px" />
+              <NSelect v-model:value="simulateStatus" :options="simulateOps" style="width: 84px" to="#popover-portal"/>
               <template v-if="enableSimulate">
                 <NInputNumber v-model:value="simulateDelayTimes.v1" style="width: 64px" :show-button="false">
                   <template #suffix>ms</template>

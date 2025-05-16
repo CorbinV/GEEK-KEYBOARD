@@ -90,7 +90,7 @@ function generateGroupCode() {
       <template #header-extra>
         <div class="flex items-center">
           <span class="text-4 text-[#999999]">{{ $t('supperKey.priorityExe') }}</span>
-          <NSelect v-model:value="trigger" class="ml-3 w-45" size="large" :options="SOCDTriggerOps"
+          <NSelect v-model:value="trigger"  to="#popover-portal" class="ml-3 w-45" size="large" :options="SOCDTriggerOps"
             ></NSelect>
         </div>
       </template>

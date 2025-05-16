@@ -18,5 +18,5 @@ const options = computed(() => {
 </script>
 
 <template>
-  <NSelect v-model:value="keyLayerInfo.configIndex" :options="options" class="w-24" />
+  <NSelect v-model:value="keyLayerInfo.configIndex" to="#popover-portal" :options="options" class="w-24" />
 </template>
