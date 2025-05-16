@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, onMounted,onUnmounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
+import { computed, inject, onMounted, onUnmounted, provide, readonly, ref, toRaw, toRef, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
@@ -304,6 +304,15 @@ async function handleApiResetRtFnc(selectKeyList: string[]) {
     console.error(error);
     window.$message?.error($t('businessCommon.executeFail'));
   }
+async function handleApiSetHighlight(keyId: string) {
+  // find key idx in layoutList
+  const idx = layoutList.value.findIndex(k => k === keyId);
+  if (idx === -1) {
+    return;
+  }
+  clickedKey.value = { idx, keyId };
+
+
 }
 onMounted(() => {
   emitter.on(EventNameEnum.layerOrConfigChange, updateOriginData);
@@ -352,11 +361,13 @@ function handleLastKeyMounted() {
 </script>
 
 <template>
-  <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick" :key="`${layer}${config}`">
+  <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick"
+    :key="`${layer}${config}`">
     <KeyboardKey v-for="(key, idx) in layoutList" :key="`${key}${layer}${config}`" :key-id="key" :idx="idx"
       :kb-length="layoutList.length" :selected="selectedList[idx]" :key-detail="layerOriginData?.keys?.[key]"
       :disabled="layerOriginData?.disable?.includes(key)" :smart="layerOriginData?.smart?.[key]"
       :sp="activeKeyLayer.superKeyMap[key]?.sp" :mt="activeKeyLayer.superKeyMap[key]?.mt"
       :dks="activeKeyLayer.superKeyMap[key]?.dks" @last-key-mounted="handleLastKeyMounted" />
+    <div class="w-50px h-50px absolute top-2 right-2 rounded-full bg-#222227" @click.stop></div>
   </div>
 </template>
