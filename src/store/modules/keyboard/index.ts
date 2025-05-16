@@ -1,4 +1,4 @@
-import { effectScope, onScopeDispose, reactive, watch, watchEffect } from 'vue';
+import { computed, effectScope, onScopeDispose, reactive, watch, watchEffect } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import { useEventListener } from '@vueuse/core';
 import { useBoolean } from '@sa/hooks';
