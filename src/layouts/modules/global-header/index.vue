@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onMounted, ref, watchEffect } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref, watchEffect, toRefs } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppStore } from '~/src/store/modules/app';
 import { useThemeStore } from '~/src/store/modules/theme';
@@ -107,8 +107,8 @@ const headerMenus = computed(() => {
       </ButtonIcon>
 -->
 
-      <GlobalSetting></GlobalSetting>
-      <LangSwitch :lang="appStore.locale" :lang-options="appStore.localeOptions" @change-lang="appStore.changeLocale" />
+      <GlobalSetting v-if="showCfg" ></GlobalSetting>
+      <LangSwitch v-if="showCfg" :lang="appStore.locale" :lang-options="appStore.localeOptions" @change-lang="appStore.changeLocale" />
 
       <!--
  <ThemeSchemaSwitch
