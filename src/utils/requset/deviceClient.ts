@@ -9,10 +9,12 @@ export type SendCfg = {
 //   SendCfg & {
 //     // optimize: other params
 //   };
+
+// change to V5.0
 export type RespOps<T = any> = {
-  name: string;
-  code: number;
-  data: T;
+  c: string;
+  e: number;
+  d: T;
 };
 const useMock: boolean = import.meta.env?.VITE_USE_MOCK === 'Y';
 /** @notice: just handle export mock data */
@@ -64,7 +66,7 @@ export class UsbTransfor {
     try {
       // optimize: transform options and config to request
       const sendOps = JSON.parse(JSON.stringify(opstions));
-      const { code, data } = await this.request<T>(sendOps, cfg);
+      const { e:code, d:data } = await this.request<T>(sendOps, cfg);
       if (code !== 0) {
         throw new Error('error');
       }
