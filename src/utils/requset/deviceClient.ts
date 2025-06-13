@@ -9,10 +9,12 @@ export type SendCfg = {
 //   SendCfg & {
 //     // optimize: other params
 //   };
+
+// change to V5.0
 export type RespOps<T = any> = {
-  name: string;
-  code: number;
-  data: T;
+  c: string;
+  e: number;
+  d: T;
 };
 const useMock: boolean = import.meta.env?.VITE_USE_MOCK === 'Y';
 /** @notice: just handle export mock data */
