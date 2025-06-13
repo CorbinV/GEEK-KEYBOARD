@@ -4,6 +4,11 @@ import { HIDMessageListener, HIDMessageQueue } from './message-queue';
 import type { FilterType, HIDProtocolOptions, HIDResponse } from './types';
 import { HIDMessageCodec } from './utils';
 const webHidLogger = logger.getLogger('web-hid');
+type AlisasKeyType = {
+  name: string,
+  code: string
+  data: string
+}
 export class HIDProtocolController extends EventTarget {
   private device: HIDDevice | null = null;
   private messageQueue: HIDMessageQueue;
@@ -14,7 +19,7 @@ export class HIDProtocolController extends EventTarget {
   private connected: boolean = false;
   private options: HIDProtocolOptions;
   private filterConditions: FilterType | null = null;
-
+  private msgAlias: AlisasKeyType = { name: 'name', code: 'code', data: 'data' }
   constructor(options: HIDProtocolOptions = {}) {
     super();
     this.options = {
@@ -30,6 +35,9 @@ export class HIDProtocolController extends EventTarget {
   }
   public getInstance() {
     return this.device;
+  }
+  setMsgAlisas(msgAlias: AlisasKeyType) {
+    this.msgAlias = msgAlias
   }
   async connect(filters: FilterType) {
     const { usagePage, ...rest } = filters;
@@ -111,7 +119,6 @@ export class HIDProtocolController extends EventTarget {
 
     try {
       const messageId = `${Date.now()}-${this.messageCounter++}`;
-      // const name = data.name;
       return await this.sendWithRetry(messageId, data, {
         attemptsLeft: this.options.retryAttempts || 1
       });
@@ -144,7 +151,7 @@ export class HIDProtocolController extends EventTarget {
         webHidLogger.debug('Requset 🟢', isBinary ? 'binary data' : data);
         if (!withoutResponse) {
           this.messageQueue.add(messageId, {
-            name: data?.name || 'bin',
+            name: data?.[this.msgAlias.name] || 'bin',
             callback: (response: HIDResponse) => {
               clearTimeout(timeoutId);
               resolve(response);
@@ -156,6 +163,7 @@ export class HIDProtocolController extends EventTarget {
         (async () => {
           for await (const outputReport of outputReports) {
             await new Promise((resolve, reject) => {
+              // @ts-ignore
               this.device!.sendReport(0, outputReport)
                 .then(() => {
                   resolve(true);
@@ -206,8 +214,8 @@ export class HIDProtocolController extends EventTarget {
         if (!message) {
           return;
         }
-        const { name } = message;
-        if (!name) {
+        const name = message[this.msgAlias.name]
+          if (!name) {
           return;
         }
         const listeners = this.listenerMap.get(name);
@@ -283,7 +291,7 @@ export class HIDProtocolController extends EventTarget {
         }, this.options.timeout);
         if (!withoutResponse) {
           this.binMessageQueue.add(messageId, {
-            name: data?.name || 'bin',
+            name: data?.[this.msgAlias.name] || 'bin',
             callback: (response: HIDResponse) => {
               clearTimeout(timeoutId);
               resolve(response);
@@ -293,6 +301,7 @@ export class HIDProtocolController extends EventTarget {
         (async () => {
           await new Promise((res, rej) => {
             for (const report of outputReports) {
+              // @ts-ignore
               this.device!.sendReport(0, report)
                 .then(() => {
                   res(true);
