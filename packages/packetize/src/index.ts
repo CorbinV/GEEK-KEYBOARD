@@ -31,22 +31,26 @@ export function depacketize(data: Uint8Array): Uint8Array | undefined {
         arr = [];
       }
       appendData(data.slice(4, data[1] - 1));
-      return data[2] === 1 ? new Uint8Array(arr) : undefined;
+      if (data[2] === 1) {
+        return new Uint8Array(arr)
+      }
+      return undefined
+    // return data[2] === 1 ? new Uint8Array(arr) : undefined;
     default:
       return undefined;
   }
 }
 
 // 将数据包拆分成多个小包
-export function packetize(data: Uint8Array, mtu: number = 48): Uint8Array[] {
+export function packetize(data: Uint8Array, mtu: number = 48, type = 0x20): Uint8Array[] {
   const packages: Uint8Array[] = [];
-  if (data.length <= mtu) {
+  if (data.length <= mtu - 4) {
     const header = 0xa5;
     const packageLength = data.length + 4;
     const packageBuffer = new Uint8Array(packageLength);
     packageBuffer[0] = header;
     packageBuffer[1] = packageLength;
-    packageBuffer[2] = 0xcc;
+    packageBuffer[2] = type;
     packageBuffer.set(data, 3);
     const checksum = packageBuffer.reduce((a, b) => a + b, 0) & 0xff;
     packageBuffer[packageLength - 1] = checksum;
@@ -63,12 +67,9 @@ export function packetize(data: Uint8Array, mtu: number = 48): Uint8Array[] {
       const packageBuffer = new Uint8Array(packageLength);
       packageBuffer[0] = header;
       packageBuffer[1] = packageLength;
-      packageBuffer[2] = count - i;
-      if (i === 0) {
-        packageBuffer[2] += 0x80;
-      }
-      packageBuffer[3] = 0xcc;
-      packageBuffer.set(packageData, 4);
+      packageBuffer[2] = type;
+      packageBuffer[3] = count - i;
+      packageBuffer.set(packageData, 3);
       const checksum = packageBuffer.reduce((a, b) => a + b, 0) & 0xff;
       packageBuffer[packageLength - 1] = checksum;
       packages.push(packageBuffer);
