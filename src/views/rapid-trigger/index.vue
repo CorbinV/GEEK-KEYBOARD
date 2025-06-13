@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, toRef } from 'vue';
 import { KeyboardContainer } from '@/components/custom/keyboard/index';
 import { useKeyboardStore } from '@/store/modules/keyboard';
+import { useCommonStore } from '@/store/modules/common';
 import AdjustView from './components/adjust-view.vue';
 import PropertyView from './components/property-view.vue';
 import ButtonGroup from './components/button-group.vue';
@@ -24,6 +25,16 @@ function useMutipleKeysControl() {
 useMutipleKeysControl();
 const isPropertyView = computed(() => {
   return tabName.value === tabNameEnum.property;
+});
+onMounted(async () => {
+  const commonStore = useCommonStore();
+  // show global loading
+  // wait tary info load finish
+  nextTick(async () => {
+    await commonStore.updateAllKeyTary();
+    commonStore.updateTaryDataCache();
+  })
+  // hide loading and allow user opeartor
 });
 </script>
 

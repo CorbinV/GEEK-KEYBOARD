@@ -304,12 +304,17 @@ async function handleApiResetRtFnc(selectKeyList: string[]) {
     console.error(error);
     window.$message?.error($t('businessCommon.executeFail'));
   }
+}
+// only for single mode && slected key at least one
 async function handleApiSetHighlight(keyId: string) {
   // find key idx in layoutList
   const idx = layoutList.value.findIndex(k => k === keyId);
   if (idx === -1) {
     return;
   }
+  //
+
+  // update selectedIdxObj
   clickedKey.value = { idx, keyId };
 
 
@@ -334,6 +339,7 @@ onMounted(() => {
     await handleApiResetRtFnc(selectKeyList);
     const tary = activeKeyLayer.value.xxx?.def?.tary || []
     selectKeyList.forEach(key => {
+      // console.log(key, activeKeyLayer.value.xxx)
       activeKeyLayer.value.xxx.keys[key].tary = tary
     })
     await commonStore.updateTaryDataCache(selectKeyList)

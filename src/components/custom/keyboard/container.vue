@@ -34,8 +34,11 @@ function handleKeyEmit(data: { keyId: string; code: number; type: number }, { to
     code: data.code,
     keyId: data.keyId
   };
+  // check if key belong to some super key
   const keyOriginInfo = activeKeyLayer.value.keys[keyId]
   if (keyOriginInfo?.mt.length > 0 || keyOriginInfo?.super.length > 0) {
+    // confirm: delete super key
+
     dialog.warning({
       title: $t('common.warning'),
       content: $t('baseKey.keyboard.removeSpkeyChange'),
@@ -55,6 +58,8 @@ function handleKeyEmit(data: { keyId: string; code: number; type: number }, { to
     },
     { toDevice, isxx: true }
   );
+  // optimize: add some notify to show the key config has been changed
+  // }
 }
 provide('selectedInfo', readonly(selectedInfo));
 provide('resetSelectedInfo', resetSelectedInfo);

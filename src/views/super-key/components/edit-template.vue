@@ -88,10 +88,28 @@ onMounted(() => {
               detail: detailList[index]
             });
           })
+        // selectedKeyInfo.list =  baseList.map
+        //   selectedKeyInfo.list= baseList.map((item, index){
+        //     base: item,
+        //     detail: detailList[index]
+        //   });
+        // });
+        //   baseList.forEach((item, index) => {
       }
     },
     { immediate: true }
   );
+  // if (props.needImportKey) {
+  //   watch(
+  //     () => selectedKeys.value,
+  //     newSelectedKeys => {
+  //       const keys = Object.keys(newSelectedKeys);
+  //       if (keys?.[0]) {
+  //         selectedKeyInfo.list = [selectedKeys.value[keys[0]]];
+  //       }
+  //     }
+  //   );
+  // }
 });
 const [localTitle] = useTitle();
 

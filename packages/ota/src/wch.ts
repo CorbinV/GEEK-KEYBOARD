@@ -32,6 +32,8 @@ export class WCH_OTA extends OTAProtocolController {
         try {
           u8a[1] = len;
           u8a[len - 1] = cs;
+          // let strx = ''
+          // u8a.forEach(v => (strx += `${v.toString(16)} `));
 
           const res = await this.sendFnc!(u8a, ops);
           sum = 0;
@@ -51,6 +53,7 @@ export class WCH_OTA extends OTAProtocolController {
             await sendCmd(sum + fixedNum, outMut, { withoutResponse: true })
             if (onProgress && (offset >= onePercent * progress)) {
               progress++;
+              console.log(progress)
               onProgress?.(progress);
             }
             u8a.fill(0x00, 3)
@@ -78,6 +81,7 @@ export class WCH_OTA extends OTAProtocolController {
 
     const cs = CMD_ENUM.H + CMD_ENUM.L_U + CMD_ENUM.T_U + v + s1 + s2 + l1 + l2 + id;
     const u8 = new Uint8Array([CMD_ENUM.H, CMD_ENUM.L_U, CMD_ENUM.T_U, v, s1, s2, l1, l2, id, cs]);
+    // const u8 = new Uint8Array([CMD_ENUM.H, 9, CMD_ENUM.T_U, v, s1,s2, l1, l2, cs])
     let result = 0;
     try {
       if (!this.sendFnc) {
@@ -128,6 +132,8 @@ export class WCH_OTA extends OTAProtocolController {
       if (!this.sendFnc || !this.fileContent) {
         throw new Error('sendFnc or fileContent is null');
       }
+      // const s1 = fileContentSum & (0xffff >> 8);
+      // const l1 = fileByteSize > BIT_CONDITION ? fileByteSize & (0xff00 >> 8) : fileByteSize >> 8;
       await this.enableOtaMode({
         v: VERSION,
         s1: fileContentSum & (0xffff >> 8),

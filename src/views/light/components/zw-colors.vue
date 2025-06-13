@@ -153,6 +153,8 @@ const selectColor = (event: MouseEvent) => {
   const rect = colorCanvas.value.getBoundingClientRect();
   const x = (event.clientX - rect.left) * (colorCanvas.value.width / rect.width);
   const y = (event.clientY - rect.top) * (colorCanvas.value.height / rect.height);
+  // const x = event.clientX - rect.left - colorCanvasInfo.width / 2;
+  // const y = event.clientY - rect.top - colorCanvasInfo.height / 2;
   const distance = Math.sqrt(x * x + y * y);
 
   if (distance < colorCanvasInfo.width / 2) {
@@ -187,6 +189,7 @@ const handleInput = (e: any, key: 'r' | 'g' | 'b') => {
   //   // 如果不合法，只保留合法的部分
   //   colorVal[key] = `${colorVal[key]}`.slice(0, 2);
   // }
+  // console.log('2222222', colorVal[key]);
 };
 // 初始化色轮
 

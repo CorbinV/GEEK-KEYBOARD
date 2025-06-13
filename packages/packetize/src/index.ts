@@ -35,6 +35,7 @@ export function depacketize(data: Uint8Array): Uint8Array | undefined {
         return new Uint8Array(arr)
       }
       return undefined
+    // return data[2] === 1 ? new Uint8Array(arr) : undefined;
     default:
       return undefined;
   }

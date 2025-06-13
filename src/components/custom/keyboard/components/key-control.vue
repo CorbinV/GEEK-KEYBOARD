@@ -187,7 +187,7 @@ async function updateKeyInfoByEmit(key: string) {
           <div v-if="superTitle" class="inline-flex flex-1 flex-row items-center justify-between">
             <div>{{ superTitle }}</div>
             <div class="ml-2 inline-flex gap-x-0.5">
-              <div class="ml-2 inline-flex gap-x-0.5">Y</div>
+              <div class="ml-2 inline-flex gap-x-0.5">Enable</div>
             </div>
           </div>
         </div>

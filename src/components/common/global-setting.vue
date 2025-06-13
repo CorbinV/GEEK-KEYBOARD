@@ -88,25 +88,34 @@ const productionInfo = JSON.parse(import.meta.env.VITE_PRODUCTION);
   padding-top: 20px;
   padding-bottom: 20px;
 }
+
 .vertical-bar {
   width: 4px;
   height: 18px;
   margin-right: 10px;
-  background-color: #3c8df4; /* 按钮文字颜色 */
+  background-color: #3c8df4;
+  /* 按钮文字颜色 */
 }
+
 .hollow-btn {
   background-color: transparent;
-  color: #3c8df4; /* 按钮文字颜色 */
-  border: 1px solid #3c8df4; /* 边框颜色 */
-  border-radius: 8px; /* 圆角边框 */
+  color: #3c8df4;
+  /* 按钮文字颜色 */
+  border: 1px solid #3c8df4;
+  /* 边框颜色 */
+  border-radius: 8px;
+  /* 圆角边框 */
   padding: 10px 20px;
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
 .hollow-btn:hover {
-  background-color: #3c8df4; /* 悬停时的背景颜色 */
-  color: white; /* 悬停时文字颜色 */
+  background-color: #3c8df4;
+  /* 悬停时的背景颜色 */
+  color: white;
+  /* 悬停时文字颜色 */
 }
 </style>

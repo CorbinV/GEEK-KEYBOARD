@@ -44,6 +44,7 @@ function useKeyInfo() {
     ops?: { toDevice?: boolean; isxx?: boolean }
   ) {
     const { toDevice = true, isxx } = ops || {};
+    // get current key config and cache it
     if (isxx) {
       const oldVal = JSON.parse(JSON.stringify(activeKeyLayer.value.keys[key] || {}));
       const newVal = JSON.parse(JSON.stringify({ ...oldVal, ...data }));
@@ -52,6 +53,7 @@ function useKeyInfo() {
         newVal
       });
     }
+    // record inject data(change)
     if (toDevice) {
       await setKeyInfo({
         keys: [
@@ -158,6 +160,37 @@ function useKeyInfo() {
     });
   }
   async function updateTaryDataCache(keys?: string[]) {
+    // let exeKeys: string[];
+    // if (!keys?.length) {
+    //   exeKeys = Object.keys(keyConfigMap.value.keys);
+    // } else {
+    //   exeKeys = keys;
+    // }
+    // let idx = 0;
+    // const chunkSize = 10;
+    // const handle = () => {
+    //   const end = Math.min(idx + chunkSize, exeKeys.length);
+    //   for (let i = idx; i < end; i++) {
+    //     const key = exeKeys[i];
+    //     const data = keyConfigMap.value[key].tary;
+    //     const [triggerPoint, enableRt, rtTrigger, rtReset] = data;
+    //     const cache = {
+    //       trigPt: triggerPoint ? triggerToPage(triggerPoint) : '',
+    //       enableRt,
+    //       rtTrig: rtTrigger ? sensitivityToPage(rtTrigger) : '',
+    //       rtReset: rtReset ? sensitivityToPage(rtReset) : ''
+    //     };
+    //     activeKeyLayer.value.rtLabelMap.set(key, {
+    //       ...cache
+    //     });
+    //     console.log('rtLabelMap info update----------------------------', key, cache);
+    //   }
+    //   idx = end;
+    //   if (idx < exeKeys.length) {
+    //     requestAnimationFrame(handle);
+    //   }
+    // };
+    // requestAnimationFrame(handle);
     return new Promise((resolve, reject) => {
       try {
         if (!keyConfigMap?.value) {

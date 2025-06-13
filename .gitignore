@@ -35,6 +35,7 @@ yarn.lock
 .VSCodeCounter
 types/elegant-router.d.ts
 types/components.d.ts
+dist-仅压缩图片-未分包/
 v
 release/
 stats.html

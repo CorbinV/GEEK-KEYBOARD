@@ -13,6 +13,7 @@ async function handleUndoClick() {
   }
   const { key, code, type, enable } = data.oldVal;
   await setTargetKeyInfoById(key, { code, type, enable });
+  // set tartget key heightlight
 }
 async function handleRedoClick() {
   const data = redo();

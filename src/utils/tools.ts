@@ -96,3 +96,6 @@ export function rgbToHsl(r = 0, g = 0, b = 0) {
   // 将 H, S, L 转换回百分比格式
   return { H, S: S * 100, L: L * 100 };
 }
+export function mod(n: number, m: number) {
+  return ((n % m) + m) % m
+}

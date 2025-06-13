@@ -8,6 +8,7 @@ interface DragConstraints {
   minY: number;
   maxY: number;
 }
+// Props 定义
 const props = withDefaults(
   defineProps<{
     groupIdx: number;
@@ -31,12 +32,14 @@ items.forEach(item => (item.currentHeight = props.initialHeight));
 const groupRef = ref<HTMLElement | null>(null);
 const capsuleRefs = ref<any[]>([]);
 
+// 提供上下文
 provide('groupContext', {
   items,
   initialHeight: props.initialHeight,
   gap: props.gap
 });
 
+// 计算最大拖动距离
 const calculateMaxDragDistance = (index: number): number => {
   for (let i = index + 1; i < items.length; i++) {
     if (items[i].isAboveMask) {
@@ -46,6 +49,7 @@ const calculateMaxDragDistance = (index: number): number => {
   return (items.length - index - 1) * (props.initialHeight + props.gap);
 };
 
+// 获取拖动约束
 const getDragConstraints = (index: number): DragConstraints => {
   return {
     minY: -props.initialHeight,
@@ -53,6 +57,7 @@ const getDragConstraints = (index: number): DragConstraints => {
   };
 };
 
+// 更新胶囊位置
 const updateCapsulePosition = (index: number, position: number) => {
   items[index].position = position;
   // 更新所有胶囊的约束
@@ -62,18 +67,23 @@ const updateCapsulePosition = (index: number, position: number) => {
     }
   });
 };
+// 点击蒙版的处理函数
 const handleMaskClick = (index: number) => {
   if (props.disable) {
     window.$message?.info('请先绑定当前配置的按键');
     return;
   }
+  // 设置当前胶囊的显示状态
   items[index].isAboveMask = true;
 
+  // 更新约束
   if (capsuleRefs.value[index]?.updateConstraints) {
     capsuleRefs.value[index].updateConstraints(getDragConstraints(index));
   }
 };
+// 生命周期钩子
 onMounted(() => {
+  // 初始化约束
   capsuleRefs.value.forEach((dragRef: typeof DraggableCapsule, index) => {
     if (dragRef && dragRef.updateConstraints) {
       dragRef.updateConstraints(getDragConstraints(index));
@@ -81,6 +91,7 @@ onMounted(() => {
   });
 });
 
+// 检查是否与下一个item重叠
 function checkOverlap(dragIndex: number, currentPos: number): [boolean, number, number] {
   let res: [boolean, number, number] = [false, -1, items.length - 1];
 
@@ -89,6 +100,7 @@ function checkOverlap(dragIndex: number, currentPos: number): [boolean, number, 
     return res;
   }
   const currentItemBottom = currentPos + (props.initialHeight + props.gap) * dragIndex;
+  // 从拖动项的下一个位置开始检查
   for (let i = dragIndex + 1; i < items.length; i++) {
     const top = i * (props.initialHeight + props.gap);
     const bottom = top + props.initialHeight;
@@ -98,6 +110,7 @@ function checkOverlap(dragIndex: number, currentPos: number): [boolean, number, 
       res = [false, -1, idx];
       break;
     }
+    // 检查是否与当前位置重叠
     if (currentItemBottom < bottom && currentItemBottom >= mid) {
       res = [true, i, -1];
       break;
@@ -106,6 +119,7 @@ function checkOverlap(dragIndex: number, currentPos: number): [boolean, number, 
   return res;
 }
 
+// 处理拖动结束
 const handleDragEnd = (index: number, position: number) => {
   if (items[index + 1]?.isAboveMask) {
     return;

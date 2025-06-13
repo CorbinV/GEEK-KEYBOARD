@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { nextTick, onMounted, ref, toRaw, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
 import { useMessage, SelectOption } from 'naive-ui';
 import useConver from '@/utils/conver';
@@ -29,6 +29,9 @@ const BREAK_OPTIMIZE_SWITCH = 4;
 const SHAKE_LEAVE = 5;
 const RT_TOP_DEAD_ZONE = 6;
 const RT_BELOW_DEAD_ZONE = 7;
+
+const  localShowKeyParams = ref<boolean>(localStorage.getItem('showKeyParams') === 'true');
+// ref<boolean>(false);
 
 const exeDeadZoneValue = ref<number>(0);
 const rapidTiggerSwitch = ref<boolean>(false);
@@ -143,21 +146,65 @@ watch(
     }
     showMask.value = false
     updatView()    // selectedKey.value.forEach((newKey) => {
+    // commonStore.getTargetKeyInfo(newKey).then(data => {
+    // if (newKey === '0') {
+    //  // 如果需要遍历某个数据结构中的键
+    // Object.entries(data).forEach(([keykey]) => {
+    // curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
+    // });
+    // getDevPerf(data.tary); // 假设的功能调用
+    // }
+    // });
+    // });
   }
 );
 function updateViewToDefault() {
   const defaultTary = activeKeyLayer.value.xxx.def.tary;
-  getDevPerf(defaultTary);
+  getDevPerf(defaultTary); // 假设的功能调用
 }
-function updatView() {
-  const fristKey = selectedKey.value[0];
+function updatView(toDefalut = false) {
+  const fristKey = selectedKey.value[selectedKey.value.length - 1];
   commonStore.getTargetKeyInfo(fristKey).then(data => {
+    // 如果需要遍历某个数据结构中的键
     Object.entries(data).forEach(([keykey]) => {
-      curKey.value = keykey;
+      curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
     });
-    getDevPerf(data.tary);
+    getDevPerf(data.tary); // 假设的功能调用
   });
 }
+// watch(
+//   () => Object.keys(selectedKeys.value),
+//   () => {
+//     console.log(selectedKeys.value);
+//   }
+// );
+// watch(
+//   () => selectedKeysMap.value.size,
+//   (val) => {
+//     console.log('selectedKeysMap.value.keys change', val);
+//     // const keys = Array.from(val);
+//     // console.log('selectedKeysMap.value.keys change', Array.from(V));
+//     // console.log('selectedKeysMap.value.keys change', selectedKeysMap.value, selectedKeys.value);
+//   }
+// );
+// watch(
+//   () => Object.keys(selectedKeys.value),
+//   () => {
+//     selectedKey.value = Object.keys(selectedKeys.value);
+
+//     Object.entries(selectedKey.value).forEach(([newKey]) => {
+//       commonStore.getTargetKeyInfo(newKey).then(data => {
+//         if (newKey === '0') {
+//           // 如果需要遍历某个数据结构中的键
+//           Object.entries(data).forEach(([keykey]) => {
+//             curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
+//           });
+//           getDevPerf(data.tary); // 假设的功能调用
+//         }
+//       });
+//     });
+//   }
+// );
 // watch(
 //   () => selectedKeys.value,
 //       console.log('11111111111', Object.keys(selectedKeys.value));
@@ -194,10 +241,47 @@ function updatView() {
 //   }
 // );
 
+// watch(
+//   () => selectedKeys.value,
+
+//   // (nLength, oLength) => {
+//   nLength => {
+//     setTimeout(() => {
+//       Object.keys(selectedKeys.value).forEach(key => {
+//         const val = selectedKeys.value[key];
+//         console.log('11111111111', selectedKeys.value);
+
+//         if (val?.base) {
+//           // const base = val.base.key;
+//           // selectedKey.value.push('7');
+//           // console.log(base);
+//           Object.entries(nLength).forEach(([newKey]) => {
+//             commonStore.getTargetKeyInfo(newKey).then(data => {
+//               Object.entries(nLength).forEach(([keykey]) => {
+//                 // console.log(`键: ${keykey}, 值: ${value}`);
+//                 curKey.value = keykey;
+//               });
+//               getDevPerf(data.tary);
+//               console.log('22222222222 ', data.tary);
+//               // curKey.value = data.getDevPerf();
+//             });
+//             // getDevPerf({ key: newKey });
+//           });
+//         } else {
+//           selectedKey.value.length = 0;
+//         }
+//       });
+//     }, 100);
+//   }
+// );
+
 // function setAxosome() {}
 // 1. 创建一个 Apple 实例并使其响应式
 // async function getDevPerf(data: { key: string }) {
 async function getDevPerf(tary: number[]) {
+  // console.log(11111111);
+  // console.log(data);
+  //  const x = await getPerf(data);
   perfArr.value = tary;
 
   rapidTiggerSwitch.value = getPerfIndex(RAPID_TRIGGER_SWITCH) === 1;
@@ -211,13 +295,25 @@ async function getDevPerf(tary: number[]) {
 
   rtTopDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_TOP_DEAD_ZONE)));
   rtBelowDeadValue.value = Number(sensitivityToPage(getPerfIndex(RT_BELOW_DEAD_ZONE)));
+  // // console.log(calibration.value);
+  // // 当前最大轮询率
+  // console.log('滑动中，当前值:', perfArr.value);
+  // // rateOption.value = perf.value.rate.map(num => ({
+  // //   key: num,
+  // //   label: `${num / 1000}K`
+  // // }));
+  // curRate.value = rateOption.value.find((item: Opetion) => item.key === perf.value.curRate);
+  // 当前防抖等级
+
+  // console.log('shakeCtrl.value.ops', shakeCtrl.value.ops);
+  // shakeCtrl.value.val.label = shakelayerLabel[shakeLeaveValue.value];
 }
 async function setDevPerf() {
   isLoading.value = true;
   timeoutId.value = setTimeout(() => {
     isLoading.value = false;
     message.error('写入失败', {
-      duration: 1000
+      duration: 1000 // 持续时间
     });
   }, 3000);
   const sendData = selectedKey.value.map((key) => {
@@ -232,8 +328,10 @@ async function setDevPerf() {
   isLoading.value = false;
 
   if (timeoutId.value) {
-    clearTimeout(timeoutId.value);
+    clearTimeout(timeoutId.value); // 清除之前的定时器
   }
+
+  //  await addOks({ code, keys, name });
 }
 
 function exeDeadSlidingStop(value: number) {
@@ -291,8 +389,6 @@ async function getDevRate() {
     window.$log!.error('Catch Error when get Device Rate', error);
   }
 }
-// getComboList();
-// getDevPerf({ key: 'G' });
 getDevRate();
 
 function handleMaskClick(e: MouseEvent) {
@@ -304,6 +400,16 @@ function handleMaskClick(e: MouseEvent) {
     window?.$message!.info($t('businessCommon.btnSelectRequired'))
   }
 }
+watch(
+  () => localShowKeyParams.value,
+  (val) => {
+    showKeyParams.value = val;
+    nextTick(()=>{
+      localStorage.setItem('showKeyParams', JSON.stringify(val))
+    })
+  },{
+    immediate: true
+  })
 </script>
 
 <template>
@@ -313,15 +419,17 @@ function handleMaskClick(e: MouseEvent) {
         mask: showMask
       }" @click.prevent="handleMaskClick">
         <div class="flex-raw box-border w-full flex gap-30px bg-[#171619] p-20px">
+          <!-- +++++++++++++++++++++ SECTION 1 +++++++++++++++++++++ -->
           <div class="flex flex-col flex-1 gap-y-10px">
             <GroupTitle :title="$t('repidTrigger.showArg')" class="z-60" data-tag="showArg">
               <template #end>
-                <NSwitch v-model:value="showKeyParams"></NSwitch>
+                <NSwitch v-model:value="localShowKeyParams"></NSwitch>
               </template>
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60" data-tag="pollingRate">
               <template #end>
                 <NSelect v-model:value="rateCtrl.val" :options="rateCtrl.ops"
+                  to="#popover-portal"
                   class="h-40px w-100px !cursor-not-allowed" placement="bottom-start" trigger="click"
                   @update-value="rateSelect">
                   <!-- <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton> -->
@@ -333,6 +441,7 @@ function handleMaskClick(e: MouseEvent) {
           </div>
 
           <div class="border-l-1px border-[#232327]"></div>
+          <!-- +++++++++++++++++++++ SECTION 2 +++++++++++++++++++++ -->
 
           <div class="flex-1">
             <div class="flex flex-col">
@@ -390,6 +499,7 @@ function handleMaskClick(e: MouseEvent) {
               </NModal>
             </div>
           </div>
+          <!-- +++++++++++++++++++++ SECTION 3 +++++++++++++++++++++ -->
           <div class="border-l-1px border-[#232327]"></div>
           <div class="flex flex-col flex-1 gap-y-10px">
             <GroupTitle :title="$t('repidTrigger.debounceOptimization')">
@@ -401,6 +511,7 @@ function handleMaskClick(e: MouseEvent) {
               <template #end>
                 <NSelect v-model:value="shakeCtrl.val" :options="shakeCtrl.ops"  to="#popover-portal" class="h-40px w-100px" placement="bottom-start" trigger="click"
                   @select="shakeSelect">
+                  <!-- <NButton class="h-40px w-100px bg-[#222227]">{{ curShake.label }}</NButton> -->
                 </NSelect>
               </template>
             </GroupTitle>
@@ -440,28 +551,39 @@ function handleMaskClick(e: MouseEvent) {
   width: 4px;
   height: 18px;
   margin-right: 10px;
-  background-color: #3c8df4; /* 按钮文字颜色 */
+  background-color: #3c8df4;
+  /* 按钮文字颜色 */
 }
+
 :root {
   --primary-color: #3c8df4;
   --background-color: #171619;
   --border-color: #232327;
   --text-color: #999999;
 }
+
 .hollow-btn {
   background-color: transparent;
-  color: #3c8df4; /* 按钮文字颜色 */
-  border: 1px solid #3c8df4; /* 边框颜色 */
-  border-radius: 8px; /* 圆角边框 */
+  color: #3c8df4;
+  /* 按钮文字颜色 */
+  border: 1px solid #3c8df4;
+  /* 边框颜色 */
+  border-radius: 8px;
+  /* 圆角边框 */
   padding: 10px 20px;
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
 .hollow-btn:hover {
-  background-color: #3c8df4; /* 悬停时的背景颜色 */
-  color: white; /* 悬停时文字颜色 */
+  background-color: #3c8df4;
+  /* 悬停时的背景颜色 */
+  color: white;
+  /* 悬停时文字颜色 */
+}
+
 .mask::before {
   content: '';
   position: absolute;

@@ -25,6 +25,7 @@ const props = withDefaults(
   }
 );
 
+// Emits 定义
 const emit = defineEmits<{
   'update:height': [value: number];
   'update:isAboveMask': [value: boolean];
@@ -32,11 +33,13 @@ const emit = defineEmits<{
   'drag-end': [index: number, position: number];
 }>();
 
+// 响应式状态
 const position = ref(0);
 const isDragging = ref(false);
 const startY = ref(0);
 const startPosition = ref(0);
 let afterDraged = false;
+// 开始拖动处理
 const startDrag = (e: MouseEvent) => {
   if (props.disabled || !props.isAboveMask || isDragging.value) return;
   startY.value = e.clientY;
@@ -45,6 +48,7 @@ const startDrag = (e: MouseEvent) => {
   // e.currentTarget.style.zIndex=20
   document.body.style.cursor = 'grabbing !important';
 };
+// 拖动过程处理
 const handleDrag = (e: MouseEvent) => {
   if (!isDragging.value || !props.isAboveMask) return;
   const deltaY = e.clientY - startY.value;
@@ -54,16 +58,21 @@ const handleDrag = (e: MouseEvent) => {
   }
   afterDraged = true;
   let newPosition = startPosition.value + deltaY;
+
+  // 应用拖动约束
   newPosition = Math.max(props.dragConstraints.minY, Math.min(newPosition, props.dragConstraints.maxY));
 
   position.value = newPosition < 0 ? 0 : newPosition;
 
+  // 更新状态和触发事件
   emit('position-change', props.index, position.value);
 
+  // 更新高度
   const newHeight = props.initialHeight + Math.abs(position.value);
   emit('update:height', newHeight);
 };
 
+// 停止拖动处理
 const stopDrag = () => {
   if (isDragging.value) {
     isDragging.value = false;
@@ -71,11 +80,13 @@ const stopDrag = () => {
     // document.removeEventListener('mouseup', stopDrag);
     // 发出停止拖动事件，让父组件处理位置检查
     emit('drag-end', props.index, position.value);
+    // document.body.style.cursor = 'initial';
     return;
   }
 
 };
 
+// 更新约束方法
 const updateConstraints = (newConstraints: DragConstraints) => {
   position.value = Math.max(newConstraints.minY, Math.min(position.value, newConstraints.maxY));
 };
@@ -117,6 +128,7 @@ onUnmounted(() => {
   document.removeEventListener('mouseup', stopDrag);
   document.removeEventListener('mouseleave', stopDrag);
 })
+// 组件方法暴露
 defineExpose({
   updateConstraints,
   isDragging

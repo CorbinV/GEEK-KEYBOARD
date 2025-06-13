@@ -29,11 +29,14 @@ type CacheSuperKey = {
   mt?: BaseKeyView;
   dks: boolean;
   combo: boolean;
+  // add
+  // oks:
 };
 
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
   const kbLogger = logger.getLogger('kbStore');
+
   function useConfigData() {
     // optimize: dynammic import keyboard config(eg)
     // const kbCfg = reactive<any>({
@@ -227,6 +230,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       }
       return codeDetail;
     };
+    // load all data
     const fetchLayerKeys = async (
       params: {
         configIdx: number;
@@ -277,6 +281,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       const managerId = `${config}-${layer}`;
       const layerInfo = dataManager.get(managerId);
 
+      // target cfgIdx-layerIdx exist -> get cache
       if (layerInfo) {
         activeKeyLayer.superKeyMap = layerInfo.superKeyMap;
         activeKeyLayer.dksKeyMap = layerInfo.dksKeyMap;
@@ -537,6 +542,8 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
               reject(e);
             });
         })
+        // .then(() => {
+        // set layer to  device current cfg
         await updateLayerKeys({
           config: keyLayerInfo.configIndex,
           layer: keyLayerInfo.layerIndex
@@ -754,6 +761,12 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     watchDevConnStatus({
       connCb: () => {
         kbLogger.debug('connect ....');
+        updateDeviceInfo()
+        // try {
+        //   updateDeviceInfo()
+        // } catch (error) {
+        //   console.log(error);
+        // }
       },
       disconnCb: () => {
         resetKeyLayerCfgCtrl();
@@ -797,7 +810,31 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         }
       }
     );
+    // regesiter when cfg mounted
 
+    // watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], ([cfgIdx, layerIdx]) => {
+    //   resetSelectedKeys();
+    //   resetKeyHistory();
+    //   updateDeviceCfgAndLayer({
+    //     layerIdx,
+    //     cfgIdx
+    //   })
+    //     .then(() => {
+    //       updateLayerKeys({
+    //         config: cfgIdx,
+    //         layer: layerIdx
+    //       });
+    //     })
+    //     .catch(e => {
+    //       window.$message?.error('设备响应异常');
+    //       console.log(e);
+    //     });
+    // });
+  }
+  const afterDeviceReset = async () => {
+    await AfterDevConn()
+    await updateDeviceInfo()
+  }
   // watch store
   // scope.run(() => {
   // });
