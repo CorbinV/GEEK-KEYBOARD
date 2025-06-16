@@ -8,6 +8,7 @@ import { useAppStore } from '@/store/modules/app';
 import { useThemeStore } from '@/store/modules/theme';
 import { useRouteStore } from '@/store/modules/route';
 import { useRouterPush } from '@/hooks/common/router';
+import { themeSettings } from '@/theme/settings';
 type MenuThemeOverrides = NonNullable<MenuProps['themeOverrides']>;
 defineOptions({
   name: 'BaseMenu'
@@ -20,6 +21,10 @@ interface Props {
 }
 const x: MenuThemeOverrides = {
   fontSize: '20px',
+  // arrowColorActive: 'white',
+  itemColorActive: themeSettings.themeColor,
+  itemTextColorActive: 'white',
+  itemIconColorActive: 'white',
 };
 const props = withDefaults(defineProps<Props>(), {
   mode: 'vertical'
@@ -75,20 +80,9 @@ watch(
 
 <template>
   <SimpleScrollbar>
-    <NMenu
-      v-model:expanded-keys="expandedKeys"
-      :theme-overrides="x"
-      :mode="mode"
-      :value="selectedKey"
-      :collapsed="siderCollapse"
-      :collapsed-width="themeStore.sider.collapsedWidth"
-      :collapsed-icon-size="22"
-      :options="naiveMenus"
-      :inverted="darkTheme"
-      :indent="18"
-      responsive
-      @update:value="handleClickMenu"
-    />
+    <NMenu v-model:expanded-keys="expandedKeys" :theme-overrides="x" :mode="mode" :value="selectedKey"
+      :collapsed="siderCollapse" :collapsed-width="themeStore.sider.collapsedWidth" :collapsed-icon-size="22"
+      :options="naiveMenus" :inverted="darkTheme" :indent="18" responsive @update:value="handleClickMenu" />
   </SimpleScrollbar>
 </template>
 
@@ -96,13 +90,16 @@ watch(
 :deep(.n-menu--horizontal) {
   --n-item-height: v-bind(headerHeight) !important;
 }
-:deep(.n-menu ){
-  .n-menu-item{
+
+:deep(.n-menu) {
+  .n-menu-item {
     margin: 15px 0;
   }
-  .n-menu-item-content{
+
+  .n-menu-item-content {
     padding-left: 48px !important;
-    .n-menu-item-content__icon{
+
+    .n-menu-item-content__icon {
       margin-right: 16px !important;
     }
   }
