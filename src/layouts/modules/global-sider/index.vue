@@ -26,7 +26,7 @@ const showLogo = computed(() => !isVerticalMix.value && !isHorizontalMix.value);
     :inverted="darkMenu"
     style="background-color: #222226"
   >
-    <GlobalLogo v-if="showLogo" :show-title="false" :style="{ height: themeStore.header.height + 'px' }" />
+    <GlobalLogo v-if="showLogo" :show-title="false" :style="{ height: themeStore.header.height + 'px' }" class="pl-6" />
     <VerticalMixMenu v-if="isVerticalMix">
       <GlobalLogo :show-title="false" :style="{ height: themeStore.header.height + 'px' }" />
     </VerticalMixMenu>
