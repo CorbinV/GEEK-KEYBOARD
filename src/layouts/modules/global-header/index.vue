@@ -76,21 +76,12 @@ const headerMenus = computed(() => {
 
 <template>
   <DarkModeContainer class="h-full flex-y-center px-6 shadow-header" style="background-color: #222226">
-    <GlobalLogo
-      v-if="showLogo"
-      :show-title="showTitle"
-      class="h-full"
-      :style="{ width: themeStore.sider.width + 'px' }"
-    />
-    <AsyncConfigSelect v-if="showCfg" />
+    <GlobalLogo v-if="showLogo" :show-title="showTitle" class="h-full"
+      :style="{ width: themeStore.sider.width + 'px' }" />
     <HorizontalMenu v-if="showMenu" mode="horizontal" :menus="headerMenus" class="win-drag px-12px" />
     <div v-else class="win-drag h-full flex-y-center flex-1-hidden">
-      <MenuToggler
-        v-if="showMenuToggler"
-        :collapsed="appStore.siderCollapse"
-        class="win-no-drag"
-        @click="appStore.toggleSiderCollapse"
-      />
+      <MenuToggler v-if="showMenuToggler" :collapsed="appStore.siderCollapse" class="win-no-drag"
+        @click="appStore.toggleSiderCollapse" />
       <GlobalBreadcrumb v-if="!appStore.isMobile" class="win-no-drag ml-12px" />
       <!-- <UserAvatar class="win-no-drag" /> -->
     </div>
@@ -106,9 +97,11 @@ const headerMenus = computed(() => {
         <SvgIcon local-icon="setting" />
       </ButtonIcon>
 -->
+      <AsyncConfigSelect v-if="showCfg" class="mr-6" />
 
-      <GlobalSetting v-if="showCfg" ></GlobalSetting>
-      <LangSwitch v-if="showCfg" :lang="appStore.locale" :lang-options="appStore.localeOptions" @change-lang="appStore.changeLocale" />
+      <GlobalSetting v-if="showCfg"></GlobalSetting>
+      <LangSwitch v-if="showCfg" :lang="appStore.locale" :lang-options="appStore.localeOptions"
+        @change-lang="appStore.changeLocale" />
 
       <!--
  <ThemeSchemaSwitch
