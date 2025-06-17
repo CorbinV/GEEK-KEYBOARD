@@ -1,5 +1,7 @@
 const lang: App.BusinessLanguage.Schema = {
   businessCommon: {
+    casualMode: 'Casual Mode',
+    competitionMode: 'Competition Mode',
     confirm1: 'confirm',
     cancel: 'cancel',
     restoreFactoryHint: 'Are you sure you want to reset to factory settings?',

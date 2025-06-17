@@ -49,6 +49,7 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     featWaitSoon: 'This feature is coming soon! Stay tuned.',
     back: 'Back',
     featCommingSoon: 'This feature is coming soon! Stay tuned.',
+    mode: 'Mode'
   },
   request: {
     logout: 'Logout user after request failed',

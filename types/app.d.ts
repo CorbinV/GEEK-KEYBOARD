@@ -307,6 +307,7 @@ declare namespace App {
         featWaitSoon: string;
         back: string;
         featCommingSoon: string;
+        mode: string
       };
       request: {
         logout: string;
@@ -470,6 +471,8 @@ declare namespace App {
     export type Schema = {
       // remove current content
       businessCommon: {
+        casualMode: string,
+        competitionMode: string,
         confirm1: string;
         cancel: string;
         restoreFactoryHint: string;

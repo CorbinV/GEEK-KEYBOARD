@@ -1,5 +1,7 @@
 const lang: App.BusinessLanguage.Schema = {
   businessCommon: {
+    casualMode: '娱乐模式',
+    competitionMode: '竞赛模式',
     confirm1: '确定',
     cancel: '取消',
     restoreFactoryHint: '您确定要恢复出厂设置吗？',
@@ -21,7 +23,7 @@ const lang: App.BusinessLanguage.Schema = {
     plsSetSwitchKeys: '请设置需要开关持续触发的健值',
     switchSwitch: '切换开关',
     connectTimeout: '连接超时',
-    connectDev: '连接设备',
+    connectDev: '去连接',
     connectHint: '探索独特的设置，并根据您的喜好个性化您的设备。轻松访问、轻松配置、轻松保存、轻松获胜!',
     buttonDisableInfo: '此按钮已禁用使用，请解禁后再操作',
     temporaryUnavailable: '功能维护中',
