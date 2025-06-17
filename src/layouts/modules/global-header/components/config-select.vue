@@ -2,15 +2,10 @@
 import { computed, toRef } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { $t } from '@/locales';
-import {  type SelectProps } from 'naive-ui'
 
 const keyboardStore = useKeyboardStore();
 const keyLayerInfo = toRef(keyboardStore, 'keyLayerInfo');
 
-type SelectPropsThemeOverrides = NonNullable<SelectProps['themeOverrides']>;
-const selectTheme: SelectPropsThemeOverrides = {
-
-}
 const modeOps = computed(() => {
   const cnt = keyLayerInfo.value.layerCount;
   return Array.from({ length: cnt }).map((_, idx) => {
