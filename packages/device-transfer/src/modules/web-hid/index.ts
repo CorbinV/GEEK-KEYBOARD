@@ -20,6 +20,7 @@ export class HIDProtocolController extends EventTarget {
   private options: HIDProtocolOptions;
   private filterConditions: FilterType | null = null;
   private msgAlias: AlisasKeyType = { name: 'name', code: 'code', data: 'data' }
+  private reportId: number = 0
   constructor(options: HIDProtocolOptions = {}) {
     super();
     this.options = {
@@ -40,7 +41,10 @@ export class HIDProtocolController extends EventTarget {
     this.msgAlias = msgAlias
   }
   async connect(filters: FilterType) {
-    const { usagePage, ...rest } = filters;
+    const { usagePage, reportId, ...rest } = filters;
+    if (!isNaN(reportId!)) {
+      this.reportId = reportId!
+    }
     try {
       this.filterConditions = filters;
       let device: HIDDevice | undefined;
@@ -164,7 +168,7 @@ export class HIDProtocolController extends EventTarget {
           for await (const outputReport of outputReports) {
             await new Promise((resolve, reject) => {
               // @ts-ignore
-              this.device!.sendReport(0, outputReport)
+              this.device!.sendReport(this.reportId, outputReport)
                 .then(() => {
                   resolve(true);
                 }).catch(err => {
@@ -302,7 +306,7 @@ export class HIDProtocolController extends EventTarget {
           await new Promise((res, rej) => {
             for (const report of outputReports) {
               // @ts-ignore
-              this.device!.sendReport(0, report)
+              this.device!.sendReport(this.reportId, report)
                 .then(() => {
                   res(true);
                 }).catch(err => {

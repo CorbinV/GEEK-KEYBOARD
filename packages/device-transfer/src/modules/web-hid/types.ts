@@ -22,6 +22,7 @@ export interface FilterType {
   vendorId?: number;
   productId?: number;
   usagePage?: number;
+  reportId?: number
 }
 export type Request = {
   name: string;
