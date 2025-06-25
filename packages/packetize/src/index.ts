@@ -42,16 +42,16 @@ export function depacketize(data: Uint8Array): Uint8Array | undefined {
 }
 
 // 将数据包拆分成多个小包
-export function packetize(data: Uint8Array, mtu: number = 48, type = 0x20): Uint8Array[] {
+export function packetize(data: Uint8Array, mtu: number = 48, type = 0xcc): Uint8Array[] {
   const packages: Uint8Array[] = [];
   if (data.length <= mtu - 4) {
     const header = 0xa5;
     const packageLength = data.length + 4;
-    const packageBuffer = new Uint8Array(packageLength);
+    const packageBuffer = new Uint8Array(mtu);
     packageBuffer[0] = header;
     packageBuffer[1] = packageLength;
     packageBuffer[2] = type;
-    packageBuffer.set(data, 2);
+    packageBuffer.set(data, 3);
     const checksum = packageBuffer.reduce((a, b) => a + b, 0) & 0xff;
     packageBuffer[packageLength - 1] = checksum;
     packages.push(packageBuffer);
@@ -64,7 +64,7 @@ export function packetize(data: Uint8Array, mtu: number = 48, type = 0x20): Uint
       const end = Math.min(start + maxDataSize, data.length);
       const packageData = data.slice(start, end);
       const packageLength = packageData.length + 5;
-      const packageBuffer = new Uint8Array(packageLength);
+      const packageBuffer = new Uint8Array(mtu);
       packageBuffer[0] = header;
       packageBuffer[1] = packageLength;
       packageBuffer[2] = type;
