@@ -15,6 +15,7 @@ interface Props {
   icon?: string;
   /** Local svg icon name */
   localIcon?: string;
+  localIcons?: string[];
 }
 
 const props = defineProps<Props>();
@@ -35,7 +36,10 @@ const symbolId = computed(() => {
 
   return `#${prefix}-${icon}`;
 });
-
+const symbol2Ids = computed(() => {
+  const { VITE_ICON_LOCAL_PREFIX: prefix } = import.meta.env;
+  return props.localIcons?.map(icon => `#${prefix}-${icon}`) || [];
+});
 /** If localIcon is passed, render localIcon first */
 const renderLocalIcon = computed(() => props.localIcon || !props.icon);
 </script>
@@ -44,6 +48,7 @@ const renderLocalIcon = computed(() => props.localIcon || !props.icon);
   <template v-if="renderLocalIcon">
     <svg aria-hidden="true" width="1em" height="1em" v-bind="bindAttrs">
       <use :xlink:href="symbolId" fill="currentColor" />
+      <use v-for="id in symbol2Ids" :key="id" :xlink:href="id" fill="currentColor" />
     </svg>
   </template>
   <template v-else>
