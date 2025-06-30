@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70.87 70.87">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #424242;
+      }
+
+      .cls-1,
+      .cls-3 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: #171717;
+      }
+
+      .cls-3 {
+        fill: #a6a6a6;
+      }
+    </style>
+  </defs>
+  <g id="鍥惧眰_1" data-name="鍥惧眰 1">
+    <path class="cls-1" d="M57.9,8A35.44,35.44,0,1,0,70.69,31.94,35.47,35.47,0,0,0,57.9,8Z" />
+    <circle class="cls-2" cx="35.43" cy="35.43" r="28.35" transform="translate(-3.32 3.66) rotate(-5.65)" />
+    <polygon class="cls-3"
+      points="28.35 42.52 34.53 28.35 34.85 28.35 36.01 28.35 36.34 28.35 42.52 42.52 41.04 42.52 38.74 37.25 33.61 37.25 34.2 35.89 38.15 35.89 35.43 29.67 29.83 42.52 28.35 42.52" />
+  </g>
+</svg>
