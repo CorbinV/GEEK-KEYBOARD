@@ -45,10 +45,10 @@ export function getDeviceConfigAndLayer(): Promise<ConfigAndLayer> {
       })
       .then(res => {
         resolve({
-          configCount: res.config_count,
-          configIndex: res.config_index,
-          layerCount: res.layer_count,
-          layerIndex: res.layer_index
+          configCount: res.cfgCnt,
+          configIndex: res.cfgIdx,
+          layerCount: res.layerCnt,
+          layerIndex: res.layerIdx
         });
       })
       .catch(reject);
