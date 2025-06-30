@@ -55,8 +55,12 @@ export class UsbTransfor {
           resolve(data);
         });
       }
-      // feat: use device to send data
-      return this.getCommunicator().send(ops);
+      const { name: c, data: d } = ops;
+      const sendOps: { c: string; d?: any } = { c };
+      if (d) {
+        sendOps.d = d;
+      }
+      return this.getCommunicator().send(sendOps);
     } catch (error) {
       console.log('error', error);
       throw error;
@@ -66,7 +70,7 @@ export class UsbTransfor {
     try {
       // optimize: transform options and config to request
       const sendOps = JSON.parse(JSON.stringify(opstions));
-      const { e:code, d:data } = await this.request<T>(sendOps, cfg);
+      const { e: code, d: data } = await this.request<T>(sendOps, cfg);
       if (code !== 0) {
         throw new Error('error');
       }
