@@ -3,35 +3,35 @@ export class HIDMessageQueue {
   private queue: Map<string, Request> | Array<[string, Request]>;
   constructor(queueType?: 'map' | 'arrary') {
     if (queueType && queueType === 'arrary') {
-      this.queue = []
+      this.queue = [];
     } else {
-      this.queue = new Map()
+      this.queue = new Map();
     }
   }
   add(messageId: string, data: Request): void {
-    if (this.queue instanceof Array) {
-      this.queue.push([messageId, data])
-      return
+    if (Array.isArray(this.queue)) {
+      this.queue.push([messageId, data]);
+      return;
     }
     this.queue.set(messageId, data);
   }
 
   remove(messageId: string): void {
-    if (this.queue instanceof Array) {
-      const idx = this.queue.findIndex(([id]) => id === messageId)
+    if (Array.isArray(this.queue)) {
+      const idx = this.queue.findIndex(([id]) => id === messageId);
       if (idx < 0) {
-        return
+        return;
       }
-      this.queue.splice(idx, 0)
-      return
+      this.queue.splice(idx, 1);
+      return;
     }
     this.queue.delete(messageId);
   }
 
   get(messageId: string): Request | undefined {
-    if (this.queue instanceof Array) {
-      const [_, data] = this.queue.find(([id]) => id === messageId) || []
-      return data
+    if (Array.isArray(this.queue)) {
+      const [_, data] = this.queue.find(([id]) => id === messageId) || [];
+      return data;
     }
     return this.queue.get(messageId);
   }
@@ -42,9 +42,9 @@ export class HIDMessageQueue {
     return this.queue.entries();
   }
   clear(): void {
-    if (this.queue instanceof Array) {
-      this.queue = []
-      return
+    if (Array.isArray(this.queue)) {
+      this.queue = [];
+      return;
     }
     this.queue.clear();
   }
