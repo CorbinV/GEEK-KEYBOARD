@@ -121,14 +121,10 @@ export class HIDProtocolController extends EventTarget {
       throw new Error('Device not connected');
     }
 
-    try {
-      const messageId = `${Date.now()}-${this.messageCounter++}`;
-      return await this.sendWithRetry(messageId, data, {
-        attemptsLeft: this.options.retryAttempts || 1
-      });
-    } catch (error) {
-      throw error
-    }
+    const messageId = `${Date.now()}-${this.messageCounter++}`;
+    return await this.sendWithRetry(messageId, data, {
+      attemptsLeft: this.options.retryAttempts || 1
+    });
   }
 
   private async sendWithRetry(
@@ -258,11 +254,14 @@ export class HIDProtocolController extends EventTarget {
     this.dispatchEvent(new CustomEvent('disconnected'));
   }
   // handle binary case
-  async sendBinary(data: Uint8Array, { withoutResponse }: { withoutResponse?: boolean }): Promise<void> {
+  async sendBinary(
+    data: Uint8Array,
+    { withoutResponse, msgId }: { withoutResponse?: boolean; msgId?: string }
+  ): Promise<Uint8Array | null> {
     if (!this.connected || !this.device) {
       throw new Error('Device not connected');
     }
-    const messageId = data[2] + ''; // use type as cbId
+    const messageId = msgId !== undefined ? msgId : `${data[0]}-${data[2]}`; // use type as cbId
     // const messageId = `${Date.now()}-${this.messageCounter}`;
     this.messageCounter += 1;
     await this.sendWithRetryBin(messageId, data, {
@@ -298,6 +297,7 @@ export class HIDProtocolController extends EventTarget {
             name: data?.[this.msgAlias.name] || 'bin',
             callback: (response: HIDResponse) => {
               clearTimeout(timeoutId);
+              }
               resolve(response);
             }
           });
