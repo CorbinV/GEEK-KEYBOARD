@@ -194,14 +194,27 @@ export class HIDProtocolController extends EventTarget {
   }
   private async handleInput(event: HIDInputReportEvent) {
     try {
-      const binaryTypeList = [0x86, 0x88]
+      const binaryTypeList = [0x86, 0x88];
+      const wch585TypeList = [0x81, 0x82, 0x83, 0x84]; // 0x21, 0x80
       let message: Uint8Array | any; // object: code, name, data?
-      const [eventHead, _, eventType] = new Uint8Array(event.data.buffer)
-      // binary case
-      if (binaryTypeList.includes(eventType) && eventHead == 0xa5) {
-        message = event.data
-        // use type to match cb
-        const messageId = eventType + '';
+      const uintArr = new Uint8Array(event.data.buffer);
+      const [eventHead, _, eventType] = uintArr;
+      // binary case 1
+      if (binaryTypeList.includes(eventType) && eventHead === 0xa5) {
+        message = event.data;
+        const messageId = `${eventType}`;
+        const requestInfo = this.binMessageQueue.get(messageId);
+        if (requestInfo?.callback) {
+          requestInfo.callback(message);
+          this.binMessageQueue.remove(messageId);
+        }
+      }
+      // binary case 2
+      else if (wch585TypeList.includes(eventHead)) {
+        message = uintArr;
+        const messageId = `${eventHead}`;
+        console.log('recevice', messageId, Date.now());
+
         const requestInfo = this.binMessageQueue.get(messageId);
         if (requestInfo?.callback) {
           requestInfo.callback(message);
