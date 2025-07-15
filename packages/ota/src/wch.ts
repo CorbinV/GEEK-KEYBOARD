@@ -1,12 +1,8 @@
-import { BIT_CONDITION, VERSION } from "./constants";
-import { CMD_ENUM } from "./enums";
-import { OTAProtocolController } from "./control";
-
+import { BIT_CONDITION, VERSION } from './constants';
+import { CMD_ENUM } from './enums';
+import { OTAProtocolController } from './control';
 
 export class WCH_OTA extends OTAProtocolController {
-  constructor() {
-    super();
-  }
   async transferContentData(ops?: { onProgress?: (progress: number) => void }) {
     const { onProgress } = ops || {};
     let result = false;
@@ -19,7 +15,7 @@ export class WCH_OTA extends OTAProtocolController {
       let sum = 0;
       const cLen = this.fileContent.length;
       const outMut = this.outMtu;
-      const fixedNum = CMD_ENUM.H + this.outMtu + CMD_ENUM.T_D
+      const fixedNum = CMD_ENUM.H + this.outMtu + CMD_ENUM.T_D;
 
       const buffer = new ArrayBuffer(outMut);
       const u8a = new Uint8Array(buffer);
@@ -42,7 +38,7 @@ export class WCH_OTA extends OTAProtocolController {
         } catch (error: any) {
           throw new Error(error?.message || error);
         }
-      }
+      };
       for await (const val of this.fileContent) {
         u8a[sendFlag + 3] = val; // data
         sum += val;
@@ -50,23 +46,23 @@ export class WCH_OTA extends OTAProtocolController {
         offset++;
         if (offset < cLen) {
           if (sendFlag === outMut - 4) {
-            await sendCmd(sum + fixedNum, outMut, { withoutResponse: true })
-            if (onProgress && (offset >= onePercent * progress)) {
+            await sendCmd(sum + fixedNum, outMut, { withoutResponse: true });
+            if (onProgress && offset >= onePercent * progress) {
               progress++;
-              console.log(progress)
+              console.log(progress);
               onProgress?.(progress);
             }
-            u8a.fill(0x00, 3)
+            u8a.fill(0x00, 3);
           }
-        } else {
-          if (sendFlag > 0) {
-            // send last upgrade cmd
-            await sendCmd(sum + u8a[1] + CMD_ENUM.H + CMD_ENUM.T_D, sendFlag + 4, { withoutResponse: true })
-            let sendCmdStr = "";
-            u8a.forEach(v => (sendCmdStr += `${v.toString(16)} `));
-            console.log(`last package cmd: ${sendCmdStr}, offset: ${offset}, sendFlag: ${sendFlag}, checksum: ${u8a[outMut - 1].toString(16)}`);
-            onProgress?.(100)
-          }
+        } else if (sendFlag > 0) {
+          // send last upgrade cmd
+          await sendCmd(sum + u8a[1] + CMD_ENUM.H + CMD_ENUM.T_D, sendFlag + 4, { withoutResponse: true });
+          let sendCmdStr = '';
+          u8a.forEach(v => (sendCmdStr += `${v.toString(16)} `));
+          console.log(
+            `last package cmd: ${sendCmdStr}, offset: ${offset}, sendFlag: ${sendFlag}, checksum: ${u8a[outMut - 1].toString(16)}`
+          );
+          onProgress?.(100);
         }
       }
       result = true;
@@ -90,7 +86,6 @@ export class WCH_OTA extends OTAProtocolController {
       const res = await this.sendFnc(u8, { withoutResponse: true });
       const ret = res?.getUint8(3);
       result = Number(!ret);
-
     } catch (error) {
       console.log(error);
       result = 0;
@@ -105,27 +100,20 @@ export class WCH_OTA extends OTAProtocolController {
     const res = await this.sendFnc!(u8a);
     const ret = res?.getUint8(3);
     if (ret !== 0) {
-      result = false
+      result = false;
       console.warn(`upgrade failed, response ret value = ${ret}`);
     }
     return result;
   }
   async quickUpgrade(ops: {
-    fileContentSum: number,
-    fileByteSize: number,
-    fileContent: Uint8Array,
-    outMtu: number
-    fnc: (data: any, { withoutResponse }?: { withoutResponse?: boolean }) => Promise<any> | null
+    fileContentSum: number;
+    fileByteSize: number;
+    fileContent: Uint8Array;
+    outMtu: number;
+    fnc: (data: any, { withoutResponse }?: { withoutResponse?: boolean }) => Promise<any> | null;
   }) {
-    const {
-      fnc,
-      fileContent,
-      fileContentSum,
-      fileByteSize,
-      outMtu,
-    } = ops
+    const { fnc, fileContent, fileContentSum, fileByteSize, outMtu } = ops;
     try {
-
       this.setSendFnc(fnc);
       this.setFileContent(fileContent);
       this.setOutMtu(outMtu);
@@ -139,7 +127,7 @@ export class WCH_OTA extends OTAProtocolController {
         s1: fileContentSum & (0xffff >> 8),
         s2: fileContentSum,
         l1: fileByteSize > BIT_CONDITION ? fileByteSize & (0xff00 >> 8) : fileByteSize >> 8,
-        l2: fileByteSize,
+        l2: fileByteSize
       });
       console.log('enable ota mode success');
       await this.transferContentData();
