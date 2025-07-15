@@ -13,7 +13,7 @@ const lang: App.BusinessLanguage.Schema = {
     executeSuccess: '执行成功',
     executeFail: '执行失败',
     delFailPlsUpdate: '删除失败, 请更新最新固件后重试',
-    plsUpdate: "请更新最新固件后重试",
+    plsUpdate: '请更新最新固件后重试',
     set: '设置',
 
     addSuccess: '添加成功',
@@ -29,11 +29,11 @@ const lang: App.BusinessLanguage.Schema = {
     temporaryUnavailable: '功能维护中',
     btnSelectRequired: '请选择按钮',
     confirmToReset: '您确定要重置吗？',
-    devErr: "设备异常，请重启设备或刷新重试",
+    devErr: '设备异常，请重启设备或刷新重试',
     tooSmallToDislay: '屏幕太小而无法展示',
     upgradeSuccess: '升级成功',
     upgradeFail: '升级失败',
-    latestVersion: '最新版本',
+    latestVersion: '最新版本'
   },
   baseKey: {
     keyboard: {
@@ -47,7 +47,7 @@ const lang: App.BusinessLanguage.Schema = {
       x7: '默认（{total}）',
       current: '当前',
       keyboardHint: '选中键盘上按键后，再选中下方需要替换的键',
-      removeSpkeyChange: "改键会导致绑定的超级键失效，继续吗？",
+      removeSpkeyChange: '改键会导致绑定的超级键失效，继续吗？',
       beginKeyTest: '点击按键测试'
     },
     tab: {
@@ -193,10 +193,10 @@ const lang: App.BusinessLanguage.Schema = {
     c4: 'TGL切换开关',
     c5: 'RS灵动触发',
     c6: '请选择两个按键，当其中一个按键被抬起时，立马触发一另一个按键，在一些游戏中实现单个按键 的快速急停',
-    c7: "监控两个按键，当两个按键同时按下时，触发按压更深的按键",
+    c7: '监控两个按键，当两个按键同时按下时，触发按压更深的按键',
     c8: '例：设置AB键为RS键，当A键按压比D键更深时，A键触发，抬起A键后，D键将恢复触发',
     c9: 'SOCD',
-    timeIntervalError: '时间取值范围应在{min}{unit}-{max}{unit}之间',
+    timeIntervalError: '时间取值范围应在{min}{unit}-{max}{unit}之间'
   },
   // {{ $t('light.modeSelect') }}
   macro: {
@@ -245,11 +245,10 @@ const lang: App.BusinessLanguage.Schema = {
     connectMode: '连接模式',
     allKeyNot: '全键无冲',
     wakeUp: '感应唤醒',
-    wakeUpHint:
-      '(当双手靠近键盘后，将会自动将键盘唤醒)',
+    wakeUpHint: '(当双手靠近键盘后，将会自动将键盘唤醒)',
     gjUpdate: '固件更新',
     checkUpdate: '检查更新',
-
+    update: '更新',
     restore: '恢复出厂设置',
 
     wakeUpOpenHint: '感应唤醒已开启',
@@ -263,17 +262,23 @@ const lang: App.BusinessLanguage.Schema = {
     wakeUpDistance: '感应距离',
     upgradeAgain: '重新升级',
     upgradeNotice1: '升级过程中，请勿关闭设备以及网页',
-    upgradeNotice2: '升级成功后会有提示，请耐心等待～',
-
+    upgradeNotice2: '升级成功后会有提示，请耐心等待～'
   },
   global_Setting: {
-    version: '版本号：{total}',
+    resetToFactory: '恢复出厂设置',
+    rate: '回报率',
+    currentRate: '当前回报率',
+    inputMode: '输入模式',
+    currentInputMode: '当前输入模式',
     qdVersion: '驱动版本',
-    versionInfo: '版本信息：{total}',
+    firmwareVersion: '固件版本',
+    officialInfo: '官方信息',
+    versionInfo: '版本信息',
+    version: '版本号',
     contactUs: '联系我们',
     moreProduct: '更多产品',
-    officialWeb: '官网：',
-    wechart: '公众号：'
+    officialWeb: '官网',
+    wechart: '公众号'
   },
   otaHooks: {
     upgradeFailDevice: '升级失败，请确认设备是否正常',
@@ -286,7 +291,12 @@ const lang: App.BusinessLanguage.Schema = {
     wrongFileType: '文件类型错误',
     wrongFileFormat: '文件格式错误',
     noFirmwareNeedUpgrade: '没有需要升级的固件',
-    downloadFileFail: '文件下载失败',
+    downloadFileFail: '文件下载失败'
+  },
+  socd: {
+    upPriorityMode: '向上优先模式',
+    centerReset: '全回中模式',
+    lastInputPriority: '后覆盖模式'
   }
 };
 export default lang;

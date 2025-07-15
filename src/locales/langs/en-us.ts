@@ -156,13 +156,12 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     // exception_403: '403',
     // exception_404: '404',
     // exception_500: '500'
-    'base-key': 'Base Key',
-    'super-key': 'Super Key',
-    'rapid-trigger': 'Rapid Trigger',
-    marco: 'Marco',
+    'base-key': 'Key Mapper',
+    'super-key': 'Test Key',
     light: 'Light',
     settings: 'Setting',
-    connect: 'Device Connect'
+    connect: 'Device Connect',
+    tst: 'Test'
   },
   page: {
     login: {

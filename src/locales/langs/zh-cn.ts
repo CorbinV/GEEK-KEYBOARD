@@ -152,13 +152,12 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     'iframe-page': '外链页面',
     home: '首页',
     'user-center': '个人中心',
-    'base-key': '键值',
-    'super-key': '超级键',
-    'rapid-trigger': '快速触发',
-    marco: '宏编辑',
+    'base-key': '键位映射',
+    'super-key': '按键测试',
     light: '灯效',
     settings: '设置',
-    connect: '设备连接'
+    connect: '设备连接',
+    tst: '测试'
     // exception: '异常页',
     // exception_403: '403',
     // exception_404: '404',

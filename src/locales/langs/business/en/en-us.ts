@@ -29,11 +29,11 @@ const lang: App.BusinessLanguage.Schema = {
     temporaryUnavailable: 'Temporarily unavailable for Maintenance',
     btnSelectRequired: 'Button selection required',
     confirmToReset: 'Are you sure you want to reset these settings?',
-    devErr: "Device error detected. Please restart or refresh to retry.",
+    devErr: 'Device error detected. Please restart or refresh to retry.',
     tooSmallToDislay: 'The window is too small to display.',
     upgradeSuccess: 'Upgrade Success',
     upgradeFail: 'Upgrade Fail',
-    latestVersion: 'Latest Version',
+    latestVersion: 'Latest Version'
   },
   baseKey: {
     keyboard: {
@@ -47,8 +47,8 @@ const lang: App.BusinessLanguage.Schema = {
       x7: 'Default（{total}）',
       current: 'current',
       keyboardHint: 'Select a key on the keyboard, then choose the key below to replace it',
-      removeSpkeyChange: "This may deactivate your Super Key functions. Conntinue?",
-      beginKeyTest: "Click to Begin Key Test"
+      removeSpkeyChange: 'This may deactivate your Super Key functions. Conntinue?',
+      beginKeyTest: 'Click to Begin Key Test'
     },
     tab: {
       basic: 'Basic',
@@ -200,7 +200,7 @@ const lang: App.BusinessLanguage.Schema = {
     c7: 'When two keys are pressed together, activate the one with greater key travel.',
     c8: 'Example: Assign AB to RS. If A is pressed harder than D, A activates first. Lifting A will switch back to D.',
     c9: 'SOCD',
-    timeIntervalError: 'The time value should be between {min}{unit} and {max}{unit}.',
+    timeIntervalError: 'The time value should be between {min}{unit} and {max}{unit}.'
   },
   macro: {
     addMacroKey: 'Add Macro Key',
@@ -248,10 +248,10 @@ const lang: App.BusinessLanguage.Schema = {
     connectMode: 'Connection Mode',
     allKeyNot: 'NKRO',
     wakeUp: 'Sensor Wake',
-    wakeUpHint:
-      'The keyboard wakes up automatically when hands approach.',
+    wakeUpHint: 'The keyboard wakes up automatically when hands approach.',
     gjUpdate: 'Firmware Update',
     checkUpdate: 'Check for Updates',
+    update: 'Upgrade',
     restore: 'Restore Factory Settings',
     pair24: '2.4G Receiver Pairing',
     wakeUpOpenHint: 'Sensor Wake enabled',
@@ -260,22 +260,30 @@ const lang: App.BusinessLanguage.Schema = {
     restoreSucess: 'Factory reset successful',
     allKeyCloseHint: 'NKRO disabled',
     deepSleep: 'Deep Sleep',
-    deepSleepHint: 'In Deep Sleep Mode, the keyboard disconnects wirelessly and deactivates key functions to significantly extend battery life.',
+    deepSleepHint:
+      'In Deep Sleep Mode, the keyboard disconnects wirelessly and deactivates key functions to significantly extend battery life.',
     wakeUpDistance: 'Detection Distance',
-    upgradeAgain: "Upgrade Again",
-    upgradeNotice1: "Do not turn off the device or close the browser during the upgrade process.",
-    upgradeNotice2: "A notification will appear once the upgrade is complete. Please wait patiently.",
+    upgradeAgain: 'Upgrade Again',
+    upgradeNotice1: 'Do not turn off the device or close the browser during the upgrade process.',
+    upgradeNotice2: 'A notification will appear once the upgrade is complete. Please wait patiently.'
   },
   global_Setting: {
-    version: 'Version：{total}',
+    resetToFactory: 'Reset Device',
+    rate: 'Rate',
+    currentRate: 'Current rate',
+    inputMode: 'Input Mode',
+    currentInputMode: 'Current Mode',
+    firmwareVersion: 'Firmware Version',
+    officialInfo: 'Official Information',
+    version: 'Version',
     qdVersion: 'Driver Version',
-    versionInfo: 'Version Info：{total}',
+    versionInfo: 'Version Info',
     contactUs: 'Contact Us',
     moreProduct: 'More Products',
-    officialWeb: 'Official Website： {total}',
-    wechart: 'Official Account： {total}'
+    officialWeb: 'Official Website',
+    wechart: 'Official Account'
   },
-  otaHooks:  {
+  otaHooks: {
     upgradeFailDevice: 'Upgrade failed, please confirm the device is working properly',
     enableOtaModeFail: 'Enable OTA mode failed',
     fetchVersionFail: 'Failed to get version information',
@@ -286,7 +294,12 @@ const lang: App.BusinessLanguage.Schema = {
     wrongFileType: 'Wrong file type',
     wrongFileFormat: 'Wrong file format',
     noFirmwareNeedUpgrade: 'No firmware needs to be upgraded',
-    downloadFileFail: 'Download file failed',
+    downloadFileFail: 'Download file failed'
+  },
+  socd: {
+    upPriorityMode: 'Up Priority Mode',
+    centerReset: 'Center Reset',
+    lastInputPriority: 'Last Input Priority'
   }
 };
 export default lang;

@@ -307,7 +307,7 @@ declare namespace App {
         featWaitSoon: string;
         back: string;
         featCommingSoon: string;
-        mode: string
+        mode: string;
       };
       request: {
         logout: string;
@@ -447,8 +447,8 @@ declare namespace App {
     } & BusinessLanguage.Schema;
     type GetI18nKey<T extends Record<string, unknown>, K extends keyof T = keyof T> = K extends string
       ? T[K] extends Record<string, unknown>
-      ? `${K}.${GetI18nKey<T[K]>}`
-      : K
+        ? `${K}.${GetI18nKey<T[K]>}`
+        : K
       : never;
 
     type I18nKey = GetI18nKey<Schema>;
@@ -471,8 +471,8 @@ declare namespace App {
     export type Schema = {
       // remove current content
       businessCommon: {
-        casualMode: string,
-        competitionMode: string,
+        casualMode: string;
+        competitionMode: string;
         confirm1: string;
         cancel: string;
         restoreFactoryHint: string;
@@ -715,6 +715,7 @@ declare namespace App {
         wakeUpHint: string;
         gjUpdate: string;
         checkUpdate: string;
+        update: string;
         restore: string;
         pair24: string;
         wakeUpOpenHint: string;
@@ -724,12 +725,19 @@ declare namespace App {
         restoreSucess: string;
         deepSleep: string;
         deepSleepHint: string;
-        wakeUpDistance: string
-        upgradeAgain: string
-        upgradeNotice1: string
-        upgradeNotice2: string
+        wakeUpDistance: string;
+        upgradeAgain: string;
+        upgradeNotice1: string;
+        upgradeNotice2: string;
       };
       global_Setting: {
+        resetToFactory: string;
+        rate: string;
+        currentRate: string;
+        inputMode: string;
+        currentInputMode: string;
+        firmwareVersion: string;
+        officialInfo: string;
         version: string;
         qdVersion: string;
         versionInfo: string;
@@ -737,7 +745,7 @@ declare namespace App {
         moreProduct: string;
         officialWeb: string;
         wechart: string;
-      },
+      };
       otaHooks: {
         upgradeFailDevice: string;
         enableOtaModeFail: string;
@@ -750,7 +758,12 @@ declare namespace App {
         wrongFileFormat: string;
         noFirmwareNeedUpgrade: string;
         downloadFileFail: string;
-      }
+      };
+      socd: {
+        upPriorityMode: string;
+        centerReset: string;
+        lastInputPriority: string;
+      };
     };
   }
   /** Service namespace */
