@@ -1,38 +1,51 @@
 <script setup lang="ts">
-import { toRefs, watchEffect } from 'vue';
+import { onMounted, shallowRef, toRefs, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { useDeviceStore } from '@/store/modules/device';
 import { router } from '@/router';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 const deviceStore = useDeviceStore();
-
 const keyboardStore = useKeyboardStore();
 const { kbInfo } = toRefs(keyboardStore);
 const route = useRoute();
-
 watchEffect(() => {
   if (!kbInfo.value.mounted) {
     return;
   }
-  const redirctPath = localStorage.getItem('redirectFrom') || route.query.redirect as string;
+  const redirctPath = route.query.redirect as string;
+  // ||   localStorage.getItem('redirectFrom') ;
   if (redirctPath) {
     router.push(redirctPath.substring(1));
   } else {
-    router.push('base-key');
+    router.push(import.meta.env.VITE_ROUTE_HOME || 'base-key');
   }
 });
 let isClicked = false;
-async function handleConnectBtnClicked() {
+const device = shallowRef();
+const filter = {
+  vendorId: 0x4353,
+  productId: 0x800c,
+  usagePage: 0xff80,
+  reportId: 0x00
+};
+async function handleConnectBtnClicked(e) {
   try {
     if (isClicked) {
       return;
     }
     isClicked = true;
-    await deviceStore.connect({
-      vendorId: 0x4353,
-      productId: 0x9108,
-      usagePage: 65408
-    });
+    const devices = [];
+    if (device.value) {
+      devices.push(device.value);
+    } else {
+      const list = await deviceStore.scanDevices(filter);
+      if (!list.length) {
+        window.$message!.info('No device selected');
+        return;
+      }
+      devices.push(...list);
+    }
+    await deviceStore.connect(devices, filter);
     console.log('Connected');
   } catch (error) {
     console.error('Error:', error);
@@ -40,32 +53,32 @@ async function handleConnectBtnClicked() {
     isClicked = false;
   }
 }
+onMounted(async () => {
+  device.value = await deviceStore.scanPairedDevices(filter);
+});
 </script>
 
 <template>
   <div class="h-full w-full flex flex-col">
-    <div class="background-image h-full w-full flex">
+    <div class="h-full w-full flex items-center justify-center">
       <NSpin :show="kbInfo.isLoad" class="h-100% w-100%">
-        <div class="flex flex-col items-center text-center">
+        <div class="mx-auto my-0 min-w-480px w-1/2 flex flex-col items-center justify-center gap-y-12 text-center">
           <span class="mt-125px text-[36px] text-[#fff] font-500">{{ $t('businessCommon.connectDev') }}</span>
-          <span class="mt-6px w-173 text-#999999">{{ $t('businessCommon.connectHint') }}</span>
-
-          <button class="mt-62px h-60px w-168px rounded bg-[#3c8df4] text-[#fff]" @click="handleConnectBtnClicked">
+          <p class="mt-6px w-105 text-lg text-#999999">{{ $t('businessCommon.connectHint') }}</p>
+          <NButton
+            type="primary"
+            class="h-60px w-168px text-lg text-[#fff] !hover:text-#eee"
+            @click="handleConnectBtnClicked"
+          >
             {{ $t('businessCommon.connectDev') }}
-          </button>
+          </NButton>
+          <div class="mt-8 w-1/2 flex justify-center">
+            <img src="@/assets/img/prod-static.png" />
+          </div>
         </div>
-
-        <!-- <img src="@/assets/img/connect_bg.png" class="block h-full w-full object-scale-down" draggable="false" /> -->
       </NSpin>
     </div>
   </div>
 </template>
 
-<style scoped>
-.background-image {
-  background-image: url('@/assets/img/connect_bg.png');
-  /* 设置背景图片 */
-  background-size: cover;
-  background-position: center;
-}
-</style>
+<style scoped></style>
