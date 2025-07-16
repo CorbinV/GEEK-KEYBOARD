@@ -1,96 +1,31 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef } from 'vue';
-import { KeyboardContainer } from '@/components/custom/keyboard/index';
-import { KeyTypeEnum } from '@/enum/keyType';
-import TopBanner from './components/top-banner.vue';
-
-import Macro from './module/marco.vue';
-import Base from './module/base.vue';
-import ModuleTemplate from './components/module-template.vue';
-import Combo from './module/combo.vue';
-const tabName = ref(KeyTypeEnum.Normal);
-function handleKeyEventTabs(value: string | number) {
-  tabName.value = Number(value);
+import { ref } from 'vue';
+import SOCD from './module/socd.vue';
+import Control from './module/control.vue';
+import BtnList from './module/btn-list.vue';
+const btnName = ref('');
+function injBtnItemClick(k: string) {
+  btnName.value = k;
 }
-const xList = shallowRef([
-  {
-    label: 'baseKey.tab.basic',
-    type: KeyTypeEnum.Normal,
-    component: Base,
-    isTemplate: false,
-    needBanner: false
-  },
-  {
-    label: 'baseKey.tab.system',
-    type: KeyTypeEnum.System,
-    component: ModuleTemplate,
-    isTemplate: true,
-    needBanner: true
-  },
-  {
-    label: 'baseKey.tab.media',
-    type: KeyTypeEnum.Media,
-    component: ModuleTemplate,
-    isTemplate: true,
-    needBanner: true
-  },
-  {
-    label: 'baseKey.tab.combination',
-    type: KeyTypeEnum.Combo,
-    component: Combo,
-    isTemplate: false,
-    needBanner: false
-  },
-  {
-    label: 'baseKey.tab.special',
-    type: KeyTypeEnum.Special,
-    component: ModuleTemplate,
-    isTemplate: true,
-    needBanner: true
-  },
-  {
-    label: 'baseKey.tab.macro',
-    type: KeyTypeEnum.Marco,
-    component: Macro,
-    isTemplate: false,
-    needBanner: false
-  }
-]);
-const currentContent = computed(() => {
-  const res = xList.value.find(item => item.type === tabName.value)!;
-  return res;
-});
 </script>
 
 <template>
-  <div>
-    <KeyboardContainer>
-      <template #default="{ handleKeyEmit }">
-        <div class="h-full flex flex-col">
-          <TopBanner v-if="currentContent.needBanner" />
-          <div class="flex-1">
-            <component :is="currentContent.component" :key="currentContent.label" class="h-full w-full"
-              :type="currentContent.type" @key-clicked="handleKeyEmit"></component>
-          </div>
-
-          <NTabs v-model:value="tabName" type="segment" class="custom-segment-tabs " animated @update:value="handleKeyEventTabs">
-            <NTab v-for="item in xList" :key="item.label" :name="item.type">
-              <span :class="`${tabName == item.type ? 'text-#3C8DF4' : 'text-#999999'} text-lg`">
-                {{$t(item.label) }}
-              </span>
-            </NTab>
-          </NTabs>
-        </div>
-      </template>
-    </KeyboardContainer>
+  <div class="flex flex-col p-6 pt-17">
+    <div class="grid grid-cols-5">
+      <SOCD class="col-span-1"></SOCD>
+      <div class="col-span-3">
+        <Control :update-btn="btnName"></Control>
+      </div>
+      <div class="col-span-1 w-46 text-#999999">control</div>
+    </div>
+    <BtnList class="mx-auto mt-76 w-90%" @list-item-click="injBtnItemClick"></BtnList>
   </div>
 </template>
 
 <style scoped>
 .custom-segment-tabs {
   :deep(.n-tabs-tab) {
-    margin: 3px 12px
+    margin: 3px 12px;
   }
 }
-
 </style>
