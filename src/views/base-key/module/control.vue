@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Dom, SVGTypeMapping, Svg } from '@svgdotjs/svg.js';
 import { SVG } from '@svgdotjs/svg.js';
-import { nextTick, onMounted, ref, toRef, watch } from 'vue';
+import { nextTick, onMounted, ref, toRefs, watch } from 'vue';
 import controlBgSvg from '@/assets/svg-icon/hp-ctrl-bg.svg';
 import controlBtnSvg from '@/assets/svg-icon/hp-ctrl-btn.svg';
 import { useKeyboardStore } from '@/store/modules/keyboard';
@@ -13,8 +13,7 @@ const props = withDefaults(defineProps<ControlProps>(), {
   updateBtn: ''
 });
 const keyboardStore = useKeyboardStore();
-const keyLayerInfo = toRef(keyboardStore, 'keyLayerInfo');
-const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
+const { keyLayerInfo, activeKeyLayer } = toRefs(keyboardStore);
 const { layoutMap } = keyboardStore.kbCfg;
 const fetchData = async (url: string): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -48,6 +47,11 @@ async function updateBtnEffect(key: string, val: string) {
       v: val
     };
     await setKeyInfo(send);
+    const oldV = activeKeyLayer.value.keys[key]?.v || 'err';
+    keyboardStore.pushState({
+      oldVal: { ...send, v: oldV },
+      newVal: send
+    });
   } catch (error) {
     window?.$message!.error('按键修改失败');
     res = [false, error];
@@ -76,12 +80,12 @@ async function updateBtnView(key: string) {
   if (!ctx) {
     return;
   }
-  const [res, errMsg] = await updateBtnEffect(activeBtn.value, props.updateBtn);
+  const btn = activeBtn.value.split('_').pop()!;
+  const [res, errMsg] = await updateBtnEffect(btn, props.updateBtn);
   if (!res) {
     window?.$log?.error(errMsg);
     return;
   }
-  const btn = activeBtn.value.split('_').pop()!;
   // ctx.clear();
   let tKey = key;
   if (activeBtn.value === 'G_UP' && key === 'UP') {
