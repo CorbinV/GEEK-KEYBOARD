@@ -43,9 +43,11 @@ export class HIDMessageQueue {
   }
   clear(): void {
     if (Array.isArray(this.queue)) {
+      this.queue.forEach(([_, i]) => clearTimeout(i.timeoutId));
       this.queue = [];
       return;
     }
+    this.queue.forEach(i => clearTimeout(i.timeoutId));
     this.queue.clear();
   }
 }

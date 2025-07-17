@@ -22,9 +22,10 @@ export interface FilterType {
   vendorId?: number;
   productId?: number;
   usagePage?: number;
-  reportId?: number
+  reportId?: number;
 }
 export type Request = {
   name: string;
+  timeoutId: NodeJS.Timeout;
   callback: MessageCallback;
 };

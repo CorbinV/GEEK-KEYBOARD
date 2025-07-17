@@ -140,6 +140,7 @@ export class HIDProtocolController extends EventTarget {
         if (!withoutResponse) {
           this.messageQueue.add(messageId, {
             name: data?.[this.msgAlias.name] || 'bin',
+            timeoutId,
             callback: (response: HIDResponse) => {
               clearTimeout(timeoutId);
               resolve(response);
@@ -202,7 +203,6 @@ export class HIDProtocolController extends EventTarget {
       else if (wch585TypeList.includes(eventHead)) {
         message = uintArr;
         const messageId = `${eventHead}`;
-        console.log('recevice', messageId, Date.now());
 
         const requestInfo = this.binMessageQueue.get(messageId);
         if (requestInfo?.callback) {
@@ -297,6 +297,7 @@ export class HIDProtocolController extends EventTarget {
           }, this.options.timeout);
           this.binMessageQueue.add(messageId, {
             name: data?.[this.msgAlias.name] || 'bin',
+            timeoutId,
             callback: (response: HIDResponse) => {
               if (timeoutId) {
                 clearTimeout(timeoutId);
