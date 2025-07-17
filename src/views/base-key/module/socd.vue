@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue';
 import { onMounted, ref } from 'vue';
-import type { SocdBase } from '@/api/modules/socd';
 import { getSocdMode, setSocdMode } from '@/api/socd';
 import { $t } from '@/locales';
 enum ModeEnum {
@@ -39,7 +38,9 @@ async function handleSwitchChange(val: boolean, tag: ModeEnum, idx: number) {
     } else if (activeMode === tag) {
       activeMode = null;
     }
-    await setSocdMode(idx as any as SocdBase);
+    await setSocdMode({
+      mode: idx
+    });
     modeValues.value[tag] = val;
   } catch (error) {
     window?.$log?.error(error);
