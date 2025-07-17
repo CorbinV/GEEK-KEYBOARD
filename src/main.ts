@@ -7,7 +7,7 @@ import { setupRouter } from './router';
 import { setupI18n } from './locales';
 import App from './App.vue';
 import autofit from 'autofit.js'
-
+import SvgPath from '@/assets/svg-icon/hp-source.svg'
 async function setupApp() {
   setupLoading();
 
@@ -33,10 +33,17 @@ async function setupApp() {
     ignore: [
       {
         // @ts-ignore
-       dom: "#popover-portal",
+        dom: "#popover-portal",
       },
-   ]
+    ]
   });
+  (async () => {
+    const r = await fetch(SvgPath)
+    const text =await r.text()
+    const div = document.createElement('div');
+    div.innerHTML = text;
+    document.body.append(div);
+  })()
 }
 
 setupApp();
