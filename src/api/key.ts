@@ -1,5 +1,5 @@
 import requestClient from './config';
-import type { CfgCntBase, KeyBase, KeyRes, LayerKeysConfig } from './modules/keyModify';
+import type { CfgCntBase, CfgCntRes, KeyBase, KeyRes, LayerKeysConfig } from './modules/keyModify';
 
 export function getKeyInfo(data: KeyBase) {
   return requestClient.send<KeyRes>({
@@ -15,10 +15,15 @@ export function setKeyInfo(data: KeyRes) {
   });
 }
 
-export function getConfigCnt() {
+export function getConfigCnt(): Promise<{
+  configCount: number;
+  configIndex: number;
+  layerCount: number;
+  layerIndex: number;
+}> {
   return new Promise((resolve, reject) => {
     requestClient
-      .send<any>({
+      .send<CfgCntRes>({
         name: 'gCfgs'
       })
       .then(res => {
@@ -40,9 +45,9 @@ export function getKeysCfgByLayer(data: { cfg: number; layer: number }): Promise
   });
 }
 
-export function resetLayerKeys(data: CfgCntBase) {
+export function resetLayerKeys(data: Pick<LayerKeysConfig, 'cfg' | 'layer'>) {
   return requestClient.send<null>({
-    name: 'gBasicK',
+    name: 'sResetLayer',
     data
   });
 }

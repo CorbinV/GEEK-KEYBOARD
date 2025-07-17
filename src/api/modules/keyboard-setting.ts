@@ -4,7 +4,7 @@ export type KeyboardSetting = {
   wpDistance: number;
   wpDistances: number[];
   deepSleep: number;
-  ds: number[]
+  ds: number[];
 };
 export type SetKeyboardSetting = {
   allKey?: number;
@@ -21,11 +21,11 @@ export type SetKeyPerf = {
   code: number;
 };
 export type DeviceInfo = {
-  zkm: number
+  zkm: number;
   // model: string;
   // version: string;
   connect: number;
-  firmwares: { version: number; id: number; type: number; model: string }[]
+  firmwares: { version: number; id: number; type: number; model: string }[];
   battery: number;
   bleMtu: number;
   bleOtaMtu: number;

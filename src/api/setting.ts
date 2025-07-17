@@ -16,3 +16,8 @@ export function getInputType() {
     name: 'gIptTp'
   });
 }
+export function setResetDevice() {
+  return requestClient.send<never>({
+    name: 'sRstDev'
+  });
+}
