@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, effectScope, onScopeDispose, ref } from 'vue';
+import { computed, effectScope, onScopeDispose, readonly, ref } from 'vue';
 import { ConnectionManager } from '@/utils/requset/connectMannager';
 
 export const useDeviceStore = defineStore('device', () => {
@@ -8,18 +8,23 @@ export const useDeviceStore = defineStore('device', () => {
   const connectionManager = ConnectionManager.getInstance();
   // base status
   const isConnected = ref(false);
+  const isOtaMode = ref(false);
   const connectionError = ref<Error | null>(null);
   const connectionStatus = computed(() => {
     if (connectionError.value) return 'error';
     return isConnected.value ? 'connected' : 'disconnected';
   });
-
+  let isOtadevice = false;
   // Actions
-  async function connect(config: any) {
+  async function connect(devices: HIDDevice[], config: any, otaDevice?: boolean) {
     try {
       connectionError.value = null;
       if (isTrueDevice) {
-        await connectionManager.connectDevice(config);
+        await connectionManager.connectDevice(devices, config);
+      }
+      if (isOtaMode.value && otaDevice !== undefined) {
+        isOtadevice = otaDevice;
+        return;
       }
       isConnected.value = true;
     } catch (error) {
@@ -27,14 +32,40 @@ export const useDeviceStore = defineStore('device', () => {
       isConnected.value = false;
     }
   }
-  async function disconnect(){
+  function scanPairedDevices(filters: any) {
+    return connectionManager.scanPairedDevices(filters);
+  }
+  function scanDevices(filter: any) {
+    const filters = [];
+    if (filter) {
+      filters.push(filter);
+    }
+    if (isTrueDevice) {
+      return navigator.hid.requestDevice({ filters: [filter] });
+    }
+    return [{}] as unknown as Promise<HIDDevice[]>; // Return an empty promise if not using a true device
+  }
+  async function disconnect() {
     await connectionManager.deviceDisconnect();
     isConnected.value = false;
   }
   function getDeviceClient() {
     return connectionManager.getDeviceClient();
   }
+  function updateOtaMode(v: boolean) {
+    isOtaMode.value = v;
+    // effect
+    if (!isOtaMode.value) {
+      isOtadevice = false;
+    }
+  }
   connectionManager.onDeviceDisconnect(() => {
+    if (isOtaMode.value) {
+      if (isOtadevice) {
+        isConnected.value = false;
+      }
+      return;
+    }
     isConnected.value = false;
   });
   scope.run(() => {});
@@ -51,6 +82,10 @@ export const useDeviceStore = defineStore('device', () => {
     connect,
     disconnect,
     getDeviceClient,
-    isTrueDevice
+    isTrueDevice,
+    scanPairedDevices,
+    scanDevices,
+    isOtaMode: readonly(isOtaMode),
+    updateOtaMode
   };
 });
