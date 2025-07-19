@@ -165,6 +165,10 @@ function initWatch() {
         }
         updateIcon(tKey, btnVal, ctx);
       });
+      activeBtn.value = '';
+    },
+    {
+      immediate: true
     }
   );
 }
