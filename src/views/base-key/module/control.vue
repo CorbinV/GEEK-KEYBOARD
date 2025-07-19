@@ -72,6 +72,26 @@ function updateIcon(iconKey: string, layoutKey: string, ctx: Svg) {
     element.fill('#a6a6a6');
   }
 }
+async function updateBtnByParent(key: string, value: string) {
+  if (!ctrlInstance || !activeBtn.value) {
+    return;
+  }
+  const ctx = ctrlInstance.findOne(`#${key}_CTX`) as Svg;
+  if (!ctx) {
+    return;
+  }
+  await setKeyInfo({
+    cfg: keyLayerInfo.value.configIndex,
+    layer: keyLayerInfo.value.layerIndex,
+    k: key,
+    v: value
+  });
+  let tKey = key;
+  if (activeBtn.value === 'G_UP' && key === 'UP') {
+    tKey = 'UP_LIGHT';
+  }
+  updateIcon(value, tKey, ctx);
+}
 async function updateBtnView(key: string) {
   if (!ctrlInstance || !activeBtn.value) {
     return;
@@ -187,6 +207,9 @@ onMounted(async () => {
       initWatch();
     });
   });
+});
+defineExpose({
+  updateBtnByParent
 });
 </script>
 

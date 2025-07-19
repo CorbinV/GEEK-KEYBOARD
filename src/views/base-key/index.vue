@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, toRefs } from 'vue';
-import { resetLayerKeys } from '@/api/key';
 import { $t } from '@/locales';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import SOCD from './module/socd.vue';
@@ -12,7 +11,7 @@ function injBtnItemClick(k: string) {
 }
 
 const keyboardStore = useKeyboardStore();
-const { keyLayerInfo, allowUndo } = toRefs(keyboardStore);
+const { keyLayerInfo, allowUndo, undo } = toRefs(keyboardStore);
 const showSocd = computed(() => {
   return !(keyLayerInfo.value.layerIndex === 0);
 });
@@ -48,7 +47,20 @@ function handleResetLayerConfig() {
     }
   });
 }
-function handleCancel() {}
+
+const ControlRef = ref<typeof Control>();
+async function handleCancel() {
+  const historyItem = undo.value();
+  if (Array.isArray(historyItem)) {
+    for await (const item of historyItem) {
+      const { oldVal } = item;
+      await ControlRef.value?.updateBtnByParent(oldVal.k, oldVal.v);
+    }
+  } else if (historyItem?.newVal) {
+    const { oldVal: oldBase } = historyItem;
+    await ControlRef.value?.updateBtnByParent(oldBase.k, oldBase.v);
+  }
+}
 function handleSelectAll() {
   window?.$message?.info('该功能暂未开放，敬请期待');
 }
@@ -64,7 +76,7 @@ function handleSelectRevert() {
         <SOCD v-show="showSocd"></SOCD>
       </div>
       <div class="col-span-3">
-        <Control :update-btn="btnName"></Control>
+        <Control ref="ControlRef" :vs-layer="keyLayerInfo.layerIndex === 0" :update-btn="btnName"></Control>
       </div>
       <div class="col-span-1 w-46 text-#999999">
         <div class="mt-25%"></div>
