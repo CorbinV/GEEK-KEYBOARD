@@ -32,13 +32,18 @@ export enum DeviceLinkEnum {
   BLE = 'BLE',
   '2.4G' = '2.4G'
 }
+export enum DeviceInputTypeEnum {
+  PC = 'PC',
+  PS = 'PS',
+  SWITCH = 'SWITCH'
+}
 export const deviceLinkEnumProxy = new Proxy(DeviceLinkEnum, {
   get(target: any, prop: string) {
     if (prop === 'getKey') {
       return (value: number) => {
         const arr = Object.keys(target) as string[];
         return arr.find((key, idx) => {
-          if(idx === value){
+          if (idx === value) {
             return target[key];
           }
         });
@@ -46,4 +51,19 @@ export const deviceLinkEnumProxy = new Proxy(DeviceLinkEnum, {
     }
     return target[prop];
   }
-})
+});
+export const deviceInputEnumProxy = new Proxy(DeviceInputTypeEnum, {
+  get(target: any, prop: string) {
+    if (prop === 'getKey') {
+      return (value: number) => {
+        const arr = Object.keys(target) as string[];
+        return arr.find((key, idx) => {
+          if (idx === value) {
+            return target[key];
+          }
+        });
+      };
+    }
+    return target[prop];
+  }
+});

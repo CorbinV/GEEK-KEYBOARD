@@ -8,3 +8,9 @@ export enum SetupStoreId {
   Common = 'common-store',
   DKS = 'dks'
 }
+export enum OtaStatusEnum {
+  IDLE,
+  UPGRADE,
+  UPGRADE_SUCCESS,
+  UPGRADE_FAIL
+}
