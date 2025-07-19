@@ -8,6 +8,7 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import { setKeyInfo } from '@/api/key';
 type ControlProps = {
   updateBtn?: string;
+  vsLayer?: boolean; // special layer
 };
 const props = withDefaults(defineProps<ControlProps>(), {
   updateBtn: ''
@@ -40,18 +41,47 @@ watch(
 async function updateBtnEffect(key: string, val: string) {
   let res: [boolean, any] = [true, ''];
   try {
-    const send = {
+    // common case
+    const origin = JSON.parse(JSON.stringify(activeKeyLayer.value.keys));
+    const target = origin[key]!;
+    const tkSend = {
       cfg: keyLayerInfo.value.configIndex,
       layer: keyLayerInfo.value.layerIndex,
       k: key,
       v: val
     };
-    await setKeyInfo(send);
-    const oldV = activeKeyLayer.value.keys[key]?.v || 'err';
-    keyboardStore.pushState({
-      oldVal: { ...send, v: oldV },
-      newVal: send
-    });
+    const oldV = target?.v || 'err';
+    await keyboardStore.updateKey(key, { v: val });
+
+    // vs layer
+    const cache = [
+      {
+        oldVal: { ...tkSend, v: oldV },
+        newVal: tkSend
+      }
+    ];
+    if (props.vsLayer) {
+      const reflectKey = Object.keys(origin).find(k => {
+        return origin[k].v === val;
+      })!;
+      if (reflectKey) {
+        const rtSend = {
+          cfg: keyLayerInfo.value.configIndex,
+          layer: keyLayerInfo.value.layerIndex,
+          k: reflectKey,
+          v: target.v
+        };
+        await keyboardStore.updateKey(reflectKey, { v: target.v });
+        cache.push({ oldVal: { ...rtSend, v: val }, newVal: rtSend });
+        updateBtnByParent(rtSend.k, rtSend.v, false);
+      }
+    }
+    // cache change btn
+    if (cache.length >= 1) {
+      keyboardStore.pushState(cache[0]);
+    } else {
+      keyboardStore.pushState(cache);
+    }
   } catch (error) {
     window?.$message!.error('按键修改失败');
     res = [false, error];
@@ -72,22 +102,25 @@ function updateIcon(iconKey: string, layoutKey: string, ctx: Svg) {
     element.fill('#a6a6a6');
   }
 }
-async function updateBtnByParent(key: string, value: string) {
+async function updateBtnByParent(key: string, value: string, updateDevice = true) {
   if (!ctrlInstance || !activeBtn.value) {
     return;
   }
-  const ctx = ctrlInstance.findOne(`#${key}_CTX`) as Svg;
+  const vKey = `G_${key}`;
+  const ctx = ctrlInstance.findOne(`#${vKey}_CTX`) as Svg;
   if (!ctx) {
     return;
   }
-  await setKeyInfo({
-    cfg: keyLayerInfo.value.configIndex,
-    layer: keyLayerInfo.value.layerIndex,
-    k: key,
-    v: value
-  });
+  if (updateDevice) {
+    await setKeyInfo({
+      cfg: keyLayerInfo.value.configIndex,
+      layer: keyLayerInfo.value.layerIndex,
+      k: key,
+      v: value
+    });
+  }
   let tKey = key;
-  if (activeBtn.value === 'G_UP' && key === 'UP') {
+  if (vKey === 'G_UP' && key === 'UP') {
     tKey = 'UP_LIGHT';
   }
   updateIcon(value, tKey, ctx);
