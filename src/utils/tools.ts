@@ -97,5 +97,14 @@ export function rgbToHsl(r = 0, g = 0, b = 0) {
   return { H, S: S * 100, L: L * 100 };
 }
 export function mod(n: number, m: number) {
-  return ((n % m) + m) % m
+  return ((n % m) + m) % m;
+}
+export function number2Version(n: number, p: number = 3) {
+  const s: string[] = [];
+
+  for (let index = p - 1; index >= 0; index--) {
+    const v = Math.floor((n / 10 ** index) % 10);
+    s.push(`${v}`);
+  }
+  return s.join('.');
 }
