@@ -1,84 +1,108 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import { onUnmounted, toRef } from 'vue';
-import { KeyboardContainer } from '@/components/custom/keyboard/index';
-import { useKeyboardStore } from '@/store/modules/keyboard';
-import { KeyTypeEnum } from '@/enum/keyType';
-import Dks from './modules/dks.vue';
-import Oks from './modules/oks.vue';
-import Socd from './modules/socd.vue';
-import MT from './modules/mt.vue';
-import TGL from './modules/tgl.vue';
-import Rs from './modules/rs.vue';
-const keyboardStore = useKeyboardStore();
-const allowMutipleSelect = toRef(keyboardStore, 'allowMutipleSelect');
-const currentSuperKeyType = toRef(keyboardStore, 'currentSuperKeyType') as Ref<KeyTypeEnum>;
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
+import type { Dom, SVGTypeMapping, Svg } from '@svgdotjs/svg.js';
+import { SVG } from '@svgdotjs/svg.js';
+import tstBgSvg from '@/assets/svg-icon/hp-tst-bg.svg';
+import tstBtnsSvg from '@/assets/svg-icon/hp-tst-btns.svg';
+import GroupTitle from '@/components/custom/group-title.vue';
+import SvgIcon from '@/components/custom/svg-icon.vue';
+import { offKeyPressListener, onKeyPressListener, setTestMode } from '@/api/test';
+import type { TestKeyRes } from '@/api/modules/test';
 
-allowMutipleSelect.value = false;
-currentSuperKeyType.value = KeyTypeEnum.DKS;
+const fetchData = async (url: string): Promise<string> =>
+  new Promise((resolve, reject) => {
+    fetch(url)
+      .then(r => resolve(r.text()))
+      .catch(e => reject(e));
+  });
+let ctrlInstance: SVGTypeMapping<Dom> | null = null;
 
-onUnmounted(() => keyboardStore.resetCurrentSuperKeyType());
-
-const paneList = [
-  {
-    name: KeyTypeEnum.DKS,
-    label: 'supperKey.c1',
-    component: Dks
-  },
-  {
-    name: KeyTypeEnum.OKS,
-    label: 'supperKey.c2',
-    component: Oks
-  },
-  {
-    name: KeyTypeEnum.SOCD,
-    label: 'supperKey.c9',
-    component: Socd
-  },
-  {
-    name: KeyTypeEnum.MT,
-    label: 'supperKey.c3',
-    component: MT
-  },
-  {
-    name: KeyTypeEnum.TGL,
-    label: 'supperKey.c4',
-    component: TGL
-  },
-  {
-    name: KeyTypeEnum.RS,
-    label: 'supperKey.c5',
-    component: Rs
+const btnRef = ref();
+const bgRef = ref();
+function updateBtnView(name: string, staus: 0 | 1) {
+  if (!ctrlInstance) {
+    return;
   }
-];
+  const bgElement = ctrlInstance.findOne(`#TG_${name}_BG`) as Svg;
+  if (!bgElement) {
+    return;
+  }
+  let color = '#171717';
+  if (staus) {
+    color = '#c1c1c1';
+  }
+  bgElement.fill(color);
+}
+const keyList = ref<{ id: string; key: string }[]>([]);
+const lastKeyList = computed(() => {
+  return keyList.value.slice(0, 6);
+});
+function updateKeyList(name: string, idx?: number) {
+  if (idx !== undefined && idx >= 0) {
+    keyList.value.splice(idx, 1);
+    return;
+  }
+  keyList.value.unshift({
+    id: `${name}-${Date.now()}`,
+    key: name
+  });
+  if (keyList.value.length > 32) {
+    keyList.value.pop();
+  }
+}
+function listenerKeyPress(data: TestKeyRes) {
+  const { ks } = data;
+  Object.keys(ks).forEach(key => {
+    const element = ks[key];
+    if (element.pr) {
+      updateKeyList(element.v);
+    }
+    updateBtnView(key, element.pr);
+  });
+}
+onMounted(async () => {
+  Promise.all([fetchData(tstBtnsSvg), fetchData(tstBgSvg)]).then(([btn, bg]) => {
+    bgRef.value.innerHTML = bg;
+    btnRef.value.innerHTML = btn;
+    nextTick(async () => {
+      ctrlInstance = SVG(btnRef.value).first();
+      await setTestMode({ enable: 1 });
+      onKeyPressListener(listenerKeyPress);
+    });
+  });
+});
+onUnmounted(async () => {
+  await setTestMode({ enable: 0 });
+  await offKeyPressListener(listenerKeyPress);
+});
 </script>
 
 <template>
-  <div>
-    <KeyboardContainer>
-      <template #keyboardBottom></template>
-      <template #default="{ handleKeyEmit }">
-        <div class="h-full flex flex-col">
-          <div class="flex-1 bg-#171619 rounded-md mb-2">
-            <component :is="paneList.find(item => item.name === currentSuperKeyType)?.component"
-              @key-clicked="handleKeyEmit" />
-          </div>
-          <NTabs v-model:value="currentSuperKeyType" class="custom-segment-tabs" type="segment" animated>
-            <NTab v-for="pane in paneList" :key="pane.name" :name="pane.name" class="text-xl text-#3C8DF4">
-              <span :class="`${currentSuperKeyType == pane.name ? 'text-#3C8DF4' : 'text-#999999'} text-lg`">{{
-                $t(pane.label) }}</span>
-            </NTab>
-          </NTabs>
-        </div>
-      </template>
-    </KeyboardContainer>
+  <div class="flex flex-row gap-x-36 py-36">
+    <div class="relative ml-38 w-3/5">
+      <div ref="bgRef" class="svg-top-wrapper absolute left-50% top-0 h-full -translate-x-50%"></div>
+      <div ref="btnRef" class="svg-top-wrapper pointer-event-all absolute left-50% top-0 h-full -translate-x-50%"></div>
+    </div>
+    <div class="p my-4 w-1/5 rounded-xl bg-#171619 px-6 py-4">
+      <GroupTitle title="按键测试" :show-bottom-line="false" />
+      <div class="ml-8 mt-12 flex flex-col gap-y-4 overflow-clip">
+        <SvgIcon
+          v-for="info in lastKeyList"
+          :key="info.id"
+          local-icon="hp-btn-BG"
+          :local-icons="[`hp-btn-${info.key}`]"
+          class="text-7xl"
+        ></SvgIcon>
+      </div>
+    </div>
   </div>
 </template>
 
-<style scoped>
-.custom-segment-tabs {
-  :deep(.n-tabs-tab) {
-    margin: 3px 12px
+<style lang="scss" scoped>
+.svg-top-wrapper {
+  ::v-deep(svg) {
+    height: 100%;
+    object-fit: contain;
   }
 }
 </style>
