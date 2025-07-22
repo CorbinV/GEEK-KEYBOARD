@@ -89,17 +89,21 @@ async function updateBtnEffect(key: string, val: string) {
   return res;
 }
 function updateIcon(iconKey: string, layoutKey: string, ctx: Svg) {
-  ctx.clear();
-  const iconName = genSymbolId(iconKey);
-  const { pos } = layoutMap.get(layoutKey)!;
-  const element = ctx.use(iconName);
-  const nBbox = element.bbox();
-  const x = pos[0] - nBbox.cx;
-  const y = pos[1] - nBbox.cy;
-  element.move(x, y).front();
-  element.scale(1.12);
-  if (iconName !== 'NULL') {
-    element.fill('#a6a6a6');
+  try {
+    ctx.clear();
+    const iconName = genSymbolId(iconKey);
+    const { pos } = layoutMap.get(layoutKey)!;
+    const element = ctx.use(iconName);
+    const nBbox = element.bbox();
+    const x = pos[0] - nBbox.cx;
+    const y = pos[1] - nBbox.cy;
+    element.move(x, y).front();
+    element.scale(1.12);
+    if (iconName !== 'NULL') {
+      element.fill('#a6a6a6');
+    }
+  } catch (error) {
+    window?.$log?.error(iconKey, layoutKey, error);
   }
 }
 async function updateBtnByParent(key: string, value: string, updateDevice = true) {
@@ -119,11 +123,11 @@ async function updateBtnByParent(key: string, value: string, updateDevice = true
       v: value
     });
   }
-  let tKey = key;
-  if (vKey === 'G_UP' && key === 'UP') {
-    tKey = 'UP_LIGHT';
+  let tValue = value;
+  if (vKey === 'G_UP' && value === 'UP') {
+    tValue = 'UP_LIGHT';
   }
-  updateIcon(value, tKey, ctx);
+  updateIcon(tValue, key, ctx);
 }
 function resetActiveBtn(x?: boolean) {
   if (x) {
@@ -150,11 +154,11 @@ async function updateBtnView(value: string) {
     return;
   }
   // ctx.clear();
-  let tKey = key;
-  if (activeBtn.value === 'G_UP' && key === 'UP') {
-    tKey = 'UP_LIGHT';
+  let tValue = value;
+  if (activeBtn.value === 'G_UP' && value === 'UP') {
+    tValue = 'UP_LIGHT';
   }
-  updateIcon(tKey, btn, ctx);
+  updateIcon(tValue, btn, ctx);
 }
 const btnRef = ref();
 const bgRef = ref();
@@ -187,7 +191,11 @@ function initCtx() {
     // }
   });
 }
-function initWatch() {
+async function initWatch() {
+  await keyboardStore.updateLayerKeys({
+    config: keyLayerInfo.value.configIndex,
+    layer: keyLayerInfo.value.layerIndex
+  });
   watch(
     () => activeKeyLayer.value.xxx,
     val => {
@@ -195,21 +203,23 @@ function initWatch() {
         return;
       }
       // update btn view
-      const keys = Object.keys(val.keys);
+      const keys = Object.keys(val?.keys) || [];
+      if (!keys?.length) {
+        return;
+      }
       resetActiveBtn(true);
       keys.forEach(key => {
         const ctx = ctrlInstance!.findOne(`#G_${key}_CTX`) as Svg;
         if (!ctx) {
           return;
         }
-        const btnVal = val.keys[key].v as string;
-        let tKey = key;
-        if (key === 'UP') {
-          tKey = 'UP_LIGHT';
+        let btnVal = val.keys[key].v as string;
+        const tKey = key;
+        if (btnVal === 'UP' && key === 'UP') {
+          btnVal = 'UP_LIGHT';
         }
-        updateIcon(tKey, btnVal, ctx);
+        updateIcon(btnVal, tKey, ctx);
       });
-      activeBtn.value = '';
     },
     {
       immediate: true
