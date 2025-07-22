@@ -8,10 +8,11 @@ import SOCD from './module/socd.vue';
 import Control from './module/control.vue';
 import BtnList from './module/btn-list.vue';
 const btnName = ref('');
+const btnNameFlag = ref(Date.now());
 function injBtnItemClick(k: string) {
   btnName.value = k;
+  btnNameFlag.value = Date.now();
 }
-
 const keyboardStore = useKeyboardStore();
 const deviceStore = useDeviceStore();
 const { keyLayerInfo, allowUndo, undo } = toRefs(keyboardStore);
@@ -22,24 +23,7 @@ const showSocd = computed(() => {
 const showMask = computed(() => iptDevType.value !== DeviceIptEnum.PC);
 
 const ControlRef = ref<typeof Control>();
-function handleResetLayerConfig() {
-  window.$dialog?.info({
-    title: $t('common.tip'),
-    content: `确认重置当前层的按键配置吗？`,
-    positiveText: $t('common.confirm'),
-    negativeText: $t('common.cancel'),
-    onPositiveClick: async () => {
-      try {
-        await keyboardStore.resetTargetLayerCfg();
-      } catch (error) {
-        window?.$log?.error(error);
-        window?.$message?.error('配置重置异常，请检查设备状态或更新版本');
-      }
-    }
-  });
-}
 
-const ControlRef = ref<typeof Control>();
 async function handleCancel() {
   const historyItem = undo.value();
   if (Array.isArray(historyItem)) {
@@ -52,6 +36,24 @@ async function handleCancel() {
     await ControlRef.value?.updateBtnByParent(oldBase.k, oldBase.v);
   }
 }
+function handleResetLayerConfig() {
+  window.$dialog?.info({
+    title: $t('common.tip'),
+    content: `确认重置当前层的按键配置吗？`,
+    positiveText: $t('common.confirm'),
+    negativeText: $t('common.cancel'),
+    onPositiveClick: async () => {
+      try {
+        await keyboardStore.resetTargetLayerCfg();
+        btnName.value = '';
+      } catch (error) {
+        window?.$log?.error(error);
+        window?.$message?.error('配置重置异常，请检查设备状态或更新版本');
+      }
+    }
+  });
+}
+
 function handleSelectAll() {
   window?.$message?.info('该功能暂未开放，敬请期待');
 }

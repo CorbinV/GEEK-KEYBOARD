@@ -7,6 +7,7 @@ import controlBtnSvg from '@/assets/svg-icon/hp-ctrl-btn.svg';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { setKeyInfo } from '@/api/key';
 type ControlProps = {
+  updateFlag?: number;
   updateBtn?: string;
   vsLayer?: boolean; // special layer
 };
@@ -30,12 +31,12 @@ let ctrlInstance: SVGTypeMapping<Dom> | null = null;
 
 const activeBtn = ref('');
 watch(
-  () => props.updateBtn,
-  name => {
-    if (!name) {
+  () => props.updateFlag,
+  () => {
+    if (!props.updateBtn) {
       return;
     }
-    updateBtnView(name);
+    updateBtnView(props.updateBtn);
   }
 );
 async function updateBtnEffect(key: string, val: string) {
