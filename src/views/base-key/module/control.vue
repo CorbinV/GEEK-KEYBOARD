@@ -125,7 +125,17 @@ async function updateBtnByParent(key: string, value: string, updateDevice = true
   }
   updateIcon(value, tKey, ctx);
 }
-async function updateBtnView(key: string) {
+function resetActiveBtn(x?: boolean) {
+  if (x) {
+    const ctx1 = ctrlInstance!.findOne(`#${activeBtn.value}_BORDER`) as Svg;
+    if (!ctx1) {
+      return;
+    }
+    ctx1.fill('#424242');
+  }
+  activeBtn.value = '';
+}
+async function updateBtnView(value: string) {
   if (!ctrlInstance || !activeBtn.value) {
     return;
   }
@@ -186,6 +196,7 @@ function initWatch() {
       }
       // update btn view
       const keys = Object.keys(val.keys);
+      resetActiveBtn(true);
       keys.forEach(key => {
         const ctx = ctrlInstance!.findOne(`#G_${key}_CTX`) as Svg;
         if (!ctx) {
@@ -216,7 +227,7 @@ onMounted(async () => {
         if (targetElement) {
           const btnName = (targetElement as SVGAElement).dataset.name;
           if (btnName === activeBtn.value) {
-            activeBtn.value = '';
+            resetActiveBtn();
             const ctx = ctrlInstance!.findOne(`#${btnName}_BORDER`) as Svg;
             if (!ctx) {
               return;
