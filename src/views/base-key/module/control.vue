@@ -78,9 +78,9 @@ async function updateBtnEffect(key: string, val: string) {
     }
     // cache change btn
     if (cache.length >= 1) {
-      keyboardStore.pushState(cache[0]);
-    } else {
       keyboardStore.pushState(cache);
+    } else {
+      keyboardStore.pushState(cache[0]);
     }
   } catch (error) {
     window?.$message!.error('按键修改失败');
