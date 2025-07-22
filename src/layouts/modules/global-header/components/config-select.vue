@@ -62,9 +62,7 @@ function handleModeChange(v: number) {
         }
       }
     });
-    return;
   }
-  keyLayerInfo.value.configIndex = cache;
 }
 // const modeInfo = computed(() => {
 //   return {
