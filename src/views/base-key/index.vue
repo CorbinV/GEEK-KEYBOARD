@@ -76,7 +76,12 @@ function handleSelectRevert() {
           <SOCD v-show="showSocd"></SOCD>
         </div>
         <div class="col-span-3">
-          <Control ref="ControlRef" :vs-layer="keyLayerInfo.layerIndex === 0" :update-btn="btnName"></Control>
+          <Control
+            ref="ControlRef"
+            :vs-layer="keyLayerInfo.layerIndex === 0"
+            :update-btn="btnName"
+            :update-flag="btnNameFlag"
+          ></Control>
         </div>
         <div class="col-span-1 w-46 text-#999999">
           <div class="mt-25%"></div>
