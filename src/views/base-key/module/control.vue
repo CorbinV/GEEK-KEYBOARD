@@ -204,7 +204,7 @@ async function initWatch() {
         return;
       }
       // update btn view
-      const keys = Object.keys(val?.keys) || [];
+      const keys = Object.keys(val?.keys || {});
       if (!keys?.length) {
         return;
       }
