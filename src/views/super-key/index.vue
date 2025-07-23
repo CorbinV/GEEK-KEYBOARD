@@ -43,10 +43,10 @@ function updateKeyList(name: string, idx?: number) {
     return;
   }
   keyList.value.unshift({
-    id: `${name}-${Date.now()}`,
+    id: `${name}-${Date.now()}-${Math.random()}`,
     key: name
   });
-  if (keyList.value.length > 32) {
+  if (keyList.value.length > 10) {
     keyList.value.pop();
   }
 }
