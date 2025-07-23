@@ -106,5 +106,5 @@ export function number2Version(n: number, p: number = 3) {
     const v = Math.floor((n / 10 ** index) % 10);
     s.push(`${v}`);
   }
-  return s.join('.');
+  return s;
 }
