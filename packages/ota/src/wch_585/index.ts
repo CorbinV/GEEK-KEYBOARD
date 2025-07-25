@@ -212,7 +212,7 @@ export class WCH_585_OTA extends OTAProtocolController {
             if (this.onProgress) {
               const progress = Math.round((offset / firmwareData.length) * 50);
               // console.log(`编程进度: ${progress}%`);
-              this.progress = progress / 2 + 50;
+              this.progress = progress + 50;
               this.onProgress(this.progress);
             }
             resolve();
