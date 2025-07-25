@@ -66,7 +66,7 @@ function handleSelectRevert() {
   <div class="relative h-full w-full">
     <div v-if="showMask" class="mask">
       <div class="mask-content text-bold text-3xl line-height-relaxed">
-        <p class="w-full text-center">请在设备上切换模式值PC模式后，</p>
+        <p class="w-full text-center">请在设备上切换至 PC模式后，</p>
         <p class="w-full text-center">再次进入此界面操作</p>
       </div>
     </div>
