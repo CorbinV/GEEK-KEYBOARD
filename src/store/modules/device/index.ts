@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, effectScope, onScopeDispose, readonly, ref } from 'vue';
 import { ConnectionManager } from '@/utils/requset/connectMannager';
+import { DeviceIptEnum } from '@/api/modules/setting';
 
 export const useDeviceStore = defineStore('device', () => {
   const scope = effectScope();
@@ -15,6 +16,7 @@ export const useDeviceStore = defineStore('device', () => {
     return isConnected.value ? 'connected' : 'disconnected';
   });
   let isOtadevice = false;
+  const iptDevType = ref<DeviceIptEnum>(DeviceIptEnum.PC);
   // Actions
   async function connect(devices: HIDDevice[], config: any, otaDevice?: boolean) {
     try {
@@ -35,13 +37,9 @@ export const useDeviceStore = defineStore('device', () => {
   function scanPairedDevices(filters: any) {
     return connectionManager.scanPairedDevices(filters);
   }
-  function scanDevices(filter: any) {
-    const filters = [];
-    if (filter) {
-      filters.push(filter);
-    }
+  function scanDevices(filters: any) {
     if (isTrueDevice) {
-      return navigator.hid.requestDevice({ filters: [filter] });
+      return navigator.hid.requestDevice({ filters });
     }
     return [{}] as unknown as Promise<HIDDevice[]>; // Return an empty promise if not using a true device
   }
@@ -86,6 +84,7 @@ export const useDeviceStore = defineStore('device', () => {
     scanPairedDevices,
     scanDevices,
     isOtaMode: readonly(isOtaMode),
-    updateOtaMode
+    updateOtaMode,
+    iptDevType
   };
 });
