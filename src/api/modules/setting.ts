@@ -21,7 +21,7 @@ export enum DeviceIptEnum {
   SWITCH
 }
 export type DeviceIpt = {
-  ipt: DeviceIptEnum;
+  iptTp: DeviceIptEnum;
 };
 export type Rate = {
   rate: number;

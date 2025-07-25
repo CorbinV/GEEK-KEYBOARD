@@ -33,5 +33,6 @@ export type KeyInfo = {
 export type LayerKeysConfig = {
   cfg: number;
   layer: number;
+  rest: number;
   ks: KeyInfo[];
 };

@@ -39,7 +39,7 @@ export function getConfigCnt(): Promise<{
 }
 
 export function getKeysCfgByLayer(data: { cfg: number; layer: number }): Promise<LayerKeysConfig> {
-  return requestClient.send<any>({
+  return requestClient.send<LayerKeysConfig>({
     name: 'gBasicKs',
     data
   });

@@ -16,6 +16,12 @@ export function getInputType() {
     name: 'gIptTp'
   });
 }
+export function setInputType(data: DeviceIpt) {
+  return requestClient.send<DeviceIpt>({
+    name: 'sIptTp',
+    data
+  });
+}
 export function setResetDevice() {
   return requestClient.send<never>({
     name: 'sRstDev'
