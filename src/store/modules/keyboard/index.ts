@@ -304,7 +304,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         //   rate: 1000
         // };
         const inputInfo = await getInputType();
-        const inputType = deviceInputEnumProxy.getKey(inputInfo.ipt || 0);
+        const inputType = deviceInputEnumProxy.getKey(inputInfo.iptTp || 0);
         // const rateInfo = {};
         // const inputType = 'PC';
         // baseInfo.connect = deviceLinkEnumProxy.getKey(baseInfo.connect || 0); // get connect type
@@ -315,15 +315,10 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
           }
           return firmware.mode.split('*').shift()!;
         };
-        const versionList = Array.from({ length: 3 }).fill('0') as string[];
+        const versionList = number2Version(baseInfo.devVer[0].ver || 0, 3);
         baseInfo.devVer.forEach(firmware => {
           if (!model) {
             model = generateModelName(firmware);
-          }
-          if (versionList[firmware.id] !== undefined) {
-            versionList[firmware.id] = number2Version(firmware.ver || 0, 1);
-          } else {
-            versionList.splice(firmware.id, 0, (firmware.ver || 0).toString(16));
           }
         });
         kbInfo.hd = { ...baseInfo, ...rateInfo, inputType, model, version: versionList.join('.') };
@@ -364,6 +359,10 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         }
         if (!kbInfo.mounted) {
           try {
+            if (isInBoot()) {
+              kbInfo.mounted = true;
+              return;
+            }
             await handleDevConn();
             let cbRes = true;
             if (connCb instanceof Function) {
