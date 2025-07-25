@@ -499,32 +499,6 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         }
       }
     );
-    // regesiter when cfg mounted
-
-    watch([() => keyLayerInfo.configIndex, () => keyLayerInfo.layerIndex], ([cfgIdx, layerIdx]) => {
-      resetKeyHistory();
-      if (!kbInfo.mounted) {
-        return;
-      }
-      updateLayerKeys({
-        config: cfgIdx,
-        layer: layerIdx
-      });
-      // updateDeviceCfgAndLayer({
-      //   layerIdx,
-      //   cfgIdx
-      // })
-      //   .then(() => {
-      //     updateLayerKeys({
-      //       config: cfgIdx,
-      //       layer: layerIdx
-      //     });
-      //   })
-      //   .catch(e => {
-      //     window.$message?.error('设备响应异常');
-      //     console.log(e);
-      //   });
-    });
   }
   const afterDeviceReset = async () => {
     await AfterDevConn();
@@ -548,6 +522,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         forced: true
       }
     );
+    emitter.emit(EventNameEnum.layerOrConfigChange, null);
     // reset history list
     resetKeyHistory();
     //

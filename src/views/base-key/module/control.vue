@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { Dom, SVGTypeMapping, Svg } from '@svgdotjs/svg.js';
 import { SVG } from '@svgdotjs/svg.js';
-import { nextTick, onMounted, ref, toRefs, watch } from 'vue';
+import { nextTick, onMounted, onUnmounted, ref, toRefs, watch } from 'vue';
 import controlBgSvg from '@/assets/svg-icon/hp-ctrl-bg.svg';
 import controlBtnSvg from '@/assets/svg-icon/hp-ctrl-btn.svg';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { setKeyInfo } from '@/api/key';
+import emitter, { EventNameEnum } from '@/utils/eventBus';
 type ControlProps = {
   updateFlag?: number;
   updateBtn?: string;
@@ -192,40 +193,39 @@ function initCtx() {
     // }
   });
 }
+function updateControl() {
+  if (!ctrlInstance) {
+    return;
+  }
+  // update btn view
+  const val = activeKeyLayer.value;
+  const keys = Object.keys(val?.keys || {});
+  if (!keys?.length) {
+    return;
+  }
+  resetActiveBtn(true);
+  keys.forEach(key => {
+    const ctx = ctrlInstance!.findOne(`#G_${key}_CTX`) as Svg;
+    if (!ctx) {
+      return;
+    }
+    let btnVal = val.keys[key].v as string;
+    const tKey = key;
+    if (btnVal === 'UP' && key === 'UP') {
+      btnVal = 'UP_LIGHT';
+    }
+    updateIcon(btnVal, tKey, ctx);
+  });
+}
 async function initWatch() {
   await keyboardStore.updateLayerKeys({
     config: keyLayerInfo.value.configIndex,
     layer: keyLayerInfo.value.layerIndex
   });
-  watch(
-    () => activeKeyLayer.value.xxx,
-    val => {
-      if (!ctrlInstance) {
-        return;
-      }
-      // update btn view
-      const keys = Object.keys(val?.keys || {});
-      if (!keys?.length) {
-        return;
-      }
-      resetActiveBtn(true);
-      keys.forEach(key => {
-        const ctx = ctrlInstance!.findOne(`#G_${key}_CTX`) as Svg;
-        if (!ctx) {
-          return;
-        }
-        let btnVal = val.keys[key].v as string;
-        const tKey = key;
-        if (btnVal === 'UP' && key === 'UP') {
-          btnVal = 'UP_LIGHT';
-        }
-        updateIcon(btnVal, tKey, ctx);
-      });
-    },
-    {
-      immediate: true
-    }
-  );
+  updateControl();
+  emitter.on(EventNameEnum.layerOrConfigChange, () => {
+    updateControl();
+  });
 }
 onMounted(async () => {
   Promise.all([fetchData(controlBtnSvg), fetchData(controlBgSvg)]).then(([btn, bg]) => {
@@ -269,6 +269,9 @@ onMounted(async () => {
 });
 defineExpose({
   updateBtnByParent
+});
+onUnmounted(() => {
+  emitter.off(EventNameEnum.layerOrConfigChange);
 });
 </script>
 
