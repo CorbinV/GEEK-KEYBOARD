@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { onMounted, shallowRef, toRefs, watchEffect } from 'vue';
+import { onMounted, shallowRef, toRef, toRefs, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { useDeviceStore } from '@/store/modules/device';
 import { router } from '@/router';
-import { useKeyboardStore } from '@/store/modules/keyboard';
+import { isInBoot, useKeyboardStore } from '@/store/modules/keyboard';
+import type { DeviceIptEnum } from '@/api/modules/setting';
 const deviceStore = useDeviceStore();
 const keyboardStore = useKeyboardStore();
 const { kbInfo } = toRefs(keyboardStore);
+const iptDevType = toRef(deviceStore, 'iptDevType');
+
 const route = useRoute();
 watchEffect(() => {
   if (!kbInfo.value.mounted) {
@@ -22,11 +25,38 @@ watchEffect(() => {
 });
 let isClicked = false;
 const device = shallowRef();
-const filter = {
-  vendorId: 0x4353,
-  productId: 0x800c,
-  usagePage: 0xff80,
-  reportId: 0x00
+const baseDeviceConfig = [
+  // pc
+  {
+    usagePage: 0xff80,
+    vendorId: 0x4353,
+    productId: 0x800c
+  },
+  // ps
+  {
+    usagePage: 0xff80,
+    vendorId: 0x054c,
+    productId: 0x05c5
+  },
+  // ns
+  {
+    usagePage: 0xff80,
+    vendorId: 0x057e,
+    productId: 0x2009
+  }
+];
+const boorDeviceConfig = [
+  {
+    vendorId: 0x4353,
+    productId: 0x8008
+  }
+];
+const getFilter = (useBoot?: boolean) => {
+  const inboot = isInBoot();
+  if (useBoot || inboot) {
+    return boorDeviceConfig;
+  }
+  return baseDeviceConfig;
 };
 async function handleConnectBtnClicked(e) {
   try {
@@ -38,14 +68,22 @@ async function handleConnectBtnClicked(e) {
     if (device.value) {
       devices.push(device.value);
     } else {
-      const list = await deviceStore.scanDevices(filter);
+      const list = await deviceStore.scanDevices(getFilter());
       if (!list.length) {
-        window.$message!.info('No device selected');
+        window.$message!.info('请选择设备，若无设备请检查设备连接');
         return;
       }
       devices.push(...list);
     }
-    await deviceStore.connect(devices, filter);
+    const d = devices[0];
+    const type = baseDeviceConfig.findIndex(info => {
+      return d.productId === info.productId && d.vendorId === info.vendorId;
+    }) as unknown as DeviceIptEnum;
+    if (type > -1) {
+      iptDevType.value = type;
+    }
+    await deviceStore.connect(devices, baseDeviceConfig[iptDevType.value]);
+
     console.log('Connected');
   } catch (error) {
     console.error('Error:', error);
@@ -54,7 +92,7 @@ async function handleConnectBtnClicked(e) {
   }
 }
 onMounted(async () => {
-  device.value = await deviceStore.scanPairedDevices(filter);
+  device.value = await deviceStore.scanPairedDevices(getFilter());
 });
 </script>
 
