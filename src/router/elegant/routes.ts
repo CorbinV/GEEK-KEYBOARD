@@ -62,18 +62,6 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
-    name: 'home',
-    path: '/home',
-    component: 'layout.base$view.home',
-    meta: {
-      title: 'home',
-      i18nKey: 'route.home',
-      localIcon: 'menu',
-      hideInMenu: true,
-      order: 1
-    }
-  },
-  {
     name: 'iframe-page',
     path: '/iframe-page/:url',
     component: 'layout.base$view.iframe-page',
@@ -94,6 +82,7 @@ export const generatedRoutes: GeneratedRoute[] = [
       title: 'light',
       i18nKey: 'route.light',
       localIcon: 'light-change',
+      hideInMenu: true,
       order: 41
     }
   },
@@ -110,28 +99,6 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
-    name: 'marco',
-    path: '/marco',
-    component: 'layout.base$view.marco',
-    meta: {
-      title: 'marco',
-      i18nKey: 'route.marco',
-      localIcon: 'link-points',
-      order: 31
-    }
-  },
-  {
-    name: 'rapid-trigger',
-    path: '/rapid-trigger',
-    component: 'layout.base$view.rapid-trigger',
-    meta: {
-      title: 'rapid-trigger',
-      i18nKey: 'route.rapid-trigger',
-      localIcon: 'dashboard',
-      order: 21
-    }
-  },
-  {
     name: 'settings',
     path: '/settings',
     component: 'layout.base$view.settings',
@@ -139,6 +106,7 @@ export const generatedRoutes: GeneratedRoute[] = [
       title: 'settings',
       i18nKey: 'route.settings',
       localIcon: 'setting',
+      hideInMenu: true,
       order: 61
     }
   },
@@ -151,6 +119,16 @@ export const generatedRoutes: GeneratedRoute[] = [
       i18nKey: 'route.super-key',
       localIcon: 'key-code',
       order: 21
+    }
+  },
+  {
+    name: 'tst',
+    path: '/tst',
+    component: 'layout.base$view.tst',
+    meta: {
+      title: 'tst',
+      hideInMenu: true,
+      i18nKey: 'route.tst'
     }
   },
   {

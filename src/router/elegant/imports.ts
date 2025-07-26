@@ -24,11 +24,9 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   login: () => import("@/views/_builtin/login/index.vue"),
   "base-key": () => import("@/views/base-key/index.vue"),
   connect: () => import("@/views/connect/index.vue"),
-  home: () => import("@/views/home/index.vue"),
   light: () => import("@/views/light/index.vue"),
-  marco: () => import("@/views/marco/index.vue"),
-  "rapid-trigger": () => import("@/views/rapid-trigger/index.vue"),
   settings: () => import("@/views/settings/index.vue"),
   "super-key": () => import("@/views/super-key/index.vue"),
+  tst: () => import("@/views/tst/index.vue"),
   "user-center": () => import("@/views/user-center/index.vue"),
 };

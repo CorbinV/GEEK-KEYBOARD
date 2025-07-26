@@ -123,7 +123,9 @@ export function createRouteGuard(router: Router) {
   });
   router.afterEach((to, from) => {
     // 记录用户离开的路由
-    const condition = [from.name !== connectRoute,  to.fullPath === `/${connectRoute}`, from.fullPath !== '/', !from.fullPath.includes('redirect')]
+    const condition = [from.name !== connectRoute,
+    // to.fullPath === `/${connectRoute}`,
+    from.fullPath !== '/', !from.fullPath.includes('redirect')]
     if (condition.every(item => item)) {
       localStorage.setItem('redirectFrom', from.fullPath);
     }

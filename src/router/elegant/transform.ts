@@ -168,14 +168,12 @@ const routeMap: RouteMap = {
   "500": "/500",
   "base-key": "/base-key",
   "connect": "/connect",
-  "home": "/home",
   "iframe-page": "/iframe-page/:url",
   "light": "/light",
   "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?",
-  "marco": "/marco",
-  "rapid-trigger": "/rapid-trigger",
   "settings": "/settings",
   "super-key": "/super-key",
+  "tst": "/tst",
   "user-center": "/user-center"
 };
 
