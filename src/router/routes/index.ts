@@ -11,12 +11,17 @@ import { transformElegantRoutesToVueRoutes } from '../elegant/transform';
 const customRoutes: CustomRoute[] = [];
 
 /** create routes when the auth route mode is static */
+
+function filterRoute(routes: ElegantRoute[]) {
+  const external = JSON.parse(JSON.stringify(import.meta.env.VITE_USE_EXTERNAL_ROUTES || []));
+  return routes.filter(route => !external.includes(route.name));
+}
 export function createStaticRoutes() {
   const constantRoutes: ElegantRoute[] = [];
 
   const authRoutes: ElegantRoute[] = [];
 
-  [...customRoutes, ...generatedRoutes].forEach(item => {
+  [...customRoutes, ...filterRoute(generatedRoutes)].forEach(item => {
     if (item.meta?.constant) {
       constantRoutes.push(item);
     } else {
