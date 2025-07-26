@@ -24,7 +24,7 @@ export class HIDProtocolController extends EventTarget {
   constructor(options: HIDProtocolOptions = {}) {
     super();
     this.options = {
-      timeout: 4500,
+      timeout: 2500,
       retryAttempts: 1,
       retryDelay: 800,
       ...options
@@ -52,7 +52,9 @@ export class HIDProtocolController extends EventTarget {
       device = usagePage ? devices.find(dev => dev.collections.some(coll => coll.usagePage === usagePage)) : undefined;
       device ||= devices[0];
       this.device = device;
-      await this.device.open();
+      if (!this.device.opened) {
+        await this.device.open();
+      }
       this.connected = true;
 
       this.device.addEventListener('inputreport', this.handleInput.bind(this));
@@ -177,7 +179,10 @@ export class HIDProtocolController extends EventTarget {
   }
 
   async on(name: string, callback: (data?: any) => void) {
-    this.listenerMap.dispathOn(name, callback);
+    this.listenerMap.dispathOn(name, data => {
+      webHidLogger.debug(`Listened ${name} 👂`, data);
+      return callback(data);
+    });
   }
   async off(name: string, callback: (data?: any) => void) {
     this.listenerMap.dispathOff(name, callback);
