@@ -38,6 +38,9 @@ importers:
       '@sa/utils':
         specifier: workspace:*
         version: link:packages/utils
+      '@svgdotjs/svg.js':
+        specifier: ^3.2.4
+        version: 3.2.4
       '@vueuse/core':
         specifier: 11.1.0
         version: 11.1.0(vue@3.5.7(typescript@5.6.2))
@@ -214,6 +217,9 @@ importers:
 
   packages/device-transfer:
     dependencies:
+      '@msgpack/msgpack':
+        specifier: ^3.1.2
+        version: 3.1.2
       '@sa/packetize':
         specifier: workspace:^
         version: link:../packetize
@@ -895,6 +901,10 @@ packages:
   '@juggle/resize-observer@3.4.0':
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
 
+  '@msgpack/msgpack@3.1.2':
+    resolution: {integrity: sha512-JEW4DEtBzfe8HvUYecLU9e6+XJnKDlUAIve8FvPzF3Kzs6Xo/KuZkZJsDH0wJXl/qEZbeeE7edxDNY3kMs39hQ==}
+    engines: {node: '>= 18'}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -1079,6 +1089,9 @@ packages:
         optional: true
       vue-eslint-parser:
         optional: true
+
+  '@svgdotjs/svg.js@3.2.4':
+    resolution: {integrity: sha512-BjJ/7vWNowlX3Z8O4ywT58DqbNRyYlkk6Yz/D13aB7hGmfQTvGX4Tkgtm/ApYlu9M7lCQi15xUEidqMUmdMYwg==}
 
   '@trysound/sax@0.2.0':
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
@@ -5821,6 +5834,8 @@ snapshots:
 
   '@juggle/resize-observer@3.4.0': {}
 
+  '@msgpack/msgpack@3.1.2': {}
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -5961,6 +5976,8 @@ snapshots:
     transitivePeerDependencies:
       - '@types/eslint'
       - supports-color
+
+  '@svgdotjs/svg.js@3.2.4': {}
 
   '@trysound/sax@0.2.0': {}
 
