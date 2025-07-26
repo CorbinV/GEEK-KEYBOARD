@@ -58,7 +58,7 @@ const getFilter = (useBoot?: boolean) => {
   }
   return baseDeviceConfig;
 };
-async function handleConnectBtnClicked(e) {
+async function handleConnectBtnClicked() {
   try {
     if (isClicked) {
       return;

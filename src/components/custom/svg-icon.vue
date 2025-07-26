@@ -16,6 +16,7 @@ interface Props {
   /** Local svg icon name */
   localIcon?: string;
   localIcons?: string[];
+  color?: string;
 }
 
 const props = defineProps<Props>();

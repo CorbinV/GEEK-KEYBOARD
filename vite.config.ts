@@ -6,9 +6,8 @@ import { createViteProxy, getBuildTime } from './build/config';
 
 export default defineConfig(configEnv => {
   const viteEnv = loadEnv(configEnv.mode, process.cwd()) as unknown as Env.ImportMeta;
-
   const buildTime = getBuildTime();
-
+  process.env.MODE = configEnv.mode;
   const enableProxy = configEnv.command === 'serve' && !configEnv.isPreview;
 
   return {
@@ -42,7 +41,7 @@ export default defineConfig(configEnv => {
       }
     },
     preview: {
-      port: 9725
+      port: 9719
     },
     build: {
       reportCompressedSize: false,
@@ -55,17 +54,17 @@ export default defineConfig(configEnv => {
         output: {
           manualChunks(id) {
             if (id.includes('src')) {
-              return
+              return;
             }
-            let tempId = id
+            let tempId = id;
             if (tempId.includes('.pnpm')) {
-              tempId = tempId.split('node_modules/.pnpm/').pop() || ''
+              tempId = tempId.split('node_modules/.pnpm/').pop() || '';
             }
             if (tempId.match(/^naive-ui*/)) {
-              return 'uiframe'
+              return 'uiframe';
             }
-            if(tempId.match(/^@?vue[-\+@]/)) {
-              return 'vue'
+            if (tempId.match(/^@?vue[-\+@]/)) {
+              return 'vue';
             }
           }
         }
