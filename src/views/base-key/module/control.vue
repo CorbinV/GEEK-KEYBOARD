@@ -101,7 +101,7 @@ function updateIcon(iconKey: string, layoutKey: string, ctx: Svg) {
     const y = pos[1] - nBbox.cy;
     element.move(x, y).front();
     element.scale(1.12);
-    if (iconName !== 'NULL') {
+    if (!iconName.includes('NULL')) {
       element.fill('#a6a6a6');
     }
   } catch (error) {
