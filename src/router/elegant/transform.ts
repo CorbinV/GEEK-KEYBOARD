@@ -171,7 +171,6 @@ const routeMap: RouteMap = {
   "iframe-page": "/iframe-page/:url",
   "light": "/light",
   "login": "/login/:module(pwd-login|code-login|register|reset-pwd|bind-wechat)?",
-  "settings": "/settings",
   "super-key": "/super-key",
   "tst": "/tst",
   "user-center": "/user-center"

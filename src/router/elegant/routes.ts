@@ -99,18 +99,6 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
-    name: 'settings',
-    path: '/settings',
-    component: 'layout.base$view.settings',
-    meta: {
-      title: 'settings',
-      i18nKey: 'route.settings',
-      localIcon: 'setting',
-      hideInMenu: true,
-      order: 61
-    }
-  },
-  {
     name: 'super-key',
     path: '/super-key',
     component: 'layout.base$view.super-key',
