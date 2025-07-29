@@ -24,6 +24,7 @@ export const views: Record<LastLevelRouteKey, RouteComponent | (() => Promise<Ro
   login: () => import("@/views/_builtin/login/index.vue"),
   "base-key": () => import("@/views/base-key/index.vue"),
   connect: () => import("@/views/connect/index.vue"),
+  "factory-btns": () => import("@/views/factory-btns/index.vue"),
   light: () => import("@/views/light/index.vue"),
   "super-key": () => import("@/views/super-key/index.vue"),
   tst: () => import("@/views/tst/index.vue"),

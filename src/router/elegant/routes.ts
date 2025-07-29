@@ -62,6 +62,16 @@ export const generatedRoutes: GeneratedRoute[] = [
     }
   },
   {
+    name: 'factory-btns',
+    path: '/factory-btns',
+    component: 'layout.blank$view.factory-btns',
+    meta: {
+      title: 'factory-btns',
+      constant: true,
+      i18nKey: 'route.factory-btns'
+    }
+  },
+  {
     name: 'iframe-page',
     path: '/iframe-page/:url',
     component: 'layout.base$view.iframe-page',
