@@ -5,7 +5,7 @@ import type {
   RouteLocationRaw,
   Router
 } from 'vue-router';
-import { useRoute } from 'vue-router'
+import { useRoute } from 'vue-router';
 
 import type { RouteKey, RoutePath } from '@elegant-router/types';
 import { toRef, watch } from 'vue';
@@ -60,7 +60,7 @@ export function createRouteGuard(router: Router) {
         }
       },
       {
-        condition: !isTrueDevice.value && !isConnected.value,
+        condition: !isTrueDevice.value && !isConnected.value && needLogin,
         callback: () => {
           return next({
             name: connectRoute,
@@ -69,7 +69,7 @@ export function createRouteGuard(router: Router) {
         }
       },
       {
-        condition: !isConnected.value && to.name !== connectRoute,
+        condition: !isConnected.value && to.name !== connectRoute && needLogin,
         callback: () => {
           return next({
             name: connectRoute
@@ -123,9 +123,11 @@ export function createRouteGuard(router: Router) {
   });
   router.afterEach((to, from) => {
     // 记录用户离开的路由
-    const condition = [from.name !== connectRoute,
-    // to.fullPath === `/${connectRoute}`,
-    from.fullPath !== '/', !from.fullPath.includes('redirect')]
+    const condition = [
+      from.name !== connectRoute,
+      from.fullPath !== '/',
+      !from.fullPath.includes('redirect')
+    ];
     if (condition.every(item => item)) {
       localStorage.setItem('redirectFrom', from.fullPath);
     }
