@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, toRefs, watch } from 'vue';
+import { useDeviceStore } from '@/store/modules/device';
+import { enableFct, offFctKeyListener, onFctKeyListener, setFctLight } from '@/api/factory';
+import type { FctKeyRes } from '@/api/modules/test';
+const deviceStore = useDeviceStore();
+const { isConnected } = toRefs(deviceStore);
 const initSw = () => {
   const originSwitchList = [
     {
@@ -98,13 +103,111 @@ const initBtn = () => {
     };
   });
 };
-const switchList = ref(initSw());
-const btnList = ref(initBtn());
-
+const switchList = reactive(initSw());
+const btnList = reactive(initBtn());
+const maxTestKey = switchList.length + btnList.length;
 const passTested = computed(() => {
-  const swStatus = switchList.value.every(item => item.value) && btnList.value.every(item => item.value);
-  const btnStatus = btnList.value.every(item => item.value);
-  return swStatus && btnStatus;
+  let testedCount = maxTestKey;
+  const swStatus = switchList.every(item => {
+    if (item.value) {
+      testedCount--;
+    }
+    return item.value;
+  });
+  const btnStatus = btnList.every(item => {
+    if (item.value) {
+      testedCount--;
+    }
+    return item.value;
+  });
+  return {
+    status: swStatus && btnStatus,
+    process: `${testedCount}/${maxTestKey}`
+  };
+});
+const baseDeviceConfig = [
+  {
+    usagePage: 0xff80,
+    vendorId: 0x4353,
+    productId: 0x800c
+  },
+  {
+    usagePage: 0xff80,
+    vendorId: 0x054c,
+    productId: 0x05c5
+  },
+  {
+    usagePage: 0xff80,
+    vendorId: 0x057e,
+    productId: 0x2009
+  }
+];
+async function handleConnect() {
+  try {
+    const devices = await navigator!.hid.requestDevice({
+      filters: baseDeviceConfig
+    })!;
+
+    if (devices.length > 0) {
+      deviceStore.connect([devices[0]], {
+        usagePage: 0xff80,
+        vendorId: devices[0].vendorId,
+        productId: devices[0].productId
+      });
+    } else {
+      window.$message!.error('No device found');
+    }
+  } catch (error) {
+    console.error('Error connecting to device:', error);
+    window.$message!.error('Failed to connect to device');
+  }
+}
+async function handleDisconnect() {
+  try {
+    await enableFct({ enable: 0 });
+    await deviceStore.disconnect();
+  } catch (error) {
+    console.error('Error disconnecting from device:', error);
+    window.$message!.error('Failed to disconnect from device');
+  }
+}
+function decodeFctMsg(data: FctKeyRes) {
+  const { sw, ks } = data;
+  Object.keys(sw).forEach(key => {
+    const swItem = switchList.find(item => item.key === key);
+    if (swItem) {
+      swItem.value = Boolean(sw[key].v);
+    }
+  });
+  Object.keys(ks).forEach(key => {
+    const btnItem = btnList.find(item => item.key === key);
+    if (btnItem) {
+      btnItem.value = Boolean(ks[key].v);
+      btnItem.pr = Boolean(ks[key].pr);
+    }
+  });
+}
+watch(isConnected, async val => {
+  if (val) {
+    await enableFct({ enable: 1 });
+    await setFctLight({ r: 255, g: 255, b: 255 });
+    onFctKeyListener(decodeFctMsg);
+  } else {
+    offFctKeyListener(decodeFctMsg);
+  }
+});
+watch(
+  () => passTested.value.status,
+  val => {
+    if (val) {
+      window.$message!.success('测试通过，设备已自动断开');
+      enableFct({ enable: 0 }).then(() => {
+        deviceStore.disconnect();
+      });
+    }
+  }
+);
+
 });
 </script>
 
