@@ -9,3 +9,16 @@ export type TestKeyRes = {
     };
   };
 };
+export type FctKeyRes = {
+  ks: {
+    [key: string]: {
+      v: string;
+      pr: CommonType.NumberBoolean;
+    };
+  };
+  sw: {
+    [key: string]: {
+      v: string;
+    };
+  };
+};
