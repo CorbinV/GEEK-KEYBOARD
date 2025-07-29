@@ -208,25 +208,59 @@ watch(
   }
 );
 
+function handleEntryKb() {
+  if (!isConnected.value) {
+    handleConnect();
+  }
+}
+function handleSpaceKb() {
+  if (isConnected.value) {
+    handleDisconnect();
+  }
+}
+function handleKbEvent(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    handleEntryKb();
+  } else if (e.key === ' ') {
+    handleSpaceKb();
+  }
+}
+onMounted(() => {
+  window.addEventListener('keydown', handleKbEvent);
+});
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKbEvent);
 });
 </script>
 
 <template>
   <div class="h-full w-full flex flex-row bg-#ffffff px-6 py-8 text-white">
     <div class="w-1/5">
-      <NButton size="large">Connect</NButton>
-      <div>
+      <NButton v-if="!isConnected" class="mx-auto my-0 h-16 w-3/4" size="large" @click="handleConnect">
+        回车键/点击 开始测试
+      </NButton>
+      <NButton v-else class="mx-auto my-0 h-16 w-3/4" size="large" @click="handleDisconnect">
+        空格键/点击 终止测试
+      </NButton>
+      <div class="mt-12 flex flex-col gap-y-6">
         <p class="text-xl">
-          <span class="mr-4">Status:</span>
-          <span v-if="passTested" class="text-#7ada00">Passed</span>
-          <span v-else class="text-#ff3d00">Failed</span>
+          <span class="mr-4">连接状态：</span>
+          <span>{{ isConnected ? '已连接' : '未连接' }}</span>
+        </p>
+        <p class="text-xl">
+          <span class="mr-4">测试状态：</span>
+          <span v-if="passTested.status" class="text-3xl text-#7ada00 font-bold">已通过</span>
+          <span v-else-if="isConnected" class="text-3xl text-#ff3d00 font-bold">
+            {{ `未通过(${passTested.process})` }}
+          </span>
+          <span v-else>待开始</span>
         </p>
       </div>
     </div>
     <div class="flex-1">
       <div>
-        <p>switch button</p>
-        <div class="flex flex-row flex-wrap gap-x-12 gap-y-6">
+        <p class="mb-6 text-2xl">顶部按钮/开关</p>
+        <div class="flex flex-row flex-wrap gap-x-12 gap-y-8">
           <div
             v-for="sw in switchList"
             :key="sw.key"
@@ -242,12 +276,16 @@ watch(
         </div>
       </div>
       <div>
-        <p>base button</p>
-        <div class="flex flex-row flex-wrap gap-x-12 gap-y-6">
+        <p class="my-6 text-2xl">按钮</p>
+        <div class="flex flex-row flex-wrap gap-x-12 gap-y-8">
           <div
             v-for="btn in btnList"
             :key="btn.key"
             class="h-16 w-32 flex items-center justify-center border-1 border-#000000 rounded-xl bg-#171717 text-center text-xl"
+            :class="{
+              'bg-#7ada00': btn.value && !btn.pr,
+              'bg-#ffd850': btn.pr
+            }"
           >
             <span>{{ btn.label }}</span>
           </div>
