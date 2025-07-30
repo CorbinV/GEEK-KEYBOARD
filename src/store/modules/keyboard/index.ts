@@ -550,6 +550,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     ...configDataFnc,
     ...keyHistoryFnc,
     afterDeviceReset,
+    resetKeyHistory,
     resetTargetLayerCfg
   };
 });

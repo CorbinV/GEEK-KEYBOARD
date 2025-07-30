@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRefs } from 'vue';
+import { computed, onUnmounted, ref, toRefs } from 'vue';
 import { $t } from '@/locales';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useDeviceStore } from '@/store/modules/device';
@@ -60,6 +60,9 @@ function handleSelectAll() {
 function handleSelectRevert() {
   window?.$message?.info('该功能暂未开放，敬请期待');
 }
+onUnmounted(() => {
+  keyboardStore.resetKeyHistory();
+});
 </script>
 
 <template>
