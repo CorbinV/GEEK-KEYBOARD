@@ -16,23 +16,30 @@ export const useDeviceStore = defineStore('device', () => {
     return isConnected.value ? 'connected' : 'disconnected';
   });
   let isOtadevice = false;
+  let cacheConnectConfig = [] as unknown as [HIDDevice[], any, boolean | undefined];
   const iptDevType = ref<DeviceIptEnum>(DeviceIptEnum.PC);
   // Actions
   async function connect(devices: HIDDevice[], config: any, otaDevice?: boolean) {
     try {
       connectionError.value = null;
+      cacheConnectConfig = [devices, config, otaDevice];
       if (isTrueDevice) {
         await connectionManager.connectDevice(devices, config);
       }
       if (isOtaMode.value && otaDevice !== undefined) {
         isOtadevice = otaDevice;
-        return;
       }
       isConnected.value = true;
     } catch (error) {
       connectionError.value = error as Error;
       isConnected.value = false;
     }
+  }
+  async function reconnect() {
+    if (cacheConnectConfig.length > 0) {
+      return connect(...cacheConnectConfig);
+    }
+    window?.$log?.error('No cached connection config found for reconnect');
   }
   function scanPairedDevices(filters: any) {
     return connectionManager.scanPairedDevices(filters);
@@ -85,6 +92,7 @@ export const useDeviceStore = defineStore('device', () => {
     scanDevices,
     isOtaMode: readonly(isOtaMode),
     updateOtaMode,
-    iptDevType
+    iptDevType,
+    reconnect
   };
 });
