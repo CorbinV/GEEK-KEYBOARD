@@ -3,7 +3,6 @@ import { ref, toRef, watch } from 'vue';
 import { DeviceInputTypeEnum } from '@/enum/keyType';
 import { useOTA, useVersionInfo } from '@/utils/ota/wch-x';
 
-import { router } from '@/router';
 import { $t } from '@/locales';
 import OtaVersion from '../custom/ota-version.vue';
 import OtaProgress from '../custom/ota-progress.vue';
@@ -106,7 +105,6 @@ const showProgress = ref(false);
 async function handleSecondConfirm(list: HIDDevice[]) {
   if (!list.length) {
     window.$message!.info('请按提示选取设备');
-    asyncFnc.value.updateOtaMode(false);
 
     return;
   }
@@ -124,7 +122,7 @@ async function handleSecondConfirm(list: HIDDevice[]) {
     showProgress.value = true;
     await onlineOta();
     window?.$message?.success('升级成功，即将转跳连接页', { duration: 10000 });
-    asyncFnc.value.disconnect();
+    window.location.reload();
   } catch (error) {
     window?.$log?.error(error);
     window?.$message?.error('升级失败，请检查设备连接状态', { duration: 10000 });
@@ -138,11 +136,7 @@ async function handleReupgrade() {
 async function handleShowVersion(ops: { res: boolean; firstConfirm: boolean }) {
   const { res, firstConfirm } = ops;
   if (firstConfirm && !res) {
-    await asyncFnc.value.setOutBoot();
-    asyncFnc.value.disconnect();
-    router.push({
-      name: 'root'
-    });
+    window.location.reload();
   } else {
     showVersion.value = false;
   }
