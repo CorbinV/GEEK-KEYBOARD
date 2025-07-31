@@ -157,7 +157,8 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     light: '灯效',
     settings: '设置',
     connect: '设备连接',
-    tst: '测试'
+    tst: '测试',
+    boot: 'Boot'
     // exception: '异常页',
     // exception_403: '403',
     // exception_404: '404',

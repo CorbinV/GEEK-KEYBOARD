@@ -161,7 +161,8 @@ const local: App.I18n.Schema & App.BusinessLanguage.Schema = {
     light: 'Light',
     settings: 'Setting',
     connect: 'Device Connect',
-    tst: 'Test'
+    tst: 'Test',
+    boot: 'Boot'
   },
   page: {
     login: {
