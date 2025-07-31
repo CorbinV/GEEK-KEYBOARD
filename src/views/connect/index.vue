@@ -18,7 +18,7 @@ watchEffect(() => {
   const redirctPath = route.query.redirect as string;
   if (isInBoot()) {
     router.push('boot');
-  } else if (redirctPath) {
+  } else if (redirctPath && !/boot/.test(redirctPath)) {
     router.push(redirctPath.substring(1));
   } else {
     router.push(import.meta.env.VITE_ROUTE_HOME || 'base-key');
