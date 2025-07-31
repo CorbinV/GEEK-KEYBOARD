@@ -116,6 +116,26 @@ export function useVersionInfo(deviceHd: any) {
   const resetUpgradeIds = () => {
     upgradeIds.length = 0;
   };
+  const getLastVersionUrl = (data?: Result) => {
+    if (remoteVersionInfo.value.urls.length > 0) {
+      return remoteVersionInfo.value.urls;
+    }
+    if (!data) {
+      return [];
+    }
+    const { otaList: list } = data;
+    const numberKey = Object.keys(list[0]).filter(k => /^\d+$/.test(k));
+    return numberKey
+      .map(key => {
+        const uri = (list[0] as any)[key];
+        if (uri) {
+          return `${baseUrl}/${otaEnv}/${model}/${uri}` as unknown as URL;
+        }
+        return null;
+      })
+      .filter((i): i is URL => Boolean(i))
+      .sort();
+  };
   return {
     remoteVersionInfo,
     isLastVersion,
@@ -123,7 +143,8 @@ export function useVersionInfo(deviceHd: any) {
     versionCheck,
     resetUpgradeIds,
     upgradeIds: readonly(upgradeIds),
-    version: remoteVersionInfo.value.version
+    version: remoteVersionInfo.value.version,
+    getLastVersionUrl
   };
 }
 
@@ -185,6 +206,7 @@ export async function useOTA(url: URL) {
   };
   return {
     onlineOta,
-    otaCtrl
+    otaCtrl,
+    resetOtaCtrl
   };
 }
