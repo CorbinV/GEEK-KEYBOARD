@@ -32,7 +32,7 @@ const showCfg = ref(true);
 onMounted(() => {
   const route = useRoute();
   watchEffect(() => {
-    if (route.name === 'connect') {
+    if (['connect', 'boot'].includes(route.name as string)) {
       showCfg.value = false;
     } else {
       showCfg.value = true;

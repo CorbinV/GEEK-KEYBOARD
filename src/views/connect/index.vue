@@ -3,8 +3,8 @@ import { onMounted, shallowRef, toRef, toRefs, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { useDeviceStore } from '@/store/modules/device';
 import { router } from '@/router';
-import { isInBoot, useKeyboardStore } from '@/store/modules/keyboard';
-import type { DeviceIptEnum } from '@/api/modules/setting';
+import { isInBoot, setInBoot, useKeyboardStore } from '@/store/modules/keyboard';
+import { DeviceIptEnum } from '@/api/modules/setting';
 const deviceStore = useDeviceStore();
 const keyboardStore = useKeyboardStore();
 const { kbInfo } = toRefs(keyboardStore);
@@ -16,8 +16,9 @@ watchEffect(() => {
     return;
   }
   const redirctPath = route.query.redirect as string;
-  // ||   localStorage.getItem('redirectFrom') ;
-  if (redirctPath) {
+  if (isInBoot()) {
+    router.push('boot');
+  } else if (redirctPath) {
     router.push(redirctPath.substring(1));
   } else {
     router.push(import.meta.env.VITE_ROUTE_HOME || 'base-key');
@@ -43,19 +44,14 @@ const baseDeviceConfig = [
     usagePage: 0xff80,
     vendorId: 0x057e,
     productId: 0x2009
-  }
-];
-const boorDeviceConfig = [
+  },
+  // ota
   {
     vendorId: 0x4353,
     productId: 0x8008
   }
 ];
-const getFilter = (useBoot?: boolean) => {
-  const inboot = isInBoot();
-  if (useBoot || inboot) {
-    return boorDeviceConfig;
-  }
+const getFilter = () => {
   return baseDeviceConfig;
 };
 async function handleConnectBtnClicked() {
@@ -82,8 +78,10 @@ async function handleConnectBtnClicked() {
     if (type > -1) {
       iptDevType.value = type;
     }
+    if (iptDevType.value === DeviceIptEnum.OTA) {
+      setInBoot(true);
+    }
     await deviceStore.connect(devices, baseDeviceConfig[iptDevType.value]);
-
     console.log('Connected');
   } catch (error) {
     console.error('Error:', error);

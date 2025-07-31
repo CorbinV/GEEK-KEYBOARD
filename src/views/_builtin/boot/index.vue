@@ -57,7 +57,7 @@ async function handleUpgrade() {
 async function handleReupgrade() {
   fncReflect.resetOtaCtrl();
   if (!isConnected.value) {
-    deviceStore.reconnect();
+    await deviceStore.reconnect();
   }
   await fncReflect.onlineOta(otaRelectInfo.value.value);
   if (otaRelectInfo.value.value.status === OtaStatusEnum.UPGRADE_SUCCESS) {
