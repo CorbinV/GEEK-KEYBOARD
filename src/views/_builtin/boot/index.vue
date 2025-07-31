@@ -59,13 +59,17 @@ async function handleReupgrade() {
   if (!isConnected.value) {
     await deviceStore.reconnect();
   }
-  await fncReflect.onlineOta(otaRelectInfo.value.value);
-  if (otaRelectInfo.value.value.status === OtaStatusEnum.UPGRADE_SUCCESS) {
+  try {
+    // 3. emit onlineota
+    await fncReflect.onlineOta(otaRelectInfo.value.value);
     window.$message?.success('在线升级成功，即将转跳连接页', { duration: 2000 });
     setInBoot(false);
-    window.location.reload();
-  } else {
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } catch (error) {
     window.$message?.error('在线升级失败，请刷新重试或联系技术支持');
+    window.$log?.error('在线升级失败', error);
   }
 }
 </script>
