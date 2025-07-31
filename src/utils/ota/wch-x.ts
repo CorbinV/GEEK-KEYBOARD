@@ -45,7 +45,7 @@ export function useVersionInfo(deviceHd: any) {
     localVerList.forEach((lv, idx) => {
       if (lv) {
         const condition =
-          import.meta.env.NODE_ENV === 'production' ? remoteVerList[idx] > lv : remoteVerList[idx] >= lv;
+          import.meta.env.VITE_NODE_ENV === 'production' ? remoteVerList[idx] > lv : remoteVerList[idx] >= lv;
         if (islocal || condition) {
           upgradeIds.push(`${idx}`);
         }
