@@ -15,6 +15,7 @@ import { $t } from '@/locales';
 import { getConfigCnt, getKeysCfgByLayer, resetLayerKeys, setKeyInfo } from '@/api/key';
 import type { KeyRes } from '@/api/modules/keyModify';
 import { number2Version } from '@/utils/tools';
+import type { SOCDMode } from '@/api/modules/socd';
 import { useDeviceStore } from '../device';
 let inBoot = false;
 export function isInBoot() {
@@ -268,6 +269,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         isLoad: boolean;
         mounted: boolean;
         connect: DeviceLinkEnum;
+        socd: SOCDMode;
       }
     >({
       isLoad: false,

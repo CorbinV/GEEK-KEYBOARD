@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, toRefs } from 'vue';
 import { getSocdMode, setSocdMode } from '@/api/socd';
 import { $t } from '@/locales';
+import { useKeyboardStore } from '@/store/modules/keyboard';
 enum ModeEnum {
   upPriorityMode = 'upPriorityMode',
   centerReset = 'centerReset',
   lastInputPriority = 'lastInputPriority'
 }
 const modeList = [ModeEnum.upPriorityMode, ModeEnum.centerReset, ModeEnum.lastInputPriority];
-
+const keyboardStore = useKeyboardStore();
+const { kbInfo } = toRefs(keyboardStore);
 const base = {
   [ModeEnum.upPriorityMode]: false,
   [ModeEnum.centerReset]: false,
@@ -19,8 +21,11 @@ let activeMode: ModeEnum | null = null;
 const modeValues = ref(base);
 
 onMounted(async () => {
-  const { mode } = await getSocdMode();
-  activeMode = modeList[mode];
+  if (kbInfo.value.socd === undefined) {
+    const { mode } = await getSocdMode();
+    kbInfo.value.socd = mode;
+  }
+  activeMode = modeList[kbInfo.value.socd];
   modeValues.value[activeMode] = true;
 });
 async function handleSwitchChange(val: boolean, tag: ModeEnum, idx: number) {
