@@ -29,10 +29,12 @@ async function handleCancel() {
   if (Array.isArray(historyItem)) {
     for await (const item of historyItem) {
       const { oldVal } = item;
+      await keyboardStore.updateKey(oldVal.k, { v: oldVal.v });
       await ControlRef.value?.updateBtnByParent(oldVal.k, oldVal.v);
     }
   } else if (historyItem?.newVal) {
     const { oldVal: oldBase } = historyItem;
+    await keyboardStore.updateKey(oldBase.k, { v: oldBase.v });
     await ControlRef.value?.updateBtnByParent(oldBase.k, oldBase.v);
   }
 }
