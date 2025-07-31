@@ -167,6 +167,7 @@ const routeMap: RouteMap = {
   "404": "/404",
   "500": "/500",
   "base-key": "/base-key",
+  "boot": "/boot",
   "connect": "/connect",
   "iframe-page": "/iframe-page/:url",
   "light": "/light",
