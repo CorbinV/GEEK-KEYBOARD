@@ -46,6 +46,7 @@ async function handleSwitchChange(val: boolean, tag: ModeEnum, idx: number) {
     await setSocdMode({
       mode: idx
     });
+    kbInfo.value.socd = idx;
     modeValues.value[tag] = val;
   } catch (error) {
     window?.$log?.error(error);
