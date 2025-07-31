@@ -18,7 +18,8 @@ export type DeviceInfo = {
 export enum DeviceIptEnum {
   PC,
   PS,
-  SWITCH
+  SWITCH,
+  OTA
 }
 export type DeviceIpt = {
   iptTp: DeviceIptEnum;
