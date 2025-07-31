@@ -16,11 +16,13 @@ import { getConfigCnt, getKeysCfgByLayer, resetLayerKeys, setKeyInfo } from '@/a
 import type { KeyRes } from '@/api/modules/keyModify';
 import { number2Version } from '@/utils/tools';
 import { useDeviceStore } from '../device';
-
+let inBoot = false;
 export function isInBoot() {
-  return false;
+  return inBoot;
 }
-
+export function setInBoot(v: boolean) {
+  inBoot = v;
+}
 export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const scope = effectScope();
   const kbLogger = logger.getLogger('kbStore');
