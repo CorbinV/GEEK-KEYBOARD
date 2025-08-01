@@ -269,7 +269,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         isLoad: boolean;
         mounted: boolean;
         connect: DeviceLinkEnum;
-        socd: SOCDMode;
+        socd: SOCDMode | undefined;
       }
     >({
       isLoad: false,
@@ -279,6 +279,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     const handleDevDisConn = async () => {
       kbInfo.mounted = false;
       kbInfo.isLoad = false;
+      kbInfo.socd = undefined;
       kbLogger.warn('Device is disconnected');
     };
     const handleDevConn = async () => {
@@ -333,6 +334,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     watchEffect(() => {
       if (!isConnected.value) {
         kbInfo.mounted = false;
+        kbInfo.socd = undefined as any;
       }
     });
     watch(
