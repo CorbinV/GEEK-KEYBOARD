@@ -60,6 +60,14 @@ function handleModeChange(v: number) {
           keyLayerInfo.value.configIndex = cache;
           window?.$message?.info('模式切换异常，请更新固件');
         }
+      },
+      onClose() {
+        keyLayerInfo.value.configIndex = cache;
+        return false;
+      },
+      onNegativeClick() {
+        keyLayerInfo.value.configIndex = cache;
+        return false;
       }
     });
   }
