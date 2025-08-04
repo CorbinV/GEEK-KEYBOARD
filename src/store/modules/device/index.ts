@@ -40,6 +40,7 @@ export const useDeviceStore = defineStore('device', () => {
       return connect(...cacheConnectConfig);
     }
     window?.$log?.error('No cached connection config found for reconnect');
+    return false;
   }
   function scanPairedDevices(filters: any) {
     return connectionManager.scanPairedDevices(filters);
