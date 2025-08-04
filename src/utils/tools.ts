@@ -99,12 +99,48 @@ export function rgbToHsl(r = 0, g = 0, b = 0) {
 export function mod(n: number, m: number) {
   return ((n % m) + m) % m;
 }
-export function number2Version(n: number, p: number = 3) {
-  const s: string[] = [];
-
-  for (let index = p - 1; index >= 0; index--) {
-    const v = Math.floor((n / 10 ** index) % 10);
-    s.push(`${v}`);
+export function number2Version(n: number, p: number = 3): string[] {
+  if (n === 0) {
+    return Array(p).fill('0');
   }
-  return s;
+
+  const d = Math.floor(Math.log10(n)) + 1;
+
+  const parts: string[] = [];
+
+  if (d <= p) {
+    const s = n.toString();
+    for (let i = 0; i < s.length; i++) {
+      parts.push(s[i]);
+    }
+    for (let i = s.length; i < p; i++) {
+      parts.push('0');
+    }
+  } else {
+    const baseSize = Math.floor(d / p);
+    const extra = d % p;
+    const sizes: number[] = [];
+
+    for (let i = 0; i < p; i++) {
+      if (i < extra) {
+        sizes.push(baseSize + 1);
+      } else {
+        sizes.push(baseSize);
+      }
+    }
+
+    let remaining = n;
+    let currentDigitLength = d;
+
+    for (let i = 0; i < p; i++) {
+      const size = sizes[i];
+      const divisor = 10 ** (currentDigitLength - size);
+      const partValue = divisor === 0 ? remaining : Math.floor(remaining / divisor);
+      parts.push(partValue.toString());
+      remaining %= divisor;
+      currentDigitLength -= size;
+    }
+  }
+
+  return parts;
 }
