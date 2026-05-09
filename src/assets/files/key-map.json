@@ -525,27 +525,27 @@
       "240": {
         "type": "icon",
         "icon": "mouse-left",
-        "label": ""
+        "label": "Mouse Left"
       },
       "241": {
         "type": "icon",
         "icon": "mouse-right",
-        "label": ""
+        "label": "Mouse Right"
       },
       "242": {
         "type": "icon",
         "icon": "mouse-mid",
-        "label": ""
+        "label": "Mouse Mid"
       },
       "243": {
         "type": "icon",
         "icon": "mouse-x1",
-        "label": ""
+        "label": "Mouse X1"
       },
       "244": {
         "type": "icon",
         "icon": "mouse-x2",
-        "label": ""
+        "label": "Mouse X2"
       },
       "-1": {
         "type": "str",
@@ -560,117 +560,117 @@
       "0": {
         "type": "icon",
         "icon": "light-down",
-        "label": ""
+        "label": "Light Down"
       },
       "1": {
         "type": "icon",
         "icon": "light-up",
-        "label": ""
+        "label": "Light Up"
       },
       "2": {
         "type": "icon",
         "icon": "save",
-        "label": ""
+        "label": "Save"
       },
       "3": {
         "type": "icon",
         "icon": "select-all",
-        "label": ""
+        "label": "Select All"
       },
       "4": {
         "type": "icon",
         "icon": "close-window",
-        "label": ""
+        "label": "Close Window"
       },
       "5": {
         "type": "icon",
         "icon": "open-window",
-        "label": ""
+        "label": "Open Window"
       },
       "6": {
         "type": "icon",
         "icon": "delete",
-        "label": ""
+        "label": "Delete"
       },
       "7": {
         "type": "icon",
         "icon": "feedback",
-        "label": ""
+        "label": "Feedback"
       },
       "8": {
         "type": "icon",
         "icon": "copy",
-        "label": ""
+        "label": "Copy"
       },
       "9": {
         "type": "icon",
         "icon": "paste",
-        "label": ""
+        "label": "Paste"
       },
       "10": {
         "type": "icon",
         "icon": "record",
-        "label": ""
+        "label": "Record"
       },
       "11": {
         "type": "icon",
         "icon": "calculator",
-        "label": ""
+        "label": "Calculator"
       },
       "12": {
         "type": "icon",
         "icon": "restore",
-        "label": ""
+        "label": "Restore"
       },
       "13": {
         "type": "icon",
         "icon": "my-computer",
-        "label": ""
+        "label": "My Computer"
       },
       "14": {
         "type": "icon",
         "icon": "screenshot",
-        "label": ""
+        "label": "Screenshot"
       },
       "15": {
         "type": "icon",
         "icon": "xbox",
-        "label": ""
+        "label": "Xbox"
       },
       "16": {
         "type": "icon",
         "icon": "task-manager",
-        "label": ""
+        "label": "Task Manager"
       },
       "17": {
         "type": "icon",
         "icon": "open-folder",
-        "label": ""
+        "label": "Open Folder"
       },
       "18": {
         "type": "icon",
         "icon": "to-desktop",
-        "label": ""
+        "label": "To Desktop"
       },
       "19": {
         "type": "icon",
         "icon": "revoke",
-        "label": ""
+        "label": "Revoke"
       },
       "20": {
         "type": "icon",
         "icon": "new-folder",
-        "label": ""
+        "label": "New Folder"
       },
       "21": {
         "type": "icon",
         "icon": "minus",
-        "label": ""
+        "label": "Minus"
       },
       "22": {
         "type": "icon",
         "icon": "search",
-        "label": ""
+        "label": "Search"
       }
     }
   },
@@ -680,27 +680,27 @@
       "0": {
         "type": "icon",
         "icon": "last",
-        "label": ""
+        "label": "Last"
       },
       "1": {
         "type": "icon",
         "icon": "next",
-        "label": ""
+        "label": "Next"
       },
       "2": {
         "type": "icon",
         "icon": "pause-play",
-        "label": ""
+        "label": "Pause Play"
       },
       "3": {
         "type": "icon",
         "icon": "abort-play",
-        "label": ""
+        "label": "Abort Play"
       },
       "4": {
         "type": "icon",
         "icon": "volume-up",
-        "label": ""
+        "label": "Volume Up"
       },
       "5": {
         "type": "icon",
@@ -710,57 +710,57 @@
       "6": {
         "type": "icon",
         "icon": "volume-mute",
-        "label": ""
+        "label": "Volume Mute"
       },
       "7": {
         "type": "icon",
         "icon": "media",
-        "label": ""
+        "label": "Media"
       },
       "8": {
         "type": "icon",
         "icon": "to-desktop",
-        "label": ""
+        "label": "To Desktop"
       },
       "9": {
         "type": "icon",
         "icon": "search",
-        "label": ""
+        "label": "Search"
       },
       "10": {
         "type": "icon",
         "icon": "refresh",
-        "label": ""
+        "label": "Refresh"
       },
       "11": {
         "type": "icon",
         "icon": "favorites",
-        "label": ""
+        "label": "Favorites"
       },
       "12": {
         "type": "icon",
         "icon": "page-forward",
-        "label": ""
+        "label": "Page Forward"
       },
       "13": {
         "type": "icon",
         "icon": "page-back",
-        "label": ""
+        "label": "Page Back"
       },
       "14": {
         "type": "icon",
         "icon": "page-pause",
-        "label": ""
+        "label": "Page Pause"
       },
       "15": {
         "type": "icon",
         "icon": "email",
-        "label": ""
+        "label": "Email"
       },
       "16": {
         "type": "icon",
         "icon": "browser",
-        "label": ""
+        "label": "Browser"
       }
     }
   },
@@ -839,22 +839,22 @@
       "13": {
         "type": "icon",
         "icon": "ble-adapter",
-        "label": ""
+        "label": "Ble Adapter"
       },
       "14": {
         "type": "icon",
         "icon": "usb",
-        "label": ""
+        "label": "Usb"
       },
       "15": {
         "type": "icon",
         "icon": "exchange",
-        "label": ""
+        "label": "Exchange"
       },
       "16": {
         "type": "icon",
         "icon": "power",
-        "label": ""
+        "label": "Power"
       },
       "17": {
         "type": "str",
@@ -884,7 +884,7 @@
       "22": {
         "type": "icon",
         "icon": "reset",
-        "label": ""
+        "label": "Reset"
       },
       "23": {
         "type": "str",
