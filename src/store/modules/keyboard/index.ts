@@ -798,6 +798,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       }
     );
 
+  }
   // watch store
   // scope.run(() => {
   // });
