@@ -1,4 +1,4 @@
-import { arrayToJson, depacketize, objToArray, packetize } from '@sa/packetize';
+import { depacketize, packetize } from '@sa/packetize';
 import { encode, decode } from '@msgpack/msgpack'
 // 消息编解码器
 export class HIDMessageCodec {

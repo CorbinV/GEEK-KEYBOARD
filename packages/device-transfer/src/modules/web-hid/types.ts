@@ -5,13 +5,13 @@ export interface HIDMessage {
   payload: any;
 }
 
-export interface HIDResponse {
-  data?: any;
-  code: string;
-  name: string;
+export interface HIDResponse<T extends any> {
+  d?: T;
+  e: string;
+  c: string;
 }
 
-export type MessageCallback = (response: HIDResponse) => void;
+export type MessageCallback = <T>(response: HIDResponse<T>) => void;
 
 export interface HIDProtocolOptions {
   timeout?: number;
@@ -22,8 +22,10 @@ export interface FilterType {
   vendorId?: number;
   productId?: number;
   usagePage?: number;
+  reportId?: number;
 }
 export type Request = {
   name: string;
+  timeoutId: NodeJS.Timeout;
   callback: MessageCallback;
 };

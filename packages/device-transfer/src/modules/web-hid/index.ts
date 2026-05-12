@@ -5,10 +5,10 @@ import type { FilterType, HIDProtocolOptions, HIDResponse } from './types';
 import { HIDMessageCodec } from './utils';
 const webHidLogger = logger.getLogger('web-hid');
 type AlisasKeyType = {
-  name: string,
-  code: string
-  data: string
-}
+  name: string;
+  code: string;
+  data: string;
+};
 export class HIDProtocolController extends EventTarget {
   private device: HIDDevice | null = null;
   private messageQueue: HIDMessageQueue;
@@ -19,7 +19,8 @@ export class HIDProtocolController extends EventTarget {
   private connected: boolean = false;
   private options: HIDProtocolOptions;
   private filterConditions: FilterType | null = null;
-  private msgAlias: AlisasKeyType = { name: 'name', code: 'code', data: 'data' }
+  private msgAlias: AlisasKeyType = { name: 'name', code: 'code', data: 'data' };
+  private reportId: number = 0;
   constructor(options: HIDProtocolOptions = {}) {
     super();
     this.options = {
@@ -37,33 +38,31 @@ export class HIDProtocolController extends EventTarget {
     return this.device;
   }
   setMsgAlisas(msgAlias: AlisasKeyType) {
-    this.msgAlias = msgAlias
+    this.msgAlias = msgAlias;
   }
-  async connect(filters: FilterType) {
-    const { usagePage, ...rest } = filters;
+  async bindDevice(_deviceId: string, connDevice: HIDDevice) {
+    this.device = connDevice
+    this.connected = true;
+    this.device.addEventListener('inputreport', this.handleInput.bind(this));
+  }
+  async connect(injectDevices: HIDDevice[], filters: FilterType) {
+    const { usagePage, reportId, ...rest } = filters;
     try {
       this.filterConditions = filters;
       let device: HIDDevice | undefined;
-      const pairedDevice = await this.pairedDeviceByFilter(filters);
-      if (pairedDevice) {
-        device = pairedDevice;
-      } else {
-        const devices = await navigator.hid.requestDevice({
-          filters: [rest]
-        });
-        if (devices.length === 0) {
-          throw new Error('No device selected');
-        }
-        device = usagePage
-          ? devices.find(dev => dev.collections.some(coll => coll.usagePage === usagePage))
-          : undefined;
-        device ||= devices[0];
+      const devices = injectDevices;
+      if (devices.length === 0) {
+        throw new Error('No device selected');
       }
+      device = usagePage ? devices.find(dev => dev.collections.some(coll => coll.usagePage === usagePage)) : undefined;
+      device ||= devices[0];
       this.device = device;
-      await this.device.open();
+      if (!this.device.opened) {
+        await this.device.open();
+      }
       this.connected = true;
-
       this.device.addEventListener('inputreport', this.handleInput.bind(this));
+
       navigator.hid.addEventListener('disconnect', e => {
         const disconnectDevice = e.device;
         if (!disconnectDevice || !this.device) {
@@ -92,16 +91,18 @@ export class HIDProtocolController extends EventTarget {
   }
   async disconnect(device?: HIDDevice) {
     if (!this.connected) {
-      return
+      return;
     }
     if (device) {
+      device?.removeEventListener('inputreport', this.handleInput)
       await device?.close();
     } else {
+      this.device?.removeEventListener('inputreport', this.handleInput)
       await this.device?.close();
     }
     this.handleDisconnect();
   }
-  async pairedDeviceByFilter(filters: FilterType) {
+  static async pairedDeviceByFilter(filters: FilterType) {
     const deviceList = await navigator.hid.getDevices();
     const device = deviceList.find(dev => {
       const baseCondition = [dev.productId === filters.productId, dev.vendorId === filters.vendorId];
@@ -112,22 +113,19 @@ export class HIDProtocolController extends EventTarget {
     });
     return device;
   }
-  async send(data: any): Promise<HIDResponse> {
+  async send<T>(data: any, ops?: any): Promise<HIDResponse<T>> {
     if (!this.connected || !this.device) {
       throw new Error('Device not connected');
     }
 
-    try {
-      const messageId = `${Date.now()}-${this.messageCounter++}`;
-      return await this.sendWithRetry(messageId, data, {
-        attemptsLeft: this.options.retryAttempts || 1
-      });
-    } catch (error) {
-      throw error
-    }
+    const messageId = `${Date.now()}-${this.messageCounter++}`;
+    return await this.sendWithRetry(messageId, data, {
+      ...(ops || {}),
+      attemptsLeft: this.options.retryAttempts || 1
+    });
   }
 
-  private async sendWithRetry(
+  private async sendWithRetry<T>(
     messageId: string,
     data: any,
     ops: {
@@ -135,7 +133,7 @@ export class HIDProtocolController extends EventTarget {
       withoutResponse?: boolean;
       isBinary?: boolean;
     }
-  ): Promise<HIDResponse> {
+  ): Promise<HIDResponse<T>> {
     const { attemptsLeft = 1, withoutResponse = false, isBinary = false } = ops;
     try {
       return new Promise((resolve, reject) => {
@@ -152,23 +150,25 @@ export class HIDProtocolController extends EventTarget {
         if (!withoutResponse) {
           this.messageQueue.add(messageId, {
             name: data?.[this.msgAlias.name] || 'bin',
-            callback: (response: HIDResponse) => {
+            timeoutId,
+            callback: (response: HIDResponse<any>) => {
               clearTimeout(timeoutId);
               resolve(response);
             }
           });
         }
 
-        const outputReports = this.codec['encodeMessage'](messageId, data);
+        const outputReports = this.codec.encodeMessage(messageId, data);
         (async () => {
           for await (const outputReport of outputReports) {
-            await new Promise((resolve, reject) => {
+            await new Promise((res, rej) => {
               // @ts-ignore
-              this.device!.sendReport(0, outputReport)
+              this.device!.sendReport(this.reportId, outputReport)
                 .then(() => {
-                  resolve(true);
-                }).catch(err => {
-                  reject(err);
+                  res(true);
+                })
+                .catch(err => {
+                  rej(err);
                 });
             });
           }
@@ -187,21 +187,36 @@ export class HIDProtocolController extends EventTarget {
   }
 
   async on(name: string, callback: (data?: any) => void) {
-    this.listenerMap.dispathOn(name, callback);
+    this.listenerMap.dispathOn(name, data => {
+      webHidLogger.debug(`Listened ${name} 👂`, data);
+      return callback(data);
+    });
   }
   async off(name: string, callback: (data?: any) => void) {
     this.listenerMap.dispathOff(name, callback);
   }
   private async handleInput(event: HIDInputReportEvent) {
     try {
-      const binaryTypeList = [0x86, 0x88]
+      const binaryTypeList = [0x86, 0x88];
+      const wch585TypeList = [0x81, 0x82, 0x83, 0x84]; // 0x21, 0x80
       let message: Uint8Array | any; // object: code, name, data?
-      const [eventHead, _, eventType] = new Uint8Array(event.data.buffer)
-      // binary case
-      if (binaryTypeList.includes(eventType) && eventHead == 0xa5) {
-        message = event.data
-        // use type to match cb
-        const messageId = eventType + '';
+      const uintArr = new Uint8Array(event.data.buffer);
+      const [eventHead, _, eventType] = uintArr;
+      // binary case 1
+      if (binaryTypeList.includes(eventType) && eventHead === 0xa5) {
+        message = event.data;
+        const messageId = `${eventType}`;
+        const requestInfo = this.binMessageQueue.get(messageId);
+        if (requestInfo?.callback) {
+          requestInfo.callback(message);
+          this.binMessageQueue.remove(messageId);
+        }
+      }
+      // binary case 2
+      else if (wch585TypeList.includes(eventHead)) {
+        message = uintArr;
+        const messageId = `${eventHead}`;
+
         const requestInfo = this.binMessageQueue.get(messageId);
         if (requestInfo?.callback) {
           requestInfo.callback(message);
@@ -214,8 +229,8 @@ export class HIDProtocolController extends EventTarget {
         if (!message) {
           return;
         }
-        const name = message[this.msgAlias.name]
-          if (!name) {
+        const name = message[this.msgAlias.name];
+        if (!name) {
           return;
         }
         const listeners = this.listenerMap.get(name);
@@ -225,7 +240,7 @@ export class HIDProtocolController extends EventTarget {
           return;
         }
         // @ts-ignore
-        const matchingRequests = Array.from((this.messageQueue).entries()).find(([_, request]) => {
+        const matchingRequests = Array.from(this.messageQueue.entries()).find(([_m, request]) => {
           return request.name === name;
         });
         const [messageId, requestInfo] = matchingRequests || [];
@@ -254,46 +269,53 @@ export class HIDProtocolController extends EventTarget {
     this.dispatchEvent(new CustomEvent('disconnected'));
   }
   // handle binary case
-  async sendBinary(data: Uint8Array, { withoutResponse }: { withoutResponse?: boolean }): Promise<void> {
+  async sendBinary(
+    data: Uint8Array,
+    { withoutResponse, msgId }: { withoutResponse?: boolean; msgId?: string }
+  ): Promise<Uint8Array | null> {
     if (!this.connected || !this.device) {
       throw new Error('Device not connected');
     }
-    const messageId = data[2] + ''; // use type as cbId
+    const messageId = msgId !== undefined ? msgId : `${data[0]}-${data[2]}`; // use type as cbId
     // const messageId = `${Date.now()}-${this.messageCounter}`;
     this.messageCounter += 1;
-    await this.sendWithRetryBin(messageId, data, {
+    return await this.sendWithRetryBin(messageId, data, {
       attemptsLeft: this.options.retryAttempts || 1,
       withoutResponse
     });
   }
-  private async sendWithRetryBin(messageId: string,
+  private async sendWithRetryBin(
+    messageId: string,
     data: any,
     ops: {
       attemptsLeft?: number;
       withoutResponse?: boolean;
     }
-  ): Promise<HIDResponse | void> {
+  ): Promise<Uint8Array | null> {
     const { attemptsLeft = 1, withoutResponse = false } = ops;
     try {
       return new Promise((resolve, reject) => {
-
-        const outputReports = this.codec['encodeBinaryMessage'](messageId, data);
+        const outputReports = this.codec.encodeBinaryMessage(messageId, data);
         webHidLogger.debug('Requset 🟢', 'binary data', data);
-        let timeoutId = setTimeout(() => {
-          console.log('setimeout exec')
-          this.binMessageQueue.remove(messageId);
-          if (attemptsLeft > 1) {
-            webHidLogger.debug('Requset retry 🟢', messageId, data);
-            resolve(this.sendWithRetryBin(messageId, data, { attemptsLeft: attemptsLeft - 1, withoutResponse }));
-          } else {
-            reject(new Error('Request timeout'));
-          }
-        }, this.options.timeout);
+        let timeoutId: NodeJS.Timeout | null = null;
         if (!withoutResponse) {
+          timeoutId = setTimeout(() => {
+            this.binMessageQueue.remove(messageId);
+            if (attemptsLeft > 1) {
+              webHidLogger.debug('Requset retry 🟢', messageId, data);
+              resolve(this.sendWithRetryBin(messageId, data, { attemptsLeft: attemptsLeft - 1, withoutResponse }));
+            } else {
+              reject(new Error('Request timeout'));
+            }
+          }, this.options.timeout);
           this.binMessageQueue.add(messageId, {
             name: data?.[this.msgAlias.name] || 'bin',
-            callback: (response: HIDResponse) => {
-              clearTimeout(timeoutId);
+            timeoutId,
+            callback: (response: any) => {
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+              }
               resolve(response);
             }
           });
@@ -302,20 +324,26 @@ export class HIDProtocolController extends EventTarget {
           await new Promise((res, rej) => {
             for (const report of outputReports) {
               // @ts-ignore
-              this.device!.sendReport(0, report)
+              this.device!.sendReport(this.reportId, report)
                 .then(() => {
                   res(true);
-                }).catch(err => {
+                })
+                .catch(err => {
                   rej(err);
                 });
             }
           });
-        })().then(() => {
-          if (withoutResponse) {
-            clearTimeout(timeoutId);
-            resolve()
-          }
-        }).catch(reject);
+        })()
+          .then(() => {
+            if (withoutResponse) {
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+              }
+              resolve(null);
+            }
+          })
+          .catch(reject);
       });
     } catch (error) {
       this.binMessageQueue.remove(messageId);
