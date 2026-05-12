@@ -754,6 +754,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     watchDevConnStatus({
       connCb: () => {
         kbLogger.debug('connect ....');
+        updateDeviceInfo()
       },
       disconnCb: () => {
         resetKeyLayerCfgCtrl();
@@ -799,6 +800,9 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     );
 
   }
+  const afterDeviceReset = async () => {
+    await AfterDevConn()
+    await updateDeviceInfo()
   }
   // watch store
   // scope.run(() => {
