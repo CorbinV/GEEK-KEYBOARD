@@ -304,6 +304,7 @@ async function handleApiResetRtFnc(selectKeyList: string[]) {
     console.error(error);
     window.$message?.error($t('businessCommon.executeFail'));
   }
+}
 async function handleApiSetHighlight(keyId: string) {
   // find key idx in layoutList
   const idx = layoutList.value.findIndex(k => k === keyId);
