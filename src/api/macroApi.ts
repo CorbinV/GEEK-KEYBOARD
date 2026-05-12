@@ -46,3 +46,7 @@ export function macroStop() {
     name: 'macroStop'
   });
 }
+// eg
+// export function onXxListener(cb: (data: RequestType ) => void) {
+//   return requestClient.listen<ResponseType>('eventName', cb);
+// }
