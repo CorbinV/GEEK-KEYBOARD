@@ -4,15 +4,15 @@ export class ConnectionManager {
   private static instance: ConnectionManager;
   private deviceClient: UsbTransfor;
   private hidController: HIDProtocolController;
-  private msgAlisas = {
-    name: 'c',
-    code: 'e',
-    data: 'd'
-  };
+  // private msgAlisas = {
+  //   name: 'c',
+  //   code: 'e',
+  //   data: 'd'
+  // };
   constructor() {
     this.deviceClient = new UsbTransfor();
     this.hidController = new HIDProtocolController();
-    this.hidController.setMsgAlisas(this.msgAlisas);
+    // this.hidController.setMsgAlisas(this.msgAlisas);
   }
   static getInstance() {
     if (!this.instance) {

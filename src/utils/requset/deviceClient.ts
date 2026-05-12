@@ -12,9 +12,9 @@ export type SendCfg = {
 
 // change to V5.0
 export type RespOps<T = any> = {
-  c: string;
-  e: number;
-  d: T;
+  name: string;
+  code: number;
+  data: T;
 };
 const useMock: boolean = import.meta.env?.VITE_USE_MOCK === 'Y';
 /** @notice: just handle export mock data */
@@ -56,10 +56,10 @@ export class UsbTransfor {
           resolve(data);
         });
       }
-      const { name: c, data: d } = ops;
-      const sendOps: { c: string; d?: any } = { c };
-      if (d) {
-        sendOps.d = d;
+      const { name, data} = ops;
+      const sendOps: { name: string; data?: any } = { name };
+      if (data) {
+        sendOps.data = data;
       }
       return this.getCommunicator().send(sendOps);
     } catch (error) {
@@ -70,7 +70,7 @@ export class UsbTransfor {
   async send<T = any>(opstions: SendOps, cfg: SendCfg = { waitResponse: true }): Promise<T> {
     // optimize: transform options and config to request
     const sendOps = JSON.parse(JSON.stringify(opstions));
-    const { e: code, d: data } = await this.request<T>(sendOps, cfg);
+    const { code, data } = await this.request<T>(sendOps, cfg);
     if (code !== 0) {
       throw new Error('error');
     }
@@ -97,7 +97,7 @@ export class UsbTransfor {
     return await this.requestBinary<string>(data, cfg);
   }
   listen<T>(name: string, cb: (data: T) => void): void {
-    const wrap = (data: RespOps<T>) => cb(data.d);
+    const wrap = (data: RespOps<T>) => cb(data.data);
     if (this.listenerMap.has(cb)) {
       throw new Error('Listener already exists');
     }
