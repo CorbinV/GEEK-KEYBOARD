@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { nextTick, onMounted, ref, toRaw, watch } from 'vue';
 import { toRefs } from '@vueuse/core';
 import { useMessage, SelectOption } from 'naive-ui';
 import useConver from '@/utils/conver';
@@ -29,6 +29,9 @@ const BREAK_OPTIMIZE_SWITCH = 4;
 const SHAKE_LEAVE = 5;
 const RT_TOP_DEAD_ZONE = 6;
 const RT_BELOW_DEAD_ZONE = 7;
+
+const  localShowKeyParams = ref<boolean>(localStorage.getItem('showKeyParams') === 'true');
+// ref<boolean>(false);
 
 const exeDeadZoneValue = ref<number>(0);
 const rapidTiggerSwitch = ref<boolean>(false);
@@ -147,15 +150,16 @@ watch(
 );
 function updateViewToDefault() {
   const defaultTary = activeKeyLayer.value.xxx.def.tary;
-  getDevPerf(defaultTary);
+  getDevPerf(defaultTary); // 假设的功能调用
 }
-function updatView() {
-  const fristKey = selectedKey.value[0];
+function updatView(toDefalut = false) {
+  const fristKey = selectedKey.value[selectedKey.value.length - 1];
   commonStore.getTargetKeyInfo(fristKey).then(data => {
+    // 如果需要遍历某个数据结构中的键
     Object.entries(data).forEach(([keykey]) => {
-      curKey.value = keykey;
+      curKey.value = keykey; // 这里的赋值可能是要处理 `keykey`
     });
-    getDevPerf(data.tary);
+    getDevPerf(data.tary); // 假设的功能调用
   });
 }
 // watch(
@@ -217,7 +221,7 @@ async function setDevPerf() {
   timeoutId.value = setTimeout(() => {
     isLoading.value = false;
     message.error('写入失败', {
-      duration: 1000
+      duration: 1000 // 持续时间
     });
   }, 3000);
   const sendData = selectedKey.value.map((key) => {
@@ -232,7 +236,7 @@ async function setDevPerf() {
   isLoading.value = false;
 
   if (timeoutId.value) {
-    clearTimeout(timeoutId.value);
+    clearTimeout(timeoutId.value); // 清除之前的定时器
   }
 }
 
@@ -291,8 +295,6 @@ async function getDevRate() {
     window.$log!.error('Catch Error when get Device Rate', error);
   }
 }
-// getComboList();
-// getDevPerf({ key: 'G' });
 getDevRate();
 
 function handleMaskClick(e: MouseEvent) {
@@ -304,6 +306,16 @@ function handleMaskClick(e: MouseEvent) {
     window?.$message!.info($t('businessCommon.btnSelectRequired'))
   }
 }
+watch(
+  () => localShowKeyParams.value,
+  (val) => {
+    showKeyParams.value = val;
+    nextTick(()=>{
+      localStorage.setItem('showKeyParams', JSON.stringify(val))
+    })
+  },{
+    immediate: true
+  })
 </script>
 
 <template>
@@ -316,12 +328,13 @@ function handleMaskClick(e: MouseEvent) {
           <div class="flex flex-col flex-1 gap-y-10px">
             <GroupTitle :title="$t('repidTrigger.showArg')" class="z-60" data-tag="showArg">
               <template #end>
-                <NSwitch v-model:value="showKeyParams"></NSwitch>
+                <NSwitch v-model:value="localShowKeyParams"></NSwitch>
               </template>
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60" data-tag="pollingRate">
               <template #end>
                 <NSelect v-model:value="rateCtrl.val" :options="rateCtrl.ops"
+                  to="#popover-portal"
                   class="h-40px w-100px !cursor-not-allowed" placement="bottom-start" trigger="click"
                   @update-value="rateSelect">
                   <!-- <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton> -->
@@ -440,28 +453,39 @@ function handleMaskClick(e: MouseEvent) {
   width: 4px;
   height: 18px;
   margin-right: 10px;
-  background-color: #3c8df4; /* 按钮文字颜色 */
+  background-color: #3c8df4;
+  /* 按钮文字颜色 */
 }
+
 :root {
   --primary-color: #3c8df4;
   --background-color: #171619;
   --border-color: #232327;
   --text-color: #999999;
 }
+
 .hollow-btn {
   background-color: transparent;
-  color: #3c8df4; /* 按钮文字颜色 */
-  border: 1px solid #3c8df4; /* 边框颜色 */
-  border-radius: 8px; /* 圆角边框 */
+  color: #3c8df4;
+  /* 按钮文字颜色 */
+  border: 1px solid #3c8df4;
+  /* 边框颜色 */
+  border-radius: 8px;
+  /* 圆角边框 */
   padding: 10px 20px;
   font-size: 18px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
 .hollow-btn:hover {
-  background-color: #3c8df4; /* 悬停时的背景颜色 */
-  color: white; /* 悬停时文字颜色 */
+  background-color: #3c8df4;
+  /* 悬停时的背景颜色 */
+  color: white;
+  /* 悬停时文字颜色 */
+}
+
 .mask::before {
   content: '';
   position: absolute;
