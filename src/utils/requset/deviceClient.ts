@@ -35,6 +35,7 @@ export class UsbTransfor {
    *               if the device calls the data transfer function without instantiation.
    */
   private communicator: any;
+  private listenerMap: WeakMap<(data: any) => void, (data: any) => void> = new WeakMap();
   constructor() {
     this.communicator = undefined;
   }
@@ -55,34 +56,35 @@ export class UsbTransfor {
           resolve(data);
         });
       }
-      // feat: use device to send data
-      return this.getCommunicator().send(ops);
+      const { name: c, data: d } = ops;
+      const sendOps: { c: string; d?: any } = { c };
+      if (d) {
+        sendOps.d = d;
+      }
+      return this.getCommunicator().send(sendOps);
     } catch (error) {
       console.log('error', error);
       throw error;
     }
   }
   async send<T = any>(opstions: SendOps, cfg: SendCfg = { waitResponse: true }): Promise<T> {
-    try {
-      // optimize: transform options and config to request
-      const sendOps = JSON.parse(JSON.stringify(opstions));
-      const { code, data } = await this.request<T>(sendOps, cfg);
-      if (code !== 0) {
-        throw new Error('error');
-      }
-      return data;
-    } catch (error) {
-      throw error;
+    // optimize: transform options and config to request
+    const sendOps = JSON.parse(JSON.stringify(opstions));
+    const { e: code, d: data } = await this.request<T>(sendOps, cfg);
+    if (code !== 0) {
+      throw new Error('error');
     }
+    return data;
   }
 
-  requestBinary<T = any>(data: Uint8Array, cfg?: SendCfg): Promise<BinaryType> {
+  requestBinary<_T = any>(data: Uint8Array, cfg?: SendCfg): Promise<BinaryType> {
     try {
       if (useMock) {
         // return new Promise(resolve => {
         //   const data = mockData[ops.name];
         //   resolve(data);
         // });
+        return Promise.resolve(new Uint8Array() as unknown as BinaryType);
       }
       return this.getCommunicator().sendBinary(data, cfg);
     } catch (error) {
@@ -92,14 +94,30 @@ export class UsbTransfor {
   }
 
   async sendBinary(data: Uint8Array, cfg: SendCfg = { waitResponse: true }) {
-    try {
-      const binary = await this.requestBinary<string>(data, cfg);
-      return binary;
-    } catch (error) {
-      throw error;
-    }
+    return await this.requestBinary<string>(data, cfg);
   }
-  listen() { }
+  listen<T>(name: string, cb: (data: T) => void): void {
+    const wrap = (data: RespOps<T>) => cb(data.d);
+    if (this.listenerMap.has(cb)) {
+      throw new Error('Listener already exists');
+    }
+    if (useMock) {
+      return
+    }
+    this.listenerMap.set(cb, wrap);
+    return this.getCommunicator().on(name, wrap);
+  }
+  removeListener<T>(name: string, cb: (data: T) => void): void {
+    const wrap = this.listenerMap.get(cb);
+    if (!wrap) {
+      throw new Error('Listener not found');
+    }
+    if (useMock) {
+      return
+    }
+    this.getCommunicator().off(name, wrap);
+    this.listenerMap.delete(cb);
+  }
 }
 const requestClient = new UsbTransfor();
 export { requestClient };

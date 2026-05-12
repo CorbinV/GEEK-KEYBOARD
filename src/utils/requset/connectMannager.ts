@@ -8,11 +8,11 @@ export class ConnectionManager {
     name: 'c',
     code: 'e',
     data: 'd'
-  }
+  };
   constructor() {
     this.deviceClient = new UsbTransfor();
     this.hidController = new HIDProtocolController();
-    this.hidController.setMsgAlisas(this.msgAlisas)
+    this.hidController.setMsgAlisas(this.msgAlisas);
   }
   static getInstance() {
     if (!this.instance) {
@@ -20,8 +20,11 @@ export class ConnectionManager {
     }
     return this.instance;
   }
-  async connectDevice(deviceConfig: any) {
-    await this.hidController.connect(deviceConfig);
+  scanPairedDevices(filters: any) {
+    return HIDProtocolController.pairedDeviceByFilter(filters);
+  }
+  async connectDevice(devs: HIDDevice) {
+    await this.hidController.bindDevice("", devs);
     this.deviceClient.setCommunicator(this.hidController);
   }
   getDeviceClient() {
