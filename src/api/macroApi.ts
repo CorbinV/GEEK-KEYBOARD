@@ -47,6 +47,6 @@ export function macroStop() {
   });
 }
 // eg
-// export function onXxListener(cb: (data: RequestType ) => void) {
-//   return requestClient.listen<ResponseType>('eventName', cb);
-// }
+export function onMacroFrameListener(cb: (data: ResponseType) => void) {
+  return requestClient.listen<ResponseType>('eventName', cb);
+}

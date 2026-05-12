@@ -3,8 +3,8 @@ import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import type { TabsInst } from 'naive-ui';
 import { NInputNumber, NModal, NRadio, NSelect, NSwitch, NTab, NTabs, useMessage } from 'naive-ui';
 import type { Macro, MacroAttr } from '@/api/modules/macro';
-import { macroStart, macroStop, setMacro } from '@/api/macroApi';
-import type { UIKey } from '@/store/modules/macro';
+import { macroStart, macroStop, onMacroFrameListener, setMacro } from '@/api/macroApi';
+import type { MacroFrame, UIKey } from '@/store/modules/macro';
 import { useMacroStore } from '@/store/modules/macro';
 import { MacroType } from '../composables/macroType';
 import { useKeyListener } from '../composables/useKeyListener';
@@ -256,19 +256,30 @@ async function stopRecord() {
 
 // 添加帧
 async function recording() {
-  // 模拟录制 - 待完善
-  const frames = [
-    { index: 0, code: [4, 5], time: 0 },
-    { index: 1, code: [4], time: 3 },
-    { index: 2, code: [], time: 5 },
-    { index: 3, code: [6], time: 7 },
-    { index: 4, code: [6, 7], time: 9 }
-  ];
-  frames.forEach((item, index) => {
-    setTimeout(() => {
-      addFrame(item);
-    }, 1000 * index);
+  // 这里是直接使用监听方法获取到数据后给addFrame方法
+  await onMacroFrameListener(data => {
+    console.log(data);
+    let frame: MacroFrame;
+    if (typeof data === 'string') {
+      frame = JSON.parse(data);
+    } else {
+      frame = data;
+    }
+    addFrame(frame);
   });
+  // 模拟录制 - 待完善
+  // const frames = [
+  //   { index: 0, code: [4, 5], time: 0 },
+  //   { index: 1, code: [4], time: 3 },
+  //   { index: 2, code: [], time: 5 },
+  //   { index: 3, code: [6], time: 7 },
+  //   { index: 4, code: [6, 7], time: 9 }
+  // ];
+  // frames.forEach((item, index) => {
+  //   setTimeout(() => {
+  //     addFrame(item);
+  //   }, 1000 * index);
+  // });
 }
 
 // 取消
