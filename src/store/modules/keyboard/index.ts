@@ -321,6 +321,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
         xxx: cfgData
       };
       dataManager.set(managerId, cache);
+      Object.assign(activeKeyLayer, cache)
       return cache;
     };
     const updateAllLayerKeys = async (
