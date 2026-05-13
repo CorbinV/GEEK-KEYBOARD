@@ -116,7 +116,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
           }
         }
         repeat += 1;
-        if (end <= list.length) {
+        if (end < list.length) {
           return requestAnimationFrame(() => updateMap(list));
         }
         return '';
