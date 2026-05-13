@@ -61,11 +61,23 @@ function handleSelectKey(data: Omit<BaseKey, 'key'> & { idx: number; keyId: stri
       <LayerControl v-model:layer="keyLayerInfo.layerIndex" :layer-list="layerList"></LayerControl>
     </div>
     <Keyboard :layer="keyLayerInfo.layerIndex" class="kb-control" @update:key-id="handleSelectKey" />
+    <div class="second-view h-full flex flex-1 items-center justify-center text-2xl font-bold">
       <p>{{ $t('businessCommon.tooSmallToDislay') }}</p>
+    </div>
     <KeyControl :key-id="selectedKey.keyId" :key-label="selectedKey.label" />
   </div>
 </template>
 
 <style lang="scss" scoped>
+@media screen and (max-width: 1268px) {
+  .kb-control {
+    display: none;
+  }
+}
 
+@media screen and (min-width: 1268px) {
+  .second-view {
+    display: none;
+  }
+}
 </style>
