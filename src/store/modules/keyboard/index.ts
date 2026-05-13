@@ -325,37 +325,27 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       return cache;
     };
     const updateAllLayerKeys = async (
-      { fetchIdx = 0, configIdx = 0, maxFetch = 0 },
-      { finish = false, finishCb, errCb }: { skipIdx?: number; finish?: boolean; finishCb?: any; errCb?: any }
+      { configIdx = 0, maxFetch = 0 }: { configIdx?: number; maxFetch?: number },
+      opts?: { finishCb?: any; errCb?: any }
     ) => {
-      if (finish) {
-        if (finishCb instanceof Function) {
-          finishCb();
-        }
-        return;
-      }
-      try {
-        await updateLayerKeys({
-          config: configIdx,
-          layer: fetchIdx
-        });
-      } catch (error) {
-        if (errCb instanceof Function) {
-          return errCb(error);
-        }
-        return Promise.reject(error);
-      }
-      setTimeout(() => {
-        updateAllLayerKeys(
-          { fetchIdx: fetchIdx + 1, configIdx, maxFetch },
-          {
-            finish: fetchIdx === maxFetch,
-            finishCb,
-            errCb
+      for (let fetchIdx = 0; fetchIdx <= maxFetch; fetchIdx++) {
+        try {
+          await updateLayerKeys({
+            config: configIdx,
+            layer: fetchIdx
+          });
+        } catch (error) {
+          if (opts?.errCb instanceof Function) {
+            return opts.errCb(error);
           }
-        )
-      })
+          throw error;
+        }
+      }
+      if (opts?.finishCb instanceof Function) {
+        opts.finishCb();
+      }
     };
+
     const updateDeviceCfgAndLayers = async (): Promise<void> => {
       const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
       keyLayerInfo.configCount = configCount;
@@ -528,16 +518,9 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       try {
         kbInfo.isLoad = true;
         await updateDeviceCfgAndLayers();
-        await new Promise((resolve, reject) => {
-          updateAllLayerKeys(
-            { configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount },
-            { finishCb: resolve, errCb: reject }
-          )
-            .catch(e => {
-              kbLogger.error('catch error when update config and layer', e);
-              reject(e);
-            });
-        })
+        await updateAllLayerKeys(
+          { configIdx: keyLayerInfo.configIndex, maxFetch: keyLayerInfo.layerCount }
+        );
         await updateLayerKeys({
           config: keyLayerInfo.configIndex,
           layer: keyLayerInfo.layerIndex
