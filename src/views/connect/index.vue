@@ -23,23 +23,31 @@ watchEffect(() => {
 });
 let isClicked = false;
 async function handleConnectBtnClicked() {
+  const HID_AUTH_USAGE_PAGE = 0x0001;
+  const HID_AUTH_USAGE = 0x0000;
+
   try {
     if (isClicked) {
       return;
     }
     isClicked = true;
-    await deviceStore.connect({
-      vendorId: 0x4353,
-      productId: 0x9108,
-      usagePage: 65408
-    });
-    console.log('Connected');
+    const devices = await navigator.hid.requestDevice({
+      filters: [
+        { usagePage: HID_AUTH_USAGE_PAGE, usage: HID_AUTH_USAGE }
+      ]
+    })
+    if(!devices.length){
+      return
+    }
+    await deviceStore.connect(devices[0]);
+    window.$log?.debug('Device Connected');
   } catch (error) {
     console.error('Error:', error);
   } finally {
     isClicked = false;
   }
 }
+console.log('ssss')
 </script>
 
 <template>
