@@ -24,6 +24,7 @@ export class ConnectionManager {
     return HIDProtocolController.pairedDeviceByFilter(filters);
   }
   async connectDevice(devs: HIDDevice) {
+    !devs?.opened && await devs.open()
     await this.hidController.bindDevice("", devs);
     this.deviceClient.setCommunicator(this.hidController);
   }

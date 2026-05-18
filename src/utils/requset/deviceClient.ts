@@ -4,6 +4,7 @@ export type SendOps = {
 };
 export type SendCfg = {
   waitResponse?: boolean;
+  msgId?: string;
 };
 // export type MessageConfig = SendOps &
 //   SendCfg & {
@@ -28,6 +29,8 @@ function getAllMock() {
 }
 const mockData = useMock ? getAllMock() : {};
 
+import type { DeviceSession } from '@sa/keyboard-protocol';
+
 export class UsbTransfor {
   /**
    * @description: Transport dependencies.
@@ -36,6 +39,7 @@ export class UsbTransfor {
    */
   private communicator: any;
   private listenerMap: WeakMap<(data: any) => void, (data: any) => void> = new WeakMap();
+  private sessionLock: Promise<any> | null = null;
   constructor() {
     this.communicator = undefined;
   }
@@ -77,16 +81,13 @@ export class UsbTransfor {
     return data;
   }
 
-  requestBinary<_T = any>(data: Uint8Array, cfg?: SendCfg): Promise<BinaryType> {
+  requestBinary<_T = any>(data: Uint8Array, cfg?: { waitResponse?: boolean; msgId?: string }): Promise<BinaryType> {
     try {
       if (useMock) {
-        // return new Promise(resolve => {
-        //   const data = mockData[ops.name];
-        //   resolve(data);
-        // });
         return Promise.resolve(new Uint8Array() as unknown as BinaryType);
       }
-      return this.getCommunicator().sendBinary(data, cfg);
+      const { msgId } = cfg || {};
+      return this.getCommunicator().sendBinary(data, { withoutResponse: cfg?.waitResponse === false, msgId });
     } catch (error) {
       console.log('error', error);
       throw error;
@@ -96,6 +97,39 @@ export class UsbTransfor {
   async sendBinary(data: Uint8Array, cfg: SendCfg = { waitResponse: true }) {
     return await this.requestBinary<string>(data, cfg);
   }
+
+  async executeSession<T>(session: DeviceSession<{ code: number; data: T }>): Promise<T> {
+    // Keyboard protocol: strict one-at-a-time — serial lock
+    while (this.sessionLock) {
+      await this.sessionLock;
+    }
+    let resolveLock!: () => void;
+    this.sessionLock = new Promise<void>(r => { resolveLock = r; });
+
+    try {
+      let step = await session.next();
+      while (!step.done) {
+        const outPacket = step.value;
+        const inPacket = await this.requestBinary<number[]>(
+          new Uint8Array(outPacket),
+          { msgId: `${outPacket[1]}` }
+        );
+        const arr = inPacket instanceof Uint8Array
+          ? Array.from(inPacket)
+          : (inPacket as unknown as number[]);
+        step = await session.next(arr);
+      }
+      const result = step.value;
+      if (result.code !== 0) {
+        throw new Error(`session error: code=${result.code}`);
+      }
+      return result.data;
+    } finally {
+      resolveLock();
+      this.sessionLock = null;
+    }
+  }
+
   listen<T>(name: string, cb: (data: T) => void): void {
     const wrap = (data: RespOps<T>) => cb(data.data);
     if (this.listenerMap.has(cb)) {
