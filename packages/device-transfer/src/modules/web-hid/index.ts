@@ -223,6 +223,17 @@ export class HIDProtocolController extends EventTarget {
           this.binMessageQueue.remove(messageId);
         }
       }
+      // binary case 3: keyboard protocol response (0xAA)
+      else if (eventHead === 0xAA) {
+        message = uintArr;
+        const subCommand = uintArr[1];
+        const messageId = `${subCommand}`;
+        const requestInfo = this.binMessageQueue.get(messageId);
+        if (requestInfo?.callback) {
+          requestInfo.callback(message);
+          this.binMessageQueue.remove(messageId);
+        }
+      }
       // default
       else {
         message = this.codec.decodeMessage(event.data);
