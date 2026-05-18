@@ -1,0 +1,17 @@
+{
+  "name": "@sa/keyboard-protocol",
+  "version": "1.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./src/*"
+      ]
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
