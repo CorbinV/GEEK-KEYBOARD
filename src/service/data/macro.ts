@@ -63,29 +63,39 @@ export const getMacro = {
     },
     keys: [
       {
-        index: 0,
-        code: [2, 3],
-        time: 0
+        inx: 0,
+        kt: 1,
+        iT: 0,
+        dT: 0,
+        ks: [2, 3]
       },
       {
-        index: 1,
-        code: [2],
-        time: 3
+        inx: 1,
+        kt: 1,
+        iT: 3,
+        dT: 3,
+        ks: [2]
       },
       {
-        index: 2,
-        code: [],
-        time: 5
+        inx: 2,
+        kt: 1,
+        iT: 2,
+        dT: 5,
+        ks: []
       },
       {
-        index: 3,
-        code: [4],
-        time: 7
+        inx: 3,
+        kt: 1,
+        iT: 2,
+        dT: 7,
+        ks: [4]
       },
       {
-        index: 4,
-        code: [4, 5],
-        time: 9
+        inx: 4,
+        kt: 1,
+        iT: 2,
+        dT: 9,
+        ks: [4, 5]
       }
     ]
   }
@@ -115,9 +125,11 @@ export const macroFrame = {
   name: 'macroFrame',
   code: 0,
   data: {
-    index: 0,
-    time: 0,
-    code: [0, 0]
+    inx: 0,
+    kt: 1,
+    iT: 0,
+    dT: 0,
+    ks: [0, 0]
   }
 };
 

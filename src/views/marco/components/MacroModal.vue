@@ -269,11 +269,11 @@ async function recording() {
   });
   // 模拟录制 - 待完善
   // const frames = [
-  //   { index: 0, code: [4, 5], time: 0 },
-  //   { index: 1, code: [4], time: 3 },
-  //   { index: 2, code: [], time: 5 },
-  //   { index: 3, code: [6], time: 7 },
-  //   { index: 4, code: [6, 7], time: 9 }
+  //   { inx: 0, kt: 1, iT: 0, dT: 0, ks: [4, 5] },
+  //   { inx: 1, kt: 1, iT: 3, dT: 3, ks: [4] },
+  //   { inx: 2, kt: 1, iT: 2, dT: 5, ks: [] },
+  //   { inx: 3, kt: 1, iT: 2, dT: 7, ks: [6] },
+  //   { inx: 4, kt: 1, iT: 2, dT: 9, ks: [6, 7] }
   // ];
   // frames.forEach((item, index) => {
   //   setTimeout(() => {

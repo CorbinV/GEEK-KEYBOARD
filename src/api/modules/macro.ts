@@ -20,9 +20,11 @@ export type MacroAttr = {
 };
 
 export type MacroKey = {
-  index: number;
-  code: number[];
-  time: number;
+  inx: number;
+  kt: number;
+  iT: number;
+  dT: number;
+  ks: number[];
 };
 
 export type MacroCfg = {

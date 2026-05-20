@@ -4,19 +4,22 @@ import type { MacroAttr, MacroCfg, MacroKey, Macros } from '@/api/modules/macro'
 import { useKeyboardStore } from '@/store/modules/keyboard';
 
 export interface MacroFrame {
-  index: number;
-  time: number;
-  code: number[];
+  inx: number;
+  kt: number;
+  iT: number;
+  dT: number;
+  ks: number[];
 }
 
 export interface UIKey {
   type: number;
   code: number;
   value: number | string;
+  kt?: number;
 }
 
 export const useMacroStore = defineStore('macro', () => {
-  let lastFrame: MacroFrame = { index: -1, time: 0, code: [] };
+  let lastFrame: MacroFrame = { inx: -1, kt: 1, iT: 0, dT: 0, ks: [] };
   const uiKey: UIKey[] = reactive([] as UIKey[]);
   let macroAttr: MacroAttr = {
     type: 6,
@@ -35,7 +38,7 @@ export const useMacroStore = defineStore('macro', () => {
   // 重置uiKey数组并停止录制
   const resetUIKey = () => {
     uiKey.length = 0;
-    lastFrame = { index: -1, time: 0, code: [] };
+    lastFrame = { inx: -1, kt: 1, iT: 0, dT: 0, ks: [] };
   };
 
   // 设置macroAttr
@@ -65,20 +68,20 @@ export const useMacroStore = defineStore('macro', () => {
   };
 
   // 添加一个UIKey到uiKey数组
-  const addKey = (type: number, code: number, value: number) => {
+  const addKey = (type: number, code: number, value: number, kt?: number) => {
     if (type === 3) {
-      uiKey.push({ type, code, value });
+      uiKey.push({ type, code, value, kt });
     } else {
       const data = codeMap.value[code]?.label;
       if (data) {
-        uiKey.push({ type, code, value: data });
+        uiKey.push({ type, code, value: data, kt });
       }
     }
   };
 
   // 计算frame类型的逻辑
   const calculateFrameType = (frame: MacroFrame): number => {
-    return frame.index === 0 || lastFrame.code.length <= frame.code.length ? 1 : 2;
+    return frame.inx === 0 || lastFrame.ks.length <= frame.ks.length ? 1 : 2;
   };
 
   // 计算两个frame代码差异
@@ -100,13 +103,13 @@ export const useMacroStore = defineStore('macro', () => {
   // 计算UIKey的差异并添加一个MacroFrame
   const addFrame = (frame: MacroFrame) => {
     const type = calculateFrameType(frame);
-    const diff = calculateFrameDiff(lastFrame.code, frame.code);
+    const diff = calculateFrameDiff(lastFrame.ks, frame.ks);
 
     // 更新UIKey数组，记录时间差和差异
-    if (frame.index !== 0) {
-      addKey(3, 0, frame.time - lastFrame.time);
+    if (frame.inx !== 0) {
+      addKey(3, 0, frame.iT, frame.kt);
     }
-    diff.forEach(code => addKey(type, code, 0));
+    diff.forEach(code => addKey(type, code, 0, frame.kt));
 
     lastFrame = frame;
   };
@@ -183,22 +186,34 @@ export const useMacroStore = defineStore('macro', () => {
     if (uiKey.length === 0) return undefined;
 
     const macroKey: MacroKey[] = [];
-    const code: number[] = [];
-    let index = 0;
-    let time = 0;
+    const ks: number[] = [];
+    let inx = 0;
+    let accumulatedTime = 0;
 
     uiKey.forEach((item, idx) => {
       if (item.type !== 3) {
-        handleUIKeyChange(item, code);
+        handleUIKeyChange(item, ks);
       } else {
-        macroKey.push({ index, code: [...code], time });
-        index += 1;
-        time += Number(item.value);
+        macroKey.push({
+          inx,
+          kt: item.kt ?? 1,
+          iT: Number(item.value),
+          dT: accumulatedTime,
+          ks: [...ks]
+        });
+        inx += 1;
+        accumulatedTime += Number(item.value);
       }
 
-      // 处理最后一个元素
+      // 处理最后一个元素作为结束帧
       if (idx === uiKey.length - 1) {
-        macroKey.push({ index, code: [...code], time });
+        macroKey.push({
+          inx,
+          kt: item.kt ?? 1,
+          iT: 0,
+          dT: accumulatedTime,
+          ks: [...ks]
+        });
       }
     });
 
