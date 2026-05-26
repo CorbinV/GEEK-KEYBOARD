@@ -1,9 +1,9 @@
 import { bgRed, green, red, yellow } from 'kolorist';
 
-export type Lang = 'zh-cn' | 'en-us';
+export type Lang = 'zh-CN' | 'en-US';
 
 export const locales = {
-  'zh-cn': {
+  'zh-CN': {
     gitCommitMessages: {
       types: '请选择提交类型',
       scopes: '请选择提交范围',
@@ -41,7 +41,7 @@ export const locales = {
       '推荐使用命令 `pnpm commit` 生成符合 Conventional Commits 标准的提交信息。\n获取有关 Conventional Commits 的更多信息，请访问此链接: https://conventionalcommits.org'
     )}`
   },
-  'en-us': {
+  'en-US': {
     gitCommitMessages: {
       types: 'Please select a type',
       scopes: 'Please select a scope',
