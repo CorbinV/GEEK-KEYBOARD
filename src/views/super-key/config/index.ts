@@ -47,6 +47,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     extractList: (res) => res.socd,
     defaultItemNameKey: '',
     headerExtraComponent: SocdTriggerSelect,
+    headerExtraModelKey: 'trigger',
     createExtraState: () => ({ trigger: 0, socdRawList: [] }),
   },
   {
@@ -71,6 +72,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     },
     enhanceCreateData: (data, extra) => ({ ...data, time: extra.inputTime }),
     extraComponent: MtTimeInput,
+    extraComponentModelKey: 'inputTime',
     createExtraState: () => ({ inputTime: 200, mtRawList: [] }),
   },
   {
@@ -134,7 +136,9 @@ function normalizeConfigs(partials: Partial<SuperKeyStrategy>[]): [KeyTypeEnum, 
       editComponent: p.editComponent ?? null,
       getEditProps: p.getEditProps ?? null,
       headerExtraComponent: p.headerExtraComponent ?? null,
+      headerExtraModelKey: p.headerExtraModelKey ?? '',
       extraComponent: p.extraComponent ?? null,
+      extraComponentModelKey: p.extraComponentModelKey ?? '',
       createExtraState: p.createExtraState ?? null,
     };
     return [strategy.keyType, strategy];

@@ -40,7 +40,9 @@ export const dksStrategy: SuperKeyStrategy = {
     simulateDelayTimes: state.extra.simulateDelayTimes,
   }),
   headerExtraComponent: null,
+  headerExtraModelKey: '',
   extraComponent: null,
+  extraComponentModelKey: '',
 
   createExtraState: () => ({
     simulateStatus: 0 as 0 | 1 | 2,

@@ -60,7 +60,9 @@ export interface SuperKeyStrategy {
   editComponent: Component | null;
   getEditProps: ((state: ModuleState) => Record<string, any>) | null;
   headerExtraComponent: Component | null;
+  headerExtraModelKey: string;
   extraComponent: Component | null;
+  extraComponentModelKey: string;
 
   createExtraState: (() => Record<string, any>) | null;
 }

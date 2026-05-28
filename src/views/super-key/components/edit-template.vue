@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { nextTick, onMounted, reactive, ref, toRef, toRefs, watch, watchEffect } from 'vue';
+import { nextTick, onMounted, provide, reactive, ref, readonly, toRef, toRefs, watch, watchEffect } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import BaseKeyWrapper from '@/components/custom/keyboard/components/base-key-wrapper.vue';
 import { BaseKeyboard, StandardKeyboard } from '@/components/custom/keyboard';
-import { useResttableReactiveFn } from '@/hooks/common/basicFnc';
+import { useResttableReactiveFn, useResttableRefFn } from '@/hooks/common/basicFnc';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 const emit = defineEmits(['update:visible', 'update:title', 'create-group']);
 
@@ -94,6 +94,14 @@ onMounted(() => {
   );
 });
 const [localTitle] = useTitle();
+
+const [editSelectedInfo, resetEditSelectedInfo] = useResttableRefFn<{ type: number; code: number; keyId: string }>(() => ({
+  type: -1,
+  code: 0,
+  keyId: ''
+}));
+provide('selectedInfo', readonly(editSelectedInfo));
+provide('resetSelectedInfo', resetEditSelectedInfo);
 
 function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEnum; keyId: string }) {
   if (code === undefined || type === undefined) {
