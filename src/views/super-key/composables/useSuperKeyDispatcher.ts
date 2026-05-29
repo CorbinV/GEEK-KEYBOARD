@@ -53,7 +53,7 @@ export function useSuperKeyDispatcher() {
     state.groupList = rawList.map(item => {
       const formatted = formatGroupItem(
         Object.assign({}, item, {
-          name: (strategy.defaultItemNameKey && $t(strategy.defaultItemNameKey as any)) || item.name,
+          name: strategy.defaultItemName || item.name,
         })
       );
 

@@ -1,10 +1,12 @@
 import type { SuperKeyStrategy } from '../types';
 import { KeyTypeEnum } from '@/enum/keyType';
+import { $t } from '@/locales';
 import { addDks, deleteDksByCode, getDksList, getTargetDks, resetDksName } from '@/api/super-key';
 import DksEdit from '../components/dks-edit.vue';
 
 export const dksStrategy: SuperKeyStrategy = {
   keyType: KeyTypeEnum.DKS,
+  label: $t('supperKey.c1' as any),
   labelKey: 'supperKey.c1',
   codePrefix: 'D',
   maxGroupCount: 8,
@@ -23,6 +25,7 @@ export const dksStrategy: SuperKeyStrategy = {
     rename: resetDksName,
   },
   extractList: (res) => res.shortcuts,
+  defaultItemName: '',
   defaultItemNameKey: '',
 
   beforeAdd: null,

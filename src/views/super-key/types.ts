@@ -33,6 +33,7 @@ export interface ModuleState {
 
 export interface SuperKeyStrategy {
   keyType: KeyTypeEnum;
+  label: string;
   labelKey: string;
   codePrefix: string;
   maxGroupCount: number;
@@ -52,6 +53,7 @@ export interface SuperKeyStrategy {
   };
 
   extractList: (res: any) => any[];
+  defaultItemName: string;
   defaultItemNameKey: string;
 
   beforeAdd: ((ctx: AddContext) => boolean | Promise<boolean>) | null;
