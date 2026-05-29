@@ -232,11 +232,11 @@ function useTitle() {
     :mask-closable="false" class="!bg-#191b1d !min-w-1000px max-w-1560px" :class="`${wide ? 'w-80%' : 'w-54%'}`"
     content-class="bg-#191b1d" size="large">
     <template #header>
-      <div class="flex flex-row justify-between text-xl">
-        <div></div>
-        <span>{{ localTitle }}</span>
-        <div>
-          <slot name="header-extra"></slot>
+      <div class="flex flex-row justify-between items-center text-xl relative">
+        <!-- <div></div> -->
+        <span class="w-full text-center h-full">{{ localTitle }}</span>
+        <div class="absolute right-0">
+          <slot name="header-extra" ></slot>
         </div>
       </div>
     </template>
