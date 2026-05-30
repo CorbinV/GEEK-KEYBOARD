@@ -446,7 +446,12 @@
     "c9": "SOCD",
     "timeIntervalError": "The time value should be between {min}{unit} and {max}{unit}.",
     "c10": "Please select two buttons. When two buttons are pressed at the same time, they will not be triggered at the same time. They will be triggered first according to your settings. After releasing, the other button will be triggered immediately.",
-    "x9": "RS Smart Trigger"
+    "x9": "RS Smart Trigger",
+    "x10": "Dynamic Key Travel",
+    "enableSimulate": "Enable Simulation",
+    "trigger": "Trigger",
+    "random": "Random",
+    "fixed": "Fixed"
   },
   "macro": {
     "addMacroKey": "Add Macro Key",

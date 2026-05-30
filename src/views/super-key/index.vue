@@ -126,6 +126,8 @@ const paneList = [
     :edit-item="editCtrl.item"
     @update:visible="editCtrl.show = $event"
     @create-group="handleGroupCreated"
+    @update:simulate-status="currentModuleState!.extra.simulateStatus = $event"
+    @update:simulate-delay-times="currentModuleState!.extra.simulateDelayTimes = $event"
   />
 
   <!-- 单例编辑弹窗：通用 EditTemplate -->

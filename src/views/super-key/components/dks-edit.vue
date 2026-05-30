@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
-import { nextTick, onMounted, onUnmounted, reactive, ref, toRef, toRefs, watch, watchEffect } from 'vue';
+import { nextTick, onMounted, onUnmounted, reactive, ref, toRef, toRefs, watch, watchEffect, computed } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { StandardKeyboard } from '@/components/custom/keyboard';
@@ -10,7 +10,13 @@ import type { CapsuleItem } from '@/store/modules/dks';
 import { useDksStore } from '@/store/modules/dks';
 import DksKeyControl from './dks-key-control.vue';
 import KeyDistanceControl from './key-distance-control.vue';
-const emit = defineEmits(['update:visible', 'update:title', 'create-group']);
+import { $t } from '@/locales';
+
+const SIMULATE_OPS = [
+  { label: $t('supperKey.random' as any), value: 1 },
+  { label: $t('supperKey.fixed' as any), value: 2 },
+];
+const emit = defineEmits(['update:visible', 'update:title', 'create-group', 'update:simulateStatus', 'update:simulateDelayTimes']);
 const dksStore = useDksStore();
 const keyboardStore = useKeyboardStore();
 const getKeyDetail = keyboardStore.getKeyDetail;
@@ -24,9 +30,13 @@ const props = withDefaults(
     secondTitle?: string;
     keyboardType?: 'base' | 'standard';
     needImportKey?: boolean;
+    simulateStatus?: 0 | 1 | 2;
+    simulateDelayTimes?: { v1: number; v2: number };
   }>(),
   {
-    secondTitle: ''
+    secondTitle: '',
+    simulateStatus: 0,
+    simulateDelayTimes: () => ({ v1: 0, v2: 0 }),
   }
 );
 function useDialogController() {
@@ -49,6 +59,21 @@ function useDialogController() {
   };
 }
 const { dialogControl, closeDialog } = useDialogController();
+
+// simulate state — sync with parent via props/emit
+const enableSimulate = computed({
+  get: () => props.simulateStatus > 0,
+  set: (val: boolean) => emit('update:simulateStatus', val ? 1 : 0),
+});
+const localSimulateStatus = computed({
+  get: () => props.simulateStatus,
+  set: (val: 0 | 1 | 2) => emit('update:simulateStatus', val),
+});
+watchEffect(() => {
+  if (props.simulateStatus === 2 && props.simulateDelayTimes.v1 && props.simulateDelayTimes.v1 !== props.simulateDelayTimes.v2) {
+    emit('update:simulateDelayTimes', { v1: props.simulateDelayTimes.v1, v2: props.simulateDelayTimes.v1 });
+  }
+});
 
 // event handler
 const [selectedKeyInfo, resetSelectedKeyInfo] = useResttableReactiveFn<{
@@ -194,7 +219,27 @@ onUnmounted(() => {
         <div></div>
         <span>{{ localTitle }}</span>
         <div>
-          <slot name="header-extra"></slot>
+          <slot name="header-extra">
+            <div class="flex flex-row items-center text-base text-[#999999]">
+              <span class="mr-2">{{ $t('supperKey.enableSimulate' as any) }}</span>
+              <div class="flex flex-row items-center gap-x-6">
+                <NSwitch v-model:value="enableSimulate" />
+                <div v-if="enableSimulate" class="flex flex-row items-center gap-x-4">
+                  <span>{{ $t('supperKey.trigger' as any) }}:</span>
+                  <NSelect v-model:value="localSimulateStatus" :options="SIMULATE_OPS" style="width: 84px" to="#popover-portal" />
+                  <NInputNumber :value="simulateDelayTimes.v1" style="width: 64px" :show-button="false" @update:value="v => emit('update:simulateDelayTimes', { v1: v ?? 0, v2: simulateDelayTimes.v2 })">
+                    <template #suffix>ms</template>
+                  </NInputNumber>
+                  <template v-if="localSimulateStatus === 1">
+                    <span>-</span>
+                    <NInputNumber :value="simulateDelayTimes.v2" style="width: 64px" :show-button="false" @update:value="v => emit('update:simulateDelayTimes', { v1: simulateDelayTimes.v1, v2: v ?? 0 })">
+                      <template #suffix>ms</template>
+                    </NInputNumber>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </slot>
         </div>
       </div>
     </template>

@@ -447,7 +447,11 @@
     "c8": "例：设置AB键为RS键，当A键按压比D键更深时，A键触发，抬起A键后，D键将恢复触发",
     "c9": "SOCD",
     "c10": "请选择两个按键，当两个按键同时按下时，不会同时触发，将会按照您的设置，优先进行触发，松开后立即恢复另个一按键触发。",
-    "timeIntervalError": "时间取值范围应在{min}{unit}-{max}{unit}之间"
+    "timeIntervalError": "时间取值范围应在{min}{unit}-{max}{unit}之间",
+    "enableSimulate": "开启仿真",
+    "trigger": "触发",
+    "random": "随机",
+    "fixed": "固定"
   },
   "macro": {
     "addMacroKey": "添加宏按键",
