@@ -122,6 +122,10 @@ export function useSuperKeyDispatcher() {
     if (currentSuperKeyType.value === KeyTypeEnum.MT) {
       state.extra.inputTime = 200;
     }
+    if (currentSuperKeyType.value === KeyTypeEnum.DKS) {
+      state.extra.simulateStatus = 0;
+      state.extra.simulateDelayTimes = { v1: 0, v2: 0 };
+    }
   }
 
   async function handleGroupCreated(formData: any) {
