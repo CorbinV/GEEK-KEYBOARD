@@ -586,17 +586,19 @@ export const getBasicKey = {
     disable: []
   }
 };
-export const getKeyInfo = {
-  name: 'getKeyInfo',
-  code: 0,
-  data: {
-    key: 'A',
-    type: 0,
-    code: 4,
-    enable: 1,
-    tary: [10, 10, 10, 1, 1],
-    super: [5, 1],
-    mt: [6, 1]
+export const getKeyInfo = (val: { key: string }) => {
+  return {
+    name: 'getKeyInfo',
+    code: 0,
+    data: {
+      key: val.key,
+      type: 0,
+      code: 4,
+      enable: 1,
+      tary: [10, 10, 10, 1, 1],
+      super: [5, 1],
+      mt: [6, 1]
+    }
   }
 };
 export const resetKeyInfo = {
