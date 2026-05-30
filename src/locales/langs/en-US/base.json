@@ -425,8 +425,8 @@
     "x3": "Delete",
     "x5": "Per Key emergency stop",
     "x6": "Deleted Successfully",
-    "x7": "MT Click/Hold",
-    "x8": "TGL Toggle Switch",
+    "x7": "Click/Hold",
+    "x8": "Toggle Switch",
     "plsSelectKey": "Please select a key first",
     "keyBinedDKSFunc": "This key is already bound to the DKS function",
     "keyBinedOtherFunc": "This key is already bound to another function",
@@ -439,12 +439,14 @@
     "c2": "OKS per key emergency stop",
     "c3": "MT single press/hold",
     "c4": "TGL Toggle Switch",
-    "c5": " RS smart trigger",
+    "c5": "RS smart trigger",
     "c6": "Please select the first and second buttons, by binding it, the action of lifting the first button can stop the triggering of the first button and trigger the second button at the same time, enabling emergency stop with per key in some games.",
     "c7": "When two keys are pressed together, activate the one with greater key travel.",
     "c8": "Example: Assign AB to RS. If A is pressed harder than D, A activates first. Lifting A will switch back to D.",
     "c9": "SOCD",
-    "timeIntervalError": "The time value should be between {min}{unit} and {max}{unit}."
+    "timeIntervalError": "The time value should be between {min}{unit} and {max}{unit}.",
+    "c10": "Please select two buttons. When two buttons are pressed at the same time, they will not be triggered at the same time. They will be triggered first according to your settings. After releasing, the other button will be triggered immediately.",
+    "x9": "RS Smart Trigger"
   },
   "macro": {
     "addMacroKey": "Add Macro Key",
