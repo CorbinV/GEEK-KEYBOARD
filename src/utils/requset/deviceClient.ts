@@ -60,7 +60,7 @@ export class UsbTransfor {
           resolve(data);
         });
       }
-      const { name, data} = ops;
+      const { name, data } = ops;
       const sendOps: { name: string; data?: any } = { name };
       if (data) {
         sendOps.data = data;
@@ -99,6 +99,20 @@ export class UsbTransfor {
   }
 
   async executeSession<T>(session: DeviceSession<{ code: number; data: T }>): Promise<T> {
+    if (useMock) {
+      const name = (session as any)._requestName;
+      let mock = mockData[name];
+      if (!mock) {
+        throw new Error(`invalid methoed: ${name}`)
+      }
+      if (mock instanceof Function) {
+        const sessionData = (session as any)._requestData;
+        mock = mock(sessionData)
+      }
+      if (mock.code !== 0) throw new Error(`session error: code=${mock.code}`);
+      return mock.data as T;
+
+    }
     // Keyboard protocol: strict one-at-a-time — serial lock
     while (this.sessionLock) {
       await this.sessionLock;
