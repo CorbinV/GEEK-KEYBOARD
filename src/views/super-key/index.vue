@@ -33,8 +33,9 @@ const {
   initAll,
 } = useSuperKeyDispatcher();
 
-const editTitle = computed(() => currentStrategy.value?.label ?? '');
-const editDesc = computed(() => currentStrategy.value?.defaultItemName ?? '');
+const editTitle = computed(() => currentStrategy.value?.defaultItemName ?? '');
+const editDesc = computed(() => currentStrategy.value?.desc ?? '');
+const editSecondTitle = computed(() => currentStrategy.value?.secondTitle ?? '');
 
 function handleItemClick(item: any, handleKeyEmit: (item: any) => void) {
   handleKeyEmit(item);
@@ -102,7 +103,7 @@ const paneList = [
         <NTabs v-model:value="currentSuperKeyType" class="custom-segment-tabs" type="segment" animated>
           <NTab v-for="s in allStrategies" :key="s.keyType" :name="s.keyType" class="text-xl text-#3C8DF4">
             <span :class="currentSuperKeyType === s.keyType ? 'text-#3C8DF4' : 'text-#999999'" class="text-lg">
-              {{ $t(s.labelKey) }}
+              {{ s.labelKey}}
             </span>
           </NTab>
         </NTabs>
@@ -117,6 +118,8 @@ const paneList = [
     v-bind="currentStrategy.getEditProps?.(currentModuleState!) ?? {}"
     :visible="editCtrl.show"
     :title="editTitle"
+    :desc="editDesc"
+    :second-title="editSecondTitle"
     :code-type="currentStrategy.keyType"
     :fnc-generate-code="generateGroupCode"
     :is-edit="editCtrl.isEdit"

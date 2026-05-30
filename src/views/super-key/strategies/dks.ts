@@ -7,7 +7,7 @@ import DksEdit from '../components/dks-edit.vue';
 export const dksStrategy: SuperKeyStrategy = {
   keyType: KeyTypeEnum.DKS,
   label: $t('supperKey.c1' as any),
-  labelKey: 'supperKey.c1',
+  labelKey: $t('supperKey.c1'),
   codePrefix: 'D',
   maxGroupCount: 8,
   maxKeyCount: 4,
@@ -25,8 +25,12 @@ export const dksStrategy: SuperKeyStrategy = {
     rename: resetDksName,
   },
   extractList: (res) => res.shortcuts,
-  defaultItemName: '',
-  defaultItemNameKey: '',
+  defaultItemName: $t('supperKey.x10'),
+  defaultItemNameKey: 'DKS',
+  descKey: '',
+  desc: '',
+  secondTitleKey: '',
+  secondTitle: '',
 
   beforeAdd: null,
   enhanceCreateData: (data, extra) => ({

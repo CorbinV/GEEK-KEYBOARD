@@ -21,7 +21,7 @@ export const SOCDTriggerOps = [
 const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
   {
     keyType: KeyTypeEnum.OKS,
-    labelKey: 'supperKey.c2',
+    labelKey: $t('supperKey.c2'),
     codePrefix: 'O',
     maxKeyCount: 2,
     needSelectKey: false,
@@ -31,11 +31,12 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     wide: false,
     api: { getList: getOksList, addTarget: addOks, deleteByCode: deleteOksByCode, getTarget: getTargetOks, rename: resetOksName },
     extractList: (res) => res.oks,
-    defaultItemNameKey: 'supperKey.singleKeyStop',
+    defaultItemNameKey: $t('supperKey.singleKeyStop'),
+    descKey: $t('supperKey.c6' as any),
   },
   {
     keyType: KeyTypeEnum.SOCD,
-    labelKey: 'supperKey.c9',
+    labelKey: $t('supperKey.c9'),
     codePrefix: 'S',
     maxKeyCount: 2,
     needSelectKey: false,
@@ -45,14 +46,15 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     wide: false,
     api: { getList: getSOCDList, addTarget: addSOCD, deleteByCode: deleteSOCDByCode, getTarget: getTargetSOCD, rename: resetSOCDName },
     extractList: (res) => res.socd,
-    defaultItemNameKey: '',
+    defaultItemNameKey: 'SOCD',
+    descKey: $t('supperKey.c10' as any),
     headerExtraComponent: SocdTriggerSelect,
     headerExtraModelKey: 'trigger',
     createExtraState: () => ({ trigger: 0, socdRawList: [] }),
   },
   {
     keyType: KeyTypeEnum.MT,
-    labelKey: 'supperKey.c3',
+    labelKey: $t('supperKey.c3'),
     codePrefix: 'M',
     maxKeyCount: 2,
     needSelectKey: true,
@@ -62,7 +64,8 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     wide: true,
     api: { getList: () => getMTList({ pageNo: 1, pageSize: 8 }), addTarget: addMT, deleteByCode: deleteMTByCode, getTarget: getTargetMT, rename: resetMTName },
     extractList: (res) => res.mt,
-    defaultItemNameKey: 'supperKey.singleKeyStop',
+    defaultItemNameKey: $t('supperKey.x7'),
+    descKey: $t('supperKey.setClickDowndown1down2' as any),
     beforeAdd: (ctx) => {
       if (ctx.targetSuperKey?.dks) {
         window.$message!.info($t('supperKey.keyBinedDKSFunc'));
@@ -77,7 +80,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
   },
   {
     keyType: KeyTypeEnum.TGL,
-    labelKey: 'supperKey.c4',
+    labelKey: $t('supperKey.c4'),
     codePrefix: 'T',
     maxKeyCount: 2,
     needSelectKey: true,
@@ -87,7 +90,8 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     wide: true,
     api: { getList: () => getTGLList({ pageNo: 1, pageSize: 8 }), addTarget: addTGL, deleteByCode: deleteTGLByCode, getTarget: getTargetTGL, rename: resetTGLName },
     extractList: (res) => res.tgl,
-    defaultItemNameKey: 'supperKey.singleKeyStop',
+    defaultItemNameKey: $t('supperKey.x8'),
+    descKey: $t('businessCommon.plsSetSwitchKeys' as any),
     beforeAdd: (ctx) => {
       if (ctx.targetSuperKey?.dks) {
         window.$message!.info($t('supperKey.keyBinedDKSFunc'));
@@ -102,7 +106,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
   },
   {
     keyType: KeyTypeEnum.RS,
-    labelKey: 'supperKey.c5',
+    labelKey: $t('supperKey.c5'),
     codePrefix: 'R',
     needSelectKey: false,
     enableEdit: true,
@@ -111,7 +115,9 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     wide: false,
     api: { getList: () => getRSList({ pageNo: 1, pageSize: 8 }), addTarget: addRS, deleteByCode: deleteRSByCode, getTarget: getTargetRS, rename: resetRSName },
     extractList: (res) => res.rs,
-    defaultItemNameKey: 'supperKey.c5',
+    defaultItemNameKey: $t('supperKey.x9' as any),
+    descKey: $t('supperKey.c8' as any),
+    secondTitleKey: $t('supperKey.c7' as any),
   },
 ];
 
@@ -119,7 +125,7 @@ function normalizeConfigs(partials: Partial<SuperKeyStrategy>[]): [KeyTypeEnum, 
   return partials.map(p => {
     const strategy: SuperKeyStrategy = {
       keyType: p.keyType!,
-      label: $t(p.labelKey! as any),
+      label: p.labelKey!,
       labelKey: p.labelKey!,
       codePrefix: p.codePrefix!,
       maxGroupCount: p.maxGroupCount ?? 8,
@@ -131,8 +137,12 @@ function normalizeConfigs(partials: Partial<SuperKeyStrategy>[]): [KeyTypeEnum, 
       wide: p.wide ?? false,
       api: p.api!,
       extractList: p.extractList!,
-      defaultItemName: p.defaultItemNameKey ? $t(p.defaultItemNameKey as any) : '',
-      defaultItemNameKey: p.defaultItemNameKey!,
+      defaultItemName: p.defaultItemNameKey || '',
+      defaultItemNameKey: p.labelKey!,
+      descKey: p.descKey ?? '',
+      desc: p.descKey ?? '',
+      secondTitleKey: p.secondTitleKey ?? '',
+      secondTitle: p.secondTitleKey ?? '',
       beforeAdd: p.beforeAdd ?? null,
       enhanceCreateData: p.enhanceCreateData ?? null,
       editComponent: p.editComponent ?? null,

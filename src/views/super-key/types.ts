@@ -55,6 +55,10 @@ export interface SuperKeyStrategy {
   extractList: (res: any) => any[];
   defaultItemName: string;
   defaultItemNameKey: string;
+  descKey: string;
+  desc: string;
+  secondTitleKey: string;
+  secondTitle: string;
 
   beforeAdd: ((ctx: AddContext) => boolean | Promise<boolean>) | null;
   enhanceCreateData: ((data: any, extraState: Record<string, any>) => any) | null;
