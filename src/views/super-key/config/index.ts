@@ -158,8 +158,8 @@ function normalizeConfigs(partials: Partial<SuperKeyStrategy>[]): [KeyTypeEnum, 
 }
 
 export const STRATEGY_REGISTRY = new Map<KeyTypeEnum, SuperKeyStrategy>([
-  ...normalizeConfigs(SIMPLE_MODULE_CONFIGS),
   [KeyTypeEnum.DKS, dksStrategy],
+  ...normalizeConfigs(SIMPLE_MODULE_CONFIGS),
 ]);
 
 export const ALL_STRATEGIES = Array.from(STRATEGY_REGISTRY.values());
