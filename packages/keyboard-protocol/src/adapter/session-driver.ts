@@ -14,9 +14,17 @@ import {
 
 export type { SessionRequest, DeviceSession, SessionResultMap } from '../vendor/KeyboardAPI';
 
+export type SessionWithMeta<T> = DeviceSession<T> & { _requestName: string; _requestData: any };
+
 export function createSession<T extends SessionRequest>(
   request: T,
-): DeviceSession<SessionResultMap[T["name"]]>;
-export function createSession(request: SessionRequest): DeviceSession<unknown> {
-  return vendorCreateSession(request);
+): SessionWithMeta<SessionResultMap[T["name"]]>;
+export function createSession(request: SessionRequest): SessionWithMeta<unknown> {
+  let session = vendorCreateSession(request) as SessionWithMeta<unknown>;
+  if (!session) {
+    session = {} as SessionWithMeta<unknown>
+  }
+  session._requestName = request.name;
+  session._requestData = request.data;
+  return session;
 }
