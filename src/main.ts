@@ -28,15 +28,21 @@ async function setupApp() {
   app.mount('#app');
 
   autofit.init({
-    el: "body",
+    el: "#app",
     resize: true,
-    ignore: [
-      {
-        // @ts-ignore
-       dom: "#popover-portal",
-      },
-   ]
+    cssMode: "zoom",
   });
+
+  const appEl = document.querySelector('#app') as HTMLElement | null;
+  if (appEl) {
+    const updateZoomVar = () => {
+      const zoom = appEl.style.zoom || '1';
+      document.documentElement.style.setProperty('--autofit-zoom', zoom);
+    };
+    updateZoomVar();
+    const observer = new MutationObserver(updateZoomVar);
+    observer.observe(appEl, { attributes: true, attributeFilter: ['style'] });
+  }
 }
 
 setupApp();

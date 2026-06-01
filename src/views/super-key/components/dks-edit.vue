@@ -226,7 +226,7 @@ onUnmounted(() => {
                 <NSwitch v-model:value="enableSimulate" />
                 <div v-if="enableSimulate" class="flex flex-row items-center gap-x-4">
                   <span>{{ $t('supperKey.trigger' as any) }}:</span>
-                  <NSelect v-model:value="localSimulateStatus" :options="SIMULATE_OPS" style="width: 84px" to="#popover-portal" />
+                  <NSelect v-model:value="localSimulateStatus" :options="SIMULATE_OPS" style="width: 84px" />
                   <NInputNumber :value="simulateDelayTimes.v1" style="width: 64px" :show-button="false" @update:value="v => emit('update:simulateDelayTimes', { v1: v ?? 0, v2: simulateDelayTimes.v2 })">
                     <template #suffix>ms</template>
                   </NInputNumber>

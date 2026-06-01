@@ -26,7 +26,6 @@ const isWrapperScrollMode = computed(() => themeStore.layout.scrollMode === 'wra
       <NSelect
         v-model:value="themeStore.layout.scrollMode"
         :options="translateOptions(themeScrollModeOptions)"
-         to="#popover-portal"
         size="small"
         class="w-120px"
       />
@@ -38,7 +37,6 @@ const isWrapperScrollMode = computed(() => themeStore.layout.scrollMode === 'wra
       <NSelect
         v-model:value="themeStore.page.animateMode"
         :options="translateOptions(themePageAnimationModeOptions)"
-         to="#popover-portal"
         size="small"
         class="w-120px"
       />
@@ -68,7 +66,6 @@ const isWrapperScrollMode = computed(() => themeStore.layout.scrollMode === 'wra
       <NSelect
         v-model:value="themeStore.tab.mode"
         :options="translateOptions(themeTabModeOptions)"
-        to="#popover-portal"
         size="small"
         class="w-120px"
       />

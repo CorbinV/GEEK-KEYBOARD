@@ -334,7 +334,6 @@ watch(
             <GroupTitle :title="$t('repidTrigger.pollingRate')" class="z-60" data-tag="pollingRate">
               <template #end>
                 <NSelect v-model:value="rateCtrl.val" :options="rateCtrl.ops"
-                  to="#popover-portal"
                   class="h-40px w-100px !cursor-not-allowed" placement="bottom-start" trigger="click"
                   @update-value="rateSelect">
                   <!-- <NButton class="h-40px w-100px bg-[#222227]">{{ curRate.label }}</NButton> -->
@@ -412,7 +411,7 @@ watch(
             </GroupTitle>
             <GroupTitle :title="$t('repidTrigger.debounceLevel')">
               <template #end>
-                <NSelect v-model:value="shakeCtrl.val" :options="shakeCtrl.ops"  to="#popover-portal" class="h-40px w-100px" placement="bottom-start" trigger="click"
+                <NSelect v-model:value="shakeCtrl.val" :options="shakeCtrl.ops" class="h-40px w-100px" placement="bottom-start" trigger="click"
                   @select="shakeSelect">
                 </NSelect>
               </template>
