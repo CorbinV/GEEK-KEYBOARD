@@ -485,6 +485,10 @@ export type SessionRequest =
   | { name: "getBasicKey";    data: GetBasicKeyParams }
   | { name: "getKeyInfo";     data: GetKeyInfoParams };
 
+// 从 SessionRequest 中按 name 提取 data 的类型
+export type SessionRequestData<T extends SessionRequest['name']> =
+  Extract<SessionRequest, { name: T }>['data'];
+
 // ========== 推导核心 ========== start
 export function createSession<T extends SessionRequest>(
   request: T,

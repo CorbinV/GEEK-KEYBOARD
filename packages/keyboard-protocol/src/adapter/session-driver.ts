@@ -12,7 +12,7 @@ import {
   type SessionResultMap,
 } from '../vendor/KeyboardAPI';
 
-export type { SessionRequest, DeviceSession, SessionResultMap } from '../vendor/KeyboardAPI';
+export type { SessionRequest, SessionRequestData, DeviceSession, SessionResultMap } from '../vendor/KeyboardAPI';
 
 export type SessionWithMeta<T> = DeviceSession<T> & { _requestName: string; _requestData: any };
 
