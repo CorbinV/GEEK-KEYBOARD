@@ -8,6 +8,11 @@ body,
   height: 100%;
 }
 
+/* 弹出层内容随页面等比缩放 */
+body > .v-binder-follower-container .v-binder-follower-content > * {
+  zoom: var(--autofit-zoom, 1);
+}
+
 html {
   overflow-x: hidden;
 }
