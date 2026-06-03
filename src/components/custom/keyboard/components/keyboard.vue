@@ -33,6 +33,19 @@ const kbCfg = toRef(keyboardStore, 'kbCfg');
 const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
 const layerOriginData = ref<any>({});
 
+const baseConfig = computed(() => kbCfg.value.layoutMap.get('base'));
+const containerStyle = computed(() => {
+  const base = baseConfig.value;
+  if (!base) return {};
+  const maxRow = layoutList.value.reduce((max, keyId) => {
+    const keyData = kbCfg.value.layoutMap.get(keyId);
+    return Math.max(max, keyData?.pos?.[0] ?? 0);
+  }, 0);
+  const rowCount = maxRow + 1;
+  const height = rowCount * base.height + (rowCount + 1) * base.gap;
+  return { height: `${height}px`, width: '941px' };
+});
+
 function updateOriginData() {
   const data = activeKeyLayer.value;
   if (!Object.keys(data?.xxx).length) {
@@ -362,13 +375,13 @@ function handleLastKeyMounted() {
 </script>
 
 <template>
-  <div class="relative h-360px w-941px select-none rounded-md low-layer-bg" @click="handleKeyClick"
+  <div class="relative select-none rounded-md low-layer-bg" :style="containerStyle" @click="handleKeyClick"
     :key="`${layer}${config}`">
     <KeyboardKey v-for="(key, idx) in layoutList" :key="`${key}${layer}${config}`" :key-id="key" :idx="idx"
       :kb-length="layoutList.length" :selected="selectedList[idx]" :key-detail="layerOriginData?.keys?.[key]"
       :disabled="layerOriginData?.disable?.includes(key)" :smart="layerOriginData?.smart?.[key]"
       :sp="activeKeyLayer.superKeyMap[key]?.sp" :mt="activeKeyLayer.superKeyMap[key]?.mt"
       :dks="activeKeyLayer.superKeyMap[key]?.dks" @last-key-mounted="handleLastKeyMounted" />
-    <div class="w-50px h-50px absolute top-2 right-2 rounded-full bg-#222227" @click.stop></div>
+    <div v-if="baseConfig?.hasDecorator" class="w-50px h-50px absolute top-2 right-2 rounded-full bg-#222227" @click.stop></div>
   </div>
 </template>

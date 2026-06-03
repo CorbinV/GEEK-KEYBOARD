@@ -67,15 +67,24 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       return allData;
     };
 
-    const initKeyboardData = async (): Promise<any> => {
-      if (kbCfg.layoutMap.size > 0) {
+    const layoutModules: Record<string, () => Promise<any>> = {
+      'rk-s75': () => import('@/assets/files/rk-s75.json'),
+      'm68': () => import('@/assets/files/m68.json')
+    };
+    const initKeyboardData = async (kbName?: string, forceReload = false): Promise<any> => {
+      if (kbCfg.layoutMap.size > 0 && !forceReload) {
         return kbCfg.layoutMap;
+      }
+      if (forceReload) {
+        kbCfg.layoutMap.clear();
+        kbCfg.offsetList = [];
       }
       // get all config data from file
       if (!hasConfig.value) {
         // optimize: dynammic import keyboard config(by keyboard name)
-        // const data = await import(`@/assets/files/${kbName}.json`);
-        const data = await import('@/assets/files/rk-s75.json');
+        const model = kbName || 'm68';
+        const loader = layoutModules[model] || layoutModules['rk-s75'];
+        const data = await loader();
         // const keyMap: { [key: string]: any } = {};
         data.layout.keys.forEach(item => {
           const viewItem = Object.assign(item, { left: -1, top: -1 });
@@ -736,9 +745,10 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       resetSelectedKeys();
     });
     watchDevConnStatus({
-      connCb: () => {
+      connCb: async () => {
         kbLogger.debug('connect ....');
-        updateDeviceInfo()
+        await updateDeviceInfo();
+        await initKeyboardData(kbInfo.hd.model, true);
       },
       disconnCb: () => {
         resetKeyLayerCfgCtrl();
@@ -787,6 +797,7 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
   const afterDeviceReset = async () => {
     await AfterDevConn()
     await updateDeviceInfo()
+    await initKeyboardData(kbInfo.hd.model, true)
   }
   // watch store
   // scope.run(() => {
