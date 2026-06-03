@@ -31,6 +31,10 @@ async function handleConnectBtnClicked() {
       return;
     }
     isClicked = true;
+    if(!deviceStore.isTrueDevice){
+      await deviceStore.connect({});
+      return
+    }
     const devices = await navigator.hid.requestDevice({
       filters: [
         { usagePage: HID_AUTH_USAGE_PAGE, usage: HID_AUTH_USAGE }
@@ -47,7 +51,6 @@ async function handleConnectBtnClicked() {
     isClicked = false;
   }
 }
-console.log('ssss')
 </script>
 
 <template>
