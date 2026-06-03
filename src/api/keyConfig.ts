@@ -1,12 +1,12 @@
 import requestClient from './config';
 import type { ConfigAndLayer, KeyInfo, LayerKeysConfig } from './modules/keyboard';
-import { createSession } from '@sa/keyboard-protocol';
+import { createSession, SessionRequestData } from '@sa/keyboard-protocol';
 
 /**
  * @param data.layer keyboard layer
  * @param data.config keyboard's config(onboard configuration or custom)
  */
-export  function getKeysCfgByLayer(data: { config: number; layer: number; pageNo: number; pageSize: number }) {
+export function getKeysCfgByLayer(data: SessionRequestData<'getBasicKey'>) {
   return requestClient.executeSession(
     createSession({
       name: 'getBasicKey',
@@ -18,7 +18,7 @@ export  function getKeysCfgByLayer(data: { config: number; layer: number; pageNo
  * @param {{ key: string }} data
  * @param {string} data.key keyId
  */
-export function getKeyInfo(data: { key: string }) {
+export function getKeyInfo(data: SessionRequestData<'getKeyInfo'>) {
   return requestClient.executeSession(
     createSession({
       name: 'getKeyInfo',
