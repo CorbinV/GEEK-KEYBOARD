@@ -20,7 +20,7 @@ export type BasicKeyRule = {
 export const EVENT_TO_CODE_MAP: Record<string, number> = {
   // 键盘按键
   ESC: 0x29, F1: 0x3a, F2: 0x3b, F3: 0x3c, F4: 0x3d, F5: 0x3e, F6: 0x3f, F7: 0x40, F8: 0x41, F9: 0x42, F10: 0x43, F11: 0x44, F12: 0x45, SYSRQ: 0x46, SCROLLLOCK: 0x47, PAUSE: 0x48, FN1: 245, FN2: 246, FN3: 247,
-  GRAVE: 0x35, 1: 0x1e, 2: 0x1f, 3: 0x20, 4: 0x21, 5: 0x22, 6: 0x23, 7: 0x24, 8: 0x25, 9: 0x26, 0: 0x27, MIUNS: 0x2d, EQUAL: 0x2e, BACKSPACE: 0x2a, INSERT: 0x49, HOME: 0x4a, PAGEUP: 0x4b, NUMLOCK: 0x53, NUM_SLASH: 0x54, NUM_ASTERISK: 0x55, NUM_MINUS: 0x56,
+  GRAVE: 0x35, 1: 0x1e, 2: 0x1f, 3: 0x20, 4: 0x21, 5: 0x22, 6: 0x23, 7: 0x24, 8: 0x25, 9: 0x26, 0: 0x27, MIUNS: 0x2d, EQUAL: 0x2e, BACKSPACE: 0x2a, INSERT: 0x49, HOME: 0x4a, PAGEUP: 0x4b, NUMLOCK: 0x53, NUM_SLASH: 0x54, NUM_ASTERISK: 0x55, NUM_MINUS: 0x56, 
   TAB: 0x2b, Q: 0x14, W: 0x1a, E: 0x08, R: 0x15, T: 0x17, Y: 0x1c, U: 0x18, I: 0x0c, O: 0x12, P: 0x13, LEFTBRACE: 0x2f, RIGHTBRACE: 0x30, BACKSLASH: 0x31, DELETE: 0x4c, END: 0x4d, PAGEDOWN: 0x4e, NUM_7: 0x5f, NUM_8: 0x60, NUM_9: 0x61, NUM_PLUS: 0x57,
   CAPSLOCK: 0x39, A: 0x04, S: 0x16, D: 0x07, F: 0x09, G: 0x0a, H: 0x0b, J: 0x0d, K: 0x0e, L: 0x0f, SEMICOLON: 0x33, APOSTROPHE: 0x34, ENTER: 0x28, NUM_4: 0x5c, NUM_5: 0x5d, NUM_6: 0x5e,
   LEFTSHIFT: 0xe1, Z: 0x1d, X: 0x1b, C: 0x06, V: 0x19, B: 0x05, N: 0x11, M: 0x10, COMMA: 0x36, DOT: 0x37, SLASH: 0x38, RIGHTSHIFT: 0xe5, UP: 0x52, NUM_1: 0x59, NUM_2: 0x5a, NUM_3: 0x5b, NUM_ENTER: 0x58,
@@ -107,7 +107,7 @@ export const KEY_FUNCTION_MAP: Record<number, string> = {
   0xF11101: "Light Test",
   0xF11201: "Light Custom",
   0xF11301: "One Click White Light",
-
+  
   // 侧灯区
   0xF10102: "Side Light Mode -",
   0xF10202: "Side Light Mode +",
@@ -186,7 +186,7 @@ export const resolveKeyFunctionByRawTriplet = (
 };
 /**
  * 扩展转换：某些场景会拿到 100100 / 100200 这类值，
- * 在这里把"原始值"映射成标准 HID code（十进制）。
+ * 在这里把“原始值”映射成标准 HID code（十进制）。
  */
 export const RAW_VALUE_TO_CODE_MAP: Record<number, number> = {
   // 100100: 41, // => Esc (0x29)
@@ -198,9 +198,9 @@ export const RAW_VALUE_TO_CODE_MAP: Record<number, number> = {
   102000: 0xe5,  // R-Shift
   104000: 0xe6,  // R-Alt
   108000: 0xe7,  // R-Gui
-  0xF00001: 245,  // FN1
-  0xF00002: 246,  // FN2
-  0xF00003: 247,  // FN3
+  0xF0FF01: 245,  // FN1
+  0xF0FF02: 246,  // FN2
+  0xF0FF03: 247,  // FN3
 };
 
 export const normalizeToHidCode = (value: number): number => {
@@ -208,6 +208,92 @@ export const normalizeToHidCode = (value: number): number => {
     return RAW_VALUE_TO_CODE_MAP[value]!;
   }
   return value;
+};
+
+/** ext/code 组合为 100xxx 等原始值（修饰键场景） */
+export const resolveRawCodeValue = (extByte: number, codeByte: number): number => {
+  if (codeByte !== 0) return codeByte;
+  if (extByte > 0) return Number(`10${extByte.toString(16).padStart(2, "0")}00`);
+  return 0;
+};
+
+/**
+ * 从 0x07 默认按键三字节 [type, ext, code] 解析标准 HID code。
+ * - 普通键：0x10 0x00 code
+ * - 修饰键等：ext 组合为 100xxx，经 {@link RAW_VALUE_TO_CODE_MAP} 转换（如 LEFTSHIFT）
+ * - FN 键：0xF0 ext code → (type<<16|ext<<8|code)
+ */
+export const resolveHidCodeFromDefaultKeyTriplet = (
+  rawType: number,
+  extByte: number,
+  codeByte: number,
+): number => {
+  const t = rawType & 0xff;
+  const e = extByte & 0xff;
+  const c = codeByte & 0xff;
+
+  const tripletComposite = (t << 16) | (e << 8) | c;
+  const fromTriplet = normalizeToHidCode(tripletComposite);
+  if (fromTriplet in KEY_NAME_BY_CODE) {
+    return fromTriplet;
+  }
+
+  if (t === 0x10 && e === 0x00 && c !== 0) {
+    return normalizeToHidCode(c);
+  }
+
+  return normalizeToHidCode(resolveRawCodeValue(e, c));
+};
+
+/** 解析后的 HID code 是否在 EVENT_TO_CODE_MAP 中有对应按键 */
+export const isKnownEventKeyCode = (code: number): boolean => {
+  const hid = normalizeToHidCode(code);
+  return hid in KEY_NAME_BY_CODE;
+};
+
+/**
+ * 对外 type + HID code → 设备三字节 [type, ext, code]（用于 0x09 改键）
+ * - type 0 普通键：0x10 0x00 code
+ * - type 0 修饰键：0x10 ext 0x00（ext 来自 RAW_VALUE_TO_CODE_MAP 反查）
+ * - FN 等：RAW_VALUE_TO_CODE_MAP 三字节组合（如 0xF0FF01 → FN1）
+ */
+export const encodeKeyTripletFromOutput = (
+  outType: number,
+  hidCode: number,
+): [number, number, number] => {
+  const code = normalizeToHidCode(hidCode);
+
+  if (outType === 0) {
+    for (const [raw, mapped] of Object.entries(RAW_VALUE_TO_CODE_MAP)) {
+      if (mapped !== code) continue;
+      const rawNum = Number(raw);
+      if (rawNum >= 0x10000) {
+        return [(rawNum >> 16) & 0xff, (rawNum >> 8) & 0xff, rawNum & 0xff];
+      }
+      if (rawNum >= 100000) {
+        const ext = Math.floor((rawNum - 100000) / 100);
+        return [0x10, ext, 0];
+      }
+    }
+    return [0x10, 0x00, code & 0xff];
+  }
+
+  for (const [firstByte, mappedType] of Object.entries(KEY_TYPE_OUTPUT_BY_FIRST_BYTE)) {
+    if (mappedType === outType) {
+      const t = Number(firstByte) & 0xff;
+      if (t === 0xf1) {
+        for (const [composite, mt] of Object.entries(KEY_TYPE_OUTPUT_F1_COMPOSITE_MAP)) {
+          if (mt === outType) {
+            const c = Number(composite) & 0xff;
+            return [0xf1, 0x00, c];
+          }
+        }
+      }
+      return [t, 0x00, code & 0xff];
+    }
+  }
+
+  return [0x10, 0x00, code & 0xff];
 };
 
 /**
