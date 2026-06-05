@@ -1,5 +1,6 @@
 import requestClient from './config';
-import type { KeyboardSetting, SetKeyboardSetting, DeviceInfo } from './modules/keyboard-setting';
+import type { KeyboardSetting, SetKeyboardSetting } from './modules/keyboard-setting';
+import { createSession } from '@sa/keyboard-protocol';
 
 export function getKeyboardSetting() {
   return requestClient.send<KeyboardSetting>({
@@ -21,7 +22,9 @@ export function resetKeyboard() {
 }
 
 export function getDeviceInfo() {
-  return requestClient.send<DeviceInfo>({
-    name: 'getDeviceInfo'
-  });
+  return requestClient.executeSession(
+    createSession({
+      name: 'getDeviceInfo'
+    })
+  );
 }

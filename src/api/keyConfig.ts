@@ -1,5 +1,5 @@
 import requestClient from './config';
-import type { ConfigAndLayer, KeyInfo, LayerKeysConfig } from './modules/keyboard';
+import type { ConfigAndLayer } from './modules/keyboard';
 import { createSession, SessionRequestData } from '@sa/keyboard-protocol';
 
 /**
@@ -35,15 +35,13 @@ export function restoreKeyConfig(data: { key: string }) {
     })
   );
 }
-export function setKeyInfo(data: {
-  keys: (Partial<KeyInfo> & {
-    key: string;
-  })[];
-}) {
-  return requestClient.send<null>({
-    name: 'setKeyInfo',
-    data
-  });
+export function setKeyInfo(data: SessionRequestData<'setKeyInfo'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setKeyInfo',
+      data
+    })
+  );
 }
 export function getDeviceConfigAndLayer(): Promise<ConfigAndLayer> {
   return new Promise((resolve, reject) => {
@@ -68,8 +66,10 @@ export function updateDeviceCfgAndLayer(data: { layerIdx: number; cfgIdx: number
     config_index: data.cfgIdx,
     layer_index: data.layerIdx
   };
-  return requestClient.send<null>({
-    name: 'setConfigLayerIndex',
-    data: sendData
-  });
+  return requestClient.executeSession(
+    createSession({
+      name: 'setConfigLayerIndex',
+      data: sendData
+    })
+  );
 }

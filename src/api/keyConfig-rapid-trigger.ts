@@ -1,53 +1,60 @@
 import requestClient from './config';
-import type {
-  Calibration,
-  GetKeyPerf,
-  Rate,
-  RateIndex,
-  SetKeyPerf,
-  SetKeyPerfCallback
-} from './modules/keyboard-rapid-trigger';
+import { createSession, type SessionRequestData } from '@sa/keyboard-protocol';
 
-export function getPerf(data?: { key: string[] }) {
-  return requestClient.send<GetKeyPerf>({
-    name: 'getPerf',
-    data
-  });
+export function getPerf(data?: SessionRequestData<'getPerf'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getPerf',
+      data
+    })
+  );
 }
 
-export function setPerf(data: SetKeyPerf) {
-  return requestClient.send<SetKeyPerfCallback>({
-    name: 'setPerf',
-    data
-  });
+export function setPerf(data: SessionRequestData<'setPerf'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setPerf',
+      data
+    })
+  );
 }
 
 export function getCalibration() {
-  return requestClient.send<Calibration>({
-    name: 'getCalibration'
-  });
+  return requestClient.executeSession(
+    createSession({
+      name: 'getCalibration'
+    })
+  );
 }
-export function setCalibration(data: Calibration) {
-  return requestClient.send<Calibration>({
-    name: 'setCalibration',
-    data
-  });
+export function setCalibration(data: SessionRequestData<'setCalibration'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setCalibration',
+      data
+    })
+  );
 }
 
 export function getRate() {
-  return requestClient.send<Rate>({
-    name: 'getRate'
-  });
+  return requestClient.executeSession(
+    createSession({
+      name: 'getRate'
+    })
+  );
 }
-export function setRate(data: RateIndex) {
-  return requestClient.send<RateIndex>({
-    name: 'setRate',
-    data
-  });
+export function setRate(data: SessionRequestData<'setRate'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setRate',
+      data
+    })
+  );
 }
-export function resetRt(data: string[]) {
-  return requestClient.send<RateIndex>({
-    name: 'resetRT',
-    data
-  });
+export function resetRt(data: SessionRequestData<'resetRT'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'resetRT',
+      data
+    })
+  );
 }
