@@ -98,7 +98,9 @@ export class UsbTransfor {
     return await this.requestBinary<string>(data, cfg);
   }
 
-  async executeSession<T>(session: DeviceSession<{ code: number; data: T }>): Promise<T> {
+  executeSession<T>(session: DeviceSession<{ code: number; data: T }>): Promise<T>;
+  executeSession(session: DeviceSession<{ code: number; message?: string }>): Promise<void>;
+  async executeSession<T>(session: DeviceSession<{ code: number; data?: T; message?: string }>): Promise<T | void> {
     if (useMock) {
       const name = (session as any)._requestName;
       let mock = mockData[name];
