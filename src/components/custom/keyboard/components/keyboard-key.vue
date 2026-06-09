@@ -18,6 +18,7 @@ interface KeyboardKeyProps {
   mt?: BaseKeyView;
   dks?: boolean;
   sp?: KeyTypeEnum[];
+  keyClassName?: string[]
 }
 const emit = defineEmits<{
   (e: 'lastKeyMounted', preload: null): void;
@@ -42,7 +43,7 @@ function useLayout(cfg: any) {
     } = keyInfo.value;
     const kw = width || base.width || 0;
     const kh = height || base.height || 0;
-    if (top > -1 && top > -1) {
+    if (left > -1 && top > -1) {
       keyStyle.value = {
         width: `${kw}px`,
         height: `${kh}px`,
@@ -80,17 +81,15 @@ function updateKeyView(data: any) {
   KeyView.icon = data.icon;
   KeyView.type = data.type;
 }
-onMounted(async () => {
-  const injectSelectedDetail = inject('selectedDetail') as any;
-  useLayout(kbCfg);
-  const specKeyEffect = (code: number, type: KeyTypeEnum) => {
+function handleKeyCfgChanged (){
+    const specKeyEffect = (code: number, type: KeyTypeEnum) => {
     if (KeyTypeEnum.Combo === type) {
       commonStore.updateComboKeyTag(props.keyId, { code, type }, { type: 'add', updateOrigin: false });
     } else if (KeyTypeEnum.DKS === type) {
       commonStore.updateDksKeyTag(props.keyId, { code, type }, { type: 'add', updateOrigin: false });
     }
   };
-  function updateKeyCfg(data: KeyCfg) {
+  const updateKeyCfg = (data: KeyCfg) => {
     if (!data) {
       const detail = keyboardStore.getKeyDetail({ code: -10, type: -1 as KeyTypeEnum });
       updateKeyView(detail);
@@ -101,17 +100,6 @@ onMounted(async () => {
     const detail = keyboardStore.getKeyDetail({ code, type });
     updateKeyView(detail);
   }
-  function updateKeyViewBySelectedDetail(data: any) {
-    if (!props.selected) {
-      return;
-    }
-    if (props.keyId === data?.keyId) {
-      updateKeyView(toRaw(data));
-    }
-  }
-  watchEffect(() => {
-    updateKeyViewBySelectedDetail(injectSelectedDetail.value);
-  });
   watch(
     () => props.keyDetail,
     nVal => {
@@ -122,6 +110,29 @@ onMounted(async () => {
       deep: true
     }
   );
+}
+function handleKeySelectd(){
+  const injectSelectedDetail = inject('selectedDetail') as any;
+  const updateKeyViewBySelectedDetail = (data: any) => {
+    if (!props.selected) {
+      return;
+    }
+    if (props.keyId === data?.keyId) {
+      updateKeyView(toRaw(data));
+    }
+  }
+  if(!injectSelectedDetail?.value){
+    return
+  }
+  watchEffect(() => {
+    updateKeyViewBySelectedDetail(injectSelectedDetail.value);
+  });
+}
+
+onMounted(async () => {
+  handleKeyCfgChanged()
+  useLayout(kbCfg);
+  handleKeySelectd()
   if (props.kbLength !== undefined && props.kbLength === props.idx + 1) {
     emit('lastKeyMounted', null);
   }
@@ -171,7 +182,8 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
             '!text-[#3C8DF4]': selected,
             'opacity-30': localDisable,
             'hover:cursor-pointer': !localDisable
-          }
+          },
+          ...(keyClassName || [])
         ]"
         :data-id="keyId"
         :data-idx="idx"
@@ -228,3 +240,10 @@ const isLightColor = ['W', 'A', 'S', 'D', 'UP', 'DOWN', 'LEFT', 'RIGHT'].include
     <!--feat: KEY DESCRIPTION -->
   </NTooltip>
 </template>
+
+<style scoped>
+.key-passed {
+  background: #3C8DF4 !important;
+  color: white;
+}
+</style>
