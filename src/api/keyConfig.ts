@@ -27,7 +27,7 @@ export function getKeyInfo(data: SessionRequestData<'getKeyInfo'>) {
   );
 }
 
-export function restoreKeyConfig(data: { key: string }) {
+export function restoreKeyConfig(data: SessionRequestData<'resetKeyInfo'>) {
   return requestClient.executeSession(
     createSession({
       name: 'resetKeyInfo',

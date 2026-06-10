@@ -180,9 +180,11 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
     );
     const [keyLayerInfo, resetKeyLayerInfo] = useResttableReactiveFn(() => ({
       configCount: 0,
-      configIndex: 0,
+      configIndex: 0, // view index
       layerIndex: 0,
-      layerCount: 0
+      layerCount: 0, // view index
+      currentConfig: 0, // device index
+      currentLayer: 0, // device index
     }));
     const generateSuperKey = () => {
       return {
@@ -359,8 +361,10 @@ export const useKeyboardStore = defineStore(SetupStoreId.Keyboard, () => {
       const { configCount, configIndex, layerIndex, layerCount } = await getDeviceConfigAndLayer();
       keyLayerInfo.configCount = configCount;
       keyLayerInfo.configIndex = configIndex;
-      keyLayerInfo.layerIndex = layerIndex;
+      keyLayerInfo.currentConfig = configIndex;
       keyLayerInfo.layerCount = layerCount;
+      keyLayerInfo.layerIndex = layerIndex;
+      keyLayerInfo.currentLayer = layerIndex;
     };
     const updateSuperKey = (keyId: string, { moduleType, mtCfg }: { moduleType: KeyTypeEnum; mtCfg?: any }) => {
       let superKey = activeKeyLayer.superKeyMap[keyId];

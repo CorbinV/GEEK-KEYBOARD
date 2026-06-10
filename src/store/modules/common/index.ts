@@ -12,7 +12,7 @@ import { deleteMTByCode, deleteSpByCode } from '@/api/super-key';
 
 function useKeyInfo() {
   const keyboardStore = useKeyboardStore();
-  const { setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag, pushState } = keyboardStore;
+  const { keyLayerInfo, setKeyDisabled, updateKeyBase, removeSuperKey, updateKeyTag, pushState } = keyboardStore;
   // key cache
   const activeKeyLayer = toRef(keyboardStore, 'activeKeyLayer');
   const keyConfigMap = computed(() => activeKeyLayer.value.keys);
@@ -20,7 +20,7 @@ function useKeyInfo() {
   const { triggerToPage, sensitivityToPage } = useConver();
 
   async function fetchTargetKeyInfo(key: string) {
-    const keyInfo = await getKeyInfo({ key });
+    const keyInfo = await getKeyInfo({ key, layer: keyLayerInfo.currentLayer });
     keyConfigMap.value[key] = keyInfo;
     updateTaryDataCache([key]);
     return keyInfo;
@@ -59,7 +59,8 @@ function useKeyInfo() {
             key,
             ...data
           }
-        ]
+        ],
+        layer: keyLayerInfo.currentLayer
       });
     }
     if (data.code !== undefined) {
@@ -82,7 +83,8 @@ function useKeyInfo() {
     })[]
   ) {
     await setKeyInfo({
-      keys: data.map(item => item)
+      keys: data.map(item => item),
+      layer: keyLayerInfo.currentLayer
     });
     data.forEach(item => {
       const { key, ...rest } = item;
@@ -91,7 +93,7 @@ function useKeyInfo() {
     });
   }
   async function restoreTargetKeyInfoById(key: string) {
-    const data = await restoreKeyConfig({ key });
+    const data = await restoreKeyConfig({ key, layer: keyLayerInfo.currentLayer });
     keyConfigMap.value[key] = data;
     updateKeyBase(key, data);
     removeSuperKey(key, { moduleType: KeyTypeEnum.None, removeAll: true });
@@ -112,7 +114,7 @@ function useKeyInfo() {
     if (!updateOrigin || !keyId) {
       return keyId;
     }
-    const keyInfo = await getKeyInfo({ key: keyId });
+    const keyInfo = await getKeyInfo({ key: keyId, layer: keyLayerInfo.currentLayer });
     keyConfigMap.value[keyId] = keyInfo;
     updateKeyBase(keyId, { code: keyInfo.code, type: keyInfo.type });
     return keyId;
@@ -136,7 +138,7 @@ function useKeyInfo() {
     return new Promise((res, rej) => {
       const fetchTary = async () => {
         try {
-          const { len, keys: taryObj } = await getPerf();
+          const { len, keys: taryObj } = await getPerf({ key: [], layer: keyLayerInfo.currentLayer });
           lenCnt += Object.keys(taryObj).length;
           Object.keys(taryObj).forEach(key => {
             if (!activeKeyLayer.value.keys[key]) {

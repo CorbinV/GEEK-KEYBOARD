@@ -311,7 +311,7 @@ async function handleApiReverseSelete() {
 }
 async function handleApiResetRtFnc(selectKeyList: string[]) {
   try {
-    await resetRt(selectKeyList);
+    await resetRt({ key: selectKeyList, layer: keyboardStore.keyLayerInfo.currentLayer });
     window.$message?.success($t('businessCommon.executeSuccess'));
   } catch (error) {
     console.error(error);
