@@ -29,6 +29,20 @@ export type {
   GetKeyInfoParams,
 } from './vendor/KeyboardAPI';
 
+// vendor 推送事件导出
+export {
+  type PushHandler,
+  type PushResultMap,
+  type PushName,
+  getPushHandler,
+} from './vendor/KeyboardAPI';
+
+// 二进制匹配规则（HID 路由基础设施）
+export type BinaryMatchPattern = {
+  position: number;
+  value: number;
+};
+
 // vendor 按键映射导出
 export {
   EVENT_TO_CODE_MAP,
