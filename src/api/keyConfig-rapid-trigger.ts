@@ -58,3 +58,9 @@ export function resetRt(data: SessionRequestData<'resetRT'>) {
     })
   );
 }
+export function onCalibrationListener(cb: (data: { key: string }) => void) {
+  requestClient.subscribe("onCalibration", cb);
+}
+export function removeCalibrationListener(cb: (data: { key: string }) => void) {
+  requestClient.unsubscribe("onCalibration", cb);
+}
