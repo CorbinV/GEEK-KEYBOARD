@@ -45,7 +45,7 @@ export const KEY_NAME_BY_CODE: Record<number, string> = (() => {
 })();
 
 /**
- * keys 返回顺序（按你维护的映射顺序）
+ * keys
  */
 export const KEY_RETURN_ORDER: string[] = [
   "ESC", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "SYSRQ", "SCROLLLOCK", "PAUSE", "FN1", "FN2", "FN3",
@@ -190,14 +190,14 @@ export const resolveKeyFunctionByRawTriplet = (
  */
 export const RAW_VALUE_TO_CODE_MAP: Record<number, number> = {
   // 100100: 41, // => Esc (0x29)
-  100100: 0xe0,  // L-Ctrl
-  100200: 0xe1,  // L-Shift
-  100400: 0xe2,  // L-Alt
-  100800: 0xe3,  // L-Gui
-  101000: 0xe4,  // R-Ctrl
-  102000: 0xe5,  // R-Shift
-  104000: 0xe6,  // R-Alt
-  108000: 0xe7,  // R-Gui
+  0x100100: 0xe0,  // L-Ctrl
+  0x100200: 0xe1,  // L-Shift
+  0x100400: 0xe2,  // L-Alt
+  0x100800: 0xe3,  // L-Gui
+  0x101000: 0xe4,  // R-Ctrl
+  0x102000: 0xe5,  // R-Shift
+  0x104000: 0xe6,  // R-Alt
+  0x108000: 0xe7,  // R-Gui
   0xF0FF01: 245,  // FN1
   0xF0FF02: 246,  // FN2
   0xF0FF03: 247,  // FN3

@@ -19,7 +19,6 @@ import {
   resolveHidCodeFromDefaultKeyTriplet,
   resolveKeyFunctionByRawTriplet,
   resolveKeyNameByCode,
-  resolveRawCodeValue,
 } from "./KeyCodeName";
 
 // ─── 公开类型 ─────────────────────────────────────────────────────────────────
@@ -44,58 +43,181 @@ export type BasicConfig = {
   layer_index: number;
 };
 
-export type SetBasicConfigParams = { config_index: number; layer_index: number };
-export type GetBasicKeyParams = { config: number; layer: number; pageNo: number; pageSize: number };
-export type GetKeyInfoParams = { key: string; config?: number; layer?: number };
-export type SetKeyInfoKeyParams = {
+export type SetBasicConfigParams  = { config_index: number; layer_index: number };
+export type GetBasicKeyParams    = { layer: number; pageNo: number; pageSize: number };
+export type GetKeyInfoParams     = { key: string; layer?: number };
+export type GetKeyInfoData       = {
   key: string;
   type: number;
   code: number;
-  enable?: number;
-  tary?: number[];
-  super?: number[];
-  mt?: number[];
+  enable: number;
+  tary: number[];
+  super: number[];
+  mt: number[];
 };
-export type SetKeyInfoParams = { keys: SetKeyInfoKeyParams[]; config?: number; layer?: number };
-export type ResetKeyInfoParams = { key: string; config?: number; layer?: number };
-export type ResetRTParams = { key: string[]; config?: number; layer?: number };
-export type GetRateParams = Record<string, never>;
-export type GetPerfParams = { key: string[]; config?: number; layer?: number };
-export type SetPerfParams = { key: string[]; tary: number[]; config?: number; layer?: number };
-export type SetRateParams = { index: number };
+export type SetKeyInfoKeyParams  = {
+  key: string;
+  type: number;
+  code: number;
+  enable: number;
+  tary: number[];
+  super: number[];
+  mt: number[];
+};
+export type SetKeyInfoParams     = { keys: SetKeyInfoKeyParams[]; layer?: number };
+export type ResetKeyInfoParams   = { key: string; layer?: number };
+export type ResetRTParams        = { key: string[]; layer?: number };
+export type GetRateParams        = Record<string, never>;
+export type GetPerfParams        = { key: string[]; layer?: number };
+export type SetPerfParams        = { key: string[]; tary: number[]; layer?: number };
+export type SetRateParams        = { index: number };
 export type SetBiCalibrationParams = { switch: number };
-export type SetCalibrationParams = { switch: number };
+export type SetCalibrationParams   = { switch: number };
+
+export type GetLightData = {
+  isRGB: number;
+  pattern: number;
+  brightness: number;
+  speed: number;
+  R: number;
+  G: number;
+  B: number;
+};
+
+export type SetLightParams = {
+  isRGB:      number;
+  pattern:    number;
+  brightness: number;
+  speed:      number;
+  sleep:      number;
+  R:          number;
+  G:          number;
+  B:          number;
+};
+
+export type DKSKeyItem = {
+  code:  number;   // 按键 HID code
+  key:   string;   // 按键名称
+  range: number[];
+};
+
+export type DKSShortcut = {
+  type:            number;     // 5 = DKS
+  code:            number;     // 按键 HID code
+  name:            string;     // DKS 条目索引
+  simulation:      number;     // 默认 1
+  simulationRange: number[];   // 默认 [200, 200]
+  range:           number[];   // 来自 0xa2 条目前 4 字节
+  keys:            DKSKeyItem[]; // 来自 0xa2 条目后 20 字节（4 × 5 字节）
+};
+
+export type GetDKSParams = {
+  type:   number;   // 5 = DKS
+  code:   number;   // 按键 HID code
+  layer?: number;   // 目标层
+};
+
+export type DelDKSParams = {
+  code:   number;   // 要删除的 DKS 按键 HID code
+  layer?: number;   // 目标层（全局 0~12），缺省时读设备当前层
+};
+
+export type DelTGLParams = {
+  code:   number;   // 要删除的 TGL 按键 HID code
+  layer?: number;   // 目标层（全局 0~12），缺省时读设备当前层
+};
+
+export type SetDKSParams = {
+  type:             number;
+  code:             number;
+  key:              string;
+  name:             string;
+  simulation:       number;
+  simulationRange:  number[];
+  range:            number[];
+  keys:             DKSKeyItem[];
+  layer?:           number;
+};
+
+export type GetTGLListParams = {
+  pageNo:   number;
+  pageSize: number;
+};
+
+export type GetTGLParams = {
+  type:   number;   // 10 = TGL
+  code:   number;
+  layer?: number;   // 目标层（全局 0~12），缺省时读设备当前层
+};
+
+export type SetTGLParams = {
+  type:   number;        // 10 = TGL
+  code:   number;        // 按键 HID code（0x07 默认矩阵匹配）
+  keys:   TGLKeyItem[];  // [0]=矩阵键（参考）, [1]=TGL 功能键定义
+  layer?: number;        // 目标层（全局 0~12），缺省时读设备当前层
+};
+
+export type TGLKeyItem = {
+  key:  string;
+  code: number;
+  type: number;
+};
+
+export type TGLEntry = {
+  type: number;       // 固定 10（TGL）
+  code: number;
+  keys: TGLKeyItem[];
+};
+
+/** 设备主动上报的校准事件（仅响应，无请求） */
+export type OnCalibrationResult = {
+  name: "onCalibration";
+  code: number;
+  data: { key: string };
+  message?: string;
+};
 
 // ─── 协议常量 ─────────────────────────────────────────────────────────────────
 
-const FLAG = 0x55; // 命令标志
-const GET_Version_COMMAND = 0x03; // 获取固件版本命令
-const GET_Base = [0x04, 0x00, 0x20, 0x20] as const;
-const GET_Func_COMMAND = 0x05; // 获取功能配置命令
-const SET_Func_COMMAND = 0x06; // 设置功能配置命令
+const FLAG                    = 0x55; // 命令标志
+const GET_Version_COMMAND     = 0x03; // 获取固件版本命令
+const GET_Base                = [0x04, 0x00, 0x20, 0x20] as const;
+const GET_Func_COMMAND        = 0x05; // 获取功能配置命令
+const SET_Func_COMMAND        = 0x06; // 设置功能配置命令
 const GET_KEY_DEFAULT_COMMAND = 0x07; // 获取默认按键配置命令
 const GET_KEY_CURRENT_COMMAND = 0x08; // 获取当前按键配置命令
 const SET_KEY_CURRENT_COMMAND = 0x09; // 设置当前按键配置命令
-const GET_KEY_TARY_COMMAND = 0xa0; // 获取按键触发参数命令
-const SET_KEY_TARY_COMMAND = 0xa1; // 设置按键触发参数命令
-const GET_DKS_COMMAND = 0xa2; // 获取 DKS 高级按键数据命令
-const SET_DKS_COMMAND = 0xa3; // 设置 DKS 高级按键数据命令
-const GET_TGL_COMMAND = 0xa6; // 获取 TGL 高级按键数据命令
-const SET_TGL_COMMAND = 0xa7; // 设置 TGL 高级按键数据命令
-const TGL_AREA_SIZE = 128;  // TGL 数据区大小（每个板载）
-const TGL_ENTRY_SIZE = 3;    // 每条 TGL 数据大小（字节）
-const PERF_CFG_MASK_OFFSET = 7;    // funcData 中 Perf_Cfg_mask 的字节偏移
-const RATE_CFG_OFFSET = 12;   // funcData 中轮询率的字节偏移
-const CALIBRATION_CFG_OFFSET = 15;   // funcData 中校准开关的字节偏移（bit3）
-const DKS_AREA_SIZE = 768;  // DKS 数据区大小（每个板载）
-const DKS_ENTRY_SIZE = 24;   // 每条 DKS 数据大小（字节）
-const DATA_LENGTH = 51;   // 数据长度
-const KEY_LAYER_LENGTH = 512;  // 按键层长度
-const KEY_ITEM_SIZE = 3;    // 按键项大小
-const KEY_TARY_ITEM_SIZE = 8;    // 按键触发参数项大小
-const KEY_COUNT = Math.floor(KEY_LAYER_LENGTH / KEY_ITEM_SIZE); // 按键槽位数（170）
-const ADVANCED_MT_TYPE = 9;    // 高级键MT类型
-const ADVANCED_SUPER_TYPES = new Set([5, 6, 7, 8, 10, 11]); // 高级键Super类型集合
+const GET_KEY_TARY_COMMAND    = 0xa0; // 获取按键触发参数命令
+const SET_KEY_TARY_COMMAND    = 0xa1; // 设置按键触发参数命令
+const ON_CALIBRATION_REPORT   = 0xa1; // 设备主动上报：校准事件标识（buffer[0]）
+const GET_DKS_COMMAND         = 0xa2; // 获取 DKS 高级按键数据命令
+const SET_DKS_COMMAND         = 0xa3; // 设置 DKS 高级按键数据命令
+const GET_TGL_COMMAND         = 0xa6; // 获取 TGL 高级按键数据命令
+const SET_TGL_COMMAND         = 0xa7; // 设置 TGL 高级按键数据命令
+const DKS_AREA_SIZE           = 768;  // DKS 数据区大小（每个板载）
+const DKS_ENTRY_SIZE          = 24;   // 每条 DKS 数据大小（字节）
+const TGL_AREA_SIZE           = 128;  // TGL 数据区大小（每个板载）
+const TGL_ENTRY_SIZE          = 3;    // 每条 TGL 数据大小（字节）
+const TGL_LIST_LEN            = 8;    // getTGLList 返回 len 默认值（128/16）
+const MT_AREA_SIZE            = 256;  // MT 数据区大小（每个板载）
+const MT_ENTRY_SIZE           = 6;    // 每条 MT 数据大小（字节）
+const PERF_CFG_MASK_OFFSET    = 7;    // funcData 中 Perf_Cfg_mask 的字节偏移
+const RATE_CFG_OFFSET         = 12;   // funcData 中轮询率的字节偏移
+const CALIBRATION_CFG_OFFSET  = 15;   // funcData 中校准开关的字节偏移（bit3）
+const LIGHT_PATTERN_OFFSET    = 16;   // funcData 灯光模式（第 16 字节）
+const LIGHT_BRIGHTNESS_OFFSET = 17;   // funcData 亮度（第 17 字节）
+const LIGHT_SPEED_OFFSET      = 18;   // funcData 速度（第 18 字节）
+const LIGHT_IS_RGB_OFFSET     = 20;   // funcData 是否 RGB（第 20 字节）
+const LIGHT_R_OFFSET          = 22;   // funcData R（第 22 字节）
+const LIGHT_G_OFFSET          = 23;   // funcData G（第 23 字节）
+const LIGHT_B_OFFSET          = 24;   // funcData B（第 24 字节）
+const DATA_LENGTH             = 51;   // 数据长度
+const KEY_LAYER_LENGTH        = 512;  // 按键层长度
+const KEY_ITEM_SIZE           = 3;    // 按键项大小
+const KEY_TARY_ITEM_SIZE      = 8;    // 按键触发参数项大小
+const KEY_COUNT               = Math.floor(KEY_LAYER_LENGTH / KEY_ITEM_SIZE); // 按键槽位数（170）
+const ADVANCED_MT_TYPE        = 9;    // 高级键MT类型
+const ADVANCED_SUPER_TYPES    = new Set([5, 6, 7, 8, 10, 11]); // 高级键Super类型集合
 
 // resetKeyInfo：需要特殊处理的高级类型首字节集合（0x90/0x95/0x94/0x92/0x91/0x93）
 const KEY_TYPE_ADVANCED_FIRST_BYTES = new Set([0x90, 0x95, 0x94, 0x92, 0x91, 0x93]);
@@ -111,9 +233,9 @@ const KEY_TYPE_ADVANCED_FIRST_BYTES = new Set([0x90, 0x95, 0x94, 0x92, 0x91, 0x9
  *  - 0xa1 数据实际只含：轴体(1) 触发模式(1) 行程(2) 触发灵敏度+顶部死区(2) 抬起灵敏度+底部死区(2)
  */
 const RESET_DEFAULT_TARY = [150, 1, 20, 20, 0, 1, 5, 5] as const;
-const RESET_RT_TARY = [150, 1, 20, 20, 0, 1, 5, 5] as const;
-const DEFAULT_TARY_AXIS = 0xa0;    // 0xa1 触发参数默认轴体
-const RATE_SUPPORT = [1000, 2000, 4000, 8000] as const;
+const RESET_RT_TARY      = [150, 1, 20, 20, 0, 1, 5, 5] as const;
+const DEFAULT_TARY_AXIS  = 0xa0;    // 0xa1 触发参数默认轴体
+const RATE_SUPPORT       = [1000, 2000, 4000, 8000] as const;
 
 // ─── 内部工具 ─────────────────────────────────────────────────────────────────
 
@@ -151,14 +273,14 @@ const buildKeyIndexMapFromDefaultLayer = (
 ): Record<string, number> => {
   const keyIndexMap: Record<string, number> = {};
   for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const rawType = rawDefaultLayerData[base] ?? 0;
-    const extDef = rawDefaultLayerData[base + 1] ?? 0;
-    const codeDef = rawDefaultLayerData[base + 2] ?? 0;
-    const hidCode = resolveHidCodeFromDefaultKeyTriplet(rawType, extDef, codeDef);
+    const base     = i * KEY_ITEM_SIZE;
+    const rawType  = rawDefaultLayerData[base] ?? 0;
+    const extDef   = rawDefaultLayerData[base + 1] ?? 0;
+    const codeDef  = rawDefaultLayerData[base + 2] ?? 0;
+    const hidCode  = resolveHidCodeFromDefaultKeyTriplet(rawType, extDef, codeDef);
     if (!isKnownEventKeyCode(hidCode)) continue;
-    const kName = resolveKeyNameByCode(hidCode, KEY_RETURN_ORDER[i] ?? `K${i}`);
-    const nk = normalizeKeyName(kName);
+    const kName    = resolveKeyNameByCode(hidCode, KEY_RETURN_ORDER[i] ?? `K${i}`);
+    const nk       = normalizeKeyName(kName);
     if (keyIndexMap[nk] === undefined) keyIndexMap[nk] = i;
   }
   return keyIndexMap;
@@ -173,7 +295,7 @@ const resolveKeySlotIndex = (
   const expectedCode = EVENT_TO_CODE_MAP[nk];
 
   for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
+    const base    = i * KEY_ITEM_SIZE;
     const hidCode = resolveHidCodeFromDefaultKeyTriplet(
       rawDefaultLayerData[base] ?? 0,
       rawDefaultLayerData[base + 1] ?? 0,
@@ -193,6 +315,125 @@ const resolveKeySlotIndex = (
   }
   return undefined;
 };
+
+/** 三字节 [type, ext, code] → TGL keys 项 */
+const parseTGLKeyFromTriplet = (
+  rawType: number,
+  extByte: number,
+  codeByte: number,
+  fallbackKey: string,
+): TGLKeyItem => {
+  const hidCode = resolveHidCodeFromDefaultKeyTriplet(rawType, extByte, codeByte);
+  return {
+    key:  resolveKeyNameByCode(hidCode, fallbackKey),
+    code: hidCode,
+    type: convertKeyTypeForOutput(rawType, codeByte),
+  };
+};
+
+/** TGL keys 项 → 三字节 [type, ext, code]（写入 0xa7） */
+const encodeTGLKeyToTriplet = (item: TGLKeyItem): [number, number, number] =>
+  encodeKeyTripletFromOutput(item.type, item.code);
+
+// ─── 写命令响应码解析 ──────────────────────────────────────────────────────────
+
+/**
+ * 解析写命令设备回包，返回 0/1/2/3：
+ *   0 = 成功
+ *   1 = 失败（无数据：回包全为 0）
+ *   2 = 不支持（[8..12] = 0x75,0x6e,0x6b,0x6e,0x77 "unknw"）
+ *   3 = 参数错误（[0]=0xab，[8..12]=0x63,0x73,0x65,0x72,0x72 "cserr"）
+ */
+function parseWriteResponseCode(inPacket: InPacket): number {
+  if (
+    inPacket[8]  === 0x75 && inPacket[9]  === 0x6e &&
+    inPacket[10] === 0x6b && inPacket[11] === 0x6e &&
+    inPacket[12] === 0x77
+  ) return 2;
+  if (
+    inPacket[0]  === 0xab &&
+    inPacket[8]  === 0x63 && inPacket[9]  === 0x73 &&
+    inPacket[10] === 0x65 && inPacket[11] === 0x72 &&
+    inPacket[12] === 0x72
+  ) return 3;
+  if (inPacket.every((b) => b === 0)) return 1;
+  return 0;
+}
+
+/**
+ * 解析 DKS 按键 range 字段
+ *
+ */
+function parseDKSKeyRange(b3: number, b4: number): number[] {
+  const raw = (b3 & 0xff) | ((b4 & 0xff) << 8);
+
+  const selected:   [boolean, boolean, boolean, boolean] = [
+    Boolean((raw >> 0) & 1),
+    Boolean((raw >> 3) & 1),
+    Boolean((raw >> 6) & 1),
+    Boolean((raw >> 9) & 1),
+  ];
+  const continuous: [boolean, boolean, boolean, boolean] = [
+    Boolean((raw >> 1) & 1),
+    Boolean((raw >> 4) & 1),
+    Boolean((raw >> 7) & 1),
+    false,                    // 触点 3 只有 1 bit，无连续位
+  ];
+
+  const range: number[] = [];
+  let i = 0;
+  while (i < 4) {
+    if (!selected[i]) { i++; continue; }
+
+    if (!continuous[i]) {
+      range.push(i, i);
+      i++;
+    } else {
+      // 顺着链找末端：持续向后，直到遇到"非连续"或"未选中"的触点
+      let j = i + 1;
+      while (j < 4 && selected[j] && continuous[j]) j++;
+      // j 处：选中但非连续 → 链尾；或未选中 → 链尾为 j-1
+      if (j < 4 && selected[j]) {
+        range.push(i, j); // 链末端已选中 → j 留到下一轮独立处理
+        i = j;
+      } else {
+        range.push(i, j); // 链末端未选中 → 链尾仍记录为 j（链"试图到达"的位置）
+        i = j + 1;        // j 未选中，直接跳过
+      }
+    }
+  }
+  return range;
+}
+
+function encodeDKSKeyRange(range: number[]): [number, number] {
+  const selected:   boolean[] = [false, false, false, false];
+  const continuous: boolean[] = [false, false, false, false];
+
+  for (let i = 0; i + 1 < range.length; i += 2) {
+    const from = range[i]!;
+    const to   = range[i + 1]!;
+    if (from === to) {
+      if (from >= 0 && from <= 3) selected[from] = true;
+    } else {
+      for (let k = from; k < to && k <= 3; k++) {
+        if (k >= 0) { selected[k] = true; continuous[k] = true; }
+      }
+      if (to >= 0 && to <= 3) selected[to] = true;
+    }
+  }
+
+  // bit2 (next_valid)：触点 i 已选中，且触点 i+1 连续时置 1
+  let value = 0;
+  for (let j = 0; j <= 2; j++) {
+    const sel  = selected[j]   ? 1 : 0;
+    const cont = continuous[j] ? 1 : 0;
+    const nxt  = (selected[j] && continuous[j + 1]) ? 1 : 0;
+    value |= (sel | (cont << 1) | (nxt << 2)) << (j * 3);
+  }
+  value |= (selected[3] ? 1 : 0) << 9;
+
+  return [value & 0xff, (value >> 8) & 0xff];
+}
 
 // ─── 分包读取 Generator（内部复用） ──────────────────────────────────────────
 
@@ -232,6 +473,21 @@ async function* readChunkedDataByCommandGen(
   return chunks.slice(0, totalLength);
 }
 
+/** 0x04 读取当前板载 index；0x05 以 config×64 为偏移读取该板载功能配置区；layer 换算为板载内局部层（0~3） */
+async function* resolveConfigLayerGen(
+  requestLayer?: number,
+): DeviceSession<{ config: number; layer: number; funcData: number[] }> {
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
+  // funcData[1] / requestLayer 均为全局层级（0~12），板载内局部层 = 全局层 - config × 4
+  const rawLayer = Number.isInteger(requestLayer) ? (requestLayer as number) : (funcData[1] ?? 0);
+  const layer    = rawLayer - config * 4;
+  return { config, layer, funcData };
+}
+
 // ─── 导出 Session ─────────────────────────────────────────────────────────────
 
 /**
@@ -248,8 +504,8 @@ export async function* getBasicConfig(): DeviceSession<{ name: "getBasicConfig";
     data: {
       config_count: baseIn[9] ?? 0,
       config_index: baseIn[8] ?? 0,
-      layer_count: 4,
-      layer_index: funcData[1] ?? 0,
+      layer_count:  4,
+      layer_index:  funcData[1] ?? 0,
     },
   };
 }
@@ -269,9 +525,10 @@ export async function* setConfigLayerIndex(
   const dataIn: InPacket = yield buildOutPacket(FLAG, [
     0x0e, 0x00, checkSum, 0x01, 0x00, 0x00, 0x00, config_index,
   ]);
+  const resCode = parseWriteResponseCode(dataIn);
   return {
     name: "setConfigLayerIndex",
-    code: 0,
+    code: resCode,
     data: {
       config_index: dataIn[8] ?? config_index,
       layer_index,
@@ -289,9 +546,7 @@ export async function* setConfigLayerIndex(
 export async function* getBasicKey(
   request: GetBasicKeyParams,
 ): DeviceSession<GetBasicKeyResult> {
-  const { config, layer, pageNo, pageSize } = request;
-  if (!Number.isInteger(config) || config < 0)
-    throw new Error("config must be a non-negative integer");
+  const { layer, pageNo, pageSize } = request;
   if (!Number.isInteger(layer) || layer < 0)
     throw new Error("layer must be a non-negative integer");
   if (!Number.isInteger(pageNo) || pageNo < 1)
@@ -299,8 +554,13 @@ export async function* getBasicKey(
   if (!Number.isInteger(pageSize) || pageSize < 1)
     throw new Error("pageSize must be a positive integer");
 
+  const { config, layer: localLayer, funcData } = yield* resolveConfigLayerGen(layer);
+  const perfCfgMask   = funcData[7] ?? 0;
+  const anti_break_sw = (perfCfgMask >> 1) & 0x01;
+  const debounce_lvl  = (perfCfgMask >> 5) & 0x07;
+
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+  const layerOffset = localLayer * KEY_LAYER_LENGTH + config * profileSize;
 
   const rawDefaultLayerData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
@@ -309,55 +569,45 @@ export async function* getBasicKey(
     FLAG, GET_KEY_CURRENT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  // 获取板载/层数基本配置
-  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  // 获取功能配置
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
-  const currentConfigIndex = baseIn[8] ?? config;
-  const currentLayerIndex = funcData[1] ?? layer;
-  // Perf_Cfg_mask：bit1=断触优化开关，bit5-7=防抖等级
-  const perfCfgMask = funcData[7] ?? 0;
-  const anti_break_sw = (perfCfgMask >> 1) & 0x01;
-  const debounce_lvl = (perfCfgMask >> 5) & 0x07;
-
   const totalKeys = KEY_COUNT;
-  const keyTaryLayerSize = totalKeys * KEY_TARY_ITEM_SIZE;
+  const keyTaryLayerSize   = totalKeys * KEY_TARY_ITEM_SIZE;
   const keyTaryProfileSize = keyTaryLayerSize * 4;
-  const keyTaryOffset = layer * keyTaryLayerSize + config * keyTaryProfileSize;
+  const keyTaryOffset      = localLayer * keyTaryLayerSize + config * keyTaryProfileSize;
 
   const rawTaryData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_TARY_COMMAND, keyTaryOffset, keyTaryLayerSize, DATA_LENGTH,
   );
 
   const getPositionInfo = (rawLayer: number[], keyIndex: number) => {
-    const base = keyIndex * KEY_ITEM_SIZE;
-    const ext = rawLayer[base + 1] ?? 0;
+    const base     = keyIndex * KEY_ITEM_SIZE;
+    const rawType  = rawLayer[base] ?? 0;
+    const ext      = rawLayer[base + 1] ?? 0;
     const codeByte = rawLayer[base + 2] ?? 0;
-    const code = normalizeToHidCode(resolveRawCodeValue(ext, codeByte));
-    const name = resolveKeyNameByCode(code, KEY_RETURN_ORDER[keyIndex] ?? `K${keyIndex}`);
+    const code     = resolveHidCodeFromDefaultKeyTriplet(rawType, ext, codeByte);
+    const name     = resolveKeyNameByCode(code, KEY_RETURN_ORDER[keyIndex] ?? `K${keyIndex}`);
     return { name, code };
   };
 
   const getKeyTary = (keyIndex: number): number[] => {
-    const start = keyIndex * KEY_TARY_ITEM_SIZE;
-    const raw = rawTaryData.slice(start, start + KEY_TARY_ITEM_SIZE);
+    const start           = keyIndex * KEY_TARY_ITEM_SIZE;
+    const raw             = rawTaryData.slice(start, start + KEY_TARY_ITEM_SIZE);
 
     // Byte 1: [4bit 快速触发开关][4bit SOCD优先级策略（保留）]
-    const rt_switch = (raw[1] ?? 0) & 0x0F;
+    const rt_switch       = (raw[1] ?? 0) & 0x0F;
 
     // Bytes 2-3 (16-bit LE): [9bit 触发死区(10~400)][7bit 预留精度切换]
-    const trigger = (raw[2] ?? 0) | ((raw[3] ?? 0) << 8);
-    const trigger_dz = trigger & 0x1FF;
+    const trigger         = (raw[2] ?? 0) | ((raw[3] ?? 0) << 8);
+    const trigger_dz      = trigger & 0x1FF;
 
     // Bytes 4-5 (16-bit LE): [9bit 触发灵敏度][7bit RT顶部死区]
-    const press_region = (raw[4] ?? 0) | ((raw[5] ?? 0) << 8);
-    const press_rt = press_region & 0x1FF;
-    const press_dz = (press_region >> 9) & 0x7F;
+    const press_region    = (raw[4] ?? 0) | ((raw[5] ?? 0) << 8);
+    const press_rt        = press_region & 0x1FF;
+    const press_dz        = (press_region >> 9) & 0x7F;
 
     // Bytes 6-7 (16-bit LE): [9bit 抬起灵敏度][7bit RT底部死区]
-    const release_region = (raw[6] ?? 0) | ((raw[7] ?? 0) << 8);
-    const release_rt = release_region & 0x1FF;
-    const release_dz = (release_region >> 9) & 0x7F;
+    const release_region  = (raw[6] ?? 0) | ((raw[7] ?? 0) << 8);
+    const release_rt      = release_region & 0x1FF;
+    const release_dz      = (release_region >> 9) & 0x7F;
 
     return [
       trigger_dz + 1,     // 触发死区
@@ -378,9 +628,9 @@ export async function* getBasicKey(
   const keysByName: Record<string, KeyEntry> = {};
 
   for (let i = 0; i < totalKeys; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const rawType = rawLayerData[base] ?? 0;
-    const ext = rawLayerData[base + 1] ?? 0;
+    const base     = i * KEY_ITEM_SIZE;
+    const rawType  = rawLayerData[base] ?? 0;
+    const ext      = rawLayerData[base + 1] ?? 0;
     const codeByte = rawLayerData[base + 2] ?? 0;
     const { name: keyName, code: positionCode } = getPositionInfo(rawDefaultLayerData, i);
     if (!keysByName[keyName]) {
@@ -394,9 +644,9 @@ export async function* getBasicKey(
 
   const orderedKeyNames = KEY_RETURN_ORDER.filter((n) => !!keysByName[n]);
   const start = (pageNo - 1) * pageSize;
-  const end = Math.min(start + pageSize, orderedKeyNames.length);
+  const end   = Math.min(start + pageSize, orderedKeyNames.length);
 
-  const keys: GetBasicKeyResult["data"]["keys"] = {};
+  const keys: GetBasicKeyResult["data"]["keys"]  = {};
   const smart: GetBasicKeyResult["data"]["smart"] = {};
 
   for (let i = start; i < end; i++) {
@@ -422,9 +672,9 @@ export async function* getBasicKey(
     code: 0,
     data: {
       len: orderedKeyNames.length,
-      config: currentConfigIndex,
-      layer: currentLayerIndex,
-      name: layer,
+      config,
+      layer: localLayer,
+      name: localLayer,
       disable: [],
       def, keys, smart,
     },
@@ -443,12 +693,13 @@ export async function* getKeyInfo(
   const key = String(request?.key ?? "").trim();
   if (!key) throw new Error("request.key is required");
 
-  // config/layer 先取入参，缺省值在读取 0x04+0x05 后填充
-  let config = request.config;
-  let layer = request.layer;
+  const { config, layer, funcData } = yield* resolveConfigLayerGen(request.layer);
+  const perfCfgMask   = funcData[7] ?? 0;
+  const anti_break_sw = (perfCfgMask >> 1) & 0x01;
+  const debounce_lvl  = (perfCfgMask >> 5) & 0x07;
 
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = (layer as number) * KEY_LAYER_LENGTH + (config as number) * profileSize;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
   const rawDefaultLayerData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
@@ -457,64 +708,55 @@ export async function* getKeyInfo(
     FLAG, GET_KEY_CURRENT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  // 读取功能配置（0x05）获取全局 Perf_Cfg_mask：bit1=断触优化开关，bit5-7=防抖等级
-  const perfBaseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const perfFuncData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
-  if (!Number.isInteger(config)) config = perfBaseIn[8] ?? 0;
-  if (!Number.isInteger(layer)) layer = perfFuncData[1] ?? 0;
-  const perfCfgMask = perfFuncData[7] ?? 0;
-  const anti_break_sw = (perfCfgMask >> 1) & 0x01;
-  const debounce_lvl = (perfCfgMask >> 5) & 0x07;
-
-  const totalKeys = KEY_COUNT;
-  const keyTaryLayerSize = totalKeys * KEY_TARY_ITEM_SIZE;
-  const keyTaryOffset = (layer as number) * keyTaryLayerSize + (config as number) * (keyTaryLayerSize * 4);
+  const totalKeys      = KEY_COUNT;
+  const keyTaryLayerSize   = totalKeys * KEY_TARY_ITEM_SIZE;
+  const keyTaryOffset  = layer * keyTaryLayerSize + config * (keyTaryLayerSize * 4);
 
   const rawTaryData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_TARY_COMMAND, keyTaryOffset, keyTaryLayerSize, DATA_LENGTH,
   );
 
-  const normalizeKey = (v: string) => {
-    const u = v.trim().toUpperCase();
-    return u.startsWith("DIGIT_") ? u.slice(6) : u;
-  };
-  const wantedKey = normalizeKey(key);
+  const keyIndex = resolveKeySlotIndex(rawDefaultLayerData, key);
+  if (keyIndex === undefined) {
+    return { name: "getKeyInfo", code: 1, data: { key, type: 0, code: 0, enable: 0, tary: [], super: [], mt: [] }, message: `key not found: ${key}` };
+  }
 
-  for (let i = 0; i < totalKeys; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const rawType = rawLayerData[base] ?? 0;
-    const ext = rawLayerData[base + 1] ?? 0;
+  {
+    const base     = keyIndex * KEY_ITEM_SIZE;
+    const rawType  = rawLayerData[base] ?? 0;
+    const ext      = rawLayerData[base + 1] ?? 0;
     const codeByte = rawLayerData[base + 2] ?? 0;
-    const outType = convertKeyTypeForOutput(rawType, codeByte);
+    const outType  = convertKeyTypeForOutput(rawType, codeByte);
 
-    const extDef = rawDefaultLayerData[base + 1] ?? 0;
-    const codeDef = rawDefaultLayerData[base + 2] ?? 0;
-    const posCode = normalizeToHidCode(resolveRawCodeValue(extDef, codeDef));
-    const keyName = resolveKeyNameByCode(posCode, KEY_RETURN_ORDER[i] ?? `K${i}`);
-    if (normalizeKey(keyName) !== wantedKey) continue;
+    const posCode = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultLayerData[base] ?? 0,
+      rawDefaultLayerData[base + 1] ?? 0,
+      rawDefaultLayerData[base + 2] ?? 0,
+    );
+    const keyName = resolveKeyNameByCode(posCode, KEY_RETURN_ORDER[keyIndex] ?? `K${keyIndex}`);
 
-    const start = i * KEY_TARY_ITEM_SIZE;
-    const raw = rawTaryData.slice(start, start + KEY_TARY_ITEM_SIZE);
+    const start = keyIndex * KEY_TARY_ITEM_SIZE;
+    const raw   = rawTaryData.slice(start, start + KEY_TARY_ITEM_SIZE);
     const enable = 1;
 
     // Byte 1: [4bit 快速触发开关][4bit SOCD优先级策略（保留）]
-    const rt_switch = (raw[1] ?? 0) & 0x0F;
+    const rt_switch       = (raw[1] ?? 0) & 0x0F;
 
     // Bytes 2-3 (16-bit LE): [9bit 触发死区(10~400)][7bit 预留精度切换]
-    const trigger = (raw[2] ?? 0) | ((raw[3] ?? 0) << 8);
-    const trigger_dz = trigger & 0x1FF;
+    const trigger         = (raw[2] ?? 0) | ((raw[3] ?? 0) << 8);
+    const trigger_dz      = trigger & 0x1FF;
 
     // Bytes 4-5 (16-bit LE): [9bit 触发灵敏度][7bit RT顶部死区]
-    const press_region = (raw[4] ?? 0) | ((raw[5] ?? 0) << 8);
-    const press_rt = press_region & 0x1FF;
-    const press_dz = (press_region >> 9) & 0x7F;
+    const press_region    = (raw[4] ?? 0) | ((raw[5] ?? 0) << 8);
+    const press_rt        = press_region & 0x1FF;
+    const press_dz        = (press_region >> 9) & 0x7F;
 
     // Bytes 6-7 (16-bit LE): [9bit 抬起灵敏度][7bit RT底部死区]
-    const release_region = (raw[6] ?? 0) | ((raw[7] ?? 0) << 8);
-    const release_rt = release_region & 0x1FF;
-    const release_dz = (release_region >> 9) & 0x7F;
+    const release_region  = (raw[6] ?? 0) | ((raw[7] ?? 0) << 8);
+    const release_rt      = release_region & 0x1FF;
+    const release_dz      = (release_region >> 9) & 0x7F;
 
-    const out: GetKeyInfoResult["data"] = {
+    const out: GetKeyInfoData = {
       key: keyName,
       type: outType,
       code: posCode,
@@ -532,13 +774,11 @@ export async function* getKeyInfo(
       super: [],
       mt: [],
     };
-    if (outType === ADVANCED_MT_TYPE) out.mt = [outType, posCode];
+    if (outType === ADVANCED_MT_TYPE)         out.mt    = [outType, posCode];
     else if (ADVANCED_SUPER_TYPES.has(outType)) out.super = [outType, posCode];
 
-    return { name: "getKeyInfo", code: 0, data: out };
+    return { name: "getKeyInfo", code: 0, data: out, message: "" };
   }
-
-  return { name: "getKeyInfo", code: 1, data: { key }, message: `key not found: ${key}` };
 }
 
 /**
@@ -559,10 +799,26 @@ export async function* setKeyInfo(
   if (!Array.isArray(entries) || entries.length === 0)
     return { name: "setKeyInfo", code: 3, message: "request.keys must be a non-empty array" };
 
-  const normalizeTary = (tary: number[] | undefined): number[] | null => {
-    if (tary === undefined) return null;
+  const normalizeTary = (tary: number[]): number[] | null => {
     if (!Array.isArray(tary) || tary.length !== 8) return null;
     return [...tary];
+  };
+
+  const validateAdvKeyField = (
+    field: "super" | "mt",
+    value: unknown,
+    key: string,
+  ): string | null => {
+    if (value === undefined)
+      return `key ${key}: ${field} is required`;
+    if (!Array.isArray(value))
+      return `key ${key}: ${field} must be an array`;
+    if (value.length === 0) return null;
+    if (value.length !== 2)
+      return `key ${key}: ${field} must be [] or [type, code]`;
+    if (!Number.isInteger(value[0]) || !Number.isInteger(value[1]))
+      return `key ${key}: ${field} must contain integers`;
+    return null;
   };
 
   const validateTary = (tary: number[]): string | null => {
@@ -572,19 +828,19 @@ export async function* setKeyInfo(
     ] = tary;
     if (!Number.isInteger(tary_trigger_dz) || tary_trigger_dz < 10 || tary_trigger_dz > 400)
       return "tary[0] 触发死区 must be 10~400";
-    if (!Number.isInteger(tary_rt_switch) || tary_rt_switch < 0 || tary_rt_switch > 15)
+    if (!Number.isInteger(tary_rt_switch)  || tary_rt_switch  < 0  || tary_rt_switch  > 15)
       return "tary[1] 快速触发开关 must be 0~15";
-    if (!Number.isInteger(tary_press_rt) || tary_press_rt < 1 || tary_press_rt > 512)
+    if (!Number.isInteger(tary_press_rt)   || tary_press_rt   < 1  || tary_press_rt   > 512)
       return "tary[2] 触发灵敏度 must be 1~512";
-    if (!Number.isInteger(tary_release_rt) || tary_release_rt < 1 || tary_release_rt > 512)
+    if (!Number.isInteger(tary_release_rt) || tary_release_rt < 1  || tary_release_rt > 512)
       return "tary[3] 抬起灵敏度 must be 1~512";
-    if (!Number.isInteger(tary_anti_break) || tary_anti_break < 0 || tary_anti_break > 1)
+    if (!Number.isInteger(tary_anti_break) || tary_anti_break < 0  || tary_anti_break > 1)
       return "tary[4] 断触优化开关 must be 0 or 1";
-    if (!Number.isInteger(tary_debounce) || tary_debounce < 0 || tary_debounce > 7)
+    if (!Number.isInteger(tary_debounce)   || tary_debounce   < 0  || tary_debounce   > 7)
       return "tary[5] 防抖等级 must be 0~7";
-    if (!Number.isInteger(tary_press_dz) || tary_press_dz < 0 || tary_press_dz > 127)
+    if (!Number.isInteger(tary_press_dz)   || tary_press_dz   < 0  || tary_press_dz   > 127)
       return "tary[6] RT顶部死区 must be 0~127";
-    if (!Number.isInteger(tary_release_dz) || tary_release_dz < 0 || tary_release_dz > 127)
+    if (!Number.isInteger(tary_release_dz) || tary_release_dz < 0  || tary_release_dz > 127)
       return "tary[7] RT底部死区 must be 0~127";
     return null;
   };
@@ -595,17 +851,17 @@ export async function* setKeyInfo(
       tary_press_dz, tary_release_dz,
     ] = [tary[0], tary[1], tary[2], tary[3], tary[6], tary[7]];
     const dev_trigger_dz = (tary_trigger_dz - 1) & 0x1ff;
-    const dev_press_rt = (tary_press_rt - 1) & 0x1ff;
+    const dev_press_rt   = (tary_press_rt   - 1) & 0x1ff;
     const dev_release_rt = (tary_release_rt - 1) & 0x1ff;
-    const press_region = dev_press_rt | ((tary_press_dz & 0x7f) << 9);
+    const press_region   = dev_press_rt   | ((tary_press_dz   & 0x7f) << 9);
     const release_region = dev_release_rt | ((tary_release_dz & 0x7f) << 9);
     return [
       DEFAULT_TARY_AXIS,
       tary_rt_switch & 0x0f,
       dev_trigger_dz & 0xff,
       (dev_trigger_dz >> 8) & 0xff,
-      press_region & 0xff,
-      (press_region >> 8) & 0xff,
+      press_region   & 0xff,
+      (press_region  >> 8) & 0xff,
       release_region & 0xff,
       (release_region >> 8) & 0xff,
     ];
@@ -616,34 +872,29 @@ export async function* setKeyInfo(
     if (!key) return { name: "setKeyInfo", code: 3, message: "each key entry requires key" };
     if (!Number.isInteger(entry.type)) return { name: "setKeyInfo", code: 3, message: `key ${key}: type is required` };
     if (!Number.isInteger(entry.code)) return { name: "setKeyInfo", code: 3, message: `key ${key}: code is required` };
-    const enable = entry.enable ?? 1;
-    if (enable !== 0 && enable !== 1)
-      return { name: "setKeyInfo", code: 3, message: `key ${key}: enable must be 0 or 1` };
+    if (!Number.isInteger(entry.enable) || (entry.enable !== 0 && entry.enable !== 1))
+      return { name: "setKeyInfo", code: 3, message: `key ${key}: enable is required and must be 0 or 1` };
     const normalizedTary = normalizeTary(entry.tary);
-    if (entry.tary !== undefined && normalizedTary === null)
-      return { name: "setKeyInfo", code: 3, message: `key ${key}: tary must be an array of 8 numbers` };
-    if (normalizedTary) {
-      const taryErr = validateTary(normalizedTary);
-      if (taryErr) return { name: "setKeyInfo", code: 3, message: `key ${key}: ${taryErr}` };
-    }
+    if (normalizedTary === null)
+      return { name: "setKeyInfo", code: 3, message: `key ${key}: tary is required and must be an array of 8 numbers` };
+    const taryErr = validateTary(normalizedTary);
+    if (taryErr) return { name: "setKeyInfo", code: 3, message: `key ${key}: ${taryErr}` };
+    const superErr = validateAdvKeyField("super", entry.super, key);
+    if (superErr) return { name: "setKeyInfo", code: 3, message: superErr };
+    const mtErr = validateAdvKeyField("mt", entry.mt, key);
+    if (mtErr) return { name: "setKeyInfo", code: 3, message: mtErr };
   }
 
-  let config = request.config;
-  let layer = request.layer;
-
-  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
-  if (!Number.isInteger(config)) config = baseIn[8] ?? 0;
-  if (!Number.isInteger(layer)) layer = funcData[1] ?? 0;
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
 
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = (layer as number) * KEY_LAYER_LENGTH + (config as number) * profileSize;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
   const rawDefaultLayerData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
+  const keyTaryLayerSize   = KEY_COUNT * KEY_TARY_ITEM_SIZE;
   const keyTaryProfileSize = keyTaryLayerSize * 4;
   let lastPerfMask: { anti_break: number; debounce: number } | null = null;
 
@@ -655,42 +906,46 @@ export async function* setKeyInfo(
 
     const [defType, defExt, defCode] = encodeKeyTripletFromOutput(entry.type, entry.code);
     const keyDefAbsOff = layerOffset + keyIndex * KEY_ITEM_SIZE;
-    const [dLo, dHi] = shiftFrom16Bit(keyDefAbsOff);
-    const defChecksum = (dLo + dHi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
-    yield buildOutPacket(FLAG, [
+    const [dLo, dHi]   = shiftFrom16Bit(keyDefAbsOff);
+    const defChecksum  = (dLo + dHi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
+    const w1In: InPacket = yield buildOutPacket(FLAG, [
       SET_KEY_CURRENT_COMMAND, 0x00, defChecksum, KEY_ITEM_SIZE,
       dLo, dHi, 0x00,
       defType, defExt, defCode,
     ]);
+    const w1Code = parseWriteResponseCode(w1In);
+    if (w1Code !== 0) return { name: "setKeyInfo", code: w1Code, message: `key ${key}: write key def failed` };
 
-    const normalizedTary = normalizeTary(entry.tary);
-    if (normalizedTary) {
-      const taryDevBytes = encodeTaryDevBytes(normalizedTary);
-      const taryAbsOff = (layer as number) * keyTaryLayerSize
-        + (config as number) * keyTaryProfileSize
-        + keyIndex * KEY_TARY_ITEM_SIZE;
-      const [tLo, tHi] = shiftFrom16Bit(taryAbsOff);
-      const tarySize = taryDevBytes.length;
-      const taryChecksum = (tLo + tHi + tarySize + taryDevBytes.reduce((s, v) => s + v, 0)) & 0xff;
-      yield buildOutPacket(FLAG, [
-        SET_KEY_TARY_COMMAND, 0x00, taryChecksum, tarySize,
-        tLo, tHi, 0x00,
-        ...taryDevBytes,
-      ]);
-      lastPerfMask = { anti_break: normalizedTary[4], debounce: normalizedTary[5] };
-    }
+    const normalizedTary = normalizeTary(entry.tary)!;
+    const taryDevBytes = encodeTaryDevBytes(normalizedTary);
+    const taryAbsOff   = (layer as number) * keyTaryLayerSize
+                       + (config as number) * keyTaryProfileSize
+                       + keyIndex * KEY_TARY_ITEM_SIZE;
+    const [tLo, tHi]   = shiftFrom16Bit(taryAbsOff);
+    const tarySize     = taryDevBytes.length;
+    const taryChecksum = (tLo + tHi + tarySize + taryDevBytes.reduce((s, v) => s + v, 0)) & 0xff;
+    const w2In: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_TARY_COMMAND, 0x00, taryChecksum, tarySize,
+      tLo, tHi, 0x00,
+      ...taryDevBytes,
+    ]);
+    const w2Code = parseWriteResponseCode(w2In);
+    if (w2Code !== 0) return { name: "setKeyInfo", code: w2Code, message: `key ${key}: write tary failed` };
+    lastPerfMask = { anti_break: normalizedTary[4], debounce: normalizedTary[5] };
   }
 
   if (lastPerfMask) {
-    const perfCfgMask = ((lastPerfMask.anti_break & 0x01) << 1) | ((lastPerfMask.debounce & 0x07) << 5);
-    const [pLo, pHi] = shiftFrom16Bit(PERF_CFG_MASK_OFFSET);
-    const perfSize = 1;
+    const perfCfgMask  = ((lastPerfMask.anti_break & 0x01) << 1) | ((lastPerfMask.debounce & 0x07) << 5);
+    const [pLo, pHi]   = shiftFrom16Bit(config * 64 + PERF_CFG_MASK_OFFSET);
+    const perfSize     = 1;
     const perfChecksum = (pLo + pHi + perfSize + perfCfgMask) & 0xff;
-    yield buildOutPacket(FLAG, [
+    const wPerfIn: InPacket = yield buildOutPacket(FLAG, [
       SET_Func_COMMAND, 0x00, perfChecksum, perfSize,
       pLo, pHi, 0x00,
       perfCfgMask,
     ]);
+    const wPerfCode = parseWriteResponseCode(wPerfIn);
+    if (wPerfCode !== 0) return { name: "setKeyInfo", code: wPerfCode, message: "write perf mask failed" };
   }
 
   return { name: "setKeyInfo", code: 0 };
@@ -719,20 +974,13 @@ export async function* getPerf(
     throw new Error("request.key is required and must be an array");
   const reqKeys = request.key;
 
-  let config = request.config;
-  let layer = request.layer;
-
-  // ── 步骤一：0x04 + 0x05 获取 config / layer / Perf_Cfg_mask ────────────
-  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
-  if (!Number.isInteger(config)) config = baseIn[8] ?? 0;
-  if (!Number.isInteger(layer)) layer = funcData[1] ?? 0;
-  const perfCfgMask = funcData[PERF_CFG_MASK_OFFSET] ?? 0;
+  const { config, layer, funcData } = yield* resolveConfigLayerGen(request.layer);
+  const perfCfgMask   = funcData[PERF_CFG_MASK_OFFSET] ?? 0;
   const anti_break_sw = (perfCfgMask >> 1) & 0x01;
-  const debounce_lvl = (perfCfgMask >> 5) & 0x07;
+  const debounce_lvl  = (perfCfgMask >> 5) & 0x07;
 
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = (layer as number) * KEY_LAYER_LENGTH + (config as number) * profileSize;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
   // ── 步骤二：0x07 读取默认矩阵，建立 keyName → keyIndex 映射 ────────────
   const rawDefaultLayerData: number[] = yield* readChunkedDataByCommandGen(
@@ -740,9 +988,9 @@ export async function* getPerf(
   );
 
   // ── 读取当前层完整触发参数 ────────────────────────────────
-  const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
+  const keyTaryLayerSize   = KEY_COUNT * KEY_TARY_ITEM_SIZE;
   const keyTaryProfileSize = keyTaryLayerSize * 4;
-  const keyTaryOffset = (layer as number) * keyTaryLayerSize + (config as number) * keyTaryProfileSize;
+  const keyTaryOffset      = layer * keyTaryLayerSize + config * keyTaryProfileSize;
 
   const rawTaryData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_TARY_COMMAND, keyTaryOffset, keyTaryLayerSize, DATA_LENGTH,
@@ -752,14 +1000,14 @@ export async function* getPerf(
   const buildAllKeySlotsFromDefault = (): KeySlot[] => {
     const byName = new Map<string, KeySlot>();
     for (let i = 0; i < KEY_COUNT; i++) {
-      const base = i * KEY_ITEM_SIZE;
-      const rawType = rawDefaultLayerData[base] ?? 0;
-      const extDef = rawDefaultLayerData[base + 1] ?? 0;
-      const codeDef = rawDefaultLayerData[base + 2] ?? 0;
-      const hidCode = resolveHidCodeFromDefaultKeyTriplet(rawType, extDef, codeDef);
+      const base     = i * KEY_ITEM_SIZE;
+      const rawType  = rawDefaultLayerData[base] ?? 0;
+      const extDef   = rawDefaultLayerData[base + 1] ?? 0;
+      const codeDef  = rawDefaultLayerData[base + 2] ?? 0;
+      const hidCode  = resolveHidCodeFromDefaultKeyTriplet(rawType, extDef, codeDef);
       if (!isKnownEventKeyCode(hidCode)) continue;
-      const name = resolveKeyNameByCode(hidCode, KEY_RETURN_ORDER[i] ?? `K${i}`);
-      const nk = normalizeKeyName(name);
+      const name     = resolveKeyNameByCode(hidCode, KEY_RETURN_ORDER[i] ?? `K${i}`);
+      const nk       = normalizeKeyName(name);
       if (!byName.has(nk)) byName.set(nk, { name, index: i });
     }
     const ordered: KeySlot[] = [];
@@ -778,29 +1026,29 @@ export async function* getPerf(
   const targetSlots: KeySlot[] =
     reqKeys.length > 0
       ? reqKeys.flatMap((keyName) => {
-        const keyIndex = resolveKeySlotIndex(rawDefaultLayerData, keyName);
-        return keyIndex !== undefined
-          ? [{ name: keyName.trim().toUpperCase(), index: keyIndex }]
-          : [];
-      })
+          const keyIndex = resolveKeySlotIndex(rawDefaultLayerData, keyName);
+          return keyIndex !== undefined
+            ? [{ name: keyName.trim().toUpperCase(), index: keyIndex }]
+            : [];
+        })
       : buildAllKeySlotsFromDefault();
 
   const extractTary = (keyIndex: number): number[] => {
-    const taryStart = keyIndex * KEY_TARY_ITEM_SIZE;
-    const raw = rawTaryData.slice(taryStart, taryStart + KEY_TARY_ITEM_SIZE);
-    const rt_switch = (raw[1] ?? 0) & 0x0f;
-    const trigger = (raw[2] ?? 0) | ((raw[3] ?? 0) << 8);
-    const trigger_dz = trigger & 0x1ff;
-    const press_region = (raw[4] ?? 0) | ((raw[5] ?? 0) << 8);
-    const press_rt = press_region & 0x1ff;
-    const press_dz = (press_region >> 9) & 0x7f;
+    const taryStart      = keyIndex * KEY_TARY_ITEM_SIZE;
+    const raw            = rawTaryData.slice(taryStart, taryStart + KEY_TARY_ITEM_SIZE);
+    const rt_switch      = (raw[1] ?? 0) & 0x0f;
+    const trigger        = (raw[2] ?? 0) | ((raw[3] ?? 0) << 8);
+    const trigger_dz     = trigger & 0x1ff;
+    const press_region   = (raw[4] ?? 0) | ((raw[5] ?? 0) << 8);
+    const press_rt       = press_region & 0x1ff;
+    const press_dz       = (press_region >> 9) & 0x7f;
     const release_region = (raw[6] ?? 0) | ((raw[7] ?? 0) << 8);
-    const release_rt = release_region & 0x1ff;
-    const release_dz = (release_region >> 9) & 0x7f;
+    const release_rt     = release_region & 0x1ff;
+    const release_dz     = (release_region >> 9) & 0x7f;
     return [
       trigger_dz + 1,
       rt_switch,
-      press_rt + 1,
+      press_rt   + 1,
       release_rt + 1,
       anti_break_sw,
       debounce_lvl,
@@ -821,6 +1069,7 @@ export async function* getPerf(
       len: Object.keys(resultKeys).length,
       keys: resultKeys,
     },
+    message: "",
   };
 }
 
@@ -844,7 +1093,7 @@ export async function* setPerf(
   request: SetPerfParams,
 ): DeviceSession<SetPerfResult> {
   const reqKeys = request.key;
-  const tary = request.tary;
+  const tary    = request.tary;
 
   // ── 参数校验（不触发设备通信）───────────────────────────────────────────
   if (!Array.isArray(reqKeys) || reqKeys.length === 0)
@@ -865,32 +1114,25 @@ export async function* setPerf(
 
   if (!Number.isInteger(tary_trigger_dz) || tary_trigger_dz < 10 || tary_trigger_dz > 400)
     return { name: "setPerf", code: 3, message: "tary[0] 触发死区 must be 10~400" };
-  if (!Number.isInteger(tary_rt_switch) || tary_rt_switch < 0 || tary_rt_switch > 2)
+  if (!Number.isInteger(tary_rt_switch)  || tary_rt_switch  < 0  || tary_rt_switch  > 2)
     return { name: "setPerf", code: 3, message: "tary[1] 快速触发开关 must be 0~15" };
-  if (!Number.isInteger(tary_press_rt) || tary_press_rt < 1 || tary_press_rt > 512)
+  if (!Number.isInteger(tary_press_rt)   || tary_press_rt   < 1  || tary_press_rt   > 512)
     return { name: "setPerf", code: 3, message: "tary[2] 触发灵敏度 must be 1~512" };
-  if (!Number.isInteger(tary_release_rt) || tary_release_rt < 1 || tary_release_rt > 512)
+  if (!Number.isInteger(tary_release_rt) || tary_release_rt < 1  || tary_release_rt > 512)
     return { name: "setPerf", code: 3, message: "tary[3] 抬起灵敏度 must be 1~512" };
-  if (!Number.isInteger(tary_anti_break) || tary_anti_break < 0 || tary_anti_break > 1)
+  if (!Number.isInteger(tary_anti_break) || tary_anti_break < 0  || tary_anti_break > 1)
     return { name: "setPerf", code: 3, message: "tary[4] 断触优化开关 must be 0 or 1" };
-  if (!Number.isInteger(tary_debounce) || tary_debounce < 0 || tary_debounce > 7)
+  if (!Number.isInteger(tary_debounce)   || tary_debounce   < 0  || tary_debounce   > 7)
     return { name: "setPerf", code: 3, message: "tary[5] 防抖等级 must be 0~7" };
-  if (!Number.isInteger(tary_press_dz) || tary_press_dz < 0 || tary_press_dz > 50)
+  if (!Number.isInteger(tary_press_dz)   || tary_press_dz   < 0  || tary_press_dz   > 50)
     return { name: "setPerf", code: 3, message: "tary[6] RT顶部死区 must be 0~127" };
-  if (!Number.isInteger(tary_release_dz) || tary_release_dz < 0 || tary_release_dz > 50)
+  if (!Number.isInteger(tary_release_dz) || tary_release_dz < 0  || tary_release_dz > 50)
     return { name: "setPerf", code: 3, message: "tary[7] RT底部死区 must be 0~127" };
 
-  let config = request.config;
-  let layer = request.layer;
-
-  // ── 步骤一：0x04 + 0x05 获取 config / layer ─────────────────────────────
-  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
-  if (!Number.isInteger(config)) config = baseIn[8] ?? 0;
-  if (!Number.isInteger(layer)) layer = funcData[1] ?? 0;
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
 
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = (layer as number) * KEY_LAYER_LENGTH + (config as number) * profileSize;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
   // ── 步骤二：0x07 读取默认矩阵，建立 keyName → keyIndex 映射 ────────────
   const rawDefaultLayerData: number[] = yield* readChunkedDataByCommandGen(
@@ -898,27 +1140,27 @@ export async function* setPerf(
   );
 
   // ── 步骤三：编码 8 字节设备格式 ─────────────────────────────────────────
-  const dev_trigger_dz = (tary_trigger_dz - 1) & 0x1ff;
-  const dev_press_rt = (tary_press_rt - 1) & 0x1ff;
-  const dev_release_rt = (tary_release_rt - 1) & 0x1ff;
-  const press_region = dev_press_rt | ((tary_press_dz & 0x7f) << 9);
-  const release_region = dev_release_rt | ((tary_release_dz & 0x7f) << 9);
+  const dev_trigger_dz  = (tary_trigger_dz - 1) & 0x1ff;
+  const dev_press_rt    = (tary_press_rt   - 1) & 0x1ff;
+  const dev_release_rt  = (tary_release_rt - 1) & 0x1ff;
+  const press_region    = dev_press_rt   | ((tary_press_dz   & 0x7f) << 9);
+  const release_region  = dev_release_rt | ((tary_release_dz & 0x7f) << 9);
 
   const taryDevBytes = [
     DEFAULT_TARY_AXIS,                  // 轴体（保持默认）
     tary_rt_switch & 0x0f,              // 触发模式低 4bit
     dev_trigger_dz & 0xff,              // 行程低字节
     (dev_trigger_dz >> 8) & 0xff,       // 行程高字节
-    press_region & 0xff,              // 触发灵敏度+顶部死区低字节
-    (press_region >> 8) & 0xff,        // 触发灵敏度+顶部死区高字节
+    press_region   & 0xff,              // 触发灵敏度+顶部死区低字节
+    (press_region  >> 8) & 0xff,        // 触发灵敏度+顶部死区高字节
     release_region & 0xff,              // 抬起灵敏度+底部死区低字节
     (release_region >> 8) & 0xff,       // 抬起灵敏度+底部死区高字节
   ];
 
   // ── 步骤四：0xa1 逐键写入触发参数 ──────────────────────────────────────
-  const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
+  const keyTaryLayerSize   = KEY_COUNT * KEY_TARY_ITEM_SIZE;
   const keyTaryProfileSize = keyTaryLayerSize * 4;
-  const tarySize = taryDevBytes.length; // 8
+  const tarySize           = taryDevBytes.length; // 8
 
   for (const keyName of reqKeys) {
     const keyIndex = resolveKeySlotIndex(rawDefaultLayerData, keyName);
@@ -926,29 +1168,33 @@ export async function* setPerf(
       return { name: "setPerf", code: 1, message: `key not found: ${keyName}` };
     }
 
-    const taryAbsOff = (layer as number) * keyTaryLayerSize
-      + (config as number) * keyTaryProfileSize
-      + keyIndex * KEY_TARY_ITEM_SIZE;
-    const [tLo, tHi] = shiftFrom16Bit(taryAbsOff);
+    const taryAbsOff   = (layer  as number) * keyTaryLayerSize
+                       + (config as number) * keyTaryProfileSize
+                       + keyIndex * KEY_TARY_ITEM_SIZE;
+    const [tLo, tHi]   = shiftFrom16Bit(taryAbsOff);
     const taryChecksum = (tLo + tHi + tarySize + taryDevBytes.reduce((s, v) => s + v, 0)) & 0xff;
-    yield buildOutPacket(FLAG, [
+    const wTaryIn: InPacket = yield buildOutPacket(FLAG, [
       SET_KEY_TARY_COMMAND, 0x00, taryChecksum, tarySize,
       tLo, tHi, 0x00,
       ...taryDevBytes,
     ]);
+    const wTaryCode = parseWriteResponseCode(wTaryIn);
+    if (wTaryCode !== 0) return { name: "setPerf", code: wTaryCode, message: `key ${keyName}: write tary failed` };
   }
 
   // ── 步骤五：0x06 写入 Perf_Cfg_mask（断触优化开关 + 防抖等级，全局）──
   // Perf_Cfg_mask: bit1 = anti_break_sw, bit5-7 = debounce_lvl
-  const perfCfgMask = ((tary_anti_break & 0x01) << 1) | ((tary_debounce & 0x07) << 5);
-  const [pLo, pHi] = shiftFrom16Bit(PERF_CFG_MASK_OFFSET);
-  const perfSize = 1;
+  const perfCfgMask  = ((tary_anti_break & 0x01) << 1) | ((tary_debounce & 0x07) << 5);
+  const [pLo, pHi]   = shiftFrom16Bit(config * 64 + PERF_CFG_MASK_OFFSET);
+  const perfSize     = 1;
   const perfChecksum = (pLo + pHi + perfSize + perfCfgMask) & 0xff;
-  yield buildOutPacket(FLAG, [
+  const wPerfIn: InPacket = yield buildOutPacket(FLAG, [
     SET_Func_COMMAND, 0x00, perfChecksum, perfSize,
     pLo, pHi, 0x00,
     perfCfgMask,
   ]);
+  const wPerfCode = parseWriteResponseCode(wPerfIn);
+  if (wPerfCode !== 0) return { name: "setPerf", code: wPerfCode, message: "write perf mask failed" };
 
   return { name: "setPerf", code: 0 };
 }
@@ -973,18 +1219,10 @@ export async function* resetKeyInfo(
   const key = String(request?.key ?? "").trim();
   if (!key) throw new Error("request.key is required");
 
-  let config = request.config;
-  let layer = request.layer;
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
 
   const profileSize = KEY_LAYER_LENGTH * 4;
-
-  // ── 步骤一：获取当前 config / layer ──────────────────────────────────────
-  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
-  if (!Number.isInteger(config)) config = baseIn[8] ?? 0;
-  if (!Number.isInteger(layer)) layer = funcData[1] ?? 0;
-
-  const layerOffset = (layer as number) * KEY_LAYER_LENGTH + (config as number) * profileSize;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
   // ── 步骤二：0x07 读取默认矩阵，定位按键索引 ─────────────────────────────
   const rawDefaultLayerData: number[] = yield* readChunkedDataByCommandGen(
@@ -1056,76 +1294,86 @@ export async function* resetKeyInfo(
 
     // 0x09：将按键恢复为默认按键定义
     const defBase = keyIndex * KEY_ITEM_SIZE;
-    const defType = rawDefaultLayerData[defBase] ?? 0x10;
-    const defExt = rawDefaultLayerData[defBase + 1] ?? 0x00;
+    const defType = rawDefaultLayerData[defBase]     ?? 0x10;
+    const defExt  = rawDefaultLayerData[defBase + 1] ?? 0x00;
     const defCode = rawDefaultLayerData[defBase + 2] ?? (posCode & 0xff);
-    yield yieldSetKeyDef(layerOffset + keyIndex * KEY_ITEM_SIZE, defType, defExt, defCode);
+    const wDefIn: InPacket = yield yieldSetKeyDef(layerOffset + keyIndex * KEY_ITEM_SIZE, defType, defExt, defCode);
+    const wDefCode = parseWriteResponseCode(wDefIn);
+    if (wDefCode !== 0) return { name: "resetKeyInfo", code: wDefCode, data: { key, type: 0, code: 0, tary: [], super: [], mt: [] }, message: "write key def failed" };
 
     // 0x09：将同类型按键中 DKS 索引 > aDksIdx 的其他按键索引各减 1（填补空缺）
     for (const entry of dksEntries) {
       if (entry.keyI === keyIndex) continue;
       if (entry.dksIdx <= aDksIdx) continue;
       const newDksIdx = entry.dksIdx - 1;
-      yield yieldSetKeyDef(
+      const wShiftIn: InPacket = yield yieldSetKeyDef(
         layerOffset + entry.keyI * KEY_ITEM_SIZE,
         rawType, newDksIdx, 0x00,
       );
+      const wShiftCode = parseWriteResponseCode(wShiftIn);
+      if (wShiftCode !== 0) return { name: "resetKeyInfo", code: wShiftCode, data: { key, type: 0, code: 0, tary: [], super: [], mt: [] }, message: "shift key index failed" };
     }
 
     // 按类型选择对应的数据区命令、区域大小、条目大小
-    const isTgl = rawType === 0x91;
+    const isTgl           = rawType === 0x91;
     const GET_ADV_COMMAND = isTgl ? GET_TGL_COMMAND : GET_DKS_COMMAND;
     const SET_ADV_COMMAND = isTgl ? SET_TGL_COMMAND : SET_DKS_COMMAND;
-    const ADV_AREA_SIZE = isTgl ? TGL_AREA_SIZE : DKS_AREA_SIZE;
-    const ADV_ENTRY_SIZE = isTgl ? TGL_ENTRY_SIZE : DKS_ENTRY_SIZE;
+    const ADV_AREA_SIZE   = isTgl ? TGL_AREA_SIZE   : DKS_AREA_SIZE;
+    const ADV_ENTRY_SIZE  = isTgl ? TGL_ENTRY_SIZE  : DKS_ENTRY_SIZE;
 
     const advAreaOffset = (config as number) * ADV_AREA_SIZE;
 
     // 读取需要平移的那段数据（aDksIdx+1 ~ totalDks-1），跳过无关区域
     //   moveCount = 需要平移的条目数；为 0 时跳过读取
-    const moveCount = totalDks - 1 - aDksIdx;
+    const moveCount  = totalDks - 1 - aDksIdx;
     const partialDksData: number[] = moveCount > 0
       ? yield* readChunkedDataByCommandGen(
-        FLAG, GET_ADV_COMMAND,
-        advAreaOffset + (aDksIdx + 1) * ADV_ENTRY_SIZE,  // 从需要平移的开始
-        moveCount * ADV_ENTRY_SIZE,                        // 只读需要平移的部分
-        DATA_LENGTH,
-      )
+          FLAG, GET_ADV_COMMAND,
+          advAreaOffset + (aDksIdx + 1) * ADV_ENTRY_SIZE,  // 从需要平移的开始
+          moveCount * ADV_ENTRY_SIZE,                        // 只读需要平移的部分
+          DATA_LENGTH,
+        )
       : [];
 
     // 将读取到的每条数据依次写到前一个槽位
     for (let i = 0; i < moveCount; i++) {
       const entryData = partialDksData.slice(i * ADV_ENTRY_SIZE, (i + 1) * ADV_ENTRY_SIZE);
-      const writeOff = advAreaOffset + (aDksIdx + i) * ADV_ENTRY_SIZE;
+      const writeOff  = advAreaOffset + (aDksIdx + i) * ADV_ENTRY_SIZE;
       const [wLo, wHi] = shiftFrom16Bit(writeOff);
       const wChk = (wLo + wHi + ADV_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
-      yield buildOutPacket(FLAG, [
+      const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
         SET_ADV_COMMAND, 0x00, wChk, ADV_ENTRY_SIZE,
         wLo, wHi, 0x00,
         ...entryData,
       ]);
+      const wAdvCode = parseWriteResponseCode(wAdvIn);
+      if (wAdvCode !== 0) return { name: "resetKeyInfo", code: wAdvCode, data: { key, type: 0, code: 0, tary: [], super: [], mt: [] }, message: "write adv entry failed" };
     }
 
     // 末尾条目清零
-    const clearOff = advAreaOffset + (totalDks - 1) * ADV_ENTRY_SIZE;
+    const clearOff  = advAreaOffset + (totalDks - 1) * ADV_ENTRY_SIZE;
     const [cLo, cHi] = shiftFrom16Bit(clearOff);
-    const clearData = new Array<number>(ADV_ENTRY_SIZE).fill(0);
+    const clearData  = new Array<number>(ADV_ENTRY_SIZE).fill(0);
     const cChk = (cLo + cHi + ADV_ENTRY_SIZE) & 0xff;
-    yield buildOutPacket(FLAG, [
+    const wClearIn: InPacket = yield buildOutPacket(FLAG, [
       SET_ADV_COMMAND, 0x00, cChk, ADV_ENTRY_SIZE,
       cLo, cHi, 0x00,
       ...clearData,
     ]);
+    const wClearCode = parseWriteResponseCode(wClearIn);
+    if (wClearCode !== 0) return { name: "resetKeyInfo", code: wClearCode, data: { key, type: 0, code: 0, tary: [], super: [], mt: [] }, message: "clear adv entry failed" };
 
   } else if (KEY_TYPE_ADVANCED_FIRST_BYTES.has(rawType)) {
     // TODO: 其他高级类型（0x95/0x92/0x93/0x94）预留
   } else {
     // 非高级类型：0x09 下发默认3字节定义（来自默认矩阵）
     const defBase = keyIndex * KEY_ITEM_SIZE;
-    const defType = rawDefaultLayerData[defBase] ?? 0x10;
-    const defExt = rawDefaultLayerData[defBase + 1] ?? 0x00;
+    const defType = rawDefaultLayerData[defBase]     ?? 0x10;
+    const defExt  = rawDefaultLayerData[defBase + 1] ?? 0x00;
     const defCode = rawDefaultLayerData[defBase + 2] ?? (posCode & 0xff);
-    yield yieldSetKeyDef(layerOffset + keyIndex * KEY_ITEM_SIZE, defType, defExt, defCode);
+    const wNormalIn: InPacket = yield yieldSetKeyDef(layerOffset + keyIndex * KEY_ITEM_SIZE, defType, defExt, defCode);
+    const wNormalCode = parseWriteResponseCode(wNormalIn);
+    if (wNormalCode !== 0) return { name: "resetKeyInfo", code: wNormalCode, data: { key, type: 0, code: 0, tary: [], super: [], mt: [] }, message: "write key def failed" };
   }
 
   // ── 步骤五：0xa1 按 keyIndex×8 偏移写入默认触发参数 ─────────────────────
@@ -1147,11 +1395,11 @@ export async function* resetKeyInfo(
   // Bytes 2-3 (16-bit LE): [8:0] = trigger_dz(设备值), [15:9] = 预留
   // Bytes 4-5 (16-bit LE): [8:0] = press_rt(设备值),   [15:9] = press_dz
   // Bytes 6-7 (16-bit LE): [8:0] = release_rt(设备值), [15:9] = release_dz
-  const dev_trigger_dz = (tary_trigger_dz - 1) & 0x1ff;
-  const dev_press_rt = (tary_press_rt - 1) & 0x1ff;
-  const dev_release_rt = (tary_release_rt - 1) & 0x1ff;
-  const press_region = dev_press_rt | ((tary_press_dz & 0x7f) << 9);
-  const release_region = dev_release_rt | ((tary_release_dz & 0x7f) << 9);
+  const dev_trigger_dz   = (tary_trigger_dz - 1) & 0x1ff;
+  const dev_press_rt     = (tary_press_rt   - 1) & 0x1ff;
+  const dev_release_rt   = (tary_release_rt - 1) & 0x1ff;
+  const press_region     = dev_press_rt   | ((tary_press_dz   & 0x7f) << 9);
+  const release_region   = dev_release_rt | ((tary_release_dz & 0x7f) << 9);
 
   const taryDevBytes = [
     0x00,                               // 轴体（默认）
@@ -1164,37 +1412,41 @@ export async function* resetKeyInfo(
     (release_region >> 8) & 0xff,       // 抬起灵敏度+底部死区 高字节
   ];
 
-  const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
+  const keyTaryLayerSize   = KEY_COUNT * KEY_TARY_ITEM_SIZE;
   const keyTaryProfileSize = keyTaryLayerSize * 4;
-  const taryAbsOff = (layer as number) * keyTaryLayerSize
-    + (config as number) * keyTaryProfileSize
-    + keyIndex * KEY_TARY_ITEM_SIZE;
-  const [tLo, tHi] = shiftFrom16Bit(taryAbsOff);
-  const tarySize = taryDevBytes.length; // 8
+  const taryAbsOff   = (layer  as number) * keyTaryLayerSize
+                     + (config as number) * keyTaryProfileSize
+                     + keyIndex * KEY_TARY_ITEM_SIZE;
+  const [tLo, tHi]   = shiftFrom16Bit(taryAbsOff);
+  const tarySize     = taryDevBytes.length; // 8
   const taryChecksum = (tLo + tHi + tarySize + taryDevBytes.reduce((s, v) => s + v, 0)) & 0xff;
-  yield buildOutPacket(FLAG, [
+  const wTaryIn: InPacket = yield buildOutPacket(FLAG, [
     SET_KEY_TARY_COMMAND, 0x00, taryChecksum, tarySize,
     tLo, tHi, 0x00,
     ...taryDevBytes,
   ]);
+  const wTaryCode = parseWriteResponseCode(wTaryIn);
+  if (wTaryCode !== 0) return { name: "resetKeyInfo", code: wTaryCode, data: { key, type: 0, code: 0, tary: [], super: [], mt: [] }, message: "write tary failed" };
 
   // ── 步骤五（续）：0x06 写入 Perf_Cfg_mask（断触优化开关 + 防抖等级）────
   // Perf_Cfg_mask: bit1 = anti_break_sw, bit5-7 = debounce_lvl
-  const perfCfgMask = ((tary_anti_break & 0x01) << 1) | ((tary_debounce & 0x07) << 5);
-  const [pLo, pHi] = shiftFrom16Bit(PERF_CFG_MASK_OFFSET);
-  const perfSize = 1;
+  const perfCfgMask  = ((tary_anti_break & 0x01) << 1) | ((tary_debounce & 0x07) << 5);
+  const [pLo, pHi]   = shiftFrom16Bit(config * 64 + PERF_CFG_MASK_OFFSET);
+  const perfSize     = 1;
   const perfChecksum = (pLo + pHi + perfSize + perfCfgMask) & 0xff;
-  yield buildOutPacket(FLAG, [
+  const wPerfIn: InPacket = yield buildOutPacket(FLAG, [
     SET_Func_COMMAND, 0x00, perfChecksum, perfSize,
     pLo, pHi, 0x00,
     perfCfgMask,
   ]);
+  const wPerfCode = parseWriteResponseCode(wPerfIn);
+  if (wPerfCode !== 0) return { name: "resetKeyInfo", code: wPerfCode, data: { key, type: 0, code: 0, tary: [], super: [], mt: [] }, message: "write perf mask failed" };
 
   // ── 返回结果 ──────────────────────────────────────────────────────
   const retDefBase = keyIndex * KEY_ITEM_SIZE;
-  const retDefType = rawDefaultLayerData[retDefBase] ?? 0x10;
+  const retDefType = rawDefaultLayerData[retDefBase]     ?? 0x10;
   const retDefCode = rawDefaultLayerData[retDefBase + 2] ?? (posCode & 0xff);
-  const outType = convertKeyTypeForOutput(retDefType, retDefCode);
+  const outType    = convertKeyTypeForOutput(retDefType, retDefCode);
 
   return {
     name: "resetKeyInfo",
@@ -1232,17 +1484,10 @@ export async function* resetRT(
     return { name: "resetRT", code: 3, message: "request.key must be a non-empty array" };
   }
 
-  let config = request.config;
-  let layer = request.layer;
-
-  // ── 获取当前 config / layer ──────────────────────────────────────
-  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
-  if (!Number.isInteger(config)) config = baseIn[8] ?? 0;
-  if (!Number.isInteger(layer)) layer = funcData[1] ?? 0;
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
 
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = (layer as number) * KEY_LAYER_LENGTH + (config as number) * profileSize;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
   // ── 0x07 读取默认矩阵，定位按键索引 ─────────────────────────────
   const rawDefaultLayerData: number[] = yield* readChunkedDataByCommandGen(
@@ -1261,11 +1506,11 @@ export async function* resetRT(
     tary_release_dz,
   ] = RESET_RT_TARY;
 
-  const dev_trigger_dz = (tary_trigger_dz - 1) & 0x1ff;
-  const dev_press_rt = (tary_press_rt - 1) & 0x1ff;
-  const dev_release_rt = (tary_release_rt - 1) & 0x1ff;
-  const press_region = dev_press_rt | ((tary_press_dz & 0x7f) << 9);
-  const release_region = dev_release_rt | ((tary_release_dz & 0x7f) << 9);
+  const dev_trigger_dz  = (tary_trigger_dz - 1) & 0x1ff;
+  const dev_press_rt    = (tary_press_rt   - 1) & 0x1ff;
+  const dev_release_rt  = (tary_release_rt - 1) & 0x1ff;
+  const press_region    = dev_press_rt   | ((tary_press_dz   & 0x7f) << 9);
+  const release_region  = dev_release_rt | ((tary_release_dz & 0x7f) << 9);
 
   const taryDevBytes = [
     0xa0,
@@ -1278,9 +1523,9 @@ export async function* resetRT(
     (release_region >> 8) & 0xff,
   ];
 
-  const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
+  const keyTaryLayerSize   = KEY_COUNT * KEY_TARY_ITEM_SIZE;
   const keyTaryProfileSize = keyTaryLayerSize * 4;
-  const tarySize = taryDevBytes.length;
+  const tarySize           = taryDevBytes.length;
 
   for (const keyName of reqKeys) {
     const keyIndex = resolveKeySlotIndex(rawDefaultLayerData, String(keyName));
@@ -1288,16 +1533,18 @@ export async function* resetRT(
       return { name: "resetRT", code: 1, message: `key not found: ${keyName}` };
     }
 
-    const taryAbsOff = (layer as number) * keyTaryLayerSize
-      + (config as number) * keyTaryProfileSize
-      + keyIndex * KEY_TARY_ITEM_SIZE;
-    const [tLo, tHi] = shiftFrom16Bit(taryAbsOff);
+    const taryAbsOff   = (layer as number) * keyTaryLayerSize
+                       + (config as number) * keyTaryProfileSize
+                       + keyIndex * KEY_TARY_ITEM_SIZE;
+    const [tLo, tHi]   = shiftFrom16Bit(taryAbsOff);
     const taryChecksum = (tLo + tHi + tarySize + taryDevBytes.reduce((s, v) => s + v, 0)) & 0xff;
-    yield buildOutPacket(FLAG, [
+    const wIn: InPacket = yield buildOutPacket(FLAG, [
       SET_KEY_TARY_COMMAND, 0x00, taryChecksum, tarySize,
       tLo, tHi, 0x00,
       ...taryDevBytes,
     ]);
+    const wCode = parseWriteResponseCode(wIn);
+    if (wCode !== 0) return { name: "resetRT", code: wCode, message: `key ${keyName}: write tary failed` };
   }
 
   return { name: "resetRT", code: 0 };
@@ -1326,7 +1573,7 @@ type GetBasicKeyResult = {
     layer: number;
     name: number;
     def: number[];
-    disable: number;
+    disable: number[];
     keys: Record<string, { type: number; code: number; tary: number[] }>;
     smart: Record<string, { super?: [number, number]; mt?: [number, number] }>;
   };
@@ -1335,21 +1582,13 @@ type GetBasicKeyResult = {
 type GetKeyInfoResult = {
   name: "getKeyInfo";
   code: number;
-  data: {
-    key: string;
-    type?: number;
-    code?: number;
-    enable?: number;
-    tary?: number[];
-    super?: number[];
-    mt?: number[];
-  };
-  message?: string;
+  data: GetKeyInfoData;
+  message: string;
 };
 
 type SetKeyInfoResult = {
   name: "setKeyInfo";
-  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  code: number;
   message?: string;
 };
 
@@ -1365,7 +1604,7 @@ type GetPerfResult = {
 
 type SetPerfResult = {
   name: "setPerf";
-  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  code: number;
   message?: string;
 };
 
@@ -1380,13 +1619,13 @@ type GetRateResult = {
 
 type SetRateResult = {
   name: "setRate";
-  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  code: number;
   message?: string;
 };
 
 type ResetRTResult = {
   name: "resetRT";
-  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  code: number;
   message?: string;
 };
 
@@ -1408,18 +1647,18 @@ type GetDeviceInfoResult = {
   name: "getDeviceInfo";
   code: number;
   data: {
-    Zkm: number;
-    connect: number;
-    battery: number;
-    bleMtu: number;
+    Zkm:       number;
+    connect:   number;
+    battery:   number;
+    bleMtu:    number;
     bleOtaMtu: number;
-    usbMtu: number;
+    usbMtu:    number;
     usbOtaMtu: number;
     firmwares: Array<{
       version: number;
-      id: number;
-      type: number;
-      model: string;
+      id:      number;
+      type:    number;
+      model:   string;
     }>;
   };
 };
@@ -1428,40 +1667,121 @@ type GetCalibrationResult = {
   name: "getCalibration";
   code: number;
   data: {
-    switch: number; // 0=关 1=开
+    switch: number;
   };
+};
+
+type GetLightResult = {
+  name: "getLight";
+  code: number;
+  data: GetLightData;
+};
+
+
+
+type SetLightResult = {
+  name: "setLight";
+  code: number;
+  message?: string;
+};
+
+
+
+type GetDKSListResult = {
+  name: "getDKSList";
+  code: number;
+  data: { shortcuts: DKSShortcut[] };
+};
+
+type GetTGLListResult = {
+  name: "getTGLList";
+  code: number;
+  data: { len: number; tgl: TGLEntry[] };
+};
+
+type GetTGLResult = {
+  name: "getTGL";
+  code: number;
+  data: TGLEntry;
+  message?: string;
+};
+
+type SetTGLResult = {
+  name: "setTGL";
+  code: number;
+  message?: string;
+};
+
+type GetDKSResult = {
+  name: "getDKS";
+  code: number;
+  data: DKSShortcut;
+  message?: string;
+};
+
+
+type DelDKSResult = {
+  name: "delDKS";
+  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  message?: string;
+};
+
+type DelTGLResult = {
+  name: "delTGL";
+  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  message?: string;
+};
+
+
+
+type SetDKSResult = {
+  name: "setDKS";
+  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  message?: string;
 };
 
 type SetBiCalibrationResult = {
   name: "setBiCalibration";
-  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  code: number;
   message?: string;
 };
 
 type SetCalibrationResult = {
   name: "setCalibration";
-  code: number;   // 0=成功 1=失败 2=不支持 3=参数错误
+  code: number;
   message?: string;
 };
+
+
 
 // ========== 推导核心 ========== start
 // 导出类型名必须为： SessionResultMap
 export type SessionResultMap = {
-  getBasicConfig: GetBasicConfigResult;
+  getBasicConfig:      GetBasicConfigResult;
   setConfigLayerIndex: SetConfigLayerIndexResult;
-  getBasicKey: GetBasicKeyResult;
-  getKeyInfo: GetKeyInfoResult;
-  setKeyInfo: SetKeyInfoResult;
-  getPerf: GetPerfResult;
-  setPerf: SetPerfResult;
-  getRate: GetRateResult;
-  setRate: SetRateResult;
-  resetRT: ResetRTResult;
-  resetKeyInfo: ResetKeyInfoResult;
-  getDeviceInfo: GetDeviceInfoResult;
-  getCalibration: GetCalibrationResult;
-  setBiCalibration: SetBiCalibrationResult;
-  setCalibration: SetCalibrationResult;
+  getBasicKey:         GetBasicKeyResult;
+  getKeyInfo:          GetKeyInfoResult;
+  setKeyInfo:          SetKeyInfoResult;
+  getPerf:             GetPerfResult;
+  setPerf:             SetPerfResult;
+  getRate:             GetRateResult;
+  setRate:             SetRateResult;
+  resetRT:             ResetRTResult;
+  resetKeyInfo:        ResetKeyInfoResult;
+  getDeviceInfo:       GetDeviceInfoResult;
+  getCalibration:      GetCalibrationResult;
+  getLight:            GetLightResult;
+  setLight:            SetLightResult;
+  getDKSList:          GetDKSListResult;
+  getTGLList:          GetTGLListResult;
+  getTGL:              GetTGLResult;
+  setTGL:              SetTGLResult;
+  getDKS:              GetDKSResult;
+  setDKS:              SetDKSResult;
+  delDKS:              DelDKSResult;
+  delTGL:              DelTGLResult;
+  setBiCalibration:    SetBiCalibrationResult;
+  setCalibration:      SetCalibrationResult;
 };
 // ========== 推导核心 ========== end
 
@@ -1482,7 +1802,11 @@ export type SessionResultMap = {
  *
  */
 export async function* getRate(): DeviceSession<GetRateResult> {
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
   const rawRate = (funcData[12] ?? 0) & 0x07;
   const indexMap: Record<number, number> = {
     1: 3, // 8K
@@ -1522,22 +1846,28 @@ export async function* setRate(
   if (rawRate === undefined)
     return { name: "setRate", code: 3, message: "index must be 0~3 (0=1K, 1=2K, 2=4K, 3=8K)" };
 
-  // 读取功能配置
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
+  // 读取当前板载 + 功能配置
+  const rBaseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = rBaseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
 
   // 修改轮询率 bit[2:0]
   const oldByte = funcData[RATE_CFG_OFFSET] ?? 0;
   const newByte = (oldByte & ~0x07) | (rawRate & 0x07);
 
   // 写回轮询率字节
-  const [lo, hi] = shiftFrom16Bit(RATE_CFG_OFFSET - 8);
-  const size = 1;
-  const checksum = (lo + hi + size + newByte) & 0xff;
-  yield buildOutPacket(FLAG, [
+  const [lo, hi]  = shiftFrom16Bit(config * 64 + RATE_CFG_OFFSET - 8);
+  const size      = 1;
+  const checksum  = (lo + hi + size + newByte) & 0xff;
+  const wIn: InPacket = yield buildOutPacket(FLAG, [
     SET_Func_COMMAND, 0x00, checksum, size,
     lo, hi, 0x00,
     newByte,
   ]);
+  const wCode = parseWriteResponseCode(wIn);
+  if (wCode !== 0) return { name: "setRate", code: wCode, message: "write rate failed" };
 
   return { name: "setRate", code: 0 };
 }
@@ -1551,21 +1881,21 @@ export async function* setRate(
  */
 export async function* getDeviceInfo(): DeviceSession<GetDeviceInfoResult> {
   const inPacket: InPacket = yield buildOutPacket(FLAG, [GET_Version_COMMAND]);
-  const version = (inPacket[8] ?? 0) | ((inPacket[9] ?? 0) << 8);
+  const version = (inPacket[8] ?? 0) | ((inPacket[9] ?? 0) << 8) - 0x99;
 
   return {
     name: "getDeviceInfo",
     code: 0,
     data: {
-      Zkm: 1,
-      connect: 0,
-      battery: 80,
-      bleMtu: 64,
+      zkm:       1,
+      connect:   0,
+      battery:   100,
+      bleMtu:    64,
       bleOtaMtu: 256,
-      usbMtu: 64,
+      usbMtu:    64,
       usbOtaMtu: 512,
       firmwares: [
-        { version, id: 0, type: 1, model: "rk-s75*" },
+        { version, id: 0, type: 10, model: "m68" },
       ],
     },
   };
@@ -1581,7 +1911,11 @@ export async function* getDeviceInfo(): DeviceSession<GetDeviceInfoResult> {
  *
  */
 export async function* getCalibration(): DeviceSession<GetCalibrationResult> {
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
   const calibSwitch = (funcData[15] ?? 0) >> 3 & 0x01;
 
   return {
@@ -1589,6 +1923,1060 @@ export async function* getCalibration(): DeviceSession<GetCalibrationResult> {
     code: 0,
     data: { switch: calibSwitch },
   };
+}
+
+/**
+ *
+ * 读取灯光模式
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号（config_index）
+ *  2. 0x05 以 config × 64 为偏移读取该板载功能配置区（一包 51 字节，灯光字段均在前 24 字节内）
+ *  3. 从原始 inPacket 解析响应码与灯光字段
+ *
+ */
+export async function* getLight(): DeviceSession<GetLightResult> {
+  // 步骤一：读取当前板载号
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+
+  // 步骤二：读取该板载功能配置区（每板载 64 字节，偏移 = config × 64）
+  const boardOffset = config * 64;
+  const inPacket: InPacket = yield buildOutPacket(FLAG, getFuncPacketBytes(boardOffset, DATA_LENGTH));
+  const resCode = parseWriteResponseCode(inPacket);
+
+  const d = (offset: number) => inPacket[offset] ?? 0;
+
+  return {
+    name: "getLight",
+    code: resCode,
+    data: {
+      pattern:    d(LIGHT_PATTERN_OFFSET),
+      brightness: d(LIGHT_BRIGHTNESS_OFFSET),
+      speed:      d(LIGHT_SPEED_OFFSET),
+      isRGB:      d(LIGHT_IS_RGB_OFFSET),
+      R:          d(LIGHT_R_OFFSET),
+      G:          d(LIGHT_G_OFFSET),
+      B:          d(LIGHT_B_OFFSET),
+    },
+  };
+}
+
+/**
+ *
+ * 设置灯光数据
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号（config_index），计算 boardBase = config × 64
+ *  2. 0x06 写入第 16-18 字节（pattern / brightness / speed）
+ *  3. 0x06 写入第 20 字节（isRGB）
+ *  4. 0x06 写入第 22-24 字节（R / G / B）
+ *
+ */
+export async function* setLight(
+  request: SetLightParams,
+): DeviceSession<SetLightResult> {
+  // 步骤一：读取当前板载号
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const boardBase = config * 64;
+
+  // 步骤二：写入 pattern / brightness / speed（第 16-18 字节，连续 3 字节）
+  const seg1 = [request.pattern & 0xff, request.brightness & 0xff, request.speed & 0xff];
+  const [s1lo, s1hi] = shiftFrom16Bit(boardBase + LIGHT_PATTERN_OFFSET-8);
+  const s1size     = seg1.length;
+  const s1checksum = (s1lo + s1hi + s1size + seg1.reduce((a, b) => a + b, 0)) & 0xff;
+  const w1In: InPacket = yield buildOutPacket(FLAG, [
+    SET_Func_COMMAND, 0x00, s1checksum, s1size,
+    s1lo, s1hi, 0x00,
+    ...seg1,
+  ]);
+  const w1Code = parseWriteResponseCode(w1In);
+  if (w1Code !== 0) return { name: "setLight", code: w1Code, message: "write pattern/brightness/speed failed" };
+
+  // 步骤三：写入 isRGB（第 20 字节）
+  const isRGBByte = request.isRGB & 0xff;
+  const [s2lo, s2hi] = shiftFrom16Bit(boardBase + LIGHT_IS_RGB_OFFSET-8);
+  const s2size     = 1;
+  const s2checksum = (s2lo + s2hi + s2size + isRGBByte) & 0xff;
+  const w2In: InPacket = yield buildOutPacket(FLAG, [
+    SET_Func_COMMAND, 0x00, s2checksum, s2size,
+    s2lo, s2hi, 0x00,
+    isRGBByte,
+  ]);
+  const w2Code = parseWriteResponseCode(w2In);
+  if (w2Code !== 0) return { name: "setLight", code: w2Code, message: "write isRGB failed" };
+
+  // 步骤四：写入 R / G / B（第 22-24 字节，连续 3 字节）
+  const seg3 = [request.R & 0xff, request.G & 0xff, request.B & 0xff];
+  const [s3lo, s3hi] = shiftFrom16Bit(boardBase + LIGHT_R_OFFSET-8);
+  const s3size     = seg3.length;
+  const s3checksum = (s3lo + s3hi + s3size + seg3.reduce((a, b) => a + b, 0)) & 0xff;
+  const w3In: InPacket = yield buildOutPacket(FLAG, [
+    SET_Func_COMMAND, 0x00, s3checksum, s3size,
+    s3lo, s3hi, 0x00,
+    ...seg3,
+  ]);
+  const w3Code = parseWriteResponseCode(w3In);
+  if (w3Code !== 0) return { name: "setLight", code: w3Code, message: "write R/G/B failed" };
+
+  return { name: "setLight", code: 0 };
+}
+
+/**
+ *
+ * 读取 DKS 快捷键列表
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号（config）
+ *  2. 0x08 读取该板载全部 4 层按键数据（4 × 512 字节），扫描类型为 0x90 的 DKS 按键
+ *     - 0x90 第 2 字节 = DKS 条目索引（dksIndex）；第 1 字节（type）已确认为 0x90
+ *     - 收集所有唯一 dksIndex 及其首次出现的 keySlot
+ *  3. 0x07 读取该板载第 0 层默认按键数据（512 字节），用于解析 shortcuts[].code / name
+ *  4. 0xa2 读取该板载 DKS 数据区（768 字节）
+ *     - 无头部；条目 N 直接起始于 N × DKS_ENTRY_SIZE（24 字节）
+ *     - 每条 24 字节：前 4 字节 = range，后 20 字节 = keys（4 × 5 字节）
+ *  5. 组装 shortcuts 列表返回
+ *
+ */
+export async function* getDKSList(): DeviceSession<GetDKSListResult> {
+  // 步骤一：读取当前板载号
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const profileSize = KEY_LAYER_LENGTH * 4; // 2048 字节 / 板载（4 层 × 512）
+
+  // 步骤二：读取该板载全部 4 层 0x08 数据，扫描 0x90 类型按键
+  const allLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
+  );
+
+  // dksIndex → 首次出现的 keySlot（在某层中的槽位索引）
+  const dksMap = new Map<number, number>();
+  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const base = layerBase + i * KEY_ITEM_SIZE;
+      if ((allLayersData[base] ?? 0) === 0x90) {
+        const dksIdx = allLayersData[base + 1] ?? 0;
+        if (!dksMap.has(dksIdx)) dksMap.set(dksIdx, i);
+      }
+    }
+  }
+
+  if (dksMap.size === 0) {
+    return { name: "getDKSList", code: 0, data: { shortcuts: [] } };
+  }
+
+  // 步骤三：读取该板载第 0 层 0x07 默认按键数据
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  // 步骤四：读取该板载 0xa2 DKS 数据区（768 字节）
+  const dksData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_DKS_COMMAND, config * DKS_AREA_SIZE, DKS_AREA_SIZE, DATA_LENGTH,
+  );
+
+  // 步骤五：组装 shortcuts（按 dksIndex 升序）
+  const shortcuts: DKSShortcut[] = [];
+  const sortedEntries = [...dksMap.entries()].sort((a, b) => a[0] - b[0]);
+
+  for (const [dksIdx, keySlot] of sortedEntries) {
+    // 从 0x07 解析该槽位的 HID code 和按键名
+    const defBase  = keySlot * KEY_ITEM_SIZE;
+    const hidCode  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[defBase] ?? 0,
+      rawDefaultData[defBase + 1] ?? 0,
+      rawDefaultData[defBase + 2] ?? 0,
+    );
+    const keyName  = resolveKeyNameByCode(hidCode, KEY_RETURN_ORDER[keySlot] ?? `K${keySlot}`);
+
+    // 条目 N 直接起始于 N × DKS_ENTRY_SIZE（无头部）
+    const entryBase = dksIdx * DKS_ENTRY_SIZE;
+
+    // 前 4 字节：range
+    const range: number[] = [
+      dksData[entryBase + 0] ?? 0,
+      dksData[entryBase + 1] ?? 0,
+      dksData[entryBase + 2] ?? 0,
+      dksData[entryBase + 3] ?? 0,
+    ];
+
+    // 后 20 字节：keys（4 × 5 字节），5 字节结构为 [type, ext, code, rangeB0, rangeB1]
+    const keys: DKSKeyItem[] = [];
+    for (let k = 0; k < 4; k++) {
+      const kBase = entryBase + 4 + k * 5;
+      const b0 = dksData[kBase] ?? 0;     // type byte
+      const b1 = dksData[kBase + 1] ?? 0; // ext byte
+      const b2 = dksData[kBase + 2] ?? 0; // code byte
+      const b3 = dksData[kBase + 3] ?? 0; // range 原始字节 0
+      const b4 = dksData[kBase + 4] ?? 0; // range 原始字节 1
+
+      const kHidCode = resolveHidCodeFromDefaultKeyTriplet(b0, b1, b2);
+      const kName    = resolveKeyNameByCode(kHidCode, `K${k}`);
+      keys.push({ code: kHidCode, key: kName, range: parseDKSKeyRange(b3, b4) });
+    }
+
+    shortcuts.push({
+      type:            5,
+      code:            hidCode,
+      name:            String(dksIdx),
+      simulation:      1,
+      simulationRange: [200, 200],
+      range,
+      keys,
+    });
+  }
+
+  return { name: "getDKSList", code: 0, data: { shortcuts } };
+}
+
+/**
+ *
+ * 获取设备全部 TGL 高级按键
+ *
+ * 流程：
+ *  1. 0x04 读取板载（config），不使用 layer
+ *  2. 0x08 读取该板载 4 层数据，扫描 0x91 类型：[0x91, tglIdx, 0x00]
+ *  3. 0x07 读取该板载第 0 层默认矩阵，用 0x08 中 0x91 所在槽位取 keys[0]（各层均对应同一 0x07 默认层）
+ *  4. 0xa6 按 tglIdx（第 2 字节）× 3 读取功能区 3 字节，解析为 keys[1]
+ *
+ * pageNo / pageSize 暂不做分页处理。
+ *
+ */
+export async function* getTGLList(
+  _request: GetTGLListParams,
+): DeviceSession<GetTGLListResult> {
+  // 步骤一：读取当前板载号
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const profileSize = KEY_LAYER_LENGTH * 4;
+
+  // 步骤二：读取该板载全部 4 层 0x08 数据，扫描 0x91 类型按键
+  const allLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
+  );
+
+  // tglIdx（0x91 第 2 字节）→ 0x08 中首次出现的矩阵槽位 keySlot
+  const tglMap = new Map<number, number>();
+  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const base = layerBase + i * KEY_ITEM_SIZE;
+      if ((allLayersData[base] ?? 0) !== 0x91) continue;
+      const tglIdx = allLayersData[base + 1] ?? 0;
+      if (!tglMap.has(tglIdx)) tglMap.set(tglIdx, i);
+    }
+  }
+
+  if (tglMap.size === 0) {
+    return { name: "getTGLList", code: 0, data: { len: TGL_LIST_LEN, tgl: [] } };
+  }
+
+  // 步骤三：读取该板载第 0 层 0x07 默认按键数据
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  // 步骤四：读取该板载 0xa6 TGL 数据区（128 字节）
+  const tglAreaOffset = config * TGL_AREA_SIZE;
+  const tglData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_TGL_COMMAND, tglAreaOffset, TGL_AREA_SIZE, DATA_LENGTH,
+  );
+
+  // 步骤五：组装 tgl 列表（按 tglIdx 升序）
+  const tgl: TGLEntry[] = [];
+  const sortedEntries = [...tglMap.entries()].sort((a, b) => a[0] - b[0]);
+
+  for (const [tglIdx, keySlot] of sortedEntries) {
+    // keys[0]：0x08 中 0x91 所在槽位 → 0x07 默认层同槽位的按键定义
+    const defBase = keySlot * KEY_ITEM_SIZE;
+    const defaultKey = parseTGLKeyFromTriplet(
+      rawDefaultData[defBase] ?? 0,
+      rawDefaultData[defBase + 1] ?? 0,
+      rawDefaultData[defBase + 2] ?? 0,
+      KEY_RETURN_ORDER[keySlot] ?? `K${keySlot}`,
+    );
+
+    // keys[1]：0xa6 功能区 index × 3 字节的按键定义
+    const entryBase = tglIdx * TGL_ENTRY_SIZE;
+    const funcKey = parseTGLKeyFromTriplet(
+      tglData[entryBase] ?? 0,
+      tglData[entryBase + 1] ?? 0,
+      tglData[entryBase + 2] ?? 0,
+      `TGL${tglIdx}`,
+    );
+
+    tgl.push({
+      type: 10,
+      code: defaultKey.code,
+      keys: [defaultKey, funcKey],
+    });
+  }
+
+  return { name: "getTGLList", code: 0, data: { len: TGL_LIST_LEN, tgl } };
+}
+
+/**
+ *
+ * 读取指定 TGL 高级按键
+ *
+ * 流程：
+ *  1. 0x04/0x05 读取板载（config）与层（layer，全局层换算为局部层）
+ *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找 keySlot
+ *  3. 0x08 读取当前层，确认该槽位为 0x91 类型，取 tglIdx（第 2 字节）
+ *  4. 0xa6 以 config × TGL_AREA_SIZE + tglIdx × 3 读取 3 字节功能键定义
+ *  5. keys[0] = 0x07 同槽位默认键，keys[1] = 0xa6 功能键
+ *
+ */
+export async function* getTGL(
+  request: GetTGLParams,
+): DeviceSession<GetTGLResult> {
+  const emptyData = (code: number): TGLEntry => ({ type: 10, code, keys: [] });
+
+  if (request.type !== 10) {
+    return { name: "getTGL", code: 3, data: emptyData(request.code), message: "type must be 10 (TGL)" };
+  }
+
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "getTGL", code: 3, data: emptyData(request.code), message: "key not found in default matrix" };
+  }
+
+  // ── 0x08 当前层 → 确认 0x91 类型，取 tglIdx ─────────────────────────────
+  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
+  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  const keyBase = keySlot * KEY_ITEM_SIZE;
+  const rawType = rawCurLayerData[keyBase] ?? 0;
+
+  if (rawType !== 0x91) {
+    return {
+      name: "getTGL",
+      code: 3,
+      data: emptyData(request.code),
+      message: `key at slot ${keySlot} is not TGL (type=0x${rawType.toString(16)})`,
+    };
+  }
+  const tglIdx = rawCurLayerData[keyBase + 1] ?? 0;
+
+  // ── keys[0]：0x07 同槽位默认键定义 ───────────────────────────────────────
+  const defaultKey = parseTGLKeyFromTriplet(
+    rawDefaultData[keyBase] ?? 0,
+    rawDefaultData[keyBase + 1] ?? 0,
+    rawDefaultData[keyBase + 2] ?? 0,
+    KEY_RETURN_ORDER[keySlot] ?? `K${keySlot}`,
+  );
+
+  // ── keys[1]：0xa6 功能区 tglIdx × 3 字节 ──────────────────────────────────
+  const entryData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_TGL_COMMAND,
+    config * TGL_AREA_SIZE + tglIdx * TGL_ENTRY_SIZE,
+    TGL_ENTRY_SIZE,
+    DATA_LENGTH,
+  );
+  const funcKey = parseTGLKeyFromTriplet(
+    entryData[0] ?? 0,
+    entryData[1] ?? 0,
+    entryData[2] ?? 0,
+    `TGL${tglIdx}`,
+  );
+
+  return {
+    name: "getTGL",
+    code: 0,
+    data: {
+      type: 10,
+      code: defaultKey.code,
+      keys: [defaultKey, funcKey],
+    },
+  };
+}
+
+/**
+ *
+ * 设置指定 TGL 高级按键
+ *
+ * 流程：
+ *  1. 验证 type === 10，且 keys[1] 存在
+ *  2. 0x04/0x05 读取板载（config）与层（layer）
+ *  3. 0x08 读取该板载 4 层，扫描全部 0x91，取最大 tglIdx
+ *  4. 0x07 按 code 找 keySlot；当前层该槽位：
+ *     - 已是 0x91 → 复用已有 tglIdx（更新）
+ *     - 否则 → tglIdx = 无 TGL 时为 0，否则 maxTglIdx + 1
+ *  5. 0xa7 写入 keys[1] 三字节到 tglIdx × 3
+ *  6. 新绑定时 0x09 将 keySlot 写为 [0x91, tglIdx, 0x00]
+ *
+ */
+export async function* setTGL(
+  request: SetTGLParams,
+): DeviceSession<SetTGLResult> {
+  if (request.type !== 10) {
+    return { name: "setTGL", code: 3, message: "type must be 10 (TGL)" };
+  }
+  const funcKey = request.keys[1];
+  if (!funcKey || !Number.isInteger(funcKey.code)) {
+    return { name: "setTGL", code: 3, message: "keys[1] is required" };
+  }
+
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  // ── 0x08 全板载 4 层 → 扫描 0x91，取最大 tglIdx ─────────────────────────
+  const allLayersOffset = config * profileSize;
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
+  );
+
+  let maxTglIdx = -1;
+  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const b = layerBase + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x91) {
+        maxTglIdx = Math.max(maxTglIdx, rawAllLayersData[b + 1] ?? 0);
+      }
+    }
+  }
+
+  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "setTGL", code: 3, message: "key not found in default matrix" };
+  }
+
+  // ── 0x08 当前层 → 判断已有 / 新建，确定 tglIdx ───────────────────────────
+  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
+  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  const keyBase = keySlot * KEY_ITEM_SIZE;
+  const rawType = rawCurLayerData[keyBase] ?? 0;
+
+  let tglIdx:     number;
+  let isNewEntry: boolean;
+
+  if (rawType === 0x91) {
+    tglIdx     = rawCurLayerData[keyBase + 1] ?? 0;
+    isNewEntry = false;
+  } else {
+    tglIdx     = maxTglIdx < 0 ? 0 : maxTglIdx + 1;
+    isNewEntry = true;
+  }
+
+  // ── 0xa7 写入 keys[1] 三字节 TGL 功能定义 ─────────────────────────────────
+  const entryData = [...encodeTGLKeyToTriplet(funcKey)];
+  const advAreaOffset = config * TGL_AREA_SIZE;
+  const writeOff      = advAreaOffset + tglIdx * TGL_ENTRY_SIZE;
+  const [wLo, wHi]    = shiftFrom16Bit(writeOff);
+  const wChk = (wLo + wHi + TGL_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+  const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_TGL_COMMAND, 0x00, wChk, TGL_ENTRY_SIZE,
+    wLo, wHi, 0x00,
+    ...entryData,
+  ]);
+  const wAdvCode = parseWriteResponseCode(wAdvIn);
+  if (wAdvCode !== 0) return { name: "setTGL", code: wAdvCode, message: "write TGL entry failed" };
+
+  // ── 新绑定 → 0x09 将 keySlot 写为 [0x91, tglIdx, 0x00] ─────────────────
+  if (isNewEntry) {
+    const keyWriteOff = layerOffset + keySlot * KEY_ITEM_SIZE;
+    const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
+    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x91 + tglIdx + 0x00) & 0xff;
+    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+      kLo, kHi, 0x00,
+      0x91, tglIdx, 0x00,
+    ]);
+    const wKeyCode = parseWriteResponseCode(wKeyIn);
+    if (wKeyCode !== 0) return { name: "setTGL", code: wKeyCode, message: "write key TGL definition failed" };
+  }
+
+  return { name: "setTGL", code: 0 };
+}
+
+/**
+ *
+ * 读取指定 DKS 高级按键
+ *
+ * 流程：
+ *  1. 0x04/0x05 读取板载（config）与层（layer）
+ *  2. 0x07 读取默认层，按 HID code 找 keySlot（遵循板载 + layer 偏移）
+ *  3. 0x08 读取当前层，确认该槽位为 0x90 类型，取 dksIdx（第 2 字节）
+ *  4. 0xa2 以 config × DKS_AREA_SIZE 为板载偏移，读取第 dksIdx 条目（24 字节）
+ *  5. 解析条目：前 4 字节 = range，后 20 字节 = keys（4 × 5 字节）
+ *
+ */
+export async function* getDKS(
+  request: GetDKSParams,
+): DeviceSession<GetDKSResult> {
+  // ── 步骤一：板载 / 层 ──────────────────────────────────────────────────────
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  // ── 步骤二：0x07 默认层 → keySlot（按 HID code 匹配）────────────────────
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "getDKS", code: 3, data: { type: 5, code: request.code, name: "", simulation: 1, simulationRange: [200, 200], range: [], keys: [] }, message: "key not found in default matrix" };
+  }
+
+  // ── 步骤三：0x08 当前层 → 确认 0x90 类型，取 dksIdx ──────────────────────
+  const allLayersOffset = config * profileSize;
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
+  );
+
+  const curLayerBase = layer * KEY_LAYER_LENGTH;
+  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
+  const rawType      = rawAllLayersData[keyBase] ?? 0;
+
+  if (rawType !== 0x90) {
+    return { name: "getDKS", code: 3, data: { type: 5, code: request.code, name: "", simulation: 1, simulationRange: [200, 200], range: [], keys: [] }, message: `key at slot ${keySlot} is not DKS (type=0x${rawType.toString(16)})` };
+  }
+  const dksIdx = rawAllLayersData[keyBase + 1] ?? 0;
+
+  // ── 步骤四：0xa2 读取该 DKS 条目（遵循板载偏移）──────────────────────────
+  const advAreaOffset = config * DKS_AREA_SIZE;
+  const entryData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_DKS_COMMAND,
+    advAreaOffset + dksIdx * DKS_ENTRY_SIZE,
+    DKS_ENTRY_SIZE,
+    DATA_LENGTH,
+  );
+
+  // ── 步骤五：解析条目 ───────────────────────────────────────────────────────
+  const defBase  = keySlot * KEY_ITEM_SIZE;
+  const hidCode  = resolveHidCodeFromDefaultKeyTriplet(
+    rawDefaultData[defBase] ?? 0,
+    rawDefaultData[defBase + 1] ?? 0,
+    rawDefaultData[defBase + 2] ?? 0,
+  );
+  const keyName  = resolveKeyNameByCode(hidCode, KEY_RETURN_ORDER[keySlot] ?? `K${keySlot}`);
+
+  // 前 4 字节：range
+  const range: number[] = [
+    entryData[0] ?? 0,
+    entryData[1] ?? 0,
+    entryData[2] ?? 0,
+    entryData[3] ?? 0,
+  ];
+
+  // 后 20 字节：keys（4 × 5 字节：[type, ext, code, rangeB0, rangeB1]）
+  const keys: DKSKeyItem[] = [];
+  for (let k = 0; k < 4; k++) {
+    const kBase    = 4 + k * 5;
+    const kHidCode = resolveHidCodeFromDefaultKeyTriplet(
+      entryData[kBase] ?? 0,
+      entryData[kBase + 1] ?? 0,
+      entryData[kBase + 2] ?? 0,
+    );
+    const kName    = resolveKeyNameByCode(kHidCode, `K${k}`);
+    keys.push({
+      code:  kHidCode,
+      key:   kName,
+      range: parseDKSKeyRange(entryData[kBase + 3] ?? 0, entryData[kBase + 4] ?? 0),
+    });
+  }
+
+  return {
+    name: "getDKS",
+    code: 0,
+    data: {
+      type:            5,
+      code:            hidCode,
+      name:            `DKS-${dksIdx}`,
+      simulation:      1,
+      simulationRange: [200, 200],
+      range,
+      keys,
+    },
+  };
+}
+
+/**
+ *
+ * 设置指定 DKS 高级按键
+ *
+ * 流程：
+ *  1. 验证 type === 5
+ *  2. 0x04/0x05 读取板载（config）与层（layer）
+ *  3. 0x07 读取默认层，按 HID code 找到 keySlot
+ *  4. 0x08 读取该板载 4 层，扫描全部 0x90 取最大 dksIdx；当前层该槽位：
+ *     - 已是 0x90 → 复用已有 dksIdx（更新）
+ *     - 否则 → dksIdx = 无 DKS 时为 0，否则 maxDksIdx + 1
+ *  5. 将 request.range（4 字节）与 request.keys（4 × 5 字节）编码为 24 字节
+ *  6. 0xa3 将 24 字节写入 (config × DKS_AREA_SIZE + dksIdx × DKS_ENTRY_SIZE)
+ *  7. 若是新条目：0x09 将 keySlot 处写为 [0x90, dksIdx, 0x00]
+ *
+ */
+export async function* setDKS(
+  request: SetDKSParams,
+): DeviceSession<SetDKSResult> {
+  if (request.type !== 5) {
+    return { name: "setDKS", code: 3, message: "type must be 5 (DKS)" };
+  }
+
+  // ── 步骤一：板载 / 层 ───────────────────────────────────────────────────────
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  // ── 步骤二：0x07 默认层 → keySlot（按 HID code 匹配）────────────────────
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "setDKS", code: 3, message: "key not found in default matrix" };
+  }
+
+  // ── 步骤三：0x08 全板载 4 层 → 扫描 0x90 取最大 dksIdx，判断新建/更新 ───
+  const allLayersOffset = config * profileSize;
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
+  );
+
+  let maxDksIdx = -1;
+  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const b = layerBase + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x90) {
+        maxDksIdx = Math.max(maxDksIdx, rawAllLayersData[b + 1] ?? 0);
+      }
+    }
+  }
+
+  const curLayerBase = layer * KEY_LAYER_LENGTH;
+  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
+  const rawType      = rawAllLayersData[keyBase] ?? 0;
+
+  let dksIdx:     number;
+  let isNewEntry: boolean;
+
+  if (rawType === 0x90) {
+    dksIdx     = rawAllLayersData[keyBase + 1] ?? 0;
+    isNewEntry = false;
+  } else {
+    dksIdx     = maxDksIdx < 0 ? 0 : maxDksIdx + 1;
+    isNewEntry = true;
+  }
+
+  // ── 步骤四：编码 24 字节 DKS 条目 ─────────────────────────────────────────
+  // 前 4 字节：request.range（直接写入）
+  const rangeBytes = [
+    (request.range[0] ?? 0) & 0xff,
+    (request.range[1] ?? 0) & 0xff,
+    (request.range[2] ?? 0) & 0xff,
+    (request.range[3] ?? 0) & 0xff,
+  ];
+
+  // 后 20 字节：4 个子按键，每个 5 字节 [type=0x10, ext=0x00, code, rangeB0, rangeB1]
+  const keyBytes: number[] = [];
+  for (let k = 0; k < 4; k++) {
+    const ki = request.keys[k];
+    if (!ki || ki.code === 0) {
+      keyBytes.push(0x00, 0x00, 0x00, 0x00, 0x00);
+    } else {
+      const [rb0, rb1] = encodeDKSKeyRange(ki.range ?? []);
+      keyBytes.push(0x10, 0x00, ki.code & 0xff, rb0, rb1);
+    }
+  }
+
+  const entryData = [...rangeBytes, ...keyBytes]; // 4 + 20 = 24 字节
+
+  // ── 步骤五：0xa3 写入 DKS 条目 ────────────────────────────────────────────
+  const advAreaOffset = config * DKS_AREA_SIZE;
+  const writeOff      = advAreaOffset + dksIdx * DKS_ENTRY_SIZE;
+  const [wLo, wHi]    = shiftFrom16Bit(writeOff);
+  const wChk = (wLo + wHi + DKS_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+  const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_DKS_COMMAND, 0x00, wChk, DKS_ENTRY_SIZE,
+    wLo, wHi, 0x00,
+    ...entryData,
+  ]);
+  const wAdvCode = parseWriteResponseCode(wAdvIn);
+  if (wAdvCode !== 0) return { name: "setDKS", code: wAdvCode, message: "write DKS entry failed" };
+
+  // ── 步骤六：新条目 → 0x09 将 keySlot 写为 [0x90, dksIdx, 0x00] ──────────
+  if (isNewEntry) {
+    const keyWriteOff   = layerOffset + keySlot * KEY_ITEM_SIZE;
+    const [kLo, kHi]    = shiftFrom16Bit(keyWriteOff);
+    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x90 + dksIdx + 0x00) & 0xff;
+    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+      kLo, kHi, 0x00,
+      0x90, dksIdx, 0x00,
+    ]);
+    const wKeyCode = parseWriteResponseCode(wKeyIn);
+    if (wKeyCode !== 0) return { name: "setDKS", code: wKeyCode, message: "write key DKS definition failed" };
+  }
+
+  return { name: "setDKS", code: 0 };
+}
+
+/**
+ *
+ * 删除指定 DKS 快捷键
+ *
+ * 流程：
+ *  1. 0x04/0x05 读取板载（config）与层（layer）
+ *  2. 0x07 读取默认层，按 HID code 找到 keySlot
+ *     （LEFTCTRL / FN1 等通过 resolveHidCodeFromDefaultKeyTriplet 三字节匹配）
+ *  3. 0x08 读取全板载4层，确认 keySlot 处类型为 0x90，取 dksIdx（第2字节）
+ *  4. 收集该板载全部 4 层所有 0x90 按键，按 dksIdx 升序排列，得 totalDks
+ *  5. 0x09 将该按键恢复为默认定义
+ *  6. 0x09 将全部 4 层中 dksIdx > 被删条目 的其他 0x90 按键索引各减 1
+ *  7. 0xa2 读取 aDksIdx+1 ~ totalDks-1 的条目，依次写到 aDksIdx ~ totalDks-2
+ *  8. 0xa2 清零最后一个条目（totalDks-1）
+ *
+ */
+export async function* delDKS(
+  request: DelDKSParams,
+): DeviceSession<DelDKSResult> {
+  // ── 步骤一：读取板载（config）与层（layer）──────────────────────────────────
+  // layer 有传参时使用传参，否则从 0x05 读设备当前层
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  // ── 步骤二：0x07 默认层 → keySlot（按 HID code 匹配）────────────────────
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "delDKS", code: 3, message: "key not found in default matrix" };
+  }
+
+  // ── 步骤三：0x08 全板载4层 → 确认 0x90 类型，获取 dksIdx ─────────────────
+  const allLayersOffset = config * profileSize;
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
+  );
+
+  const curLayerBase = layer * KEY_LAYER_LENGTH;
+  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
+  const rawType      = rawAllLayersData[keyBase] ?? 0;
+
+  if (rawType !== 0x90) {
+    return { name: "delDKS", code: 3, message: `key at slot ${keySlot} is not DKS (type=0x${rawType.toString(16)})` };
+  }
+  const aDksIdx = rawAllLayersData[keyBase + 1] ?? 0;
+
+  // ── 步骤四：收集该板载全部 4 层所有 0x90 按键，按 dksIdx 升序 ───────────
+  type DksEntry = { layerIdx: number; keyI: number; dksIdx: number };
+  const dksEntries: DksEntry[] = [];
+  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const b = layerBase + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x90) {
+        dksEntries.push({
+          layerIdx,
+          keyI: i,
+          dksIdx: rawAllLayersData[b + 1] ?? 0,
+        });
+      }
+    }
+  }
+  dksEntries.sort((a, b) => a.dksIdx - b.dksIdx);
+  const totalDks = dksEntries.length > 0
+    ? Math.max(...dksEntries.map((e) => e.dksIdx)) + 1
+    : 0;
+
+  // ── 步骤五：0x09 将该按键恢复为默认定义 ────────────────────────────────────
+  const defBase   = keySlot * KEY_ITEM_SIZE;
+  const defType   = rawDefaultData[defBase]     ?? 0x10;
+  const defExt    = rawDefaultData[defBase + 1] ?? 0x00;
+  const defCode   = rawDefaultData[defBase + 2] ?? 0x00;
+  const [r1Lo, r1Hi] = shiftFrom16Bit(layerOffset + keySlot * KEY_ITEM_SIZE);
+  const r1Chk = (r1Lo + r1Hi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
+  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, r1Chk, KEY_ITEM_SIZE,
+    r1Lo, r1Hi, 0x00,
+    defType, defExt, defCode,
+  ]);
+  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+  if (wRestoreCode !== 0) return { name: "delDKS", code: wRestoreCode, message: "restore key def failed" };
+
+  // ── 步骤六：0x09 全部 4 层中 dksIdx > aDksIdx 的其他 0x90 按键索引各减 1 ─
+  for (const entry of dksEntries) {
+    if (entry.layerIdx === layer && entry.keyI === keySlot) continue;
+    if (entry.dksIdx <= aDksIdx)                         continue;
+    const newIdx   = entry.dksIdx - 1;
+    const writeOff = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [sLo, sHi] = shiftFrom16Bit(writeOff);
+    const sChk = (sLo + sHi + KEY_ITEM_SIZE + 0x90 + newIdx + 0x00) & 0xff;
+    const wShiftIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, sChk, KEY_ITEM_SIZE,
+      sLo, sHi, 0x00,
+      0x90, newIdx, 0x00,
+    ]);
+    const wShiftCode = parseWriteResponseCode(wShiftIn);
+    if (wShiftCode !== 0) return { name: "delDKS", code: wShiftCode, message: "shift key index failed" };
+  }
+
+  // ── 步骤七：0xa2 平移条目：aDksIdx+1 ~ totalDks-1 → aDksIdx ~ totalDks-2 ─
+  const advAreaOffset = config * DKS_AREA_SIZE;
+  const moveCount     = totalDks - 1 - aDksIdx;
+
+  if (moveCount > 0) {
+    const partialData: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_DKS_COMMAND,
+      advAreaOffset + (aDksIdx + 1) * DKS_ENTRY_SIZE,
+      moveCount * DKS_ENTRY_SIZE,
+      DATA_LENGTH,
+    );
+    for (let i = 0; i < moveCount; i++) {
+      const entryData = partialData.slice(i * DKS_ENTRY_SIZE, (i + 1) * DKS_ENTRY_SIZE);
+      const writeOff  = advAreaOffset + (aDksIdx + i) * DKS_ENTRY_SIZE;
+      const [wLo, wHi] = shiftFrom16Bit(writeOff);
+      const wChk = (wLo + wHi + DKS_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+      const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
+        SET_DKS_COMMAND, 0x00, wChk, DKS_ENTRY_SIZE,
+        wLo, wHi, 0x00,
+        ...entryData,
+      ]);
+      const wAdvCode = parseWriteResponseCode(wAdvIn);
+      if (wAdvCode !== 0) return { name: "delDKS", code: wAdvCode, message: `shift DKS entry ${i} failed` };
+    }
+  }
+
+  // ── 步骤八：0xa2 清零末尾条目（totalDks-1）────────────────────────────────
+  const clearOff  = advAreaOffset + (totalDks - 1) * DKS_ENTRY_SIZE;
+  const [cLo, cHi] = shiftFrom16Bit(clearOff);
+  const clearData  = new Array<number>(DKS_ENTRY_SIZE).fill(0);
+  const cChk = (cLo + cHi + DKS_ENTRY_SIZE) & 0xff;
+  const wClearIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_DKS_COMMAND, 0x00, cChk, DKS_ENTRY_SIZE,
+    cLo, cHi, 0x00,
+    ...clearData,
+  ]);
+  const wClearCode = parseWriteResponseCode(wClearIn);
+  if (wClearCode !== 0) return { name: "delDKS", code: wClearCode, message: "clear last DKS entry failed" };
+
+  return { name: "delDKS", code: 0 };
+}
+
+/**
+ *
+ * 删除指定 TGL 高级按键
+ *
+ * 流程：
+ *  1. 0x04/0x05 读取板载（config）与层（layer，全局层换算为局部层）
+ *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找到 keySlot
+ *  3. 0x08 读取当前层，确认 keySlot 处类型为 0x91，取 tglIdx（第2字节）
+ *  4. 收集该板载全部 4 层所有 0x91 按键，按 tglIdx 升序排列
+ *  5. 0x09 将该按键恢复为 0x07 同局部层默认定义
+ *  6. 0x09 将全部 4 层中 tglIdx > 被删条目 的其他 0x91 按键索引各减 1
+ *  7. 0xa6 读取 tglIdx+1 ~ totalTgl-1 的条目，依次写到 tglIdx ~ totalTgl-2
+ *  8. 0xa7 清零最后一个条目（totalTgl-1）
+ *
+ */
+export async function* delTGL(
+  request: DelTGLParams,
+): DeviceSession<DelTGLResult> {
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "delTGL", code: 3, message: "key not found in default matrix" };
+  }
+
+  // ── 0x08 当前层 → 确认 0x91 类型，获取 tglIdx ───────────────────────────
+  const allLayersOffset = config * profileSize;
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
+  );
+
+  const curLayerBase = layer * KEY_LAYER_LENGTH;
+  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
+  const rawType      = rawAllLayersData[keyBase] ?? 0;
+
+  if (rawType !== 0x91) {
+    return { name: "delTGL", code: 3, message: `key at slot ${keySlot} is not TGL (type=0x${rawType.toString(16)})` };
+  }
+  const aTglIdx = rawAllLayersData[keyBase + 1] ?? 0;
+
+  // ── 收集该板载全部 4 层所有 0x91 按键，按 tglIdx 升序 ───────────────────
+  type TglEntry = { layerIdx: number; keyI: number; tglIdx: number };
+  const tglEntries: TglEntry[] = [];
+  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const b = layerBase + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x91) {
+        tglEntries.push({
+          layerIdx,
+          keyI: i,
+          tglIdx: rawAllLayersData[b + 1] ?? 0,
+        });
+      }
+    }
+  }
+  tglEntries.sort((a, b) => a.tglIdx - b.tglIdx);
+  const totalTgl = tglEntries.length > 0
+    ? Math.max(...tglEntries.map((e) => e.tglIdx)) + 1
+    : 0;
+
+  // ── 0x09 恢复为 0x07 同局部层默认定义 ───────────────────────────────────
+  const defBase   = keySlot * KEY_ITEM_SIZE;
+  const defType   = rawDefaultData[defBase]     ?? 0x10;
+  const defExt    = rawDefaultData[defBase + 1] ?? 0x00;
+  const defCode   = rawDefaultData[defBase + 2] ?? 0x00;
+  const [r1Lo, r1Hi] = shiftFrom16Bit(layerOffset + keySlot * KEY_ITEM_SIZE);
+  const r1Chk = (r1Lo + r1Hi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
+  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, r1Chk, KEY_ITEM_SIZE,
+    r1Lo, r1Hi, 0x00,
+    defType, defExt, defCode,
+  ]);
+  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+  if (wRestoreCode !== 0) return { name: "delTGL", code: wRestoreCode, message: "restore key def failed" };
+
+  // ── 0x09 全部 4 层中 tglIdx > aTglIdx 的其他 0x91 按键索引各减 1 ───────
+  for (const entry of tglEntries) {
+    if (entry.layerIdx === layer && entry.keyI === keySlot) continue;
+    if (entry.tglIdx <= aTglIdx)                      continue;
+    const newIdx  = entry.tglIdx - 1;
+    const writeOff = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [sLo, sHi] = shiftFrom16Bit(writeOff);
+    const sChk = (sLo + sHi + KEY_ITEM_SIZE + 0x91 + newIdx + 0x00) & 0xff;
+    const wShiftIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, sChk, KEY_ITEM_SIZE,
+      sLo, sHi, 0x00,
+      0x91, newIdx, 0x00,
+    ]);
+    const wShiftCode = parseWriteResponseCode(wShiftIn);
+    if (wShiftCode !== 0) return { name: "delTGL", code: wShiftCode, message: "shift key index failed" };
+  }
+
+  // ── 0xa6 平移条目：aTglIdx+1 ~ totalTgl-1 → aTglIdx ~ totalTgl-2 ────────
+  const advAreaOffset = config * TGL_AREA_SIZE;
+  const moveCount     = totalTgl - 1 - aTglIdx;
+
+  if (moveCount > 0) {
+    const partialData: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_TGL_COMMAND,
+      advAreaOffset + (aTglIdx + 1) * TGL_ENTRY_SIZE,
+      moveCount * TGL_ENTRY_SIZE,
+      DATA_LENGTH,
+    );
+    for (let i = 0; i < moveCount; i++) {
+      const entryData = partialData.slice(i * TGL_ENTRY_SIZE, (i + 1) * TGL_ENTRY_SIZE);
+      const writeOff  = advAreaOffset + (aTglIdx + i) * TGL_ENTRY_SIZE;
+      const [wLo, wHi] = shiftFrom16Bit(writeOff);
+      const wChk = (wLo + wHi + TGL_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+      const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
+        SET_TGL_COMMAND, 0x00, wChk, TGL_ENTRY_SIZE,
+        wLo, wHi, 0x00,
+        ...entryData,
+      ]);
+      const wAdvCode = parseWriteResponseCode(wAdvIn);
+      if (wAdvCode !== 0) return { name: "delTGL", code: wAdvCode, message: `shift TGL entry ${i} failed` };
+    }
+  }
+
+  // ── 0xa7 清零末尾条目（totalTgl-1）────────────────────────────────────────
+  const clearOff  = advAreaOffset + (totalTgl - 1) * TGL_ENTRY_SIZE;
+  const [cLo, cHi] = shiftFrom16Bit(clearOff);
+  const clearData  = new Array<number>(TGL_ENTRY_SIZE).fill(0);
+  const cChk = (cLo + cHi + TGL_ENTRY_SIZE) & 0xff;
+  const wClearIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_TGL_COMMAND, 0x00, cChk, TGL_ENTRY_SIZE,
+    cLo, cHi, 0x00,
+    ...clearData,
+  ]);
+  const wClearCode = parseWriteResponseCode(wClearIn);
+  if (wClearCode !== 0) return { name: "delTGL", code: wClearCode, message: "clear last TGL entry failed" };
+
+  return { name: "delTGL", code: 0 };
 }
 
 /**
@@ -1609,19 +2997,25 @@ export async function* setBiCalibration(
   if (sw !== 0 && sw !== 1)
     return { name: "setBiCalibration", code: 3, message: "switch must be 0 or 1" };
 
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
+  const rBaseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = rBaseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
 
   const oldByte = funcData[CALIBRATION_CFG_OFFSET] ?? 0;
   const newByte = (oldByte & ~(1 << 2)) | ((sw & 0x01) << 2);
 
-  const [lo, hi] = shiftFrom16Bit(CALIBRATION_CFG_OFFSET);
-  const size = 1;
-  const checksum = (lo + hi + size + newByte) & 0xff;
-  yield buildOutPacket(FLAG, [
+  const [lo, hi]  = shiftFrom16Bit(config * 64 + CALIBRATION_CFG_OFFSET);
+  const size      = 1;
+  const checksum  = (lo + hi + size + newByte) & 0xff;
+  const wIn: InPacket = yield buildOutPacket(FLAG, [
     SET_Func_COMMAND, 0x00, checksum, size,
     lo, hi, 0x00,
     newByte,
   ]);
+  const wCode = parseWriteResponseCode(wIn);
+  if (wCode !== 0) return { name: "setBiCalibration", code: wCode, message: "write calibration failed" };
 
   return { name: "setBiCalibration", code: 0 };
 }
@@ -1644,21 +3038,63 @@ export async function* setCalibration(
   if (sw !== 0 && sw !== 1)
     return { name: "setCalibration", code: 3, message: "switch must be 0 or 1" };
 
-  const funcData: number[] = yield* readChunkedDataGen(FLAG, 64, DATA_LENGTH);
+  const rBaseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = rBaseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
 
   const oldByte = funcData[CALIBRATION_CFG_OFFSET] ?? 0;
   const newByte = (oldByte & ~(1 << 3)) | ((sw & 0x01) << 3);
 
-  const [lo, hi] = shiftFrom16Bit(CALIBRATION_CFG_OFFSET);
-  const size = 1;
-  const checksum = (lo + hi + size + newByte) & 0xff;
-  yield buildOutPacket(FLAG, [
+  const [lo, hi]  = shiftFrom16Bit(config * 64 + CALIBRATION_CFG_OFFSET);
+  const size      = 1;
+  const checksum  = (lo + hi + size + newByte) & 0xff;
+  const wIn: InPacket = yield buildOutPacket(FLAG, [
     SET_Func_COMMAND, 0x00, checksum, size,
     lo, hi, 0x00,
     newByte,
   ]);
+  const wCode = parseWriteResponseCode(wIn);
+  if (wCode !== 0) return { name: "setCalibration", code: wCode, message: "write calibration failed" };
 
   return { name: "setCalibration", code: 0 };
+}
+
+/**
+ *
+ * 解析设备主动上报的校准事件（仅响应，无请求）
+ *
+ * 识别条件：buffer[0] === 0xa1
+ * 按键定义：buffer[1..3] 为三字节 [type, ext, code]，与 0x07 默认按键矩阵一致
+ *
+ * @returns 校准事件 JSON；非校准包返回 null
+ *
+ */
+export function parseOnCalibration(buffer: InPacket | number[]): OnCalibrationResult | null {
+  if (!buffer || buffer.length < 4) return null;
+  if ((buffer[0] ?? 0) !== ON_CALIBRATION_REPORT) return null;
+
+  const rawType  = buffer[1] ?? 0;
+  const extByte  = buffer[2] ?? 0;
+  const codeByte = buffer[3] ?? 0;
+
+  const hidCode = resolveHidCodeFromDefaultKeyTriplet(rawType, extByte, codeByte);
+  if (!isKnownEventKeyCode(hidCode)) {
+    return {
+      name: "onCalibration",
+      code: 3,
+      data: { key: "" },
+      message: "unknown key definition",
+    };
+  }
+
+  const key = resolveKeyNameByCode(hidCode, "");
+  return {
+    name: "onCalibration",
+    code: 0,
+    data: { key },
+  };
 }
 
 // ─── 统一分发入口 ─────────────────────────────────────────────────────────────
@@ -1668,7 +3104,7 @@ export async function* setCalibration(
  * 传入 `{ name, data }` 即可，无需关心具体函数签名。
  *
  * @example
- * const session = createSession({ name: "getBasicKey", data: { config:0, layer:0, pageNo:1, pageSize:25 } });
+ * const session = createSession({ name: "getBasicKey", data: { layer:0, pageNo:1, pageSize:25 } });
  * let step = await session.next();
  * while (!step.done) {
  *   step = await session.next(await sendToDevice(step.value));
@@ -1678,19 +3114,29 @@ export async function* setCalibration(
 export type SessionRequest =
   | { name: "getBasicConfig"; data?: null }
   | { name: "setConfigLayerIndex"; data: SetBasicConfigParams }
-  | { name: "getBasicKey"; data: GetBasicKeyParams }
-  | { name: "getKeyInfo"; data: GetKeyInfoParams }
-  | { name: "setKeyInfo"; data: SetKeyInfoParams }
-  | { name: "getPerf"; data: GetPerfParams }
-  | { name: "setPerf"; data: SetPerfParams }
-  | { name: "getRate"; data?: null }
-  | { name: "setRate"; data: SetRateParams }
-  | { name: "resetRT"; data: ResetRTParams }
-  | { name: "resetKeyInfo"; data: ResetKeyInfoParams }
-  | { name: "getDeviceInfo"; data?: null }
+  | { name: "getBasicKey";    data: GetBasicKeyParams }
+  | { name: "getKeyInfo";     data: GetKeyInfoParams }
+  | { name: "setKeyInfo";     data: SetKeyInfoParams }
+  | { name: "getPerf";        data: GetPerfParams }
+  | { name: "setPerf";        data: SetPerfParams }
+  | { name: "getRate";        data?: null }
+  | { name: "setRate";        data: SetRateParams }
+  | { name: "resetRT";        data: ResetRTParams }
+  | { name: "resetKeyInfo";   data: ResetKeyInfoParams }
+  | { name: "getDeviceInfo";  data?: null }
   | { name: "getCalibration"; data?: null }
+  | { name: "getLight";       data?: null }
+  | { name: "setLight";       data: SetLightParams }
+  | { name: "getDKSList";     data?: null }
+  | { name: "getTGLList";     data: GetTGLListParams }
+  | { name: "getTGL";         data: GetTGLParams }
+  | { name: "setTGL";         data: SetTGLParams }
+  | { name: "getDKS";         data: GetDKSParams }
+  | { name: "setDKS";         data: SetDKSParams }
+  | { name: "delDKS";         data: DelDKSParams }
+  | { name: "delTGL";         data: DelTGLParams }
   | { name: "setBiCalibration"; data: SetBiCalibrationParams }
-  | { name: "setCalibration"; data: SetCalibrationParams };
+  | { name: "setCalibration";  data: SetCalibrationParams };
 
 // ========== 推导核心 ========== start
 export function createSession<T extends SessionRequest>(
@@ -1700,25 +3146,58 @@ export function createSession<T extends SessionRequest>(
 
 export function createSession(request: SessionRequest): DeviceSession<unknown> {
   switch (request.name) {
-    case "getBasicConfig": return getBasicConfig();
+    case "getBasicConfig":     return getBasicConfig();
     case "setConfigLayerIndex": return setConfigLayerIndex(request.data.config_index, request.data.layer_index);
-    case "getBasicKey": return getBasicKey(request.data);
-    case "getKeyInfo": return getKeyInfo(request.data);
-    case "setKeyInfo": return setKeyInfo(request.data);
-    case "getPerf": return getPerf(request.data);
-    case "setPerf": return setPerf(request.data);
-    case "getRate": return getRate();
-    case "setRate": return setRate(request.data);
-    case "resetRT": return resetRT(request.data);
-    case "resetKeyInfo": return resetKeyInfo(request.data);
-    case "getDeviceInfo": return getDeviceInfo();
-    case "getCalibration": return getCalibration();
-    case "setBiCalibration": return setBiCalibration(request.data);
-    case "setCalibration": return setCalibration(request.data);
+    case "getBasicKey":        return getBasicKey(request.data);
+    case "getKeyInfo":         return getKeyInfo(request.data);
+    case "setKeyInfo":         return setKeyInfo(request.data);
+    case "getPerf":            return getPerf(request.data);
+    case "setPerf":            return setPerf(request.data);
+    case "getRate":            return getRate();
+    case "setRate":            return setRate(request.data);
+    case "resetRT":            return resetRT(request.data);
+    case "resetKeyInfo":       return resetKeyInfo(request.data);
+    case "getDeviceInfo":      return getDeviceInfo();
+    case "getCalibration":     return getCalibration();
+    case "getLight":           return getLight();
+    case "setLight":           return setLight(request.data);
+    case "getDKSList":         return getDKSList();
+    case "getTGLList":         return getTGLList(request.data);
+    case "getTGL":             return getTGL(request.data);
+    case "setTGL":             return setTGL(request.data);
+    case "getDKS":             return getDKS(request.data);
+    case "setDKS":             return setDKS(request.data);
+    case "delDKS":             return delDKS(request.data);
+    case "delTGL":             return delTGL(request.data);
+    case "setBiCalibration":   return setBiCalibration(request.data);
+    case "setCalibration":     return setCalibration(request.data);
+  }
+}
+
+// ─── 推送事件分发入口 ─────────────────────────────────────────────────────────
+
+export type PushHandler<T> = {
+  reportCode: number;
+  parse: (buffer: number[]) => { code: number; data: T; message?: string } | null;
+};
+
+export type PushResultMap = {
+  onCalibration: { key: string };
+};
+
+export type PushName = keyof PushResultMap;
+
+function createOnCalibration(): PushHandler<PushResultMap["onCalibration"]> {
+  return { reportCode: ON_CALIBRATION_REPORT, parse: parseOnCalibration };
+}
+
+export function getPushHandler<T extends PushName>(name: T): PushHandler<PushResultMap[T]> {
+  switch (name) {
+    case "onCalibration": return createOnCalibration();
   }
 }
 export {
-  getFuncPacketBytes,
   buildOutPacket,
+  getFuncPacketBytes,
   getCommandPacketBytes
 }
