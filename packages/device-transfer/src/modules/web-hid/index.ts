@@ -1,6 +1,6 @@
 /// <reference types="@types/w3c-web-hid" />
 import logger from '@sa/log';
-import { HIDMessageListener, HIDMessageQueue } from './message-queue';
+import { HIDMessageListener, HIDMessageQueue, BinaryPatternListener, type BinaryMatchPattern } from './message-queue';
 import type { FilterType, HIDProtocolOptions, HIDResponse } from './types';
 import { HIDMessageCodec } from './utils';
 const webHidLogger = logger.getLogger('web-hid');
@@ -14,6 +14,7 @@ export class HIDProtocolController extends EventTarget {
   private messageQueue: HIDMessageQueue;
   private binMessageQueue: HIDMessageQueue;
   private listenerMap: HIDMessageListener;
+  private binaryPatternListener: BinaryPatternListener;
   private codec: HIDMessageCodec;
   private messageCounter: number = 0;
   private connected: boolean = false;
@@ -33,6 +34,7 @@ export class HIDProtocolController extends EventTarget {
     this.binMessageQueue = new HIDMessageQueue('arrary');
     this.codec = new HIDMessageCodec();
     this.listenerMap = new HIDMessageListener();
+    this.binaryPatternListener = new BinaryPatternListener();
   }
   public getInstance() {
     return this.device;
@@ -146,7 +148,7 @@ export class HIDProtocolController extends EventTarget {
             reject(new Error('Request timeout'));
           }
         }, this.options.timeout);
-        webHidLogger.debug('Requset 🟢', isBinary ? 'binary data' : data);
+        // webHidLogger.debug('Requset 🟢', isBinary ? 'binary data' : data);
         if (!withoutResponse) {
           this.messageQueue.add(messageId, {
             name: data?.[this.msgAlias.name] || 'bin',
@@ -195,6 +197,15 @@ export class HIDProtocolController extends EventTarget {
   async off(name: string, callback: (data?: any) => void) {
     this.listenerMap.dispathOff(name, callback);
   }
+  onBinary(pattern: BinaryMatchPattern, callback: (data?: any) => void) {
+    this.binaryPatternListener.on(pattern, data => {
+      webHidLogger.debug(`Binary listened pos=${pattern.position} val=0x${pattern.value.toString(16)} 👂`, data);
+      return callback(data);
+    });
+  }
+  offBinary(pattern: BinaryMatchPattern, callback: (data?: any) => void) {
+    this.binaryPatternListener.off(pattern, callback);
+  }
   private async handleInput(event: HIDInputReportEvent) {
     try {
       const binaryTypeList = [0x86, 0x88];
@@ -229,39 +240,49 @@ export class HIDProtocolController extends EventTarget {
         const subCommand = uintArr[1];
         const messageId = `${subCommand}`;
         const requestInfo = this.binMessageQueue.get(messageId);
+
         if (requestInfo?.callback) {
           requestInfo.callback(message);
           this.binMessageQueue.remove(messageId);
         }
       }
-      // default
+      // binary case 4: device push event — match registered binary patterns
       else {
-        message = this.codec.decodeMessage(event.data);
-        if (!message) {
-          return;
-        }
-        const name = message[this.msgAlias.name];
-        if (!name) {
-          return;
-        }
-        const listeners = this.listenerMap.get(name);
-        if (listeners) {
-          const promiseArr = listeners.map(cb => cb(message));
+        const matchedEntries = this.binaryPatternListener.match(uintArr);
+        if (matchedEntries.length > 0) {
+          message = Array.from(uintArr);
+          const promiseArr = matchedEntries.map(e => e.callback(message));
           await Promise.all(promiseArr);
-          return;
         }
-        // @ts-ignore
-        const matchingRequests = Array.from(this.messageQueue.entries()).find(([_m, request]) => {
-          return request.name === name;
-        });
-        const [messageId, requestInfo] = matchingRequests || [];
-        const callback = requestInfo?.callback;
-        if (!callback) {
-          return;
+        // default
+        else {
+          message = this.codec.decodeMessage(event.data);
+          if (!message) {
+            return;
+          }
+          const name = message[this.msgAlias.name];
+          if (!name) {
+            return;
+          }
+          const listeners = this.listenerMap.get(name);
+          if (listeners) {
+            const promiseArr = listeners.map(cb => cb(message));
+            await Promise.all(promiseArr);
+            return;
+          }
+          // @ts-ignore
+          const matchingRequests = Array.from(this.messageQueue.entries()).find(([_m, request]) => {
+            return request.name === name;
+          });
+          const [messageId, requestInfo] = matchingRequests || [];
+          const callback = requestInfo?.callback;
+          if (!callback) {
+            return;
+          }
+          webHidLogger.debug(`Received ${name} 🟩`, message);
+          callback(message);
+          this.messageQueue.remove(messageId!);
         }
-        webHidLogger.debug(`Received ${name} 🟩`, message);
-        callback(message);
-        this.messageQueue.remove(messageId!);
       }
 
       this.dispatchEvent(
@@ -307,7 +328,7 @@ export class HIDProtocolController extends EventTarget {
     try {
       return new Promise((resolve, reject) => {
         const outputReports = this.codec.encodeBinaryMessage(messageId, data);
-        webHidLogger.debug('Requset 🟢', 'binary data', data);
+        // webHidLogger.debug('Requset 🟢', 'binary data', data);
         let timeoutId: NodeJS.Timeout | null = null;
         if (!withoutResponse) {
           timeoutId = setTimeout(() => {

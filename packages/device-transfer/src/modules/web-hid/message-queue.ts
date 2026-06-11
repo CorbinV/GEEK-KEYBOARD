@@ -1,4 +1,6 @@
 import type { Request } from './types';
+import type { BinaryMatchPattern } from '@sa/keyboard-protocol';
+export { type BinaryMatchPattern };
 export class HIDMessageQueue {
   private queue: Map<string, Request> | Array<[string, Request]>;
   constructor(queueType?: 'map' | 'arrary') {
@@ -78,5 +80,33 @@ export class HIDMessageListener {
   }
   clear() {
     this.listeners.clear();
+  }
+}
+
+type BinaryListenerEntry = {
+  pattern: BinaryMatchPattern;
+  callback: (data?: any) => void;
+};
+
+export class BinaryPatternListener {
+  private entries: BinaryListenerEntry[] = [];
+
+  on(pattern: BinaryMatchPattern, callback: (data?: any) => void): void {
+    this.entries.push({ pattern, callback });
+  }
+
+  off(pattern: BinaryMatchPattern, callback: (data?: any) => void): void {
+    this.entries = this.entries.filter(
+      e => !(e.pattern.position === pattern.position && e.pattern.value === pattern.value && e.callback === callback)
+    );
+  }
+
+  /** 返回所有匹配 uintArr 的 listener */
+  match(uintArr: Uint8Array): BinaryListenerEntry[] {
+    return this.entries.filter(e => uintArr[e.pattern.position] === e.pattern.value);
+  }
+
+  clear(): void {
+    this.entries = [];
   }
 }
