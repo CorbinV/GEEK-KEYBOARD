@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, reactive, ref, watchEffect } from 'vue';
-import { onCalibrationListener, removeCalibrationListener } from '@/api/keyConfig-rapid-trigger';
+import { onCalibrationListener, removeCalibrationListener, setCalibration } from '@/api/keyConfig-rapid-trigger';
 
 const props = defineProps<{
   visible: boolean
@@ -39,11 +39,13 @@ function calibrateCB(data: { key: string }[]) {
 
 function handleDialogComfirm() {}
 
-onMounted(() => {
+onMounted(async() => {
+  await setCalibration({switch: 1})
   onCalibrationListener(calibrateCB);
 })
 
-onUnmounted(() => {
+onUnmounted(async() => {
+  await setCalibration({switch: 0})
   removeCalibrationListener(calibrateCB);
   passedKeys.value.clear();
 })
