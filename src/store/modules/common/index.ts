@@ -167,7 +167,7 @@ function useKeyInfo() {
         }
 
         const exeKeys = !keys?.length
-          ? Object.keys(keyConfigMap.value.keys)
+          ? Object.keys(keyConfigMap.value)
           : keys;
 
         let idx = 0;
