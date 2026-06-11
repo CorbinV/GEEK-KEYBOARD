@@ -29,7 +29,8 @@ function getAllMock() {
 }
 const mockData = useMock ? getAllMock() : {};
 
-import type { DeviceSession } from '@sa/keyboard-protocol';
+import type { DeviceSession, PushName, PushResultMap, PushHandler } from '@sa/keyboard-protocol';
+import { getPushHandler } from '@sa/keyboard-protocol';
 
 export class UsbTransfor {
   /**
@@ -39,6 +40,7 @@ export class UsbTransfor {
    */
   private communicator: any;
   private listenerMap: WeakMap<(data: any) => void, (data: any) => void> = new WeakMap();
+  private pushWrapMap: WeakMap<Function, Function> = new WeakMap();
   private sessionLock: Promise<any> | null = null;
   constructor() {
     this.communicator = undefined;
@@ -167,6 +169,32 @@ export class UsbTransfor {
     }
     this.getCommunicator().off(name, wrap);
     this.listenerMap.delete(cb);
+  }
+  subscribe<T extends PushName>(name: T, cb: (data: PushResultMap[T]) => void): void {
+    if (this.pushWrapMap.has(cb)) {
+      throw new Error('Push listener already exists');
+    }
+    if (useMock) {
+      return;
+    }
+    const handler = getPushHandler(name);
+    const wrap = (raw: number[]) => {
+      const result = handler.parse(raw);
+      if (!result || result.code !== 0) return;
+      cb(result.data);
+    };
+    this.pushWrapMap.set(cb, wrap);
+    this.getCommunicator().onBinary({ position: 0, value: handler.reportCode }, wrap);
+  }
+  unsubscribe<T extends PushName>(name: T, cb: (data: PushResultMap[T]) => void): void {
+    const wrap = this.pushWrapMap.get(cb);
+    if (!wrap) return;
+    if (useMock) {
+      return;
+    }
+    const handler = getPushHandler(name);
+    this.getCommunicator().offBinary({ position: 0, value: handler.reportCode }, wrap);
+    this.pushWrapMap.delete(cb);
   }
 }
 const requestClient = new UsbTransfor();
