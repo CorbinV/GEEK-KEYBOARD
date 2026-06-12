@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, toRef } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-import type { KeyTypeEnum } from '@/enum/keyType';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
-import KeyboardKey from './keyboard-key.vue';
+import BaseLayout from './base-layout.vue';
 
 type KeyboardProps = {
   module?: string;
@@ -11,9 +10,6 @@ type KeyboardProps = {
   config?: number;
   passedKeys?: Set<string>;
 };
-const emit = defineEmits<{
-  (e: 'update:keyId', preload: { keyId: string; idx: number; code: number; type: KeyTypeEnum }): void;
-}>();
 const props = withDefaults(defineProps<KeyboardProps>(), {
   module: 'rk-s75',
   config: 0,
@@ -75,16 +71,14 @@ onUnmounted(() => {
     :style="containerStyle"
     :key="`${layer}${config}`"
   >
-      <KeyboardKey
+      <BaseLayout
         v-for="(keyId, idx) in layoutList"
         :key="`${keyId}${layer}${config}`"
         :key-id="keyId"
         :idx="idx"
         :kb-length="layoutList.length"
         :key-detail="layerOriginData?.keys?.[keyId]"
-        :key-class-name="[
-          passedKeys?.has(keyId) ? 'key-passed' : ''
-        ]"
+        :high-light="passedKeys?.has(keyId)"
         @last-key-mounted="handleLastKeyMounted"
       />
     <div v-if="baseConfig?.hasDecorator" class="w-50px h-50px absolute top-2 right-2 rounded-full bg-#222227" @click.stop></div>
