@@ -112,7 +112,7 @@ function handleKeyCfgChanged (){
   );
 }
 function handleKeySelectd(){
-  const injectSelectedDetail = inject('selectedDetail') as any;
+  const injectSelectedDetail = inject('selectedDetail',  ref(null)) as any;
   const updateKeyViewBySelectedDetail = (data: any) => {
     if (!props.selected) {
       return;
