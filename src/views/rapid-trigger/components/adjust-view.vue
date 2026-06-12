@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { getCalibration, setCalibration } from '@/api/keyConfig-rapid-trigger';
+import CalibrateModal from './calibrate-modal.vue'
 
 const bothwayAdjustSwitch = ref<boolean>(false);
 // const triggerPoint = ref(66);
@@ -15,7 +16,10 @@ async function getConfig() {
 
   bothwayAdjustSwitch.value = data.switch === 1;
 }
-
+const calibrateVisible = ref(false)
+function onCalibrateClicked(){
+  calibrateVisible.value = true
+}
 getConfig();
 </script>
 
@@ -43,7 +47,10 @@ getConfig();
           <p class="vertical-bar"></p>
           <p class="... text-lg">{{ $t('repidTrigger.handAdjust') }}</p>
         </div>
-        <button class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]">
+        <button
+          @click="onCalibrateClicked"
+          class="h-60px w-170px rounded-md bg-[#3c8df4] c-white hover:bg-[#3c8df4]"
+        >
           {{ $t('repidTrigger.startAdjust') }}
         </button>
       </div>
@@ -52,6 +59,8 @@ getConfig();
         {{ $t('repidTrigger.handAdjustHint') }}
       </p>
     </div>
+    <CalibrateModal v-model:visible="calibrateVisible"></CalibrateModal>
+
   </div>
 </template>
 

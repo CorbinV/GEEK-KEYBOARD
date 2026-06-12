@@ -37,7 +37,14 @@ function calibrateCB(data: { key: string }[]) {
   });
 }
 
-function handleDialogComfirm() {}
+function handleDialogComfirm() {
+  closeDialog()
+  emit('update:visible', false)
+}
+function handleDialogCancle() {
+  closeDialog()
+  emit('update:visible', false)
+}
 
 onMounted(async() => {
   await setCalibration({switch: 1})
@@ -74,7 +81,7 @@ onUnmounted(async() => {
     </template>
     <template #footer>
       <div class="flex items-center justify-center gap-x-8">
-        <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-base" type="primary" ghost @click="closeDialog">
+        <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-base" type="primary" ghost @click="handleDialogCancle">
           {{ $t('businessCommon.cancel') }}
         </NButton>
         <NButton class="h-4rem w-12rem md:h-3rem md:w-8rem text-lg text-white" type="primary"
