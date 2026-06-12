@@ -1,7 +1,9 @@
 import type { SuperKeyStrategy } from '../types';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { $t } from '@/locales';
-import { addDks, deleteDksByCode, getDksList, getTargetDks, resetDksName } from '@/api/super-key';
+import { setLocalName } from '@/utils/localName';
+import { addDks, deleteDksByCode, getDksList, getTargetDks } from '@/api/super-key';
+import type { ReName } from '@/api/modules/super-key';
 import DksEdit from '../components/dks-edit.vue';
 
 export const dksStrategy: SuperKeyStrategy = {
@@ -22,7 +24,7 @@ export const dksStrategy: SuperKeyStrategy = {
     addTarget: addDks,
     deleteByCode: deleteDksByCode,
     getTarget: getTargetDks,
-    rename: resetDksName,
+    rename: (data: ReName) => { setLocalName(KeyTypeEnum.DKS, data.code, data.name); return Promise.resolve(); },
   },
   extractList: (res) => res.shortcuts,
   defaultItemName: $t('supperKey.x10'),

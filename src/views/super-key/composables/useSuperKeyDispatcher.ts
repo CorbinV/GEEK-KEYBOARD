@@ -7,6 +7,7 @@ import { $t } from '@/locales';
 import emitter, { EventNameEnum } from '@/utils/eventBus';
 import { formatGroupItem, utilGenerateGroupCode } from '../hooks';
 import { STRATEGY_REGISTRY, ALL_STRATEGIES } from '../config';
+import { getLocalName, removeLocalName } from '@/utils/localName';
 import type { AddContext, GroupItem, ModuleState, CacheSuperKey } from '../types';
 
 export function useSuperKeyDispatcher() {
@@ -56,6 +57,12 @@ export function useSuperKeyDispatcher() {
           name: strategy.defaultItemName || item.name,
         })
       );
+
+      // 用本地自定义名称覆盖
+      const localName = getLocalName(keyType, formatted.base.code);
+      if (localName) {
+        formatted.base.name = localName;
+      }
 
       // SOCD/MT 保存原始列表供编辑时读取 trigger/time
       if (keyType === KeyTypeEnum.SOCD) {
@@ -182,6 +189,7 @@ export function useSuperKeyDispatcher() {
     try {
       const bak = JSON.parse(JSON.stringify(item));
       await strategy.api.deleteByCode({ code: item.base.code });
+      removeLocalName(strategy.keyType, item.base.code);
       state.groupList.splice(idx, 1);
 
       bak.keyBaseList.forEach((listItem: any) => {
@@ -232,6 +240,7 @@ export function useSuperKeyDispatcher() {
       state.groupList[renameCtrl.idx].base.name = name;
     } catch (error) {
       console.error(error);
+      window.$message!.error($t('businessCommon.renameFail'));
     }
   }
 

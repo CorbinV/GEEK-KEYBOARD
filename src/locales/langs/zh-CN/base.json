@@ -285,7 +285,8 @@
     "tooSmallToDislay": "屏幕太小而无法展示",
     "upgradeSuccess": "升级成功",
     "upgradeFail": "升级失败",
-    "latestVersion": "最新版本"
+    "latestVersion": "最新版本",
+    "renameFail": "重命名失败"
   },
   "baseKey": {
     "keyboard": {

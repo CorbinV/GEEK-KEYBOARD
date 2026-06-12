@@ -8,6 +8,7 @@ import { useKeyboardStore } from '@/store/modules/keyboard';
 import GroupMenu from '@/views/super-key/components/group-menu.vue';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
 import { $t } from '@/locales';
+import { getLocalName, setLocalName, removeLocalName } from '@/utils/localName';
 import RenameModal from '@/views/marco/components/RenameModal.vue';
 import { useCommonStore } from '@/store/modules/common';
 import ComboEdit from '../components/combo-edit.vue';
@@ -177,21 +178,11 @@ async function handleReNameSave(data: { name: string }) {
   if (data.name === '' || listEditIndex.value === -1) return;
   const defName = `组合按键${listEditIndex.value + 1}`;
   if (defName === `${data.name}${listEditIndex.value + 1}`) return;
-  addLocalName(KeyTypeEnum.Combo, listEditIndex.value, data.name);
+  setLocalName(KeyTypeEnum.Combo, listEditIndex.value, data.name);
   showRenameModal.value = false;
   updateGroupList();
 }
 
-function getLocalName(type: number, code: number) {
-  return localStorage.getItem(`${type}-${code}`);
-}
-function addLocalName(type: number, code: number, name: string) {
-  localStorage.setItem(`${type}-${code}`, name);
-}
-
-function removeLocalName(type: number, code: number) {
-  localStorage.removeItem(`${type}-${code}`);
-}
 function handleLockCombo() {
   lockVisible.value = true;
 }

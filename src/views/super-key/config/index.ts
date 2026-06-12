@@ -1,13 +1,15 @@
 import type { SuperKeyStrategy } from '../types';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { $t } from '@/locales';
+import { setLocalName } from '@/utils/localName';
 import {
-  addOks, deleteOksByCode, getOksList, getTargetOks, resetOksName,
-  addSOCD, deleteSOCDByCode, getSOCDList, getTargetSOCD, resetSOCDName,
-  addMT, deleteMTByCode, getMTList, getTargetMT, resetMTName,
-  addTGL, deleteTGLByCode, getTargetTGL, getTGLList, resetTGLName,
-  addRS, deleteRSByCode, getRSList, getTargetRS, resetRSName,
+  addOks, deleteOksByCode, getOksList, getTargetOks,
+  addSOCD, deleteSOCDByCode, getSOCDList, getTargetSOCD,
+  addMT, deleteMTByCode, getMTList, getTargetMT,
+  addTGL, deleteTGLByCode, getTargetTGL, getTGLList,
+  addRS, deleteRSByCode, getRSList, getTargetRS,
 } from '@/api/super-key';
+import type { ReName } from '@/api/modules/super-key';
 import SocdTriggerSelect from '../components/socd-trigger-select.vue';
 import MtTimeInput from '../components/mt-time-input.vue';
 import { dksStrategy } from '../strategies/dks';
@@ -29,7 +31,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     enableRename: false,
     keyboardType: 'base',
     wide: false,
-    api: { getList: getOksList, addTarget: addOks, deleteByCode: deleteOksByCode, getTarget: getTargetOks, rename: resetOksName },
+    api: { getList: getOksList, addTarget: addOks, deleteByCode: deleteOksByCode, getTarget: getTargetOks, rename: (data: ReName) => { setLocalName(KeyTypeEnum.OKS, data.code, data.name); return Promise.resolve(); } },
     extractList: (res) => res.oks,
     defaultItemNameKey: $t('supperKey.singleKeyStop'),
     descKey: $t('supperKey.c6' as any),
@@ -44,7 +46,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     enableRename: true,
     keyboardType: 'base',
     wide: false,
-    api: { getList: getSOCDList, addTarget: addSOCD, deleteByCode: deleteSOCDByCode, getTarget: getTargetSOCD, rename: resetSOCDName },
+    api: { getList: getSOCDList, addTarget: addSOCD, deleteByCode: deleteSOCDByCode, getTarget: getTargetSOCD, rename: (data: ReName) => { setLocalName(KeyTypeEnum.SOCD, data.code, data.name); return Promise.resolve(); } },
     extractList: (res) => res.socd,
     defaultItemNameKey: 'SOCD',
     descKey: $t('supperKey.c10' as any),
@@ -62,7 +64,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     enableRename: false,
     keyboardType: 'standard',
     wide: true,
-    api: { getList: () => getMTList({ pageNo: 1, pageSize: 8 }), addTarget: addMT, deleteByCode: deleteMTByCode, getTarget: getTargetMT, rename: resetMTName },
+    api: { getList: () => getMTList({ pageNo: 1, pageSize: 8 }), addTarget: addMT, deleteByCode: deleteMTByCode, getTarget: getTargetMT, rename: (data: ReName) => { setLocalName(KeyTypeEnum.MT, data.code, data.name); return Promise.resolve(); } },
     extractList: (res) => res.mt,
     defaultItemNameKey: $t('supperKey.x7'),
     descKey: $t('supperKey.setClickDowndown1down2' as any),
@@ -88,7 +90,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     enableRename: false,
     keyboardType: 'standard',
     wide: true,
-    api: { getList: () => getTGLList({ pageNo: 1, pageSize: 8 }), addTarget: addTGL, deleteByCode: deleteTGLByCode, getTarget: getTargetTGL, rename: resetTGLName },
+    api: { getList: () => getTGLList({ pageNo: 1, pageSize: 8 }), addTarget: addTGL, deleteByCode: deleteTGLByCode, getTarget: getTargetTGL, rename: (data: ReName) => { setLocalName(KeyTypeEnum.TGL, data.code, data.name); return Promise.resolve(); } },
     extractList: (res) => res.tgl,
     defaultItemNameKey: $t('supperKey.x8'),
     descKey: $t('businessCommon.plsSetSwitchKeys' as any),
@@ -113,7 +115,7 @@ const SIMPLE_MODULE_CONFIGS: Partial<SuperKeyStrategy>[] = [
     enableRename: false,
     keyboardType: 'base',
     wide: false,
-    api: { getList: () => getRSList({ pageNo: 1, pageSize: 8 }), addTarget: addRS, deleteByCode: deleteRSByCode, getTarget: getTargetRS, rename: resetRSName },
+    api: { getList: () => getRSList({ pageNo: 1, pageSize: 8 }), addTarget: addRS, deleteByCode: deleteRSByCode, getTarget: getTargetRS, rename: (data: ReName) => { setLocalName(KeyTypeEnum.RS, data.code, data.name); return Promise.resolve(); } },
     extractList: (res) => res.rs,
     defaultItemNameKey: $t('supperKey.x9' as any),
     descKey: $t('supperKey.c8' as any),

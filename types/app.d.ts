@@ -500,6 +500,7 @@ declare namespace App {
         upgradeSuccess: string;
         upgradeFail: string;
         latestVersion: string;
+        renameFail: string;
       };
       baseKey: {
         keyboard: {

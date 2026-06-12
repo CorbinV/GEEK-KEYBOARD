@@ -285,7 +285,8 @@
     "tooSmallToDislay": "The window is too small to display.",
     "upgradeSuccess": "Upgrade Success",
     "upgradeFail": "Upgrade Fail",
-    "latestVersion": "Latest Version"
+    "latestVersion": "Latest Version",
+    "renameFail": "Rename failed"
   },
   "baseKey": {
     "keyboard": {
