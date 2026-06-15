@@ -9,6 +9,8 @@ import { formatGroupItem, utilGenerateGroupCode } from '../hooks';
 import { STRATEGY_REGISTRY, ALL_STRATEGIES } from '../config';
 import { getLocalName, removeLocalName } from '@/utils/localName';
 import type { AddContext, GroupItem, ModuleState, CacheSuperKey } from '../types';
+const keyboardStore = useKeyboardStore()
+const { keyLayerInfo } = keyboardStore;
 
 export function useSuperKeyDispatcher() {
   const keyboardStore = useKeyboardStore();
@@ -155,6 +157,8 @@ export function useSuperKeyDispatcher() {
       code: editCtrl.isEdit ? editCtrl.item.base.code : formData.code,
       name: formData.name,
       keys: formData.keys,
+      range: formData.range,
+      layer: keyLayerInfo.currentLayer
     };
     if (strategy.enhanceCreateData) {
       payload = strategy.enhanceCreateData(payload, state.extra);
