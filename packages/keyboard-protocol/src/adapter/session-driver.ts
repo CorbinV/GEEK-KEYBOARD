@@ -20,11 +20,12 @@ export function createSession<T extends SessionRequest>(
   request: T,
 ): SessionWithMeta<SessionResultMap[T["name"]]>;
 export function createSession(request: SessionRequest): SessionWithMeta<unknown> {
-  let session = vendorCreateSession(request) as SessionWithMeta<unknown>;
+  const t = JSON.parse(JSON.stringify(request))
+  let session = vendorCreateSession(t) as SessionWithMeta<unknown>;
   if (!session) {
     session = {} as SessionWithMeta<unknown>
   }
-  session._requestName = request.name;
-  session._requestData = request.data;
+  session._requestName = t.name;
+  session._requestData = t.data;
   return session;
 }
