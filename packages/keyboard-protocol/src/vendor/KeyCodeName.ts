@@ -20,7 +20,7 @@ export type BasicKeyRule = {
 export const EVENT_TO_CODE_MAP: Record<string, number> = {
   // 键盘按键
   ESC: 0x29, F1: 0x3a, F2: 0x3b, F3: 0x3c, F4: 0x3d, F5: 0x3e, F6: 0x3f, F7: 0x40, F8: 0x41, F9: 0x42, F10: 0x43, F11: 0x44, F12: 0x45, SYSRQ: 0x46, SCROLLLOCK: 0x47, PAUSE: 0x48, FN1: 245, FN2: 246, FN3: 247,
-  GRAVE: 0x35, 1: 0x1e, 2: 0x1f, 3: 0x20, 4: 0x21, 5: 0x22, 6: 0x23, 7: 0x24, 8: 0x25, 9: 0x26, 0: 0x27, MIUNS: 0x2d, EQUAL: 0x2e, BACKSPACE: 0x2a, INSERT: 0x49, HOME: 0x4a, PAGEUP: 0x4b, NUMLOCK: 0x53, NUM_SLASH: 0x54, NUM_ASTERISK: 0x55, NUM_MINUS: 0x56, 
+  GRAVE: 0x35, 1: 0x1e, 2: 0x1f, 3: 0x20, 4: 0x21, 5: 0x22, 6: 0x23, 7: 0x24, 8: 0x25, 9: 0x26, 0: 0x27, MINUS: 0x2d, EQUAL: 0x2e, BACKSPACE: 0x2a, INSERT: 0x49, HOME: 0x4a, PAGEUP: 0x4b, NUMLOCK: 0x53, NUM_SLASH: 0x54, NUM_ASTERISK: 0x55, NUM_MINUS: 0x56, 
   TAB: 0x2b, Q: 0x14, W: 0x1a, E: 0x08, R: 0x15, T: 0x17, Y: 0x1c, U: 0x18, I: 0x0c, O: 0x12, P: 0x13, LEFTBRACE: 0x2f, RIGHTBRACE: 0x30, BACKSLASH: 0x31, DELETE: 0x4c, END: 0x4d, PAGEDOWN: 0x4e, NUM_7: 0x5f, NUM_8: 0x60, NUM_9: 0x61, NUM_PLUS: 0x57,
   CAPSLOCK: 0x39, A: 0x04, S: 0x16, D: 0x07, F: 0x09, G: 0x0a, H: 0x0b, J: 0x0d, K: 0x0e, L: 0x0f, SEMICOLON: 0x33, APOSTROPHE: 0x34, ENTER: 0x28, NUM_4: 0x5c, NUM_5: 0x5d, NUM_6: 0x5e,
   LEFTSHIFT: 0xe1, Z: 0x1d, X: 0x1b, C: 0x06, V: 0x19, B: 0x05, N: 0x11, M: 0x10, COMMA: 0x36, DOT: 0x37, SLASH: 0x38, RIGHTSHIFT: 0xe5, UP: 0x52, NUM_1: 0x59, NUM_2: 0x5a, NUM_3: 0x5b, NUM_ENTER: 0x58,
@@ -49,7 +49,7 @@ export const KEY_NAME_BY_CODE: Record<number, string> = (() => {
  */
 export const KEY_RETURN_ORDER: string[] = [
   "ESC", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "SYSRQ", "SCROLLLOCK", "PAUSE", "FN1", "FN2", "FN3",
-  "GRAVE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "MIUNS", "EQUAL", "BACKSPACE", "INSERT", "HOME", "PAGEUP", "NUMLOCK", "NUM_SLASH", "NUM_ASTERISK", "NUM_MINUS",
+  "GRAVE", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "MINUS", "EQUAL", "BACKSPACE", "INSERT", "HOME", "PAGEUP", "NUMLOCK", "NUM_SLASH", "NUM_ASTERISK", "NUM_MINUS",
   "TAB", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "LEFTBRACE", "RIGHTBRACE","BACKSLASH", "DELETE", "END", "PAGEDOWN", "NUM_7", "NUM_8", "NUM_9", "NUM_PLUS",
   "CAPSLOCK", "A", "S", "D", "F", "G", "H", "J", "K", "L", "SEMICOLON", "APOSTROPHE", "ENTER", "NUM_4", "NUM_5", "NUM_6",
   "LEFTSHIFT", "Z", "X", "C", "V", "B", "N", "M", "COMMA", "DOT", "SLASH", "RIGHTSHIFT","UP", "NUM_1", "NUM_2", "NUM_3", "NUM_ENTER",
