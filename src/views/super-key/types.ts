@@ -47,7 +47,7 @@ export interface SuperKeyStrategy {
   api: {
     getList: () => Promise<any>;
     addTarget: (data: any) => Promise<any>;
-    deleteByCode: (data: { code: number }) => Promise<any>;
+    deleteByCode: (data: { code: number, layer?: number }) => Promise<any>;
     getTarget: (data: any) => Promise<any>;
     rename: (data: ReName) => Promise<any>;
   };

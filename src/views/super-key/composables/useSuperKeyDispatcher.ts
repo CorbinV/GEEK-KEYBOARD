@@ -192,7 +192,7 @@ export function useSuperKeyDispatcher() {
 
     try {
       const bak = JSON.parse(JSON.stringify(item));
-      await strategy.api.deleteByCode({ code: item.base.code });
+      await strategy.api.deleteByCode({ code: item.base.code, layer: keyLayerInfo.currentLayer});
       removeLocalName(strategy.keyType, item.base.code);
       state.groupList.splice(idx, 1);
 
@@ -250,12 +250,12 @@ export function useSuperKeyDispatcher() {
 
   // ---- 内部方法 ----
 
-  async function updateTargetGroup({ type, code }: any, isEdit: boolean) {
+  async function updateTargetGroup({ type, code, layer }: any, isEdit: boolean) {
     const strategy = currentStrategy.value;
     const state = currentModuleState.value;
     if (!strategy || !state) return;
 
-    const groupItem = await strategy.api.getTarget({ type, code });
+    const groupItem = await strategy.api.getTarget({ type, code, layer });
     const formatted = formatGroupItem(groupItem);
 
     if (isEdit) {
