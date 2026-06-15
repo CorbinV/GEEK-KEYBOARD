@@ -1,209 +1,246 @@
 import requestClient from './config';
-import type {
-  DksItem,
-  DksList,
-  MTItem,
-  MTList,
-  OksItem,
-  OksList,
-  Page,
-  RSItem,
-  RSList,
-  ReName,
-  SOCDBase,
-  SOCDList,
-  TGLItem,
-  TGLList
-} from './modules/super-key';
-import type { BaseKey } from './modules/combo';
+import { createSession, type SessionRequestData } from '@sa/keyboard-protocol';
 import { KeyTypeEnum } from '@/enum/keyType';
-export function getOksList() {
-  return requestClient.send<OksList>({
-    name: 'getOKSList'
-  });
+
+// OKS
+export function getOksList(data?: SessionRequestData<'getOKSList'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getOKSList',
+      data
+    })
+  );
 }
-export function resetOksName(data: ReName) {
-  return requestClient.send<never>({
-    name: 'setOKSName',
-    data
-  });
+export function getTargetOks(data: SessionRequestData<'getOKS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getOKS',
+      data
+    })
+  );
 }
-export function deleteOksByCode(data: { code: number }) {
-  return requestClient.send<never>({
-    name: 'delOKS',
-    data
-  });
+export function addOks(data: SessionRequestData<'setOKS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setOKS',
+      data
+    })
+  );
 }
-export function getTargetOks(data: BaseKey) {
-  return requestClient.send<never>({
-    name: 'getOKS',
-    data
-  });
-}
-export function addOks(data: OksItem) {
-  return requestClient.send<never>({
-    name: 'setOKS',
-    data
-  });
+// export function resetOksName(data: ReName) {
+//   return requestClient.send<never>({
+//     name: 'setOKSName',
+//     data
+//   });
+// }
+export function deleteOksByCode(data: SessionRequestData<'delOKS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'delOKS',
+      data
+    })
+  );
 }
 
-// socd
-export function getSOCDList() {
-  return requestClient.send<SOCDList>({
-    name: 'getSOCDList'
-  });
+// SOCD
+export function getSOCDList(data?: SessionRequestData<'getSOCDList'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getSOCDList',
+      data
+    })
+  );
 }
-export function resetSOCDName(data: ReName) {
-  return requestClient.send<never>({
-    name: 'setSOCDName',
-    data
-  });
+export function getTargetSOCD(data: SessionRequestData<'getSOCD'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getSOCD',
+      data
+    })
+  );
 }
-export function deleteSOCDByCode(data: { code: number }) {
-  return requestClient.send<never>({
-    name: 'delSOCD',
-    data
-  });
+export function addSOCD(data: SessionRequestData<'setSOCD'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setSOCD',
+      data
+    })
+  );
 }
-export function getTargetSOCD(data: BaseKey) {
-  return requestClient.send<never>({
-    name: 'getSOCD',
-    data
-  });
-}
-export function addSOCD(data: SOCDBase) {
-  return requestClient.send<never>({
-    name: 'setSOCD',
-    data
-  });
-}
-
-// rs
-export function getRSList(data: Page) {
-  return requestClient.send<RSList>({
-    name: 'getRSList',
-    data
-  });
-}
-export function resetRSName(data: ReName) {
-  return requestClient.send<never>({
-    name: 'setRSName',
-    data
-  });
-}
-export function deleteRSByCode(data: { code: number }) {
-  return requestClient.send<never>({
-    name: 'delRS',
-    data
-  });
-}
-export function getTargetRS(data: BaseKey) {
-  return requestClient.send<never>({
-    name: 'getRS',
-    data
-  });
-}
-export function addRS(data: RSItem) {
-  return requestClient.send<never>({
-    name: 'setRS',
-    data
-  });
+// export function resetSOCDName(data: ReName) {
+//   return requestClient.send<never>({
+//     name: 'setSOCDName',
+//     data
+//   });
+// }
+export function deleteSOCDByCode(data: SessionRequestData<'delSOCD'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'delSOCD',
+      data
+    })
+  );
 }
 
-// mt
-export function getMTList(data: Page) {
-  return requestClient.send<MTList>({
-    name: 'getMTList',
-    data
-  });
+// RS
+export function getRSList(data: SessionRequestData<'getRSList'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getRSList',
+      data
+    })
+  );
 }
-export function resetMTName(data: ReName) {
-  return requestClient.send<never>({
-    name: 'setMTName',
-    data
-  });
+export function getTargetRS(data: SessionRequestData<'getRS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getRS',
+      data
+    })
+  );
 }
-export function deleteMTByCode(data: { code: number }) {
-  return requestClient.send<never>({
-    name: 'delMT',
-    data
-  });
+export function addRS(data: SessionRequestData<'setRS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setRS',
+      data
+    })
+  );
 }
-export function getTargetMT(data: BaseKey) {
-  return requestClient.send<MTItem>({
-    name: 'getMT',
-    data
-  });
-}
-export function addMT(data: MTItem) {
-  return requestClient.send<never>({
-    name: 'setMT',
-    data
-  });
+// export function resetRSName(data: ReName) {
+//   return requestClient.send<never>({
+//     name: 'setRSName',
+//     data
+//   });
+// }
+export function deleteRSByCode(data: SessionRequestData<'delRS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'delRS',
+      data
+    })
+  );
 }
 
-// tgl
-export function getTGLList(data: Page) {
-  return requestClient.send<TGLList>({
-    name: 'getTGLList',
-    data
-  });
+// MT
+export function getMTList(data: SessionRequestData<'getMTList'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getMTList',
+      data
+    })
+  );
 }
-export function resetTGLName(data: ReName) {
-  return requestClient.send<never>({
-    name: 'setTGLName',
-    data
-  });
+export function getTargetMT(data: SessionRequestData<'getMT'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getMT',
+      data
+    })
+  );
 }
-export function deleteTGLByCode(data: { code: number }) {
-  return requestClient.send<never>({
-    name: 'delTGL',
-    data
-  });
+export function addMT(data: SessionRequestData<'setMT'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setMT',
+      data
+    })
+  );
 }
-export function getTargetTGL(data: BaseKey) {
-  return requestClient.send<never>({
-    name: 'getTGL',
-    data
-  });
+// export function resetMTName(data: ReName) {
+//   return requestClient.send<never>({
+//     name: 'setMTName',
+//     data
+//   });
+// }
+export function deleteMTByCode(data: SessionRequestData<'delMT'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'delMT',
+      data
+    })
+  );
 }
-export function addTGL(data: TGLItem) {
-  return requestClient.send<never>({
-    name: 'setTGL',
-    data
-  });
+
+// TGL
+export function getTGLList(data: SessionRequestData<'getTGLList'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getTGLList',
+      data
+    })
+  );
+}
+export function getTargetTGL(data: SessionRequestData<'getTGL'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getTGL',
+      data
+    })
+  );
+}
+export function addTGL(data: SessionRequestData<'setTGL'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setTGL',
+      data
+    })
+  );
+}
+// export function resetTGLName(data: ReName) {
+//   return requestClient.send<never>({
+//     name: 'setTGLName',
+//     data
+//   });
+// }
+export function deleteTGLByCode(data: SessionRequestData<'delTGL'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'delTGL',
+      data
+    })
+  );
 }
 
 // DKS
 export function getDksList() {
-  return requestClient.send<DksList>({
-    name: 'getDKSList'
-  });
+  return requestClient.executeSession(
+    createSession({
+      name: 'getDKSList'
+    })
+  );
 }
-export function resetDksName(data: ReName) {
-  return requestClient.send<never>({
-    name: 'setDKSName',
-    data
-  });
+export function getTargetDks(data: SessionRequestData<'getDKS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getDKS',
+      data
+    })
+  );
 }
-export function deleteDksByCode(data: { code: number }) {
-  return requestClient.send<never>({
-    name: 'delDKS',
-    data
-  });
+export function addDks(data: SessionRequestData<'setDKS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'setDKS',
+      data
+    })
+  );
 }
-export function getTargetDks(data: BaseKey) {
-  return requestClient.send<DksItem>({
-    name: 'getDKS',
-    data
-  });
+// export function resetDksName(data: ReName) {
+//   return requestClient.send<never>({
+//     name: 'setDKSName',
+//     data
+//   });
+// }
+export function deleteDksByCode(data: SessionRequestData<'delDKS'>) {
+  return requestClient.executeSession(
+    createSession({
+      name: 'delDKS',
+      data
+    })
+  );
 }
-export function addDks(data: DksItem) {
-  return requestClient.send<never>({
-    name: 'setDKS',
-    data
-  });
-}
+
 export function deleteSpByCode(data: { type: KeyTypeEnum; code: number }) {
   let name = '';
   switch (data.type) {
@@ -225,19 +262,18 @@ export function deleteSpByCode(data: { type: KeyTypeEnum; code: number }) {
     case KeyTypeEnum.SOCD:
       name = 'delSOCD';
       break;
-    case KeyTypeEnum.Combo:
-      name = 'delShortcut';
-      break;
     default:
       break;
   }
-  if(!name){
+  if (!name) {
     return Promise.reject('ILINVALID_PARAM');
   }
-  return requestClient.send<never>({
-    name,
-    data: {
-      code: data.code
-    }
-  });
+  return requestClient.executeSession(
+    createSession({
+      name: name as any,
+      data: {
+        code: data.code
+      }
+    })
+  );
 }
