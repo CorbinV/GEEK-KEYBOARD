@@ -157,11 +157,12 @@ async function handleDialogComfirm() {
     code: props.fncGenerateCode(),
     name: localTitle.value,
     keys: selectedKeyInfo.list.map((item: any, idx) => {
-      const { key, code } = item.base;
+      const { key, code, type } = item.base;
       const range = formatKeyRange(idx);
       return {
         key,
         code,
+        type,
         range
       };
     }),
