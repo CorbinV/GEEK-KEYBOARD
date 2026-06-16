@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import { effectScope, onScopeDispose, reactive, toRef, computed } from 'vue';
+import { effectScope, onScopeDispose, reactive, toRef, computed, watch } from 'vue';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { useCommonStore } from '@/store/modules/common';
 import { KeyTypeEnum } from '@/enum/keyType';
@@ -50,33 +50,39 @@ export function useSuperKeyDispatcher() {
     if (!strategy || !state) return;
 
     state.loading = true;
-    const res = await strategy.api.getList();
-    const rawList = strategy.extractList(res) ?? [];
+    try {
+      const res = await strategy.api.getList();
+      const rawList = strategy.extractList(res) ?? [];
 
-    state.groupList = rawList.map(item => {
-      const formatted = formatGroupItem(
-        Object.assign({}, item, {
-          name: strategy.defaultItemName || item.name,
-        })
-      );
+      state.groupList = rawList.map(item => {
+        const formatted = formatGroupItem(
+          Object.assign({}, item, {
+            name: strategy.defaultItemName || item.name,
+          })
+        );
 
-      // 用本地自定义名称覆盖
-      const localName = getLocalName(keyType, formatted.base.code);
-      if (localName) {
-        formatted.base.name = localName;
-      }
+        // 用本地自定义名称覆盖
+        const localName = getLocalName(keyType, formatted.base.code);
+        if (localName) {
+          formatted.base.name = localName;
+        }
 
-      // SOCD/MT 保存原始列表供编辑时读取 trigger/time
-      if (keyType === KeyTypeEnum.SOCD) {
-        state.extra.socdRawList = res.socd;
-      }
-      if (keyType === KeyTypeEnum.MT) {
-        state.extra.mtRawList = res.mt;
-      }
+        // SOCD/MT 保存原始列表供编辑时读取 trigger/time
+        if (keyType === KeyTypeEnum.SOCD) {
+          state.extra.socdRawList = res.socd;
+        }
+        if (keyType === KeyTypeEnum.MT) {
+          state.extra.mtRawList = res.mt;
+        }
 
-      return formatted;
-    });
-    state.loading = false;
+        return formatted;
+      });
+      state.fetchFailed = false;
+    } catch {
+      state.fetchFailed = true;
+    } finally {
+      state.loading = false;
+    }
   }
 
   async function handleAddClicked() {
@@ -290,6 +296,14 @@ export function useSuperKeyDispatcher() {
   const scope = effectScope();
   scope.run(() => {
     emitter.on(EventNameEnum.resetKey, resetKeyCb);
+
+    // Tab 切换时，若目标策略上次请求失败则自动重试
+    watch(currentSuperKeyType, (newType) => {
+      const state = moduleStateMap.get(newType);
+      if (state?.fetchFailed) {
+        fetchGroupList(newType);
+      }
+    });
   });
   onScopeDispose(() => {
     emitter.off(EventNameEnum.resetKey, resetKeyCb);
@@ -300,7 +314,7 @@ export function useSuperKeyDispatcher() {
   async function initAll() {
     for (const [keyType, strategy] of STRATEGY_REGISTRY) {
       const extra = strategy.createExtraState?.() ?? {};
-      moduleStateMap.set(keyType, { groupList: [], loading: false, extra });
+      moduleStateMap.set(keyType, { groupList: [], loading: false, extra, fetchFailed: false });
     }
     await Promise.all(
       Array.from(STRATEGY_REGISTRY.keys()).map(keyType => fetchGroupList(keyType))

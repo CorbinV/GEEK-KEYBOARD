@@ -29,6 +29,7 @@ export interface ModuleState {
   groupList: GroupItem[];
   loading: boolean;
   extra: Record<string, any>;
+  fetchFailed: boolean;
 }
 
 export interface SuperKeyStrategy {
