@@ -262,7 +262,16 @@ export function useSuperKeyDispatcher() {
     if (!strategy || !state) return;
 
     const groupItem = await strategy.api.getTarget({ type, code, layer });
-    const formatted = formatGroupItem(groupItem);
+    // 新协议不返回 name 字段，需使用默认名 + 本地名称覆盖
+    const formatted = formatGroupItem(
+      Object.assign({}, groupItem, {
+        name: strategy.defaultItemName || groupItem.name,
+      })
+    );
+    const localName = getLocalName(currentSuperKeyType.value, formatted.base.code);
+    if (localName) {
+      formatted.base.name = localName;
+    }
 
     if (isEdit) {
       const idx = state.groupList.findIndex(item => item.base.code === code);
