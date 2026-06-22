@@ -3,8 +3,11 @@ import { ref } from 'vue';
 import ZWColors from '@/views/light/components/zw-colors.vue';
 import Slider from '@/components/custom/zw-slider2.vue';
 import { $t } from '@/locales';
-import { getLight, setLight } from '@/api/light';
-import type { Light } from '@/api/modules/light';
+import { getLight } from '@/api/light-trigger';
+import { setLight } from '@/api/light-setting';
+import { GetLightData } from '~/packages/keyboard-protocol/src/vendor/KeyboardAPI';
+// import { getLight, setLight } from '@/api/light';
+// import type { Light } from '@/api/modules/light';
 
 // 假设你有 15 个项目来填充三行五列的网格
 const items = ref([
@@ -19,7 +22,7 @@ const items = ref([
 ]);
 // 选中的项，默认没有选中
 // const selectedItem = ref<number | null>(null);
-const light = ref<Light>({
+const light = ref<GetLightData>({
   isRGB: 0,
   pattern: 0,
   brightness: 0,
@@ -39,7 +42,7 @@ const sleepTimeitems = ref([
   $t('light.minute', { total: 30 }),
   $t('light.interaction', { total: 1 })
 ]);
-function selectItem(index: number) {
+function selectItem(index: 0 | 1) {
   light.value.pattern = index;
   setLight(light.value);
 }
@@ -47,6 +50,7 @@ function selectItem(index: number) {
 // 选中项的处理函数
 function selectSleepTimeItem(index: number) {
   light.value.sleep = index;
+  console.log('设置休眠时间：', light.value);
   setLight(light.value);
 }
 async function brightness(value: number) {
