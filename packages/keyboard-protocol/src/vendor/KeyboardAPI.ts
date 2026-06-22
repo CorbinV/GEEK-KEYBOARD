@@ -79,6 +79,7 @@ export type GetLightData = {
   pattern: number;
   brightness: number;
   speed: number;
+  sleep: number;
   R: number;
   G: number;
   B: number;
@@ -96,6 +97,7 @@ export type SetLightParams = {
 };
 
 export type DKSKeyItem = {
+  type:  number;   // 按键类型
   code:  number;   // 按键 HID code
   key:   string;   // 按键名称
   range: number[];
@@ -267,6 +269,71 @@ export type DelOKSParams = {
   layer?: number;
 };
 
+export type ShortcutKeyItem = {
+  type: number;   // 固定 3
+  code: number;   // HID code（修饰键 0xe0-0xe7 或直接键码）
+};
+
+export type ShortcutEntry = {
+  type: number;   // 固定 3
+  code: number;   // 绑定按键 HID code（来自 0x07 默认矩阵）
+};
+
+export type ShortcutDetail = {
+  type: number;              // 固定 3
+  code: number;              // 绑定按键 HID code（来自 0x07 默认矩阵）
+  keys: ShortcutKeyItem[];   // 修饰键列表 + 主键（来自 byte[1] 和 byte[2]）
+};
+
+/** getShortcuts 无需传参 */
+export type GetShortcutsParams = Record<string, never>;
+
+export type GetShortcutParams = {
+  type:   number;   // 3 = Shortcut
+  code:   number;   // 按键 HID code（0x07 默认矩阵匹配）
+  layer?: number;
+};
+
+export type AddShortcutParams = {
+  type:   number;         // 3 = Shortcut
+  code:   number;         // 目标按键 HID code
+  keys:   ShortcutKeyItem[];
+  layer?: number;
+};
+
+export type DelShortcutParams = {
+  code:   number;   // 要删除的按键 HID code
+  layer?: number;
+};
+
+export type LockShortcutEntry = {
+  enable: number;   // 1=锁定 0=未锁定
+  keys:   number[]; // 组合键 HID code 列表
+};
+
+export type LockShortcutsData = {
+  defaultLock: LockShortcutEntry[];
+  customLock:  LockShortcutEntry[];
+};
+
+/** getLockShortcuts 无需传参 */
+export type GetLockShortcutsParams = Record<string, never>;
+
+export type SetLockShortcutsParams = LockShortcutsData;
+
+export type MacroEntry = {
+  name: string;   // M0, M1, ...
+  type: number;   // 固定 6
+  code: number;   // 宏索引
+};
+
+/** getMacros 无需传参 */
+export type GetMacrosParams = Record<string, never>;
+
+export type DelMacroParams = {
+  code: number;   // 宏索引 0~31
+};
+
 export type SetDKSParams = {
   type:             number;
   code:             number;
@@ -313,7 +380,7 @@ export type TGLEntry = {
 export type OnCalibrationResult = {
   name: "onCalibration";
   code: number;
-  data: { key: string };
+  data: { key: string }[];
   message?: string;
 };
 
@@ -329,13 +396,15 @@ const GET_KEY_CURRENT_COMMAND = 0x08; // 获取当前按键配置命令
 const SET_KEY_CURRENT_COMMAND = 0x09; // 设置当前按键配置命令
 const GET_KEY_TARY_COMMAND    = 0xa0; // 获取按键触发参数命令
 const SET_KEY_TARY_COMMAND    = 0xa1; // 设置按键触发参数命令
-const ON_CALIBRATION_REPORT   = 0xa1; // 设备主动上报：校准事件标识（buffer[0]）
+const ON_CALIBRATION_REPORT   = 0xa0; // 设备主动上报：校准事件标识（buffer[0]）
 const GET_DKS_COMMAND         = 0xa2; // 获取 DKS 高级按键数据命令
 const SET_DKS_COMMAND         = 0xa3; // 设置 DKS 高级按键数据命令
 const GET_MT_COMMAND          = 0xa4; // 获取 MT 高级按键数据命令
 const SET_MT_COMMAND          = 0xa5; // 设置 MT 高级按键数据命令
 const GET_TGL_COMMAND         = 0xa6; // 获取 TGL 高级按键数据命令
 const SET_TGL_COMMAND         = 0xa7; // 设置 TGL 高级按键数据命令
+const GET_MACRO_COMMAND       = 0x0c; // 获取宏数据命令
+const SET_MACRO_COMMAND       = 0x0d; // 设置宏数据命令
 const DKS_AREA_SIZE           = 768;  // DKS 数据区大小（每个板载）
 const DKS_ENTRY_SIZE          = 24;   // 每条 DKS 数据大小（字节）
 const TGL_AREA_SIZE           = 128;  // TGL 数据区大小（每个板载）
@@ -344,6 +413,11 @@ const MT_AREA_SIZE            = 256;  // MT 数据区大小（每个板载）
 const MT_ENTRY_SIZE           = 6;    // 每条 MT 数据大小（字节）
 const PERF_CFG_MASK_OFFSET    = 7;    // funcData 中 Perf_Cfg_mask 的字节偏移
 const RATE_CFG_OFFSET         = 4;    // funcData 中轮询率的字节偏移
+const LOCK_CFG_OFFSET         = 6;    // funcData 第 6 字节：高 4 位为默认组合键锁
+const LOCK_BIT_WIN            = 0x01; // 高 4 位 bit0：Win 锁
+const LOCK_BIT_ALT_TAB        = 0x02; // 高 4 位 bit1：Alt+Tab 锁
+const LOCK_BIT_ALT_F4         = 0x04; // 高 4 位 bit2：Alt+F4 锁
+const LOCK_BIT_APP            = 0x08; // 高 4 位 bit3：App 锁
 const CALIBRATION_CFG_OFFSET  = 7;    // funcData 中校准开关的字节偏移（bit3）
 const LIGHT_PATTERN_OFFSET    = 8;    // funcData 灯光模式
 const LIGHT_BRIGHTNESS_OFFSET = 9;    // funcData 亮度
@@ -362,6 +436,15 @@ const ADVANCED_RS_TYPE        = 11;   // 高级键RS类型
 const ADVANCED_SOCD_TYPE      = 8;    // 高级键SOCD类型
 const ADVANCED_OKS_TYPE       = 7;    // 高级键OKS类型
 const ADVANCED_SUPER_TYPES    = new Set([5, 6, 7, 8, 10, 11]); // 高级键Super类型集合
+const SHORTCUT_RAW_TYPE       = 0x10;
+const ADVANCED_SHORTCUT_TYPE  = 3;
+const ADVANCED_MACRO_TYPE     = 6;    // 宏类型
+const MACRO_AREA_SIZE         = 2048; // 每个板载宏数据区大小
+const MACRO_PTR_REGION_SIZE   = 64;   // 宏指针区大小（32 × 2 字节）
+const MACRO_DATA_START        = 0x40; // 宏数据区起始偏移（跳过指针区）
+const MACRO_EMPTY_PTR         = 0x0040; // 指针 0x40,0x00：未录制宏数据
+const MACRO_DATA_PTR_MIN      = 0x0044; // 已录制宏数据时指针起始地址
+const MACRO_MAX_COUNT         = 32; // 宏最多 32 个
 
 // resetKeyInfo：需要特殊处理的高级类型首字节集合（0x90/0x95/0x94/0x92/0x91/0x93）
 const KEY_TYPE_ADVANCED_FIRST_BYTES = new Set([0x90, 0x95, 0x94, 0x92, 0x91, 0x93]);
@@ -561,6 +644,184 @@ const parseOKSKeyFromTriplet = (
 /** OKS keys 项 → 三字节 [type, ext, code]（写入 0xa5） */
 const encodeOKSKeyToTriplet = (item: OKSKeyItem): [number, number, number] =>
   encodeKeyTripletFromOutput(item.type, item.code);
+
+/**
+ * 解析组合键修饰字节 → ShortcutKeyItem[]
+ *
+ * byte[1] 各 bit 含义（USB HID Modifier Bitmap）：
+ *   bit0=L-Ctrl(0xe0)  bit1=L-Shift(0xe1)  bit2=L-Alt(0xe2)  bit3=L-Win(0xe3)
+ *   bit4=R-Ctrl(0xe4)  bit5=R-Shift(0xe5)  bit6=R-Alt(0xe6)  bit7=R-Win(0xe7)
+ */
+function parseShortcutModifierByte(modByte: number): ShortcutKeyItem[] {
+  const items: ShortcutKeyItem[] = [];
+  for (let i = 0; i < 8; i++) {
+    if (modByte & (1 << i)) {
+      items.push({ type: ADVANCED_SHORTCUT_TYPE, code: 0xe0 + i });
+    }
+  }
+  return items;
+}
+
+/**
+ * 将 ShortcutKeyItem[] 编码为设备写入的两个字节：
+ *   [modifierByte, mainCodeByte]
+ *
+ * 规则：
+ *   - code 在 0xe0~0xe7（修饰键）→ 按固定映射转为对应 bit 值后 OR 拼接到 modifierByte：
+ *       0xe0=L-Ctrl→0x01  0xe1=L-Shift→0x02  0xe2=L-Alt→0x04  0xe3=L-Win→0x08
+ *       0xe4=R-Ctrl→0x10  0xe5=R-Shift→0x20  0xe6=R-Alt→0x40  0xe7=R-Win→0x80
+ *     例：[{code:224},{code:225}] → 0x01|0x02 = 0x03
+ *   - code < 0xe0（主键）→ mainCodeByte = code（以最后一个为准）
+ */
+/** funcData 第 6 字节高 4 位 → defaultLock 列表（仅返回 enable=1 的项） */
+function parseDefaultLockFromFuncByte(cfgByte: number): LockShortcutEntry[] {
+  const mask = (cfgByte >> 4) & 0x0f;
+  const entries: LockShortcutEntry[] = [];
+  if (mask & LOCK_BIT_WIN) {
+    entries.push({ enable: 1, keys: [0xe3] }); // L-Win
+    entries.push({ enable: 1, keys: [0xe7] }); // R-Win
+  }
+  if (mask & LOCK_BIT_ALT_TAB) {
+    entries.push({ enable: 1, keys: [0xe2, 0x2b] }); // L-Alt + Tab
+    entries.push({ enable: 1, keys: [0xe6, 0x2b] }); // R-Alt + Tab
+  }
+  if (mask & LOCK_BIT_ALT_F4) {
+    entries.push({ enable: 1, keys: [0xe2, 0x3d] }); // L-Alt + F4
+    entries.push({ enable: 1, keys: [0xe6, 0x3d] }); // R-Alt + F4
+  }
+  if (mask & LOCK_BIT_APP) {
+    entries.push({ enable: 1, keys: [0x76] }); // Menu(App)
+  }
+  return entries;
+}
+
+/** defaultLock 列表 → funcData 第 6 字节高 4 位锁定位 */
+function encodeLockMaskFromDefaultLock(entries: LockShortcutEntry[]): number {
+  let mask = 0;
+  for (const entry of entries) {
+    if (!entry.enable) continue;
+    const keys = entry.keys ?? [];
+    if (keys.length === 1 && (keys[0] === 0xe3 || keys[0] === 0xe7)) {
+      mask |= LOCK_BIT_WIN;
+      continue;
+    }
+    if (keys.length === 1 && keys[0] === 0x76) {
+      mask |= LOCK_BIT_APP;
+      continue;
+    }
+    if (keys.length !== 2) continue;
+    const hasLAlt = keys.includes(0xe2);
+    const hasRAlt = keys.includes(0xe6);
+    if (!hasLAlt && !hasRAlt) continue;
+    if (keys.includes(0x2b)) mask |= LOCK_BIT_ALT_TAB;
+    else if (keys.includes(0x3d)) mask |= LOCK_BIT_ALT_F4;
+  }
+  return mask & 0x0f;
+}
+
+/** 读取宏指针区中第 index 个宏的起始地址（2 字节 LE） */
+function readMacroPtrAddr(ptrData: number[], index: number): number {
+  return (ptrData[index * 2] ?? 0) | ((ptrData[index * 2 + 1] ?? 0) << 8);
+}
+
+/** 写入宏指针区中第 index 个宏的起始地址 */
+function writeMacroPtrAddr(ptrData: number[], index: number, addr: number): void {
+  ptrData[index * 2]     = addr & 0xff;
+  ptrData[index * 2 + 1] = (addr >> 8) & 0xff;
+}
+
+/** 向后查找下一个有效宏数据起始地址 */
+function findNextMacroPtrAddr(
+  ptrData: number[],
+  fromIndex: number,
+  cur: number,
+  dataEndFallback = MACRO_AREA_SIZE,
+): number {
+  for (let j = fromIndex + 1; j < MACRO_MAX_COUNT; j++) {
+    const addr = readMacroPtrAddr(ptrData, j);
+    if (addr !== MACRO_EMPTY_PTR && addr > cur) return addr;
+  }
+  return dataEndFallback;
+}
+
+/** 计算宏数据区已占用末尾偏移 */
+function getMacroDataEnd(ptrData: number[]): number {
+  let end = MACRO_DATA_START;
+  for (let i = 0; i < MACRO_MAX_COUNT; i++) {
+    const cur = readMacroPtrAddr(ptrData, i);
+    if (cur === MACRO_EMPTY_PTR || cur < MACRO_DATA_PTR_MIN) continue;
+    end = Math.max(end, findNextMacroPtrAddr(ptrData, i, cur));
+  }
+  return end;
+}
+
+/** 构建空的宏数据区：指针区全部 0x40,0x00，数据区清零 */
+function buildEmptyMacroArea(): number[] {
+  const area = new Array<number>(MACRO_AREA_SIZE).fill(0);
+  for (let i = 0; i < MACRO_MAX_COUNT; i++) {
+    writeMacroPtrAddr(area, i, MACRO_EMPTY_PTR);
+  }
+  return area;
+}
+
+/** 宏指针区每 2 字节为一个起始地址（低字节在前），解析已录制宏列表 */
+function parseMacroListFromPointers(ptrData: number[]): MacroEntry[] {
+  const macros: MacroEntry[] = [];
+  const slotCount = Math.min(MACRO_MAX_COUNT, Math.floor(MACRO_PTR_REGION_SIZE / 2));
+
+  for (let i = 0; i < slotCount; i++) {
+    const cur = readMacroPtrAddr(ptrData, i);
+    if (cur === MACRO_EMPTY_PTR) continue;
+    if (cur < MACRO_DATA_PTR_MIN) continue;
+
+    const next = findNextMacroPtrAddr(ptrData, i, cur);
+    const gap  = next - cur;
+    if (gap < 4 || gap % 4 !== 0) continue;
+
+    macros.push({
+      name: `M${i}`,
+      type: ADVANCED_MACRO_TYPE,
+      code: i,
+    });
+  }
+  return macros;
+}
+
+/** 0x0d 分包写入宏数据区 */
+async function* writeMacroAreaDataGen(
+  macroAreaOffset: number,
+  areaOffset: number,
+  data: number[],
+): DeviceSession<number> {
+  for (let i = 0; i < data.length; i += DATA_LENGTH) {
+    const chunk = data.slice(i, Math.min(i + DATA_LENGTH, data.length));
+    const writeOff = macroAreaOffset + areaOffset + i;
+    const [wLo, wHi] = shiftFrom16Bit(writeOff);
+    const size = chunk.length;
+    const wChk = (wLo + wHi + size + chunk.reduce((s, v) => s + v, 0)) & 0xff;
+    const wIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_MACRO_COMMAND, 0x00, wChk, size,
+      wLo, wHi, 0x00,
+      ...chunk,
+    ]);
+    const wCode = parseWriteResponseCode(wIn);
+    if (wCode !== 0) return wCode;
+  }
+  return 0;
+}
+
+function encodeShortcutKeys(keys: ShortcutKeyItem[]): [modifierByte: number, mainCodeByte: number] {
+  let modifierByte = 0;
+  let mainCodeByte = 0;
+  for (const k of keys) {
+    if (k.code >= 0xe0 && k.code <= 0xe7) {
+      modifierByte |= (1 << (k.code - 0xe0)) & 0xff;
+    } else if (k.code < 0xe0) {
+      mainCodeByte = k.code & 0xff;
+    }
+  }
+  return [modifierByte, mainCodeByte];
+}
 
 // ─── 写命令响应码解析 ──────────────────────────────────────────────────────────
 
@@ -2152,6 +2413,31 @@ type DelOKSResult = {
   message?: string;
 };
 
+type GetShortcutsResult = {
+  name: "getShortcuts";
+  code: number;
+  data: { shortcuts: ShortcutEntry[] };
+};
+
+type GetShortcutResult = {
+  name: "getShortcut";
+  code: number;
+  data: ShortcutDetail;
+  message?: string;
+};
+
+type AddShortcutResult = {
+  name: "addShortcut";
+  code: number;
+  message?: string;
+};
+
+type DelShortcutResult = {
+  name: "delShortcut";
+  code: number;
+  message?: string;
+};
+
 
 
 type SetDKSResult = {
@@ -2168,6 +2454,36 @@ type SetBiCalibrationResult = {
 
 type SetCalibrationResult = {
   name: "setCalibration";
+  code: number;
+  message?: string;
+};
+
+type ResetKeyboardResult = {
+  name: "resetKeyboard";
+  code: number;
+  message?: string;
+};
+
+type GetLockShortcutsResult = {
+  name: "getLockShortcuts";
+  code: number;
+  data: LockShortcutsData;
+};
+
+type SetLockShortcutsResult = {
+  name: "setLockShortcuts";
+  code: number;
+  message?: string;
+};
+
+type GetMacrosResult = {
+  name: "getMacros";
+  code: number;
+  data: { macro: MacroEntry[] };
+};
+
+type DelMacroResult = {
+  name: "delMacro";
   code: number;
   message?: string;
 };
@@ -2216,8 +2532,17 @@ export type SessionResultMap = {
   getOKS:              GetOKSResult;
   setOKS:              SetOKSResult;
   delOKS:              DelOKSResult;
+  getShortcuts:        GetShortcutsResult;
+  getShortcut:         GetShortcutResult;
+  addShortcut:         AddShortcutResult;
+  delShortcut:         DelShortcutResult;
   setBiCalibration:    SetBiCalibrationResult;
   setCalibration:      SetCalibrationResult;
+  resetKeyboard:       ResetKeyboardResult;
+  getLockShortcuts:    GetLockShortcutsResult;
+  setLockShortcuts:    SetLockShortcutsResult;
+  getMacros:           GetMacrosResult;
+  delMacro:            DelMacroResult;
 };
 // ========== 推导核心 ========== end
 
@@ -2323,7 +2648,7 @@ export async function* getDeviceInfo(): DeviceSession<GetDeviceInfoResult> {
     name: "getDeviceInfo",
     code: 0,
     data: {
-      zkm:       1,
+      Zkm:       1,
       connect:   0,
       battery:   100,
       bleMtu:    64,
@@ -2331,7 +2656,7 @@ export async function* getDeviceInfo(): DeviceSession<GetDeviceInfoResult> {
       usbMtu:    64,
       usbOtaMtu: 512,
       firmwares: [
-        { version, id: 0, type: 10, model: "m68" },
+        { version, id: 0, type: 10, model: "rk-s75*" },
       ],
     },
   };
@@ -2359,6 +2684,199 @@ export async function* getCalibration(): DeviceSession<GetCalibrationResult> {
     code: 0,
     data: { switch: calibSwitch },
   };
+}
+
+/**
+ *
+ * 读取锁组合键配置
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号
+ *  2. 0x05 读取功能配置，解析第 6 字节（funcData[5]）高 4 位
+ *     bit0=Win 锁  bit1=Alt+Tab 锁  bit2=Alt+F4 锁  bit3=App 锁（1=锁定）
+ *  3. customLock 默认返回空数组
+ *
+ */
+export async function* getLockShortcuts(
+  _request?: GetLockShortcutsParams,
+): DeviceSession<GetLockShortcutsResult> {
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
+
+  const lockByte    = funcData[LOCK_CFG_OFFSET] ?? 0;
+  const defaultLock = parseDefaultLockFromFuncByte(lockByte);
+
+  return {
+    name: "getLockShortcuts",
+    code: 0,
+    data: {
+      defaultLock,
+      customLock: [],
+    },
+  };
+}
+
+/**
+ *
+ * 设置锁组合键配置
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号
+ *  2. 0x05 读取功能配置，取出 funcData[5]
+ *  3. 根据 defaultLock 编码高 4 位锁定位，保留低 4 位
+ *  4. 0x06 写回 funcData[5]（customLock 暂不支持写入，忽略）
+ *
+ */
+export async function* setLockShortcuts(
+  request: SetLockShortcutsParams,
+): DeviceSession<SetLockShortcutsResult> {
+  if (!Array.isArray(request.defaultLock)) {
+    return { name: "setLockShortcuts", code: 3, message: "defaultLock must be an array" };
+  }
+
+  const rBaseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = rBaseIn[8] ?? 0;
+  const funcData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_Func_COMMAND, config * 64, 64, DATA_LENGTH,
+  );
+
+  const oldByte   = funcData[LOCK_CFG_OFFSET] ?? 0;
+  const lockMask  = encodeLockMaskFromDefaultLock(request.defaultLock);
+  const newByte   = (oldByte & 0x0f) | ((lockMask & 0x0f) << 4);
+
+  const [lo, hi] = shiftFrom16Bit(config * 64 + LOCK_CFG_OFFSET);
+  const size     = 1;
+  const checksum = (lo + hi + size + newByte) & 0xff;
+  const wIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_Func_COMMAND, 0x00, checksum, size,
+    lo, hi, 0x00,
+    newByte,
+  ]);
+  const wCode = parseWriteResponseCode(wIn);
+  if (wCode !== 0) return { name: "setLockShortcuts", code: wCode, message: "write lock shortcuts failed" };
+
+  return { name: "setLockShortcuts", code: 0 };
+}
+
+/**
+ *
+ * 读取宏列表
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号（config）
+ *  2. 0x0c 读取该板载宏区前 64 字节（指针区）
+ *     - 每 2 字节为一个宏数据起始地址（低字节在前）
+ *     - 0x40, 0x00 = 未录制；已录制时起始地址从 0x44 起
+ *     - 与下一个有效指针间隔 >= 4 且为 4 的倍数，表示该宏有数据
+ *  3. 组装 macro 列表：name=M{index}，type=6，code=宏索引
+ *
+ */
+export async function* getMacros(
+  _request?: GetMacrosParams,
+): DeviceSession<GetMacrosResult> {
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const macroAreaOffset = config * MACRO_AREA_SIZE;
+
+  const ptrData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_MACRO_COMMAND, macroAreaOffset, MACRO_PTR_REGION_SIZE, DATA_LENGTH,
+  );
+
+  const macro = parseMacroListFromPointers(ptrData);
+
+  return {
+    name: "getMacros",
+    code: 0,
+    data: { macro },
+  };
+}
+
+/**
+ *
+ * 删除指定宏
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号
+ *  2. 0x0c 读取该板载完整宏区（2048 字节）
+ *  3. 按 code 取指针地址；<= 0x44 或无数据则返回参数错误
+ *  4. 仅 1 个宏：清空宏区，所有指针恢复 0x40,0x00
+ *  5. 多个宏：计算删除长度，被删指针恢复 0x40,0x00，后续指针减长度，数据区前移
+ *  6. 0x0d 写回宏区
+ *
+ */
+export async function* delMacro(
+  request: DelMacroParams,
+): DeviceSession<DelMacroResult> {
+  const macroIndex = request.code;
+  if (!Number.isInteger(macroIndex) || macroIndex < 0 || macroIndex >= MACRO_MAX_COUNT) {
+    return { name: "delMacro", code: 3, message: "code must be an integer between 0 and 31" };
+  }
+
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const macroAreaOffset = config * MACRO_AREA_SIZE;
+
+  const macroArea: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_MACRO_COMMAND, macroAreaOffset, MACRO_AREA_SIZE, DATA_LENGTH,
+  );
+
+  const curAddr = readMacroPtrAddr(macroArea, macroIndex);
+  if (curAddr === MACRO_EMPTY_PTR || curAddr < MACRO_DATA_PTR_MIN) {
+    return { name: "delMacro", code: 3, message: `macro ${macroIndex} has no recorded data` };
+  }
+
+  const recorded = parseMacroListFromPointers(
+    macroArea.slice(0, MACRO_PTR_REGION_SIZE),
+  );
+
+  if (recorded.length === 0) {
+    return { name: "delMacro", code: 3, message: "no macro data in profile" };
+  }
+
+  let writeData: number[];
+
+  if (recorded.length === 1) {
+    // 仅一个宏：清空整个宏区，指针全部恢复 0x40,0x00
+    writeData = buildEmptyMacroArea();
+  } else {
+    const deleteStart = curAddr;
+    const deleteEnd   = findNextMacroPtrAddr(macroArea, macroIndex, deleteStart);
+    const deleteLen   = deleteEnd - deleteStart;
+    if (deleteLen < 4 || deleteLen % 4 !== 0) {
+      return { name: "delMacro", code: 3, message: "invalid macro data length" };
+    }
+
+    const dataEnd = getMacroDataEnd(macroArea);
+
+    // 被删宏指针恢复 0x40,0x00
+    writeMacroPtrAddr(macroArea, macroIndex, MACRO_EMPTY_PTR);
+
+    // 后续宏指针减去删除长度
+    for (let i = macroIndex + 1; i < MACRO_MAX_COUNT; i++) {
+      const addr = readMacroPtrAddr(macroArea, i);
+      if (addr !== MACRO_EMPTY_PTR && addr >= MACRO_DATA_PTR_MIN) {
+        writeMacroPtrAddr(macroArea, i, addr - deleteLen);
+      }
+    }
+
+    // 数据区前移： [deleteEnd, dataEnd) → [deleteStart, ...)
+    for (let i = 0; i < dataEnd - deleteEnd; i++) {
+      macroArea[deleteStart + i] = macroArea[deleteEnd + i] ?? 0;
+    }
+    for (let i = deleteStart + (dataEnd - deleteEnd); i < dataEnd; i++) {
+      macroArea[i] = 0;
+    }
+
+    writeData = macroArea;
+  }
+
+  const wCode: number = yield* writeMacroAreaDataGen(macroAreaOffset, 0, writeData);
+  if (wCode !== 0) return { name: "delMacro", code: wCode, message: "write macro area failed" };
+
+  return { name: "delMacro", code: 0 };
 }
 
 /**
@@ -2394,6 +2912,7 @@ export async function* getLight(): DeviceSession<GetLightResult> {
       pattern:    d(LIGHT_PATTERN_OFFSET),
       brightness: d(LIGHT_BRIGHTNESS_OFFSET),
       speed:      d(LIGHT_SPEED_OFFSET),
+      sleep:      0,
       isRGB:      d(LIGHT_IS_RGB_OFFSET),
       R:          d(LIGHT_R_OFFSET),
       G:          d(LIGHT_G_OFFSET),
@@ -2553,8 +3072,14 @@ export async function* getDKSList(): DeviceSession<GetDKSListResult> {
       const b4 = dksData[kBase + 4] ?? 0; // range 原始字节 1
 
       const kHidCode = resolveHidCodeFromDefaultKeyTriplet(b0, b1, b2);
+      if (kHidCode === 0) continue;
       const kName    = resolveKeyNameByCode(kHidCode, `K${k}`);
-      keys.push({ code: kHidCode, key: kName, range: parseDKSKeyRange(b3, b4) });
+      keys.push({
+        type:  convertKeyTypeForOutput(b0, b2),
+        code:  kHidCode,
+        key:   kName,
+        range: parseDKSKeyRange(b3, b4),
+      });
     }
 
     shortcuts.push({
@@ -2954,13 +3479,17 @@ export async function* getDKS(
   const keys: DKSKeyItem[] = [];
   for (let k = 0; k < 4; k++) {
     const kBase    = 4 + k * 5;
+    const rawType  = entryData[kBase] ?? 0;
+    const rawCode  = entryData[kBase + 2] ?? 0;
     const kHidCode = resolveHidCodeFromDefaultKeyTriplet(
-      entryData[kBase] ?? 0,
+      rawType,
       entryData[kBase + 1] ?? 0,
-      entryData[kBase + 2] ?? 0,
+      rawCode,
     );
+    if (kHidCode === 0) continue;
     const kName    = resolveKeyNameByCode(kHidCode, `K${k}`);
     keys.push({
+      type:  convertKeyTypeForOutput(rawType, rawCode),
       code:  kHidCode,
       key:   kName,
       range: parseDKSKeyRange(entryData[kBase + 3] ?? 0, entryData[kBase + 4] ?? 0),
@@ -5274,6 +5803,282 @@ export async function* delOKS(
 
 /**
  *
+ * 读取所有组合键列表
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载（config）
+ *  2. 0x08 读取当前板载全部 4 层数据
+ *  3. 扫描：byte[0]=0x10 且 byte[1]>0 且 byte[2]>0 的槽位即为组合键，按 keySlot 去重
+ *  4. 0x07 读取默认矩阵（第 0 层），查找每个槽位对应的 HID code
+ *  5. 返回 {type:3, code:hidCode} 列表
+ *
+ */
+export async function* getShortcuts(
+  _request?: GetShortcutsParams,
+): DeviceSession<GetShortcutsResult> {
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const profileSize = KEY_LAYER_LENGTH * 4;
+
+  const allLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
+  );
+
+  // 按 keySlot 去重，跨 4 层扫描
+  const seenSlots = new Set<number>();
+  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const base = layerBase + i * KEY_ITEM_SIZE;
+      if ((allLayersData[base] ?? 0) !== SHORTCUT_RAW_TYPE) continue;
+      if ((allLayersData[base + 1] ?? 0) === 0) continue;
+      if ((allLayersData[base + 2] ?? 0) === 0) continue;
+      seenSlots.add(i);
+    }
+  }
+
+  if (seenSlots.size === 0) {
+    return { name: "getShortcuts", code: 0, data: { shortcuts: [] } };
+  }
+
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  const shortcuts: ShortcutEntry[] = [];
+  for (const keySlot of [...seenSlots].sort((a, b) => a - b)) {
+    const defBase = keySlot * KEY_ITEM_SIZE;
+    const hidCode = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[defBase] ?? 0,
+      rawDefaultData[defBase + 1] ?? 0,
+      rawDefaultData[defBase + 2] ?? 0,
+    );
+    shortcuts.push({ type: ADVANCED_SHORTCUT_TYPE, code: hidCode });
+  }
+
+  return { name: "getShortcuts", code: 0, data: { shortcuts } };
+}
+
+/**
+ *
+ * 读取指定组合键详情
+ *
+ * 流程：
+ *  1. 验证 type === 3
+ *  2. 0x04/0x05 读取板载（config）与层（layer）
+ *  3. 0x07 读取当前层默认矩阵，按 HID code 找 keySlot
+ *  4. 0x08 读取当前层该槽位 3 字节，确认 byte[0]=0x10
+ *  5. 解析 byte[1]（修饰字节）：bit0-7 → {type:3, code:0xe0+i}，每个置位 bit 生成一项
+ *  6. 解析 byte[2]（主键码）：直接作为 code，附加到 keys 末尾
+ *
+ */
+export async function* getShortcut(
+  request: GetShortcutParams,
+): DeviceSession<GetShortcutResult> {
+  const emptyData = (code: number): ShortcutDetail => ({
+    type: ADVANCED_SHORTCUT_TYPE, code, keys: [],
+  });
+
+  if (request.type !== ADVANCED_SHORTCUT_TYPE) {
+    return { name: "getShortcut", code: 3, data: emptyData(request.code), message: "type must be 3 (Shortcut)" };
+  }
+
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "getShortcut", code: 3, data: emptyData(request.code), message: "key not found in default matrix" };
+  }
+
+  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  const keyBase  = keySlot * KEY_ITEM_SIZE;
+  const rawType  = rawCurLayerData[keyBase] ?? 0;
+  const modByte  = rawCurLayerData[keyBase + 1] ?? 0;
+  const codeByte = rawCurLayerData[keyBase + 2] ?? 0;
+
+  if (rawType !== SHORTCUT_RAW_TYPE) {
+    return {
+      name: "getShortcut",
+      code: 3,
+      data: emptyData(request.code),
+      message: `key at slot ${keySlot} is not a Shortcut (type=0x${rawType.toString(16)})`,
+    };
+  }
+
+  const hidCode = resolveHidCodeFromDefaultKeyTriplet(
+    rawDefaultData[keyBase] ?? 0,
+    rawDefaultData[keyBase + 1] ?? 0,
+    rawDefaultData[keyBase + 2] ?? 0,
+  );
+
+  // 解析 modByte（byte[1]）：bit0-7 → 修饰键 code 0xe0-0xe7
+  const keys: ShortcutKeyItem[] = parseShortcutModifierByte(modByte);
+  // 解析 codeByte（byte[2]）：直接作为主键 code
+  if (codeByte > 0) {
+    keys.push({ type: ADVANCED_SHORTCUT_TYPE, code: codeByte });
+  }
+
+  return {
+    name: "getShortcut",
+    code: 0,
+    data: { type: ADVANCED_SHORTCUT_TYPE, code: hidCode, keys },
+  };
+}
+
+/**
+ *
+ * 添加/更新组合键
+ *
+ * 流程：
+ *  1. 验证 type===3，keys 数组非空
+ *  2. 将 keys 编码为 [modifierByte, mainCodeByte]：
+ *     - code >= 0xe0 → 将 (code-0xe0) 对应 bit 置入 modifierByte
+ *     - code <  0xe0 → mainCodeByte（最后一个为准）
+ *  3. 0x04/0x05 读取板载（config）与层（layer）
+ *  4. 0x07 当前局部层默认矩阵，按 HID code 找 keySlot
+ *  5. 0x09 将 keySlot 写为 [0x10, modifierByte, mainCodeByte]
+ *
+ */
+export async function* addShortcut(
+  request: AddShortcutParams,
+): DeviceSession<AddShortcutResult> {
+  if (request.type !== ADVANCED_SHORTCUT_TYPE) {
+    return { name: "addShortcut", code: 3, message: "type must be 3 (Shortcut)" };
+  }
+  if (!Array.isArray(request.keys) || request.keys.length === 0) {
+    return { name: "addShortcut", code: 3, message: "keys must be a non-empty array" };
+  }
+
+  const [modifierByte, mainCodeByte] = encodeShortcutKeys(request.keys);
+  if (modifierByte === 0 && mainCodeByte === 0) {
+    return { name: "addShortcut", code: 3, message: "keys encode to all-zero bytes; at least one modifier or main key is required" };
+  }
+
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "addShortcut", code: 3, message: "key not found in default matrix" };
+  }
+
+  const keyWriteOff    = layerOffset + keySlot * KEY_ITEM_SIZE;
+  const [kLo, kHi]    = shiftFrom16Bit(keyWriteOff);
+  const kChk = (kLo + kHi + KEY_ITEM_SIZE + SHORTCUT_RAW_TYPE + modifierByte + mainCodeByte) & 0xff;
+  const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+    kLo, kHi, 0x00,
+    SHORTCUT_RAW_TYPE, modifierByte, mainCodeByte,
+  ]);
+  const wKeyCode = parseWriteResponseCode(wKeyIn);
+  if (wKeyCode !== 0) return { name: "addShortcut", code: wKeyCode, message: "write shortcut definition failed" };
+
+  return { name: "addShortcut", code: 0 };
+}
+
+/**
+ *
+ * 删除组合键（恢复为默认定义）
+ *
+ * 流程：
+ *  1. 0x04/0x05 读取板载（config）与层（layer）
+ *  2. 0x07 当前局部层默认矩阵，按 HID code 找 keySlot
+ *  3. 0x08 当前层确认 keySlot 类型为 0x10
+ *  4. 0x09 将 keySlot 恢复为 0x07 同局部层默认定义
+ *
+ */
+export async function* delShortcut(
+  request: DelShortcutParams,
+): DeviceSession<DelShortcutResult> {
+  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const profileSize = KEY_LAYER_LENGTH * 4;
+  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
+
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  let keySlot = -1;
+  for (let i = 0; i < KEY_COUNT; i++) {
+    const base = i * KEY_ITEM_SIZE;
+    const hid  = resolveHidCodeFromDefaultKeyTriplet(
+      rawDefaultData[base] ?? 0,
+      rawDefaultData[base + 1] ?? 0,
+      rawDefaultData[base + 2] ?? 0,
+    );
+    if (hid === request.code) { keySlot = i; break; }
+  }
+  if (keySlot < 0) {
+    return { name: "delShortcut", code: 3, message: "key not found in default matrix" };
+  }
+
+  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+
+  const keyBase = keySlot * KEY_ITEM_SIZE;
+  const rawType = rawCurLayerData[keyBase] ?? 0;
+  if (rawType !== SHORTCUT_RAW_TYPE) {
+    return {
+      name: "delShortcut",
+      code: 3,
+      message: `key at slot ${keySlot} is not a Shortcut (type=0x${rawType.toString(16)})`,
+    };
+  }
+
+  const defBase = keySlot * KEY_ITEM_SIZE;
+  const defType = rawDefaultData[defBase]     ?? 0x00;
+  const defExt  = rawDefaultData[defBase + 1] ?? 0x00;
+  const defCode = rawDefaultData[defBase + 2] ?? 0x00;
+
+  const keyWriteOff    = layerOffset + keySlot * KEY_ITEM_SIZE;
+  const [kLo, kHi]    = shiftFrom16Bit(keyWriteOff);
+  const kChk = (kLo + kHi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
+  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+    kLo, kHi, 0x00,
+    defType, defExt, defCode,
+  ]);
+  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+  if (wRestoreCode !== 0) return { name: "delShortcut", code: wRestoreCode, message: "restore key definition failed" };
+
+  return { name: "delShortcut", code: 0 };
+}
+
+/**
+ *
  * 设置双向校准开关
  *
  * 流程：
@@ -5356,6 +6161,19 @@ export async function* setCalibration(
 
 /**
  *
+ * 恢复出厂设置
+ *
+ * 流程：发送 [0x55, 0xee, 0x00 × 62]，等待设备回包
+ *
+ */
+export async function* resetKeyboard(): DeviceSession<ResetKeyboardResult> {
+  const inPacket: InPacket = yield buildOutPacket(0x55, [0xee]);
+  const resCode = parseWriteResponseCode(inPacket);
+  return { name: "resetKeyboard", code: resCode };
+}
+
+/**
+ *
  * 解析设备主动上报的校准事件（仅响应，无请求）
  *
  * 识别条件：buffer[0] === 0xa1
@@ -5377,7 +6195,7 @@ export function parseOnCalibration(buffer: InPacket | number[]): OnCalibrationRe
     return {
       name: "onCalibration",
       code: 3,
-      data: { key: "" },
+      data: [{ key: "" }],
       message: "unknown key definition",
     };
   }
@@ -5386,7 +6204,7 @@ export function parseOnCalibration(buffer: InPacket | number[]): OnCalibrationRe
   return {
     name: "onCalibration",
     code: 0,
-    data: { key },
+    data: [{ key }],
   };
 }
 
@@ -5444,8 +6262,17 @@ export type SessionRequest =
   | { name: "getOKS";         data: GetOKSParams }
   | { name: "setOKS";         data: SetOKSParams }
   | { name: "delOKS";         data: DelOKSParams }
+  | { name: "getShortcuts";   data?: GetShortcutsParams }
+  | { name: "getShortcut";    data: GetShortcutParams }
+  | { name: "addShortcut";    data: AddShortcutParams }
+  | { name: "delShortcut";    data: DelShortcutParams }
   | { name: "setBiCalibration"; data: SetBiCalibrationParams }
-  | { name: "setCalibration";  data: SetCalibrationParams };
+  | { name: "setCalibration";  data: SetCalibrationParams }
+  | { name: "resetKeyboard";   data?: null }
+  | { name: "getLockShortcuts"; data?: GetLockShortcutsParams }
+  | { name: "setLockShortcuts"; data: SetLockShortcutsParams }
+  | { name: "getMacros";        data?: GetMacrosParams }
+  | { name: "delMacro";         data: DelMacroParams };
 
 // ========== 推导核心 ========== start
 export function createSession<T extends SessionRequest>(
@@ -5494,8 +6321,17 @@ export function createSession(request: SessionRequest): DeviceSession<unknown> {
     case "getOKS":             return getOKS(request.data);
     case "setOKS":             return setOKS(request.data);
     case "delOKS":             return delOKS(request.data);
+    case "getShortcuts":       return getShortcuts(request.data ?? {});
+    case "getShortcut":        return getShortcut(request.data);
+    case "addShortcut":        return addShortcut(request.data);
+    case "delShortcut":        return delShortcut(request.data);
     case "setBiCalibration":   return setBiCalibration(request.data);
     case "setCalibration":     return setCalibration(request.data);
+    case "resetKeyboard":      return resetKeyboard();
+    case "getLockShortcuts":   return getLockShortcuts(request.data ?? {});
+    case "setLockShortcuts":   return setLockShortcuts(request.data);
+    case "getMacros":          return getMacros(request.data ?? {});
+    case "delMacro":           return delMacro(request.data);
   }
 }
 
@@ -5512,7 +6348,7 @@ export type PushHandler<T> = {
 };
 
 export type PushResultMap = {
-  onCalibration: { key: string };
+  onCalibration: { key: string }[];
 };
 
 export type PushName = keyof PushResultMap;
