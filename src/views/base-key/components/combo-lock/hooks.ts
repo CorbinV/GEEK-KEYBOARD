@@ -1,9 +1,8 @@
-import { nextTick, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useResttableRefFn } from '@/hooks/common/basicFnc';
-import { getComboLock, setComboLock } from '@/api/combo';
+import { getLockShortcuts, setLockShortcuts } from '@/api/shortcuts-setting';
 import { KeyTypeEnum } from '@/enum/keyType';
 import { useKeyboardStore } from '@/store/modules/keyboard';
-import type { BaseKey, ComboLockData } from '@/api/modules/combo';
 
 export type SelectedKeyIndex = {
   groupIndex: number;
@@ -14,105 +13,65 @@ export enum ModuleNameEnum {
   custom = 'custom'
 }
 export type KeyItem = {
-  base: BaseKey;
+  base: { code: number; type: KeyTypeEnum; key?: string };
   detail: any;
 };
 export function useComboLock() {
   const keyboardStore = useKeyboardStore();
   const { getKeyDetail } = keyboardStore;
   const moduleName = ref(ModuleNameEnum.default);
-  const comboLockUsefly = ref<boolean>(false)
   const [selectedKeyIndex, resetSelectedKeyIndex] = useResttableRefFn<SelectedKeyIndex>(() => ({
     groupIndex: -1,
     keyIndex: -1
   }));
-  const [defaultGroups, _resetDefault] = useResttableRefFn<
+  const [defaultGroups, resetDefaultGroups] = useResttableRefFn<
     {
       keys: KeyItem[];
       enable: 0 | 1;
     }[]
   >(() => []);
-  const [customGroups, _defaultCustomGroups] = useResttableRefFn<
+  const [customGroups, resetCustomGroups] = useResttableRefFn<
     {
-      keys: {
-        base: any;
-        detail: any;
-      }[];
+      keys: KeyItem[];
       enable: 0 | 1;
     }[]
   >(() => []);
   const updateKeySelect = (data: SelectedKeyIndex) => {
     selectedKeyIndex.value = data;
   };
-  const setComboLockToDevice = async (data: ComboLockData) => {
-    await setComboLock(data);
-  };
-  const initxx = async () => {
-    const { defaultLock, customLock } = await getComboLock();
+
+  // 获取锁组合键数据
+  const fetchLockShortcuts = async () => {
+    const { defaultLock, customLock } = await getLockShortcuts();
+    console.log('获取锁组合键数据：', defaultLock, customLock);
     const keyType = KeyTypeEnum.Normal;
-    const x1 = new Promise((res, rej) => {
-      try {
-        defaultLock.forEach((item, index) => {
 
-            defaultGroups.value[index] = {
-              keys: [],
-              enable: item.enable
-            };
-            item.keys.forEach(code => {
-              const base = { code, type: keyType };
-              const detail = getKeyDetail(base);
-              defaultGroups.value[index].keys.push({
-                base,
-                detail
-              });
-            });
-            if (index === defaultLock.length - 1) {
-              res('');
-            }
-        });
-      } catch (error) {
-        rej(error);
-      }
+    // 处理默认锁定组合键
+    defaultGroups.value = defaultLock.map(item => ({
+      keys: item.keys.map(code => {
+        const base = { code, type: keyType };
+        const detail = getKeyDetail(base);
+        return { base, detail };
+      }),
+      enable: item.enable as 0 | 1
+    }));
 
-    });
-    const x2 = new Promise((res, rej) => {
-      try {
-        customLock.forEach((item, index) => {
-          try {
-            customGroups.value[index] = {
-              keys: [],
-              enable: item.enable
-            };
-            item.keys.forEach(code => {
-              const base = { code, type: keyType };
-              const detail = getKeyDetail(base);
-              customGroups.value[index].keys.push({
-                base,
-                detail
-              });
-            });
-            if (index === customLock.length - 1) {
-              res('');
-            }
-          } catch (error) {
-            rej(error);
-          }
-        });
-      } catch (error) {
-        rej(error);
-      }
-    });
-    return Promise.all([x1, x2]);
+    // 处理自定义锁定组合键
+    customGroups.value = customLock.map(item => ({
+      keys: item.keys.map(code => {
+        const base = { code, type: keyType };
+        const detail = getKeyDetail(base);
+        return { base, detail };
+      }),
+      enable: item.enable as 0 | 1
+    }));
   };
-  nextTick(async () => {
-    try {
-      await initxx();
-      comboLockUsefly.value = true;
-    } catch (error: any) {
-      comboLockUsefly.value = false;
-      window?.$log!.error('ComboLock init error', error);
-    }
-  });
+
+  // 保存锁组合键数据到设备
+  const saveLockShortcuts = async (data: { defaultLock: any[]; customLock: any[] }) => {
+    await setLockShortcuts(data);
+  };
+
   watch(
     () => moduleName.value,
     () => {
@@ -125,7 +84,9 @@ export function useComboLock() {
     customGroups,
     updateKeySelect,
     moduleName,
-    setComboLockToDevice,
-    comboLockUsefly
+    fetchLockShortcuts,
+    saveLockShortcuts,
+    resetDefaultGroups,
+    resetCustomGroups
   };
 }

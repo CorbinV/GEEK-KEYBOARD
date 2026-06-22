@@ -9,3 +9,11 @@ export function setLight(data: SessionRequestData<'setLight'>) {
     })
   );
 }
+
+export function getLight() {
+  return requestClient.executeSession(
+    createSession({
+      name: 'getLight',
+    })
+  );
+}

@@ -3,7 +3,8 @@ import { onMounted, reactive, ref } from 'vue';
 import BasicGroupItem from '@/components/custom/basic-group-item.vue';
 import BasicGroupAdd from '@/components/custom/basic-group-add.vue';
 import { KeyTypeEnum } from '@/enum/keyType';
-import { createComboGroup, deleteComboGroup, getComboGroup, getComboList } from '@/api/combo';
+// import { createComboGroup, deleteComboGroup, getComboGroup, getComboList } from '@/api/combo';
+import { getShortcuts, getShortcut, addShortcut, delShortcut } from '@/api/shortcuts-setting';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import GroupMenu from '@/views/super-key/components/group-menu.vue';
 import type { BaseKey as BaseKeyType } from '@/api/modules/combo';
@@ -52,7 +53,8 @@ function handleAddClicked() {
 async function updateGroupList() {
   try {
     console.log('getShortcuts');
-    const { shortcuts } = await getComboList();
+    // const { shortcuts } = await getComboList();
+    const { shortcuts } = await getShortcuts();
     console.log('getShortcuts ret', shortcuts);
     groupList.value = shortcuts.map(item => {
       const { code, type } = item;
@@ -88,7 +90,16 @@ async function handleGroupCreated({ code, key: _key, keys }: { code: number; key
     }
     const type = KeyTypeEnum.Combo;
 
-    await createComboGroup({ code: tmpCode, keys, type });
+    console.log(type, tmpCode, keys)
+    const keysMap = keys.map((item: any) => {
+      return {
+        code: item.code,
+        type: item.type
+      }
+    });
+    // await createComboGroup({ code: tmpCode, keys, type });
+    const ret = await addShortcut({ type, code: tmpCode, keys: keysMap });
+    console.log('添加组合键结果:', ret);
     updateGroupList();
     // groupList.value.push({
     //   base: {
@@ -117,7 +128,9 @@ function handleGroupItemClicked({ base }: { base: { code: number; type: KeyTypeE
 }
 async function handleGroupItemDelete(item: any, idx: number) {
   try {
-    const ret = await deleteComboGroup({ code: item.base.code });
+    console.log('删除组合键参数: ', item);
+    // const ret = await deleteComboGroup({ code: item.base.code });
+    const ret = await delShortcut({ code: item.base.code });
     console.log('delShortcut ret', ret);
     const simpleBase = { code: item.base.code, type: item.base.type };
     const keyId = await commonStore.updateComboKeyTag('', simpleBase, { type: 'remove', updateOrigin: true });
@@ -139,7 +152,8 @@ async function handleGroupItemEdit(items: any, idx: number) {
   try {
     console.log('getShortcut', items.base.code);
     editItemCode = items.base.code;
-    const ret = await getComboGroup({ code: items.base.code, type: items.base.type });
+    // const ret = await getComboGroup({ code: items.base.code, type: items.base.type });
+    const ret = await getShortcut({ type: items.base.type, code: items.base.code });
     console.log('getShortcut ret', ret);
     editItem.list = [];
     ret.keys.forEach(key => {

@@ -69,8 +69,8 @@ function handleEnableChange(v: CommonType.NumberBoolean) {
       <NSwitch
         v-model:value="localEnabled"
         size="large"
-        :checked-value="1"
-        :unchecked-value="0"
+        :checked-value="0"
+        :unchecked-value="1"
         @update-value="handleEnableChange"
       />
     </div>

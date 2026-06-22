@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, toRaw, watch, watchEffect } from 'vue';
+import { reactive, toRaw, watch } from 'vue';
 import type { KeyTypeEnum } from '@/enum/keyType';
 import { useKeyboardStore } from '@/store/modules/keyboard';
 import { StandardKeyboard } from '@/components/custom/keyboard';
 import { ModuleNameEnum, useComboLock } from './combo-lock/hooks';
 import KeyGroupList from './combo-lock/key-group-list.vue';
 import { $t } from '@/locales';
+
 const props = defineProps<{
   visible: boolean;
 }>();
 const emit = defineEmits(['update:visible']);
 
 const keyboardStore = useKeyboardStore();
-const { defaultGroups, customGroups, selectedKeyIndex, updateKeySelect, moduleName, setComboLockToDevice, comboLockUsefly } =
-  useComboLock();
+const {
+  defaultGroups,
+  customGroups,
+  selectedKeyIndex,
+  updateKeySelect,
+  moduleName,
+  fetchLockShortcuts,
+  saveLockShortcuts
+} = useComboLock();
+
 function useDialogController() {
   const control = reactive({
     visible: true
@@ -33,6 +42,21 @@ function useDialogController() {
 
 const { closeDialog } = useDialogController();
 
+// 监听弹窗显示状态，打开时获取数据
+watch(
+  () => props.visible,
+  async (val) => {
+    if (val) {
+      try {
+        await fetchLockShortcuts();
+      } catch (error) {
+        console.error('获取锁组合键数据失败', error);
+        window.$message?.error('获取锁组合键数据失败');
+        closeDialog();
+      }
+    }
+  }
+);
 
 function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEnum; keyId: string }) {
   const { groupIndex, keyIndex } = toRaw(selectedKeyIndex.value);
@@ -49,6 +73,7 @@ function handleFncClicked({ code, type, keyId }: { code: number; type: KeyTypeEn
   }
   customGroups.value[groupIndex].keys[keyIndex] = selectedData;
 }
+
 function handleGroupEnableChange(enable: CommonType.NumberBoolean, groupIdx: number) {
   if (moduleName.value === ModuleNameEnum.default) {
     defaultGroups.value[groupIdx].enable = enable;
@@ -75,39 +100,21 @@ async function handleDialogComfirm() {
     };
   });
   try {
-    await setComboLockToDevice({
+    await saveLockShortcuts({
       defaultLock: x1,
       customLock: x2
     });
+    window.$message?.success('保存成功');
     closeDialog();
   } catch (error) {
     console.log(error);
-    window.$message?.error(`Update lock shortcuts fail`);
+    window.$message?.error('保存锁组合键失败');
   }
 }
-const dialogVisible = computed(() => {
-  return comboLockUsefly.value && props.visible
-})
-
-function handleDialogChange(val: boolean) {
-  // emit('update:visible', val);
-  // if (!val) {
-  //   emit('update:visible', false);
-  // }
-}
-onMounted(()=>{
-
-watch(() => props.visible, (val) => {
-  if (!comboLockUsefly.value && val) {
-    window?.$message?.info($t("common.featWaitSoon"))
-    closeDialog()
-  }
-},{deep:true})
-})
 </script>
 
 <template>
-  <NModal :show="dialogVisible" @update-show="handleDialogChange" preset="card" :closable="false" :title="undefined"
+  <NModal :show="visible" @update-show="emit('update:visible', $event)" preset="card" :closable="false" :title="undefined"
     :close-on-esc="false" :mask-closable="false" class="w-90% !bg-#191b1d" content-class="bg-#191b1d"
     size="large">
     <template #header>
@@ -129,7 +136,7 @@ watch(() => props.visible, (val) => {
                 @enable-change="handleGroupEnableChange" />
             </div>
           </NTabPane>
-          <NTabPane :name="ModuleNameEnum.custom">
+          <NTabPane v-if="false" :name="ModuleNameEnum.custom">
             <template #tab>
               <span class="text-xl">自定义锁定组合按键</span>
               <span class="text-base">（可设置单个或多个）</span>
