@@ -16,9 +16,11 @@ export function setKeyboardSetting(data: SetKeyboardSetting) {
 }
 
 export function resetKeyboard() {
-  return requestClient.send<never>({
-    name: 'resetKeyboard'
-  });
+  return requestClient.executeSession(
+    createSession({
+      name: 'resetKeyboard'
+    })
+  );
 }
 
 export function getDeviceInfo() {
