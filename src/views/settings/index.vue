@@ -147,6 +147,9 @@ const onFactoryResetClick = async () => {
         window?.$log!.error(`Reset device failed`, e);
       } finally {
         loadingBar.finish()
+        nextTick(()=>{
+          window.location.reload()
+        })
       }
     }
   })
