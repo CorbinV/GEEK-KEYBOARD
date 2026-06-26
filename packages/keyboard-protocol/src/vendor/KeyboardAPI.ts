@@ -44,7 +44,7 @@ export type BasicConfig = {
 };
 
 export type SetBasicConfigParams  = { config_index: number; layer_index: number };
-export type GetBasicKeyParams    = { layer: number; pageNo: number; pageSize: number };
+export type GetBasicKeyParams    = { layer: number; pageNo: number; pageSize: number; config?: number };
 export type GetKeyInfoParams     = { key: string; layer?: number };
 export type GetKeyInfoData       = {
   key: string;
@@ -125,8 +125,7 @@ export type DelDKSParams = {
 };
 
 export type DelTGLParams = {
-  code:   number;   // 要删除的 TGL 按键 HID code
-  layer?: number;
+  code: number;   // TGL 数据区索引（0-based），扫描全部层
 };
 
 export type MTKeyItem = {
@@ -137,7 +136,7 @@ export type MTKeyItem = {
 
 export type MTEntry = {
   type: number;       // 固定 9（MT）
-  code: number;       // 绑定按键 HID code（来自 0x07 默认矩阵）
+  code: number;       // MT 数据区索引（0-based，与 RS/SOCD/OKS 共用 0xa4 区域）
   time: number;       // 时间参数（0x92 三字节第 3 字节）
   keys: MTKeyItem[];  // [0]=0xa4 条目前 3 字节，[1]=后 3 字节
 };
@@ -148,22 +147,20 @@ export type GetMTListParams = {
 };
 
 export type GetMTParams = {
-  type:   number;   // 9 = MT
-  code:   number;   // 按键 HID code
-  layer?: number;
+  type: number;   // 9 = MT
+  code: number;   // MT 数据区索引（0-based）
 };
 
 export type SetMTParams = {
   type:   number;       // 9 = MT
-  code:   number;       // 按键 HID code（0x07 默认矩阵匹配）
+  code:   number;       // MT 数据区索引；已存在 → 修改，不存在 → 新增
   time:   number;       // 时间参数（写入 0x92 三字节第 3 字节）
-  keys:   MTKeyItem[];  // [0]=条目前 3 字节定义, [1]=后 3 字节定义
+  keys:   MTKeyItem[];  // [0]=功能键0（绑定键，写入 0x08 + 0xa4 前3字节），[1]=功能键1（0xa4 后3字节）
   layer?: number;
 };
 
 export type DelMTParams = {
-  code:   number;   // 要删除的 MT 按键 HID code
-  layer?: number;
+  code: number;   // MT 数据区索引（0-based），扫描全部层
 };
 
 export type RSKeyItem = {
@@ -174,8 +171,8 @@ export type RSKeyItem = {
 
 export type RSEntry = {
   type: number;       // 固定 11（RS）
-  code: number;       // 绑定按键 HID code（来自 0x07 默认矩阵）
-  keys: RSKeyItem[];  // [0]=0xa4 条目前 3 字节，[1]=后 3 字节
+  code: number;       // 共享数据区索引（0-based，与 SOCD/OKS 共用 0xa4 区域）
+  keys: RSKeyItem[];  // [0]=功能键0（0xa4 前3字节），[1]=功能键1（后3字节）
 };
 
 export type GetRSListParams = {
@@ -184,21 +181,19 @@ export type GetRSListParams = {
 };
 
 export type GetRSParams = {
-  type:   number;   // 11 = RS
-  code:   number;   // 按键 HID code
-  layer?: number;
+  type: number;   // 11 = RS
+  code: number;   // 共享数据区索引（0-based）
 };
 
 export type SetRSParams = {
   type:   number;       // 11 = RS
-  code:   number;       // 绑定按键 HID code（0x07 默认矩阵匹配）
-  keys:   RSKeyItem[];  // [0]=前 3 字节定义, [1]=后 3 字节定义
+  code:   number;       // 共享数据区索引；已存在 → 修改，不存在 → 新增
+  keys:   RSKeyItem[];  // [0]=功能键0（绑定键，写入 0x08 + 0xa4 前3字节），[1]=功能键1（0xa4 后3字节）
   layer?: number;
 };
 
 export type DelRSParams = {
-  code:   number;   // 要删除的 RS 按键 HID code
-  layer?: number;
+  code: number;   // 共享数据区索引（0-based），扫描全部层
 };
 
 export type SOCDKeyItem = {
@@ -209,31 +204,29 @@ export type SOCDKeyItem = {
 
 export type SOCDEntry = {
   type:    number;         // 固定 8（SOCD）
-  code:    number;         // 绑定按键 HID code（来自 0x07 默认矩阵）
+  code:    number;         // 共享数据区索引（0-based，与 RS/OKS 共用 0xa4 区域）
   trigger: number;         // SOCD 优先级：0=最后按下优先, 1=key1优先, 2=key2优先
-  keys:    SOCDKeyItem[];  // [0]=0xa4 条目前 3 字节，[1]=后 3 字节
+  keys:    SOCDKeyItem[];  // [0]=功能键0（0xa4 前3字节），[1]=功能键1（后3字节）
 };
 
 /** getSOCDList 无需传参 */
 export type GetSOCDListParams = Record<string, never>;
 
 export type GetSOCDParams = {
-  type:   number;   // 8 = SOCD
-  code:   number;   // 按键 HID code
-  layer?: number;
+  type: number;   // 8 = SOCD
+  code: number;   // 共享数据区索引（0-based）
 };
 
 export type SetSOCDParams = {
   type:    number;         // 8 = SOCD
-  code:    number;         // 绑定按键 HID code（0x07 默认矩阵匹配）
+  code:    number;         // 共享数据区索引；已存在 → 修改，不存在 → 新增
   trigger: number;         // SOCD 优先级（0/1/2）
-  keys:    SOCDKeyItem[];  // [0]=前 3 字节定义, [1]=后 3 字节定义
+  keys:    SOCDKeyItem[];  // [0]=功能键0（绑定键，写入 0x08 + 0xa4 前3字节），[1]=功能键1（0xa4 后3字节）
   layer?:  number;
 };
 
 export type DelSOCDParams = {
-  code:   number;   // 要删除的 SOCD 按键 HID code
-  layer?: number;
+  code: number;   // 共享数据区索引（0-based），扫描全部层
 };
 
 export type OKSKeyItem = {
@@ -244,29 +237,27 @@ export type OKSKeyItem = {
 
 export type OKSEntry = {
   type: number;       // 固定 7（OKS）
-  code: number;       // 绑定按键 HID code（来自 0x07 默认矩阵）
-  keys: OKSKeyItem[]; // [0]=0xa4 条目前 3 字节，[1]=后 3 字节
+  code: number;       // 共享数据区索引（0-based，与 RS/SOCD 共用 0xa4 区域）
+  keys: OKSKeyItem[]; // [0]=功能键0（0xa4 前3字节），[1]=功能键1（后3字节）
 };
 
 /** getOKSList 无需传参 */
 export type GetOKSListParams = Record<string, never>;
 
 export type GetOKSParams = {
-  type:   number;   // 7 = OKS
-  code:   number;   // 按键 HID code
-  layer?: number;
+  type: number;   // 7 = OKS
+  code: number;   // 共享数据区索引（0-based）
 };
 
 export type SetOKSParams = {
   type:   number;       // 7 = OKS
-  code:   number;       // 绑定按键 HID code（0x07 默认矩阵匹配）
-  keys:   OKSKeyItem[]; // [0]=前 3 字节定义, [1]=后 3 字节定义
+  code:   number;       // 共享数据区索引；已存在 → 修改，不存在 → 新增
+  keys:   OKSKeyItem[]; // [0]=功能键0（绑定键，写入 0x08 + 0xa4 前3字节），[1]=功能键1（0xa4 后3字节）
   layer?: number;
 };
 
 export type DelOKSParams = {
-  code:   number;   // 要删除的 OKS 按键 HID code
-  layer?: number;
+  code: number;   // 共享数据区索引（0-based），扫描全部层
 };
 
 export type ShortcutKeyItem = {
@@ -307,7 +298,7 @@ export type DelShortcutParams = {
 };
 
 export type LockShortcutEntry = {
-  enable: number;   // 1=锁定 0=未锁定
+  enable: number;   // 0=启用（锁定，硬件 bit=1）  1=不启用（未锁定，硬件 bit=0）
   keys:   number[]; // 组合键 HID code 列表
 };
 
@@ -330,6 +321,27 @@ export type MacroEntry = {
 /** getMacros 无需传参 */
 export type GetMacrosParams = Record<string, never>;
 
+export type GetMacroParams = {
+  type: number;   // 6 = 宏
+  code: number;   // 宏索引 0~31
+  key?: string;   // 可选，绑定按键名（用于读取 loop / stopType）
+};
+
+export type SetMacroParams = {
+  attr: {
+    type:         number;   // 固定 6
+    code:         number;   // 宏索引 0~31
+    name?:        string;
+    trigger?:     number;
+    triggerDelay?: number;
+    loop:         number;   // 1~254 循环次数；stopType=1 时无意义
+    delay?:       number[];
+    stopType:     number;   // 0=按次数停；1=一直循环直到松键
+    key?:         string;   // 可选，绑定按键名
+  };
+  keys: MacroActionKey[];
+};
+
 export type DelMacroParams = {
   code: number;   // 宏索引 0~31
 };
@@ -338,7 +350,6 @@ export type SetDKSParams = {
   type:             number;
   code:             number;
   key:              string;
-  name:             string;
   simulation:       number;
   simulationRange:  number[];
   range:            number[];
@@ -352,15 +363,14 @@ export type GetTGLListParams = {
 };
 
 export type GetTGLParams = {
-  type:   number;   // 10 = TGL
-  code:   number;
-  layer?: number;
+  type: number;   // 10 = TGL
+  code: number;   // TGL 数据区索引（0-based）
 };
 
 export type SetTGLParams = {
-  type:   number;        // 10 = TGL
-  code:   number;
-  keys:   TGLKeyItem[];
+  type:   number;       // 10 = TGL
+  code:   number;       // TGL 数据区索引；已存在 → 修改，不存在 → 新增
+  keys:   TGLKeyItem[]; // keys[0]=绑定按键（写入 0x08）  keys[1]=TGL 数据（写入 0xa6）
   layer?: number;
 };
 
@@ -442,8 +452,9 @@ const ADVANCED_MACRO_TYPE     = 6;    // 宏类型
 const MACRO_AREA_SIZE         = 2048; // 每个板载宏数据区大小
 const MACRO_PTR_REGION_SIZE   = 64;   // 宏指针区大小（32 × 2 字节）
 const MACRO_DATA_START        = 0x40; // 宏数据区起始偏移（跳过指针区）
-const MACRO_EMPTY_PTR         = 0x0040; // 指针 0x40,0x00：未录制宏数据
-const MACRO_DATA_PTR_MIN      = 0x0044; // 已录制宏数据时指针起始地址
+const MACRO_PTR_BASE          = 0x0000; // 宏指针基地址（指针值即数组本地偏移，基地址为 0）
+const MACRO_EMPTY_PTR         = 0x0040; // 空宏指针值（设备写入 0x40 0x00）
+const MACRO_DATA_PTR_MIN      = 0x0044; // 有效宏指针最小值（0x0040 + 4 字节起始标记）
 const MACRO_MAX_COUNT         = 32; // 宏最多 32 个
 
 // resetKeyInfo：需要特殊处理的高级类型首字节集合（0x90/0x95/0x94/0x92/0x91/0x93）
@@ -673,33 +684,30 @@ function parseShortcutModifierByte(modByte: number): ShortcutKeyItem[] {
  *     例：[{code:224},{code:225}] → 0x01|0x02 = 0x03
  *   - code < 0xe0（主键）→ mainCodeByte = code（以最后一个为准）
  */
-/** funcData 第 6 字节高 4 位 → defaultLock 列表（仅返回 enable=1 的项） */
+/** funcData 第 6 字节高 4 位 → defaultLock 列表（始终返回全部项，enable=0 表示已锁定，enable=1 表示未锁定） */
 function parseDefaultLockFromFuncByte(cfgByte: number): LockShortcutEntry[] {
-  const mask = (cfgByte >> 4) & 0x0f;
-  const entries: LockShortcutEntry[] = [];
-  if (mask & LOCK_BIT_WIN) {
-    entries.push({ enable: 1, keys: [0xe3] }); // L-Win
-    entries.push({ enable: 1, keys: [0xe7] }); // R-Win
-  }
-  if (mask & LOCK_BIT_ALT_TAB) {
-    entries.push({ enable: 1, keys: [0xe2, 0x2b] }); // L-Alt + Tab
-    entries.push({ enable: 1, keys: [0xe6, 0x2b] }); // R-Alt + Tab
-  }
-  if (mask & LOCK_BIT_ALT_F4) {
-    entries.push({ enable: 1, keys: [0xe2, 0x3d] }); // L-Alt + F4
-    entries.push({ enable: 1, keys: [0xe6, 0x3d] }); // R-Alt + F4
-  }
-  if (mask & LOCK_BIT_APP) {
-    entries.push({ enable: 1, keys: [0x76] }); // Menu(App)
-  }
-  return entries;
+  const mask   = (cfgByte >> 4) & 0x0f;
+  // API 语义与硬件相反：硬件 bit=1 → enable=0（锁定），硬件 bit=0 → enable=1（未锁定）
+  const win    = (mask & LOCK_BIT_WIN)     ? 0 : 1;
+  const altTab = (mask & LOCK_BIT_ALT_TAB) ? 0 : 1;
+  const altF4  = (mask & LOCK_BIT_ALT_F4)  ? 0 : 1;
+  const app    = (mask & LOCK_BIT_APP)     ? 0 : 1;
+  return [
+    { enable: win,    keys: [0xe3] },         // L-Win
+    { enable: win,    keys: [0xe7] },         // R-Win
+    { enable: altTab, keys: [0xe2, 0x2b] },   // L-Alt + Tab
+    { enable: altTab, keys: [0xe6, 0x2b] },   // R-Alt + Tab
+    { enable: altF4,  keys: [0xe2, 0x3d] },   // L-Alt + F4
+    { enable: altF4,  keys: [0xe6, 0x3d] },   // R-Alt + F4
+    { enable: app,    keys: [0x76] },         // Menu(App)
+  ];
 }
 
 /** defaultLock 列表 → funcData 第 6 字节高 4 位锁定位 */
 function encodeLockMaskFromDefaultLock(entries: LockShortcutEntry[]): number {
   let mask = 0;
   for (const entry of entries) {
-    if (!entry.enable) continue;
+    if (entry.enable) continue; // enable=1 表示未锁定，跳过；enable=0 表示锁定，置硬件 bit=1
     const keys = entry.keys ?? [];
     if (keys.length === 1 && (keys[0] === 0xe3 || keys[0] === 0xe7)) {
       mask |= LOCK_BIT_WIN;
@@ -719,9 +727,14 @@ function encodeLockMaskFromDefaultLock(entries: LockShortcutEntry[]): number {
   return mask & 0x0f;
 }
 
-/** 读取宏指针区中第 index 个宏的起始地址（2 字节 LE） */
+/** 读取宏指针区中第 index 个宏的起始地址（2 字节 LE，返回指针值如 0x4044） */
 function readMacroPtrAddr(ptrData: number[], index: number): number {
   return (ptrData[index * 2] ?? 0) | ((ptrData[index * 2 + 1] ?? 0) << 8);
+}
+
+/** 将宏指针值转换为 macroArea 数组本地偏移（ptr - MACRO_PTR_BASE） */
+function macroPtrToLocalOffset(ptr: number): number {
+  return ptr - MACRO_PTR_BASE;
 }
 
 /** 写入宏指针区中第 index 个宏的起始地址 */
@@ -730,27 +743,26 @@ function writeMacroPtrAddr(ptrData: number[], index: number, addr: number): void
   ptrData[index * 2 + 1] = (addr >> 8) & 0xff;
 }
 
-/** 向后查找下一个有效宏数据起始地址 */
+/** 向后查找下一个有效宏的指针值；未找到时返回 MACRO_PTR_BASE + MACRO_AREA_SIZE */
 function findNextMacroPtrAddr(
   ptrData: number[],
   fromIndex: number,
   cur: number,
-  dataEndFallback = MACRO_AREA_SIZE,
 ): number {
   for (let j = fromIndex + 1; j < MACRO_MAX_COUNT; j++) {
     const addr = readMacroPtrAddr(ptrData, j);
     if (addr !== MACRO_EMPTY_PTR && addr > cur) return addr;
   }
-  return dataEndFallback;
+  return MACRO_PTR_BASE + MACRO_AREA_SIZE;
 }
 
-/** 计算宏数据区已占用末尾偏移 */
+/** 计算宏数据区已占用末尾的本地偏移（数组索引） */
 function getMacroDataEnd(ptrData: number[]): number {
   let end = MACRO_DATA_START;
   for (let i = 0; i < MACRO_MAX_COUNT; i++) {
     const cur = readMacroPtrAddr(ptrData, i);
     if (cur === MACRO_EMPTY_PTR || cur < MACRO_DATA_PTR_MIN) continue;
-    end = Math.max(end, findNextMacroPtrAddr(ptrData, i, cur));
+    end = Math.max(end, macroPtrToLocalOffset(findNextMacroPtrAddr(ptrData, i, cur)));
   }
   return end;
 }
@@ -1042,7 +1054,9 @@ export async function* getBasicKey(
   if (!Number.isInteger(pageSize) || pageSize < 1)
     throw new Error("pageSize must be a positive integer");
 
-  const { config, layer: localLayer, funcData } = yield* resolveConfigLayerGen(layer);
+  const { config: devConfig, layer: devLocalLayer, funcData } = yield* resolveConfigLayerGen(layer);
+  const config     = request.config ?? devConfig;
+  const localLayer = request.config !== undefined ? (layer - config * 4) : devLocalLayer;
   const perfCfgMask   = funcData[PERF_CFG_MASK_OFFSET] ?? 0;
   const anti_break_sw = (perfCfgMask >> 1) & 0x01;
   const debounce_lvl  = (perfCfgMask >> 5) & 0x07;
@@ -1297,8 +1311,6 @@ export async function* setKeyInfo(
     value: unknown,
     key: string,
   ): string | null => {
-    if (value === undefined)
-      return `key ${key}: ${field} is required`;
     if (!Array.isArray(value))
       return `key ${key}: ${field} must be an array`;
     if (value.length === 0) return null;
@@ -2488,7 +2500,38 @@ type DelMacroResult = {
   message?: string;
 };
 
+type MacroAttr = {
+  type:         number;
+  code:         number;
+  name:         string;
+  trigger:      number;
+  triggerDelay: number;
+  loop:         number;
+  delay:        number[];
+  stopType:     number;
+  key?:         string;
+};
 
+type MacroActionKey = {
+  inx: number;    // 按键序号（相同按键同一 inx）
+  iT:  number;    // 与前一动作的间隔时间（ms）
+  dT:  number;    // 按下到抬起的持续时间（ms）；抬起事件为 0，结束抬起为上一动作 delay
+  kT:  number;    // 按键类型（bit0-5：1=修饰键 2=普通键 3=鼠标）
+  kv:  number[];  // 按键值：按下=[code]，抬起=[]
+};
+
+type GetMacroResult = {
+  name: "getMacro";
+  code: number;
+  data?: { attr: MacroAttr; keys: MacroActionKey[] };
+  message?: string;
+};
+
+type SetMacroResult = {
+  name: "setMacro";
+  code: number;
+  message?: string;
+};
 
 // ========== 推导核心 ========== start
 // 导出类型名必须为： SessionResultMap
@@ -2542,6 +2585,8 @@ export type SessionResultMap = {
   getLockShortcuts:    GetLockShortcutsResult;
   setLockShortcuts:    SetLockShortcutsResult;
   getMacros:           GetMacrosResult;
+  getMacro:            GetMacroResult;
+  setMacro:            SetMacroResult;
   delMacro:            DelMacroResult;
 };
 // ========== 推导核心 ========== end
@@ -2656,7 +2701,7 @@ export async function* getDeviceInfo(): DeviceSession<GetDeviceInfoResult> {
       usbMtu:    64,
       usbOtaMtu: 512,
       firmwares: [
-        { version, id: 0, type: 10, model: "rk-s75*" },
+        { version, id: 0, type: 10, model: "m68" },
       ],
     },
   };
@@ -2795,15 +2840,418 @@ export async function* getMacros(
 }
 
 /**
+ * 将 getMacro 响应格式的 keys 数组重新编码为设备 4 字节动作序列。
+ *
+ * 每个动作格式：[delay_lo, delay_hi, ctrl, keyCode]
+ *   ctrl = rawTypeBits | (press?0x40:0) | (end?0x80:0)
+ *   rawTypeBits: kT=1(keyboard) → modifier(0xE0-0xE7)=1 else 2；kT=2(mouse) → 3
+ *
+ * delay 规则：
+ *   最后一个动作（END）：delay=2（占位符）
+ *   倒数第二个动作：     delay = END.dT
+ *   其他动作：           delay = keys[i+1].iT
+ */
+function encodeMacroActions(keys: MacroActionKey[]): number[] {
+  if (keys.length === 0) return [];
+
+  // 建立 inx → keyCode 映射（从 press 动作中提取）
+  const inxToCode = new Map<number, number>();
+  for (const k of keys) {
+    if (k.kv.length > 0) inxToCode.set(k.inx, k.kv[0]!);
+  }
+
+  const bytes: number[] = [];
+  const lastIdx = keys.length - 1;
+
+  for (let i = 0; i < keys.length; i++) {
+    const k       = keys[i]!;
+    const isPress = k.kv.length > 0;
+    const isEnd   = i === lastIdx;
+    const keyCode = isPress ? (k.kv[0] ?? 0) : (inxToCode.get(k.inx) ?? 0);
+
+    // kT=1(键盘) → modifier 编码 1，普通键编码 2；kT=2(鼠标) → 编码 3
+    const rawTypeBits = k.kT === 2 ? 3
+      : (keyCode >= 0xe0 && keyCode <= 0xe7 ? 1 : 2);
+    const ctrl = (rawTypeBits & 0x3f) | (isPress ? 0x40 : 0) | (isEnd ? 0x80 : 0);
+
+    let delay: number;
+    if (isEnd) {
+      delay = 2;                          // 结束动作 delay 固定为占位符
+    } else if (i === lastIdx - 1) {
+      delay = keys[lastIdx]!.dT;          // 倒数第二个动作取 END 的 dT
+    } else {
+      delay = keys[i + 1]!.iT;           // 其余取下一动作的 iT
+    }
+
+    bytes.push(delay & 0xff, (delay >> 8) & 0xff, ctrl & 0xff, keyCode & 0xff);
+  }
+
+  return bytes;
+}
+
+/**
+ *
+ * 读取指定宏配置
+ *
+ * 流程：
+ *  1. 0x04 读取当前板载号
+ *  2. 0x0c 读取完整宏区（2048 字节）
+ *  3. 按 code 取指针，判空返回空 keys
+ *  4. 若传入 key：读 0x07（默认矩阵）定位槽位，再读 0x08 第 3 字节解析 loop/stopType
+ *  5. 从指针起始位置逐 4 字节解析动作，直到 bit7=1（结束标志）
+ *  6. 构造 iT / dT / inx 响应格式
+ *
+ */
+export async function* getMacro(
+  request: GetMacroParams,
+): DeviceSession<GetMacroResult> {
+  const { code, key } = request;
+
+  if (request.type !== ADVANCED_MACRO_TYPE) {
+    return { name: "getMacro", code: 3, message: "type must be 6 (Macro)" };
+  }
+  if (!Number.isInteger(code) || code < 0 || code >= MACRO_MAX_COUNT) {
+    return { name: "getMacro", code: 3, message: "code must be an integer between 0 and 31" };
+  }
+
+  // 1. 读取板载号
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config           = baseIn[8] ?? 0;
+  const macroAreaOffset  = config * MACRO_AREA_SIZE;
+
+  const defaultAttr: MacroAttr = {
+    type:         ADVANCED_MACRO_TYPE,
+    code,
+    name:         `M${code}`,
+    trigger:      0,
+    triggerDelay: 0,
+    loop:         1,
+    delay:        [0, 0],
+    stopType:     0,
+    ...(key !== undefined ? { key } : {}),
+  };
+
+  // 2. 读取完整宏区
+  const macroArea: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_MACRO_COMMAND, macroAreaOffset, MACRO_AREA_SIZE, DATA_LENGTH,
+  );
+
+  // 3. 校验指针
+  const ptr         = readMacroPtrAddr(macroArea, code);
+  const startOffset = macroPtrToLocalOffset(ptr);
+
+  if (ptr < MACRO_DATA_PTR_MIN) {
+    return { name: "getMacro", code: 0, data: { attr: defaultAttr, keys: [] } };
+  }
+
+  // 4. 若传入 key，读 0x07 + 0x08 获取 loop / stopType
+  let loop     = 1;
+  let stopType = 0;
+
+  if (key !== undefined) {
+    const profileStride    = KEY_LAYER_LENGTH * 4;  // 4 层
+    const defaultLayerData = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND,
+      config * profileStride,
+      KEY_LAYER_LENGTH,
+      DATA_LENGTH,
+    );
+    const keySlot = resolveKeySlotIndex(defaultLayerData, key) ?? -1;
+    if (keySlot >= 0) {
+      const currentLayerData = yield* readChunkedDataByCommandGen(
+        FLAG, GET_KEY_CURRENT_COMMAND,
+        config * profileStride,
+        KEY_LAYER_LENGTH,
+        DATA_LENGTH,
+      );
+      const byte2 = currentLayerData[keySlot * KEY_ITEM_SIZE + 2] ?? 0;
+      if (byte2 === 0xff) {
+        loop     = 0;
+        stopType = 1;
+      } else if (byte2 >= 1 && byte2 <= 254) {
+        loop     = byte2;
+        stopType = 0;
+      }
+    }
+  }
+
+  // 5. 从 startOffset 解析原始动作
+  type RawAction = { delay: number; ctrl: number; keyCode: number };
+  const rawActions: RawAction[] = [];
+
+  let offset = startOffset;
+  while (offset + 3 < MACRO_AREA_SIZE) {
+    const delay   = (macroArea[offset] ?? 0) | ((macroArea[offset + 1] ?? 0) << 8);
+    const ctrl    = macroArea[offset + 2] ?? 0;
+    const keyCode = macroArea[offset + 3] ?? 0;
+    rawActions.push({ delay, ctrl, keyCode });
+    offset += 4;
+    if (ctrl & 0x80) break; // bit7 = 结束标志
+  }
+
+  if (rawActions.length === 0) {
+    return {
+      name: "getMacro",
+      code: 0,
+      data: { attr: { ...defaultAttr, loop, stopType }, keys: [] },
+    };
+  }
+
+  // 6. 构造响应 keys
+  const inxMap = new Map<number, number>(); // keyCode → inx
+  let nextInx  = 1;
+  const responseKeys: MacroActionKey[] = [];
+
+  for (let i = 0; i < rawActions.length; i++) {
+    const action  = rawActions[i]!;
+    const isEnd   = (action.ctrl & 0x80) !== 0;
+    const isPress = (action.ctrl & 0x40) !== 0;
+    const keyType = action.ctrl & 0x3f;
+    const kc      = action.keyCode;
+
+    if (!inxMap.has(kc)) inxMap.set(kc, nextInx++);
+    const inx = inxMap.get(kc)!;
+
+    let iT: number;
+    let dT: number;
+
+    if (isEnd) {
+      // 结束动作：iT=0，dT=前一动作的 delay（宏尾延迟）
+      iT = 0;
+      dT = rawActions[i - 1]?.delay ?? 0;
+    } else {
+      // iT = 前一动作的 delay（首个动作为 0）
+      iT = i === 0 ? 0 : (rawActions[i - 1]?.delay ?? 0);
+
+      if (isPress) {
+        // dT = 从本动作到匹配抬起之间所有 delay 的累加（即按住时长）
+        let releaseIdx = rawActions.length - 1; // 默认取最后一个（END）
+        for (let j = i + 1; j < rawActions.length; j++) {
+          const a = rawActions[j]!;
+          if (a.keyCode === kc && (a.ctrl & 0x40) === 0) {
+            releaseIdx = j;
+            break;
+          }
+        }
+        dT = 0;
+        for (let k = i; k < releaseIdx; k++) {
+          dT += rawActions[k]!.delay;
+        }
+      } else {
+        dT = 0;
+      }
+    }
+
+    // raw bits: 1=modifier, 2=normal keyboard, 3=mouse → response kT: 1=keyboard, 2=mouse
+    const kT = keyType <= 2 ? 1 : 2;
+
+    responseKeys.push({
+      inx,
+      iT,
+      dT,
+      kT,
+      kv: isPress ? [kc] : [],
+    });
+  }
+
+  return {
+    name: "getMacro",
+    code: 0,
+    data: {
+      attr: { ...defaultAttr, loop, stopType },
+      keys: responseKeys,
+    },
+  };
+}
+
+/**
+ *
+ * 新增或修改宏配置
+ *
+ * 流程：
+ *  1. 参数校验
+ *  2. 将 keys 编码为设备 4 字节动作序列
+ *  3. 0x04 读取当前板载号，0x0c 读取完整宏区
+ *  4. 判断新增 / 修改：
+ *     新增：按 code 索引顺序找插入点，右移后续数据，更新高位指针
+ *     修改：删旧数据（左/右移动），写入新数据，更新 >= oldEnd 的指针
+ *  5. 若为第一个宏，写入数据区起始标记（0x00 0x00 0x80 0x00）
+ *  6. 0x0d 写回宏区
+ *  7. 若 attr.key 存在，将按键矩阵 0x08 槽位写为 [0x70, code, loopStopByte]
+ *
+ */
+export async function* setMacro(
+  request: SetMacroParams,
+): DeviceSession<SetMacroResult> {
+  const { attr, keys } = request;
+  const code = attr.code;
+
+  if (attr.type !== ADVANCED_MACRO_TYPE) {
+    return { name: "setMacro", code: 3, message: "attr.type must be 6 (Macro)" };
+  }
+  if (!Number.isInteger(code) || code < 0 || code >= MACRO_MAX_COUNT) {
+    return { name: "setMacro", code: 3, message: "attr.code must be 0-31" };
+  }
+  if (!keys || keys.length === 0) {
+    return { name: "setMacro", code: 3, message: "keys must not be empty" };
+  }
+
+  // 1. 编码动作序列
+  const encodedBytes = encodeMacroActions(keys);
+  if (encodedBytes.length === 0) {
+    return { name: "setMacro", code: 3, message: "failed to encode macro actions" };
+  }
+  const newLen = encodedBytes.length;
+
+  // 2. 读取板载号
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config          = baseIn[8] ?? 0;
+  const macroAreaOffset = config * MACRO_AREA_SIZE;
+
+  // 3. 读取完整宏区
+  const macroArea: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_MACRO_COMMAND, macroAreaOffset, MACRO_AREA_SIZE, DATA_LENGTH,
+  );
+
+  const oldPtr    = readMacroPtrAddr(macroArea, code);
+  const isNew     = oldPtr < MACRO_DATA_PTR_MIN;
+  const dataEnd   = getMacroDataEnd(macroArea);    // 当前数据末尾（本地偏移）
+
+  if (isNew) {
+    // ── 新增 ──────────────────────────────────────────────────────────────────
+
+    // 找插入点：所有 code 索引 < code 的宏的数据末尾
+    let insertOffset = MACRO_DATA_PTR_MIN;
+    for (let i = 0; i < code; i++) {
+      const iPtr = readMacroPtrAddr(macroArea, i);
+      if (iPtr < MACRO_DATA_PTR_MIN) continue;
+      insertOffset = Math.max(insertOffset, findNextMacroPtrAddr(macroArea, i, iPtr));
+    }
+
+    // 若数据区为空，先写入起始标记（4 字节）
+    if (dataEnd <= MACRO_DATA_START) {
+      macroArea[MACRO_DATA_START]     = 0x00;
+      macroArea[MACRO_DATA_START + 1] = 0x00;
+      macroArea[MACRO_DATA_START + 2] = 0x80;
+      macroArea[MACRO_DATA_START + 3] = 0x00;
+    }
+
+    // 右移 [insertOffset, dataEnd) → [insertOffset+newLen, dataEnd+newLen)
+    const effectiveDataEnd = Math.max(dataEnd, MACRO_DATA_PTR_MIN);
+    for (let i = effectiveDataEnd - 1; i >= insertOffset; i--) {
+      macroArea[i + newLen] = macroArea[i] ?? 0;
+    }
+
+    // 写入新数据
+    for (let i = 0; i < newLen; i++) {
+      macroArea[insertOffset + i] = encodedBytes[i] ?? 0;
+    }
+
+    // 设置指针
+    writeMacroPtrAddr(macroArea, code, insertOffset);
+
+    // 更新 ptr >= insertOffset 的其他宏指针
+    for (let i = 0; i < MACRO_MAX_COUNT; i++) {
+      if (i === code) continue;
+      const ptr = readMacroPtrAddr(macroArea, i);
+      if (ptr >= MACRO_DATA_PTR_MIN && ptr >= insertOffset) {
+        writeMacroPtrAddr(macroArea, i, ptr + newLen);
+      }
+    }
+
+  } else {
+    // ── 修改 ──────────────────────────────────────────────────────────────────
+
+    const oldStart  = oldPtr;                                         // 本地偏移
+    const oldEndPtr = findNextMacroPtrAddr(macroArea, code, oldPtr); // 下一宏指针
+    const oldEnd    = oldEndPtr;                                      // 本地偏移
+    const oldLen    = oldEnd - oldStart;
+    const delta     = newLen - oldLen;
+
+    if (delta > 0) {
+      // 扩大：右移 [oldEnd, dataEnd)
+      for (let i = dataEnd - 1; i >= oldEnd; i--) {
+        macroArea[i + delta] = macroArea[i] ?? 0;
+      }
+    } else if (delta < 0) {
+      // 缩小：左移 [oldEnd, dataEnd)
+      for (let i = 0; i < dataEnd - oldEnd; i++) {
+        macroArea[oldEnd + delta + i] = macroArea[oldEnd + i] ?? 0;
+      }
+      // 清空末尾多余部分
+      for (let i = dataEnd + delta; i < dataEnd; i++) {
+        macroArea[i] = 0;
+      }
+    }
+
+    if (delta !== 0) {
+      // 更新 ptr >= oldEnd 的其他宏指针
+      for (let i = 0; i < MACRO_MAX_COUNT; i++) {
+        if (i === code) continue;
+        const ptr = readMacroPtrAddr(macroArea, i);
+        if (ptr >= MACRO_DATA_PTR_MIN && ptr >= oldEnd) {
+          writeMacroPtrAddr(macroArea, i, ptr + delta);
+        }
+      }
+    }
+
+    // 写入新数据（位置不变，仍从 oldStart 开始）
+    for (let i = 0; i < newLen; i++) {
+      macroArea[oldStart + i] = encodedBytes[i] ?? 0;
+    }
+  }
+
+  // 4. 写回宏区
+  const wCode: number = yield* writeMacroAreaDataGen(macroAreaOffset, 0, macroArea);
+  if (wCode !== 0) {
+    return { name: "setMacro", code: wCode, message: "write macro area failed" };
+  }
+
+  // 5. 若 attr.key 存在，更新 0x08 按键矩阵绑定
+  if (attr.key !== undefined) {
+    const profileStride    = KEY_LAYER_LENGTH * 4;
+    const defaultLayerData = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND,
+      config * profileStride,
+      KEY_LAYER_LENGTH,
+      DATA_LENGTH,
+    );
+    const keySlot = resolveKeySlotIndex(defaultLayerData, attr.key) ?? -1;
+    if (keySlot < 0) {
+      return { name: "setMacro", code: 3, message: `key "${attr.key}" not found in default layout` };
+    }
+
+    // stopType=1 → 0xFF；否则取 loop 值（1-254），0 时写 0
+    const loopStopByte = attr.stopType === 1 ? 0xff
+      : Math.min(254, Math.max(0, attr.loop));
+
+    const keyOffset = config * profileStride + keySlot * KEY_ITEM_SIZE;
+    const [kLo, kHi] = shiftFrom16Bit(keyOffset);
+    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x70 + code + loopStopByte) & 0xff;
+    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+      kLo, kHi, 0x00,
+      0x70, code, loopStopByte,
+    ]);
+    const kResult = parseWriteResponseCode(wKeyIn);
+    if (kResult !== 0) {
+      return { name: "setMacro", code: kResult, message: "write key binding to 0x08 failed" };
+    }
+  }
+
+  return { name: "setMacro", code: 0 };
+}
+
+/**
  *
  * 删除指定宏
  *
  * 流程：
  *  1. 0x04 读取当前板载号
  *  2. 0x0c 读取该板载完整宏区（2048 字节）
- *  3. 按 code 取指针地址；<= 0x44 或无数据则返回参数错误
- *  4. 仅 1 个宏：清空宏区，所有指针恢复 0x40,0x00
- *  5. 多个宏：计算删除长度，被删指针恢复 0x40,0x00，后续指针减长度，数据区前移
+ *  3. 按 code 取指针地址；< MACRO_DATA_PTR_MIN 或无数据则返回参数错误
+ *  4. 仅 1 个宏：清空宏区，所有指针恢复 MACRO_EMPTY_PTR
+ *  5. 多个宏：计算删除长度，被删指针恢复 MACRO_EMPTY_PTR，后续指针减长度，数据区前移
  *  6. 0x0d 写回宏区
  *
  */
@@ -2842,19 +3290,21 @@ export async function* delMacro(
     // 仅一个宏：清空整个宏区，指针全部恢复 0x40,0x00
     writeData = buildEmptyMacroArea();
   } else {
-    const deleteStart = curAddr;
-    const deleteEnd   = findNextMacroPtrAddr(macroArea, macroIndex, deleteStart);
-    const deleteLen   = deleteEnd - deleteStart;
+    // 指针值 → 本地数组偏移
+    const deleteStart = macroPtrToLocalOffset(curAddr);
+    const nextPtr     = findNextMacroPtrAddr(macroArea, macroIndex, curAddr);
+    const deleteEnd   = macroPtrToLocalOffset(nextPtr);
+    const deleteLen   = deleteEnd - deleteStart;   // 纯长度，指针空间差等于字节长度
     if (deleteLen < 4 || deleteLen % 4 !== 0) {
       return { name: "delMacro", code: 3, message: "invalid macro data length" };
     }
 
-    const dataEnd = getMacroDataEnd(macroArea);
+    const dataEnd = getMacroDataEnd(macroArea); // 返回本地偏移
 
-    // 被删宏指针恢复 0x40,0x00
+    // 被删宏指针恢复 MACRO_EMPTY_PTR
     writeMacroPtrAddr(macroArea, macroIndex, MACRO_EMPTY_PTR);
 
-    // 后续宏指针减去删除长度
+    // 后续宏指针值减去删除长度（指针空间里做偏移减法）
     for (let i = macroIndex + 1; i < MACRO_MAX_COUNT; i++) {
       const addr = readMacroPtrAddr(macroArea, i);
       if (addr !== MACRO_EMPTY_PTR && addr >= MACRO_DATA_PTR_MIN) {
@@ -3114,69 +3564,69 @@ export async function* getTGLList(
 ): DeviceSession<GetTGLListResult> {
   // 步骤一：读取当前板载号
   const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const config = baseIn[8] ?? 0;
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
 
-  // 步骤二：读取该板载全部 4 层 0x08 数据，扫描 0x91 类型按键
-  const allLayersData: number[] = yield* readChunkedDataByCommandGen(
+  // 步骤二：读取 0x08 全 4 层，建立 tglIdx → 首次出现的 { layerIdx, keySlot } 映射
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
   );
 
-  // tglIdx（0x91 第 2 字节）→ 0x08 中首次出现的矩阵槽位 keySlot
-  const tglMap = new Map<number, number>();
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  const slotMap = new Map<number, { layerIdx: number; keySlot: number }>();
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const base = layerBase + i * KEY_ITEM_SIZE;
-      if ((allLayersData[base] ?? 0) !== 0x91) continue;
-      const tglIdx = allLayersData[base + 1] ?? 0;
-      if (!tglMap.has(tglIdx)) tglMap.set(tglIdx, i);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) !== 0x91) continue;
+      const idx = rawAllLayersData[b + 1] ?? 0;
+      if (!slotMap.has(idx)) slotMap.set(idx, { layerIdx: li, keySlot: i });
     }
   }
 
-  if (tglMap.size === 0) {
+  if (slotMap.size === 0) {
     return { name: "getTGLList", code: 0, data: { len: 0, tgl: [] } };
   }
 
-  // 步骤三：读取该板载第 0 层 0x07 默认按键数据
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
+  // 步骤三：对每个 tglIdx 逐条读取 0xa6 功能键数据 + 0x07 绑定键（带层缓存）
+  const defaultLayerCache = new Map<number, number[]>();
+  const getDefaultLayer = async function* (li: number): AsyncGenerator<OutPacket, number[], InPacket> {
+    if (!defaultLayerCache.has(li)) {
+      const off = li * KEY_LAYER_LENGTH + config * profileSize;
+      const data: number[] = yield* readChunkedDataByCommandGen(
+        FLAG, GET_KEY_DEFAULT_COMMAND, off, KEY_LAYER_LENGTH, DATA_LENGTH,
+      );
+      defaultLayerCache.set(li, data);
+    }
+    return defaultLayerCache.get(li)!;
+  };
 
-  // 步骤四：读取该板载 0xa6 TGL 数据区（128 字节）
-  const tglAreaOffset = config * TGL_AREA_SIZE;
-  const tglData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_TGL_COMMAND, tglAreaOffset, TGL_AREA_SIZE, DATA_LENGTH,
-  );
-
-  // 步骤五：组装 tgl 列表（按 tglIdx 升序）
+  const sortedIndices = [...slotMap.keys()].sort((a, b) => a - b);
   const tgl: TGLEntry[] = [];
-  const sortedEntries = [...tglMap.entries()].sort((a, b) => a[0] - b[0]);
 
-  for (const [tglIdx, keySlot] of sortedEntries) {
-    // keys[0]：0x08 中 0x91 所在槽位 → 0x07 默认层同槽位的按键定义
-    const defBase = keySlot * KEY_ITEM_SIZE;
-    const defaultKey = parseTGLKeyFromTriplet(
-      rawDefaultData[defBase] ?? 0,
-      rawDefaultData[defBase + 1] ?? 0,
-      rawDefaultData[defBase + 2] ?? 0,
-      KEY_RETURN_ORDER[keySlot] ?? `K${keySlot}`,
+  for (const tglIdx of sortedIndices) {
+    const slot = slotMap.get(tglIdx)!;
+
+    // 读取 0xa6 该索引的 3 字节
+    const entryData: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_TGL_COMMAND,
+      config * TGL_AREA_SIZE + tglIdx * TGL_ENTRY_SIZE,
+      TGL_ENTRY_SIZE,
+      DATA_LENGTH,
     );
-
-    // keys[1]：0xa6 功能区 index × 3 字节的按键定义
-    const entryBase = tglIdx * TGL_ENTRY_SIZE;
     const funcKey = parseTGLKeyFromTriplet(
-      tglData[entryBase] ?? 0,
-      tglData[entryBase + 1] ?? 0,
-      tglData[entryBase + 2] ?? 0,
+      entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
       `TGL${tglIdx}`,
     );
 
-    tgl.push({
-      type: 10,
-      code: defaultKey.code,
-      keys: [defaultKey, funcKey],
-    });
+    // 读取 0x07 绑定键默认定义
+    const rawDefault = yield* getDefaultLayer(slot.layerIdx);
+    const db         = slot.keySlot * KEY_ITEM_SIZE;
+    const boundKey   = parseTGLKeyFromTriplet(
+      rawDefault[db] ?? 0, rawDefault[db + 1] ?? 0, rawDefault[db + 2] ?? 0,
+      KEY_RETURN_ORDER[slot.keySlot] ?? `K${slot.keySlot}`,
+    );
+
+    tgl.push({ type: 10, code: tglIdx, keys: [boundKey, funcKey] });
   }
 
   return { name: "getTGLList", code: 0, data: { len: tgl.length, tgl } };
@@ -3187,11 +3637,10 @@ export async function* getTGLList(
  * 读取指定 TGL 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer，全局层换算为局部层）
- *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找 keySlot
- *  3. 0x08 读取当前层，确认该槽位为 0x91 类型，取 tglIdx（第 2 字节）
- *  4. 0xa6 以 config × TGL_AREA_SIZE + tglIdx × 3 读取 3 字节功能键定义
- *  5. keys[0] = 0x07 同槽位默认键，keys[1] = 0xa6 功能键
+ *  1. 0x04 读取板载号（config）
+ *  2. 0xa6 以 config × TGL_AREA_SIZE + code × 3 读取 3 字节 TGL 功能键定义 → keys[1]
+ *  3. 0x08 读取该板载全部 4 层，扫描 0x91 且索引 = request.code 的槽位 → 绑定按键
+ *  4. 0x07 读取绑定槽位所在层的默认键定义 → keys[0]
  *
  */
 export async function* getTGL(
@@ -3203,78 +3652,64 @@ export async function* getTGL(
     return { name: "getTGL", code: 3, data: emptyData(request.code), message: "type must be 10 (TGL)" };
   }
 
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "getTGL", code: 3, data: emptyData(request.code), message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 当前层 → 确认 0x91 类型，取 tglIdx ─────────────────────────────
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  if (rawType !== 0x91) {
-    return {
-      name: "getTGL",
-      code: 3,
-      data: emptyData(request.code),
-      message: `key at slot ${keySlot} is not TGL (type=0x${rawType.toString(16)})`,
-    };
-  }
-  const tglIdx = rawCurLayerData[keyBase + 1] ?? 0;
-
-  // ── keys[0]：0x07 同槽位默认键定义 ───────────────────────────────────────
-  const defaultKey = parseTGLKeyFromTriplet(
-    rawDefaultData[keyBase] ?? 0,
-    rawDefaultData[keyBase + 1] ?? 0,
-    rawDefaultData[keyBase + 2] ?? 0,
-    KEY_RETURN_ORDER[keySlot] ?? `K${keySlot}`,
-  );
-
-  // ── keys[1]：0xa6 功能区 tglIdx × 3 字节 ──────────────────────────────────
+  // ── 0xa6：code × 3 → TGL 功能键（keys[1]）───────────────────────────────
   const entryData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_TGL_COMMAND,
-    config * TGL_AREA_SIZE + tglIdx * TGL_ENTRY_SIZE,
+    config * TGL_AREA_SIZE + request.code * TGL_ENTRY_SIZE,
     TGL_ENTRY_SIZE,
     DATA_LENGTH,
   );
+  // 首字节为 0 表示该索引不存在，直接返回空 keys
+  if ((entryData[0] ?? 0) === 0) {
+    return { name: "getTGL", code: 0, data: emptyData(request.code) };
+  }
   const funcKey = parseTGLKeyFromTriplet(
-    entryData[0] ?? 0,
-    entryData[1] ?? 0,
-    entryData[2] ?? 0,
-    `TGL${tglIdx}`,
+    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
+    `TGL${request.code}`,
+  );
+
+  // ── 0x08：全 4 层扫描 0x91，找索引 = request.code 的绑定槽位 ────────────
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
+  );
+
+  let boundKeySlot  = -1;
+  let boundLayerIdx = -1;
+  outer: for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
+    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const b = layerBase + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x91 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        boundKeySlot  = i;
+        boundLayerIdx = layerIdx;
+        break outer;
+      }
+    }
+  }
+
+  if (boundKeySlot < 0) {
+    return { name: "getTGL", code: 0, data: emptyData(request.code) };
+  }
+
+  // ── 0x07：绑定槽位所在层的默认键 → keys[0] ───────────────────────────────
+  const layerOffset = boundLayerIdx * KEY_LAYER_LENGTH + config * profileSize;
+  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  );
+  const defBase  = boundKeySlot * KEY_ITEM_SIZE;
+  const boundKey = parseTGLKeyFromTriplet(
+    rawDefaultData[defBase] ?? 0, rawDefaultData[defBase + 1] ?? 0, rawDefaultData[defBase + 2] ?? 0,
+    KEY_RETURN_ORDER[boundKeySlot] ?? `K${boundKeySlot}`,
   );
 
   return {
     name: "getTGL",
     code: 0,
-    data: {
-      type: 10,
-      code: defaultKey.code,
-      keys: [defaultKey, funcKey],
-    },
+    data: { type: 10, code: request.code, keys: [boundKey, funcKey] },
   };
 }
 
@@ -3283,14 +3718,14 @@ export async function* getTGL(
  * 设置指定 TGL 高级按键
  *
  * 流程：
- *  1. 验证 type === 10，且 keys[1] 存在
+ *  1. 验证 type===10，keys[0]（绑定键）与 keys[1]（TGL 数据）均存在
  *  2. 0x04/0x05 读取板载（config）与层（layer）
- *  3. 0x08 读取该板载 4 层，扫描全部 0x91，取最大 tglIdx
- *  4. 0x07 按 code 找 keySlot；当前层该槽位：
- *     - 已是 0x91 → 复用已有 tglIdx（更新）
- *     - 否则 → tglIdx = 无 TGL 时为 0，否则 maxTglIdx + 1
- *  5. 0xa7 写入 keys[1] 三字节到 tglIdx × 3
- *  6. 新绑定时 0x09 将 keySlot 写为 [0x91, tglIdx, 0x00]
+ *  3. 0x08 全 4 层扫描 0x91：
+ *     - 找到 tglIdx = request.code 的已有绑定 → 修改模式
+ *       a. 读 0x07 旧槽位默认值 → 0x09 恢复旧槽位
+ *     - 找不到 → 新增模式
+ *  4. 0x07 按 keys[0].code 找新 keySlot → 0x09 写 [0x91, request.code, 0x00]
+ *  5. 0xa7 以 request.code × TGL_ENTRY_SIZE 写入 keys[1] 三字节
  *
  */
 export async function* setTGL(
@@ -3299,75 +3734,96 @@ export async function* setTGL(
   if (request.type !== 10) {
     return { name: "setTGL", code: 3, message: "type must be 10 (TGL)" };
   }
+  const bindKey = request.keys[0];
   const funcKey = request.keys[1];
+  if (!bindKey || !Number.isInteger(bindKey.code)) {
+    return { name: "setTGL", code: 3, message: "keys[0] (bind key) is required" };
+  }
   if (!funcKey || !Number.isInteger(funcKey.code)) {
-    return { name: "setTGL", code: 3, message: "keys[1] is required" };
+    return { name: "setTGL", code: 3, message: "keys[1] (TGL data) is required" };
   }
 
   const { config, layer } = yield* resolveConfigLayerGen(request.layer);
-  const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  // ── 0x08 全板载 4 层 → 扫描 0x91，取最大 tglIdx ─────────────────────────
+  const profileSize    = KEY_LAYER_LENGTH * 4;
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：查找已绑定 request.code 的旧槽位 ───────────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  let maxTglIdx = -1;
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  let oldKeySlot  = -1;
+  let oldLayerIdx = -1;
+  outer: for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b = layerBase + i * KEY_ITEM_SIZE;
-      if ((rawAllLayersData[b] ?? 0) === 0x91) {
-        maxTglIdx = Math.max(maxTglIdx, rawAllLayersData[b + 1] ?? 0);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x91 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        oldKeySlot  = i;
+        oldLayerIdx = li;
+        break outer;
       }
     }
   }
 
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
+  const isModify = oldKeySlot >= 0;
+
+  // ── 修改模式：读 0x07 旧槽位默认值 → 0x09 恢复旧槽位 ──────────────────────
+  if (isModify) {
+    const oldLayerOffset = oldLayerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawOldDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, oldLayerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const odb = oldKeySlot * KEY_ITEM_SIZE;
+    const odType = rawOldDefault[odb] ?? 0x10;
+    const odExt  = rawOldDefault[odb + 1] ?? 0x00;
+    const odCode = rawOldDefault[odb + 2] ?? 0x00;
+    const restoreOff = allLayersOffset + oldLayerIdx * KEY_LAYER_LENGTH + oldKeySlot * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(restoreOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + odType + odExt + odCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      odType, odExt, odCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "setTGL", code: wRestoreCode, message: "restore old bind key failed" };
+  }
+
+  // ── 0x07 当前局部层：按 keys[0].code 找新 keySlot ────────────────────────
+  const layerOffset    = layer * KEY_LAYER_LENGTH + config * profileSize;
   const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  let keySlot = -1;
+  let newKeySlot = -1;
   for (let i = 0; i < KEY_COUNT; i++) {
     const base = i * KEY_ITEM_SIZE;
     const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
+      rawDefaultData[base] ?? 0, rawDefaultData[base + 1] ?? 0, rawDefaultData[base + 2] ?? 0,
     );
-    if (hid === request.code) { keySlot = i; break; }
+    if (hid === bindKey.code) { newKeySlot = i; break; }
   }
-  if (keySlot < 0) {
-    return { name: "setTGL", code: 3, message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 当前层 → 判断已有 / 新建，确定 tglIdx ───────────────────────────
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  let tglIdx:     number;
-  let isNewEntry: boolean;
-
-  if (rawType === 0x91) {
-    tglIdx     = rawCurLayerData[keyBase + 1] ?? 0;
-    isNewEntry = false;
-  } else {
-    tglIdx     = maxTglIdx < 0 ? 0 : maxTglIdx + 1;
-    isNewEntry = true;
+  if (newKeySlot < 0) {
+    return { name: "setTGL", code: 3, message: "bind key not found in default matrix" };
   }
 
-  // ── 0xa7 写入 keys[1] 三字节 TGL 功能定义 ─────────────────────────────────
-  const entryData = [...encodeTGLKeyToTriplet(funcKey)];
+  // ── 0x09：新 keySlot 写 [0x91, request.code, 0x00] ───────────────────────
+  const keyWriteOff = layerOffset + newKeySlot * KEY_ITEM_SIZE;
+  const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
+  const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x91 + request.code + 0x00) & 0xff;
+  const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+    kLo, kHi, 0x00,
+    0x91, request.code, 0x00,
+  ]);
+  const wKeyCode = parseWriteResponseCode(wKeyIn);
+  if (wKeyCode !== 0) return { name: "setTGL", code: wKeyCode, message: "write key TGL definition failed" };
+
+  // ── 0xa7：request.code × 3 写入 keys[1] TGL 功能数据 ─────────────────────
+  const entryData     = [...encodeTGLKeyToTriplet(funcKey)];
   const advAreaOffset = config * TGL_AREA_SIZE;
-  const writeOff      = advAreaOffset + tglIdx * TGL_ENTRY_SIZE;
+  const writeOff      = advAreaOffset + request.code * TGL_ENTRY_SIZE;
   const [wLo, wHi]    = shiftFrom16Bit(writeOff);
   const wChk = (wLo + wHi + TGL_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
   const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
@@ -3377,20 +3833,6 @@ export async function* setTGL(
   ]);
   const wAdvCode = parseWriteResponseCode(wAdvIn);
   if (wAdvCode !== 0) return { name: "setTGL", code: wAdvCode, message: "write TGL entry failed" };
-
-  // ── 新绑定 → 0x09 将 keySlot 写为 [0x91, tglIdx, 0x00] ─────────────────
-  if (isNewEntry) {
-    const keyWriteOff = layerOffset + keySlot * KEY_ITEM_SIZE;
-    const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
-    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x91 + tglIdx + 0x00) & 0xff;
-    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
-      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
-      kLo, kHi, 0x00,
-      0x91, tglIdx, 0x00,
-    ]);
-    const wKeyCode = parseWriteResponseCode(wKeyIn);
-    if (wKeyCode !== 0) return { name: "setTGL", code: wKeyCode, message: "write key TGL definition failed" };
-  }
 
   return { name: "setTGL", code: 0 };
 }
@@ -3815,87 +4257,64 @@ export async function* delDKS(
 export async function* delTGL(
   request: DelTGLParams,
 ): DeviceSession<DelTGLResult> {
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
-  const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "delTGL", code: 3, message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 当前层 → 确认 0x91 类型，获取 tglIdx ───────────────────────────
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config = baseIn[8] ?? 0;
+  const profileSize    = KEY_LAYER_LENGTH * 4;
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：收集所有 0x91 条目 ─────────────────────────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  const curLayerBase = layer * KEY_LAYER_LENGTH;
-  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
-  const rawType      = rawAllLayersData[keyBase] ?? 0;
-
-  if (rawType !== 0x91) {
-    return { name: "delTGL", code: 3, message: `key at slot ${keySlot} is not TGL (type=0x${rawType.toString(16)})` };
-  }
-  const aTglIdx = rawAllLayersData[keyBase + 1] ?? 0;
-
-  // ── 收集该板载全部 4 层所有 0x91 按键，按 tglIdx 升序 ───────────────────
-  type TglEntry = { layerIdx: number; keyI: number; tglIdx: number };
-  const tglEntries: TglEntry[] = [];
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  type TglKEntry = { layerIdx: number; keyI: number; tglIdx: number };
+  const tglEntries: TglKEntry[] = [];
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b = layerBase + i * KEY_ITEM_SIZE;
+      const b = lb + i * KEY_ITEM_SIZE;
       if ((rawAllLayersData[b] ?? 0) === 0x91) {
-        tglEntries.push({
-          layerIdx,
-          keyI: i,
-          tglIdx: rawAllLayersData[b + 1] ?? 0,
-        });
+        tglEntries.push({ layerIdx: li, keyI: i, tglIdx: rawAllLayersData[b + 1] ?? 0 });
       }
     }
   }
-  tglEntries.sort((a, b) => a.tglIdx - b.tglIdx);
-  const totalTgl = tglEntries.length > 0
-    ? Math.max(...tglEntries.map((e) => e.tglIdx)) + 1
-    : 0;
 
-  // ── 0x09 恢复为 0x07 同局部层默认定义 ───────────────────────────────────
-  const defBase   = keySlot * KEY_ITEM_SIZE;
-  const defType   = rawDefaultData[defBase]     ?? 0x10;
-  const defExt    = rawDefaultData[defBase + 1] ?? 0x00;
-  const defCode   = rawDefaultData[defBase + 2] ?? 0x00;
-  const [r1Lo, r1Hi] = shiftFrom16Bit(layerOffset + keySlot * KEY_ITEM_SIZE);
-  const r1Chk = (r1Lo + r1Hi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
-  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
-    SET_KEY_CURRENT_COMMAND, 0x00, r1Chk, KEY_ITEM_SIZE,
-    r1Lo, r1Hi, 0x00,
-    defType, defExt, defCode,
-  ]);
-  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
-  if (wRestoreCode !== 0) return { name: "delTGL", code: wRestoreCode, message: "restore key def failed" };
+  // 找到绑定 request.code 的所有槽位（可能跨多层）
+  const targets = tglEntries.filter((e) => e.tglIdx === request.code);
+  if (targets.length === 0) {
+    return { name: "delTGL", code: 3, message: `TGL index ${request.code} not found in key matrix` };
+  }
 
-  // ── 0x09 全部 4 层中 tglIdx > aTglIdx 的其他 0x91 按键索引各减 1 ───────
+  const totalTgl = Math.max(...tglEntries.map((e) => e.tglIdx)) + 1;
+
+  // ── 0x09 恢复所有绑定该 code 的按键为 0x07 默认值 ────────────────────────
+  for (const entry of targets) {
+    const layerOffset = entry.layerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const db      = entry.keyI * KEY_ITEM_SIZE;
+    const dType   = rawDefault[db] ?? 0x10;
+    const dExt    = rawDefault[db + 1] ?? 0x00;
+    const dCode   = rawDefault[db + 2] ?? 0x00;
+    const rOff    = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + dType + dExt + dCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      dType, dExt, dCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "delTGL", code: wRestoreCode, message: "restore key def failed" };
+  }
+
+  // ── 0x09 将 tglIdx > request.code 的 0x91 按键索引各减 1 ─────────────────
   for (const entry of tglEntries) {
-    if (entry.layerIdx === layer && entry.keyI === keySlot) continue;
-    if (entry.tglIdx <= aTglIdx)                      continue;
+    if (entry.tglIdx <= request.code) continue;
     const newIdx  = entry.tglIdx - 1;
-    const writeOff = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
-    const [sLo, sHi] = shiftFrom16Bit(writeOff);
+    const sOff    = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [sLo, sHi] = shiftFrom16Bit(sOff);
     const sChk = (sLo + sHi + KEY_ITEM_SIZE + 0x91 + newIdx + 0x00) & 0xff;
     const wShiftIn: InPacket = yield buildOutPacket(FLAG, [
       SET_KEY_CURRENT_COMMAND, 0x00, sChk, KEY_ITEM_SIZE,
@@ -3906,33 +4325,33 @@ export async function* delTGL(
     if (wShiftCode !== 0) return { name: "delTGL", code: wShiftCode, message: "shift key index failed" };
   }
 
-  // ── 0xa6 平移条目：aTglIdx+1 ~ totalTgl-1 → aTglIdx ~ totalTgl-2 ────────
+  // ── 0xa7 平移：code+1 ~ totalTgl-1 → code ~ totalTgl-2 ───────────────────
   const advAreaOffset = config * TGL_AREA_SIZE;
-  const moveCount     = totalTgl - 1 - aTglIdx;
+  const moveCount     = totalTgl - 1 - request.code;
 
   if (moveCount > 0) {
     const partialData: number[] = yield* readChunkedDataByCommandGen(
       FLAG, GET_TGL_COMMAND,
-      advAreaOffset + (aTglIdx + 1) * TGL_ENTRY_SIZE,
+      advAreaOffset + (request.code + 1) * TGL_ENTRY_SIZE,
       moveCount * TGL_ENTRY_SIZE,
       DATA_LENGTH,
     );
     for (let i = 0; i < moveCount; i++) {
-      const entryData = partialData.slice(i * TGL_ENTRY_SIZE, (i + 1) * TGL_ENTRY_SIZE);
-      const writeOff  = advAreaOffset + (aTglIdx + i) * TGL_ENTRY_SIZE;
-      const [wLo, wHi] = shiftFrom16Bit(writeOff);
-      const wChk = (wLo + wHi + TGL_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+      const eData  = partialData.slice(i * TGL_ENTRY_SIZE, (i + 1) * TGL_ENTRY_SIZE);
+      const wOff   = advAreaOffset + (request.code + i) * TGL_ENTRY_SIZE;
+      const [wLo, wHi] = shiftFrom16Bit(wOff);
+      const wChk = (wLo + wHi + TGL_ENTRY_SIZE + eData.reduce((s, v) => s + v, 0)) & 0xff;
       const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
         SET_TGL_COMMAND, 0x00, wChk, TGL_ENTRY_SIZE,
         wLo, wHi, 0x00,
-        ...entryData,
+        ...eData,
       ]);
       const wAdvCode = parseWriteResponseCode(wAdvIn);
       if (wAdvCode !== 0) return { name: "delTGL", code: wAdvCode, message: `shift TGL entry ${i} failed` };
     }
   }
 
-  // ── 0xa7 清零末尾条目（totalTgl-1）────────────────────────────────────────
+  // ── 0xa7 清零末尾（totalTgl-1）────────────────────────────────────────────
   const clearOff  = advAreaOffset + (totalTgl - 1) * TGL_ENTRY_SIZE;
   const [cLo, cHi] = shiftFrom16Bit(clearOff);
   const clearData  = new Array<number>(TGL_ENTRY_SIZE).fill(0);
@@ -3955,9 +4374,9 @@ export async function* delTGL(
  * 流程：
  *  1. 0x04 读取板载（config）
  *  2. 0x08 读取该板载 4 层数据，扫描 0x92 类型：[0x92, mtIdx, time]
- *     - mtIdx（第 2 字节）= 0xa4 功能区索引；time（第 3 字节）= 时间参数
- *  3. 0x07 读取该板载第 0 层默认矩阵，用 0x08 中 0x92 所在槽位获取 code
- *  4. 0xa4 按 mtIdx × 6 读取 6 字节功能区：前 3 字节 → keys[0]，后 3 字节 → keys[1]
+ *     - mtIdx（第 2 字节）= 数据区索引；time（第 3 字节）= 时间参数
+ *     - 同一 mtIdx 只取首次出现的 time
+ *  3. 0xa4 按 mtIdx × 6 读取 6 字节功能区：前 3 字节 → keys[0]，后 3 字节 → keys[1]
  *
  */
 export async function* getMTList(
@@ -3990,46 +4409,27 @@ export async function* getMTList(
     return { name: "getMTList", code: 0, data: { len: 0, mt: [] } };
   }
 
-  // 步骤三：读取该板载第 0 层 0x07 默认按键数据
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  // 步骤四：读取该板载 0xa4 MT 数据区（256 字节）
-  const mtAreaOffset = config * MT_AREA_SIZE;
-  const mtData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_MT_COMMAND, mtAreaOffset, MT_AREA_SIZE, DATA_LENGTH,
-  );
-
-  // 步骤五：组装 mt 列表（按 mtIdx 升序）
+  // 步骤三：对每个 mtIdx 读取 0xa4 功能键
   const mt: MTEntry[] = [];
   const sortedEntries = [...mtMap.entries()].sort((a, b) => a[0] - b[0]);
 
   for (const [mtIdx, { keySlot, time }] of sortedEntries) {
-    // code：0x07 默认层同槽位 HID code
-    const defBase = keySlot * KEY_ITEM_SIZE;
-    const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[defBase] ?? 0,
-      rawDefaultData[defBase + 1] ?? 0,
-      rawDefaultData[defBase + 2] ?? 0,
+    const entryData: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_MT_COMMAND,
+      config * MT_AREA_SIZE + mtIdx * MT_ENTRY_SIZE,
+      MT_ENTRY_SIZE,
+      DATA_LENGTH,
     );
-
-    // keys：0xa4 条目 mtIdx × 6 字节，前 3 → keys[0]，后 3 → keys[1]
-    const entryBase = mtIdx * MT_ENTRY_SIZE;
     const key0 = parseMTKeyFromTriplet(
-      mtData[entryBase] ?? 0,
-      mtData[entryBase + 1] ?? 0,
-      mtData[entryBase + 2] ?? 0,
+      entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
       KEY_RETURN_ORDER[keySlot] ?? `MT${mtIdx}`,
     );
     const key1 = parseMTKeyFromTriplet(
-      mtData[entryBase + 3] ?? 0,
-      mtData[entryBase + 4] ?? 0,
-      mtData[entryBase + 5] ?? 0,
+      entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
       `MT${mtIdx}B`,
     );
 
-    mt.push({ type: ADVANCED_MT_TYPE, code: hidCode, time, keys: [key0, key1] });
+    mt.push({ type: ADVANCED_MT_TYPE, code: mtIdx, time, keys: [key0, key1] });
   }
 
   return { name: "getMTList", code: 0, data: { len: mt.length, mt } };
@@ -4040,11 +4440,11 @@ export async function* getMTList(
  * 读取指定 MT 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找 keySlot
- *  3. 0x08 读取当前层，确认该槽位为 0x92 类型，取 mtIdx（第 2 字节）、time（第 3 字节）
- *  4. 0xa4 以 config × MT_AREA_SIZE + mtIdx × 6 读取 6 字节功能键定义
- *  5. code = 0x07 同槽位 HID code；keys[0/1] = 0xa4 条目前/后 3 字节
+ *  1. 0x04 读取板载（config）
+ *  2. 0xa4 以 config × MT_AREA_SIZE + code × 6 读取 6 字节 → keys[0]/keys[1]
+ *     首字节为 0 表示该索引不存在，返回空 keys
+ *  3. 0x08 全 4 层扫描 0x92 且索引 = code 的槽位 → 取第 3 字节 time
+ *     未找到则返回空 keys
  *
  */
 export async function* getMT(
@@ -4058,76 +4458,53 @@ export async function* getMT(
     return { name: "getMT", code: 3, data: emptyData(request.code), message: "type must be 9 (MT)" };
   }
 
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "getMT", code: 3, data: emptyData(request.code), message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 当前层 → 确认 0x92 类型，取 mtIdx / time ───────────────────────
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  if (rawType !== 0x92) {
-    return {
-      name: "getMT",
-      code: 3,
-      data: emptyData(request.code),
-      message: `key at slot ${keySlot} is not MT (type=0x${rawType.toString(16)})`,
-    };
-  }
-  const mtIdx = rawCurLayerData[keyBase + 1] ?? 0;
-  const time  = rawCurLayerData[keyBase + 2] ?? 0;
-
-  // ── code：0x07 同槽位 HID code ────────────────────────────────────────────
-  const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-    rawDefaultData[keyBase] ?? 0,
-    rawDefaultData[keyBase + 1] ?? 0,
-    rawDefaultData[keyBase + 2] ?? 0,
-  );
-
-  // ── 0xa4 功能区 mtIdx × 6 字节 ───────────────────────────────────────────
+  // ── 0xa4：code × 6 → 功能键数据（keys[0]/keys[1]）─────────────────────
   const entryData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_MT_COMMAND,
-    config * MT_AREA_SIZE + mtIdx * MT_ENTRY_SIZE,
+    config * MT_AREA_SIZE + request.code * MT_ENTRY_SIZE,
     MT_ENTRY_SIZE,
     DATA_LENGTH,
   );
+  if ((entryData[0] ?? 0) === 0) {
+    return { name: "getMT", code: 0, data: emptyData(request.code) };
+  }
   const key0 = parseMTKeyFromTriplet(
-    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
-    KEY_RETURN_ORDER[keySlot] ?? `MT${mtIdx}`,
+    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0, `MT${request.code}`,
   );
   const key1 = parseMTKeyFromTriplet(
-    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
-    `MT${mtIdx}B`,
+    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0, `MT${request.code}B`,
   );
+
+  // ── 0x08 全 4 层扫描 0x92，找索引 = code 的槽位 → 取 time（第 3 字节）──
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
+  );
+
+  let time      = 0;
+  let foundSlot = -1;
+  outer: for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x92 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        time      = rawAllLayersData[b + 2] ?? 0;
+        foundSlot = i;
+        break outer;
+      }
+    }
+  }
+  if (foundSlot < 0) {
+    return { name: "getMT", code: 0, data: emptyData(request.code) };
+  }
 
   return {
     name: "getMT",
     code: 0,
-    data: { type: ADVANCED_MT_TYPE, code: hidCode, time, keys: [key0, key1] },
+    data: { type: ADVANCED_MT_TYPE, code: request.code, time, keys: [key0, key1] },
   };
 }
 
@@ -4136,14 +4513,13 @@ export async function* getMT(
  * 设置指定 MT 高级按键
  *
  * 流程：
- *  1. 验证 type === 9，且 keys[0] / keys[1] 均存在
+ *  1. 验证 type===9，keys[0]（funcKey0，同时作为绑定键）/ keys[1]（funcKey1）均存在
  *  2. 0x04/0x05 读取板载（config）与层（layer）
- *  3. 0x08 读取该板载 4 层，扫描全部 0x92，取最大 mtIdx
- *  4. 0x07 按 code 找 keySlot；当前层该槽位：
- *     - 已是 0x92 → 复用已有 mtIdx（更新）
- *     - 否则 → mtIdx = 无 MT 时为 0，否则 maxMtIdx + 1
- *  5. 0xa5 写入 keys[0]+keys[1] 共 6 字节到 mtIdx × 6
- *  6. 新绑定时 0x09 将 keySlot 写为 [0x92, mtIdx, time]
+ *  3. 0x08 全 4 层扫描 0x92，找索引 = code 的已有绑定 → 修改模式
+ *     a. 读 0x07 旧槽位默认值 → 0x09 恢复旧槽位
+ *  4. 0x07 按 keys[0].code 找新 keySlot
+ *  5. 0x09 将 keySlot 写为 [0x92, code, time]
+ *  6. 0xa5 以 code × 6 写入 keys[0]+keys[1] MT 功能数据
  *
  */
 export async function* setMT(
@@ -4155,81 +4531,92 @@ export async function* setMT(
   const funcKey0 = request.keys[0];
   const funcKey1 = request.keys[1];
   if (!funcKey0 || !Number.isInteger(funcKey0.code)) {
-    return { name: "setMT", code: 3, message: "keys[0] is required" };
+    return { name: "setMT", code: 3, message: "keys[0] (funcKey0 / bind key) is required" };
   }
   if (!funcKey1 || !Number.isInteger(funcKey1.code)) {
-    return { name: "setMT", code: 3, message: "keys[1] is required" };
+    return { name: "setMT", code: 3, message: "keys[1] (funcKey1) is required" };
   }
 
   const { config, layer } = yield* resolveConfigLayerGen(request.layer);
-  const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  // ── 0x08 全板载 4 层 → 扫描 0x92/0x93/0x94/0x95，取共享区最大索引 ────────
-  // OKS/SOCD/RS/MT 共用同一 256 字节功能区，索引全局累加
+  const profileSize     = KEY_LAYER_LENGTH * 4;
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：查找已绑定 code 的旧槽位（0x92 类型）──────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  let maxSharedIdx = -1;
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  let oldKeySlot  = -1;
+  let oldLayerIdx = -1;
+  outer: for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
-      const bt = rawAllLayersData[b] ?? 0;
-      if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        maxSharedIdx = Math.max(maxSharedIdx, rawAllLayersData[b + 1] ?? 0);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x92 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        oldKeySlot  = i;
+        oldLayerIdx = li;
+        break outer;
       }
     }
   }
 
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
+  // ── 修改模式：读 0x07 旧槽位默认值 → 0x09 恢复旧槽位 ──────────────────────
+  if (oldKeySlot >= 0) {
+    const oldLayerOffset = oldLayerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawOldDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, oldLayerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const odb    = oldKeySlot * KEY_ITEM_SIZE;
+    const odType = rawOldDefault[odb]     ?? 0x10;
+    const odExt  = rawOldDefault[odb + 1] ?? 0x00;
+    const odCode = rawOldDefault[odb + 2] ?? 0x00;
+    const rOff   = allLayersOffset + oldLayerIdx * KEY_LAYER_LENGTH + oldKeySlot * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + odType + odExt + odCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      odType, odExt, odCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "setMT", code: wRestoreCode, message: "restore old bind key failed" };
+  }
+
+  // ── 0x07 当前层：按 keys[0].code 找新 keySlot ────────────────────────────
+  const layerOffset    = layer * KEY_LAYER_LENGTH + config * profileSize;
   const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  let keySlot = -1;
+  let newKeySlot = -1;
   for (let i = 0; i < KEY_COUNT; i++) {
     const base = i * KEY_ITEM_SIZE;
     const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
+      rawDefaultData[base] ?? 0, rawDefaultData[base + 1] ?? 0, rawDefaultData[base + 2] ?? 0,
     );
-    if (hid === request.code) { keySlot = i; break; }
+    if (hid === funcKey0.code) { newKeySlot = i; break; }
   }
-  if (keySlot < 0) {
-    return { name: "setMT", code: 3, message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 当前层 → 判断已有 / 新建，确定 mtIdx ────────────────────────────
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  let mtIdx:      number;
-  let isNewEntry: boolean;
-
-  if (rawType === 0x92) {
-    mtIdx      = rawCurLayerData[keyBase + 1] ?? 0;
-    isNewEntry = false;
-  } else {
-    mtIdx      = maxSharedIdx < 0 ? 0 : maxSharedIdx + 1;
-    isNewEntry = true;
+  if (newKeySlot < 0) {
+    return { name: "setMT", code: 3, message: "bind key not found in default matrix" };
   }
 
-  // ── 0xa5 写入 keys[0]+keys[1] 共 6 字节 MT 功能定义 ─────────────────────
-  const entryData = [
-    ...encodeMTKeyToTriplet(funcKey0),
-    ...encodeMTKeyToTriplet(funcKey1),
-  ];
+  // ── 0x09：新 keySlot 写 [0x92, code, time] ───────────────────────────────
+  const timeByte    = (request.time ?? 0) & 0xff;
+  const keyWriteOff = layerOffset + newKeySlot * KEY_ITEM_SIZE;
+  const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
+  const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x92 + request.code + timeByte) & 0xff;
+  const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+    kLo, kHi, 0x00,
+    0x92, request.code, timeByte,
+  ]);
+  const wKeyCode = parseWriteResponseCode(wKeyIn);
+  if (wKeyCode !== 0) return { name: "setMT", code: wKeyCode, message: "write key MT definition failed" };
+
+  // ── 0xa5：code × 6 写入 keys[0]+keys[1] MT 功能数据 ─────────────────────
+  const entryData     = [...encodeMTKeyToTriplet(funcKey0), ...encodeMTKeyToTriplet(funcKey1)];
   const advAreaOffset = config * MT_AREA_SIZE;
-  const writeOff      = advAreaOffset + mtIdx * MT_ENTRY_SIZE;
+  const writeOff      = advAreaOffset + request.code * MT_ENTRY_SIZE;
   const [wLo, wHi]    = shiftFrom16Bit(writeOff);
   const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
   const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
@@ -4240,21 +4627,6 @@ export async function* setMT(
   const wAdvCode = parseWriteResponseCode(wAdvIn);
   if (wAdvCode !== 0) return { name: "setMT", code: wAdvCode, message: "write MT entry failed" };
 
-  // ── 新绑定 → 0x09 将 keySlot 写为 [0x92, mtIdx, time] ───────────────────
-  if (isNewEntry) {
-    const timeByte    = (request.time ?? 0) & 0xff;
-    const keyWriteOff = layerOffset + keySlot * KEY_ITEM_SIZE;
-    const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
-    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x92 + mtIdx + timeByte) & 0xff;
-    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
-      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
-      kLo, kHi, 0x00,
-      0x92, mtIdx, timeByte,
-    ]);
-    const wKeyCode = parseWriteResponseCode(wKeyIn);
-    if (wKeyCode !== 0) return { name: "setMT", code: wKeyCode, message: "write key MT definition failed" };
-  }
-
   return { name: "setMT", code: 0 };
 }
 
@@ -4263,136 +4635,108 @@ export async function* setMT(
  * 删除指定 MT 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找到 keySlot
- *  3. 0x08 确认 keySlot 处类型为 0x92，取 mtIdx（第 2 字节）
- *  4. 收集该板载全部 4 层所有 0x92 按键，按 mtIdx 升序排列，得 totalMt
- *  5. 0x09 将该按键恢复为 0x07 同局部层默认定义
- *  6. 0x09 将全部 4 层中 mtIdx > 被删条目 的其他 0x92 按键索引各减 1
- *  7. 0xa4 读取 aMtIdx+1 ~ totalMt-1 的条目，依次写到 aMtIdx ~ totalMt-2
- *  8. 0xa5 清零最后一个条目（totalMt-1）
+ *  1. 0x04 读取板载号（config）
+ *  2. 0x08 全 4 层扫描所有共享类型（0x92-0x95）条目；找类型=0x92 且 entryIdx=code 的目标
+ *  3. 0x09 逐一读取目标槽位的 0x07 默认值并恢复
+ *  4. 0x09 将 entryIdx > code 的所有共享类型条目索引各减 1（保留原类型字节和 byte[2]）
+ *  5. 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2
+ *  6. 0xa5 清零末尾条目
  *
  */
 export async function* delMT(
   request: DelMTParams,
 ): DeviceSession<DelMTResult> {
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "delMT", code: 3, message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 全板载4层 → 确认 0x92 类型，获取 mtIdx ──────────────────────────
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：收集所有共享类型条目 ──────────────────────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  const curLayerBase = layer * KEY_LAYER_LENGTH;
-  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
-  const rawType      = rawAllLayersData[keyBase] ?? 0;
-
-  if (rawType !== 0x92) {
-    return { name: "delMT", code: 3, message: `key at slot ${keySlot} is not MT (type=0x${rawType.toString(16)})` };
-  }
-  const aMtIdx = rawAllLayersData[keyBase + 1] ?? 0;
-
-  // ── 收集该板载全部 4 层中 OKS/SOCD/RS/MT（0x95/0x94/0x93/0x92）所有条目 ──
-  // 四种类型共用同一 256 字节功能区，索引全局累加，删除时需整体维护
   type SharedEntry = { layerIdx: number; keyI: number; entryIdx: number; keyType: number };
   const sharedEntries: SharedEntry[] = [];
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
+      const b  = lb + i * KEY_ITEM_SIZE;
       const bt = rawAllLayersData[b] ?? 0;
       if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        sharedEntries.push({
-          layerIdx,
-          keyI: i,
-          entryIdx: rawAllLayersData[b + 1] ?? 0,
-          keyType:  bt,
-        });
+        sharedEntries.push({ layerIdx: li, keyI: i, entryIdx: rawAllLayersData[b + 1] ?? 0, keyType: bt });
       }
     }
   }
-  sharedEntries.sort((a, b) => a.entryIdx - b.entryIdx);
+
+  const targets = sharedEntries.filter((e) => e.keyType === 0x92 && e.entryIdx === request.code);
+  if (targets.length === 0) {
+    return { name: "delMT", code: 3, message: `MT index ${request.code} not found in key matrix` };
+  }
   const totalShared = sharedEntries.length > 0
     ? Math.max(...sharedEntries.map((e) => e.entryIdx)) + 1
     : 0;
 
-  // ── 0x09 恢复为 0x07 同局部层默认定义 ───────────────────────────────────
-  const defBase   = keySlot * KEY_ITEM_SIZE;
-  const defType   = rawDefaultData[defBase]     ?? 0x10;
-  const defExt    = rawDefaultData[defBase + 1] ?? 0x00;
-  const defCode   = rawDefaultData[defBase + 2] ?? 0x00;
-  const [r1Lo, r1Hi] = shiftFrom16Bit(layerOffset + keySlot * KEY_ITEM_SIZE);
-  const r1Chk = (r1Lo + r1Hi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
-  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
-    SET_KEY_CURRENT_COMMAND, 0x00, r1Chk, KEY_ITEM_SIZE,
-    r1Lo, r1Hi, 0x00,
-    defType, defExt, defCode,
-  ]);
-  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
-  if (wRestoreCode !== 0) return { name: "delMT", code: wRestoreCode, message: "restore key def failed" };
+  // ── 0x09 恢复所有绑定该 code 的 MT 按键为 0x07 默认值 ────────────────────
+  for (const entry of targets) {
+    const lOff = entry.layerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, lOff, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const db    = entry.keyI * KEY_ITEM_SIZE;
+    const dType = rawDefault[db]     ?? 0x10;
+    const dExt  = rawDefault[db + 1] ?? 0x00;
+    const dCode = rawDefault[db + 2] ?? 0x00;
+    const rOff  = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + dType + dExt + dCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      dType, dExt, dCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "delMT", code: wRestoreCode, message: "restore key def failed" };
+  }
 
-  // ── 0x09 全部 4 层中 entryIdx > aMtIdx 的所有共享类型按键索引各减 1 ───────
-  // 注意：循环中保留每个条目原有的类型字节（keyType），只更新索引字节
+  // ── 0x09 将 entryIdx > code 的所有共享类型按键索引各减 1 ──────────────────
   for (const entry of sharedEntries) {
-    if (entry.layerIdx === layer && entry.keyI === keySlot) continue;
-    if (entry.entryIdx <= aMtIdx)                          continue;
-    const newIdx     = entry.entryIdx - 1;
-    const rawOff     = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
-    const writeOff   = allLayersOffset + rawOff;
-    const [sLo, sHi] = shiftFrom16Bit(writeOff);
-    const origTime   = rawAllLayersData[rawOff + 2] ?? 0;
-    const sChk = (sLo + sHi + KEY_ITEM_SIZE + entry.keyType + newIdx + origTime) & 0xff;
+    if (entry.entryIdx <= request.code) continue;
+    const newIdx  = entry.entryIdx - 1;
+    const rawOff  = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const sOff    = allLayersOffset + rawOff;
+    const [sLo, sHi] = shiftFrom16Bit(sOff);
+    const origByte2  = rawAllLayersData[rawOff + 2] ?? 0;
+    const sChk = (sLo + sHi + KEY_ITEM_SIZE + entry.keyType + newIdx + origByte2) & 0xff;
     const wShiftIn: InPacket = yield buildOutPacket(FLAG, [
       SET_KEY_CURRENT_COMMAND, 0x00, sChk, KEY_ITEM_SIZE,
       sLo, sHi, 0x00,
-      entry.keyType, newIdx, origTime,
+      entry.keyType, newIdx, origByte2,
     ]);
     const wShiftCode = parseWriteResponseCode(wShiftIn);
     if (wShiftCode !== 0) return { name: "delMT", code: wShiftCode, message: "shift key index failed" };
   }
 
-  // ── 0xa4 平移共享区条目：aMtIdx+1 ~ totalShared-1 → aMtIdx ~ totalShared-2 ─
+  // ── 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2 ─────────────
   const advAreaOffset = config * MT_AREA_SIZE;
-  const moveCount     = totalShared - 1 - aMtIdx;
+  const moveCount     = totalShared - 1 - request.code;
 
   if (moveCount > 0) {
     const partialData: number[] = yield* readChunkedDataByCommandGen(
       FLAG, GET_MT_COMMAND,
-      advAreaOffset + (aMtIdx + 1) * MT_ENTRY_SIZE,
+      advAreaOffset + (request.code + 1) * MT_ENTRY_SIZE,
       moveCount * MT_ENTRY_SIZE,
       DATA_LENGTH,
     );
     for (let i = 0; i < moveCount; i++) {
-      const entryData = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
-      const writeOff  = advAreaOffset + (aMtIdx + i) * MT_ENTRY_SIZE;
-      const [wLo, wHi] = shiftFrom16Bit(writeOff);
-      const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+      const eData  = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
+      const wOff   = advAreaOffset + (request.code + i) * MT_ENTRY_SIZE;
+      const [wLo, wHi] = shiftFrom16Bit(wOff);
+      const wChk = (wLo + wHi + MT_ENTRY_SIZE + eData.reduce((s, v) => s + v, 0)) & 0xff;
       const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
         SET_MT_COMMAND, 0x00, wChk, MT_ENTRY_SIZE,
         wLo, wHi, 0x00,
-        ...entryData,
+        ...eData,
       ]);
       const wAdvCode = parseWriteResponseCode(wAdvIn);
       if (wAdvCode !== 0) return { name: "delMT", code: wAdvCode, message: `shift shared entry ${i} failed` };
@@ -4431,23 +4775,24 @@ export async function* delMT(
 export async function* getRSList(
   _request: GetRSListParams,
 ): DeviceSession<GetRSListResult> {
+  // 步骤一：读取当前板载号
   const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const config = baseIn[8] ?? 0;
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
 
+  // 步骤二：读取 0x08 全 4 层，建立 rsIdx → 首次出现的 { layerIdx, keySlot } 映射
   const allLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
   );
 
-  // rsIdx → 首次出现的 keySlot
-  const rsMap = new Map<number, number>();
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  const rsMap = new Map<number, { layerIdx: number; keySlot: number }>();
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const base = layerBase + i * KEY_ITEM_SIZE;
-      if ((allLayersData[base] ?? 0) !== 0x93) continue;
-      const rsIdx = allLayersData[base + 1] ?? 0;
-      if (!rsMap.has(rsIdx)) rsMap.set(rsIdx, i);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((allLayersData[b] ?? 0) !== 0x93) continue;
+      const rsIdx = allLayersData[b + 1] ?? 0;
+      if (!rsMap.has(rsIdx)) rsMap.set(rsIdx, { layerIdx: li, keySlot: i });
     }
   }
 
@@ -4455,41 +4800,28 @@ export async function* getRSList(
     return { name: "getRSList", code: 0, data: { len: 0, rs: [] } };
   }
 
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const rsAreaOffset = config * MT_AREA_SIZE;
-  const rsData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_MT_COMMAND, rsAreaOffset, MT_AREA_SIZE, DATA_LENGTH,
-  );
-
+  // 步骤三：对每个 rsIdx 逐条读取 0xa4 功能键
   const rs: RSEntry[] = [];
-  const sortedEntries = [...rsMap.entries()].sort((a, b) => a[0] - b[0]);
+  for (const rsIdx of [...rsMap.keys()].sort((a, b) => a - b)) {
+    const slot = rsMap.get(rsIdx)!;
 
-  for (const [rsIdx, keySlot] of sortedEntries) {
-    const defBase = keySlot * KEY_ITEM_SIZE;
-    const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[defBase] ?? 0,
-      rawDefaultData[defBase + 1] ?? 0,
-      rawDefaultData[defBase + 2] ?? 0,
+    // 读取 0xa4 该索引的 6 字节
+    const entryData: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_MT_COMMAND,
+      config * MT_AREA_SIZE + rsIdx * MT_ENTRY_SIZE,
+      MT_ENTRY_SIZE,
+      DATA_LENGTH,
     );
-
-    const entryBase = rsIdx * MT_ENTRY_SIZE;
     const key0 = parseRSKeyFromTriplet(
-      rsData[entryBase] ?? 0,
-      rsData[entryBase + 1] ?? 0,
-      rsData[entryBase + 2] ?? 0,
-      KEY_RETURN_ORDER[keySlot] ?? `RS${rsIdx}`,
+      entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
+      KEY_RETURN_ORDER[slot.keySlot] ?? `RS${rsIdx}`,
     );
     const key1 = parseRSKeyFromTriplet(
-      rsData[entryBase + 3] ?? 0,
-      rsData[entryBase + 4] ?? 0,
-      rsData[entryBase + 5] ?? 0,
+      entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
       `RS${rsIdx}B`,
     );
 
-    rs.push({ type: ADVANCED_RS_TYPE, code: hidCode, keys: [key0, key1] });
+    rs.push({ type: ADVANCED_RS_TYPE, code: rsIdx, keys: [key0, key1] });
   }
 
   return { name: "getRSList", code: 0, data: { len: rs.length, rs } };
@@ -4500,89 +4832,45 @@ export async function* getRSList(
  * 读取指定 RS 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找 keySlot
- *  3. 0x08 确认该槽位为 0x93 类型，取 rsIdx（第 2 字节）
- *  4. 0xa4 以 config × MT_AREA_SIZE + rsIdx × 6 读取 6 字节
- *  5. code = 0x07 同槽位 HID code；keys[0/1] = 0xa4 前/后 3 字节
+ *  1. 0x04 读取板载号（config）
+ *  2. 0xa4 以 config × MT_AREA_SIZE + code × 6 读取 6 字节 → keys[0]/keys[1]
+ *     首字节为 0 表示该索引不存在，返回空 keys
  *
  */
 export async function* getRS(
   request: GetRSParams,
 ): DeviceSession<GetRSResult> {
-  const emptyData = (code: number): RSEntry => ({
-    type: ADVANCED_RS_TYPE, code, keys: [],
-  });
+  const emptyData = (code: number): RSEntry => ({ type: ADVANCED_RS_TYPE, code, keys: [] });
 
   if (request.type !== ADVANCED_RS_TYPE) {
     return { name: "getRS", code: 3, data: emptyData(request.code), message: "type must be 11 (RS)" };
   }
 
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "getRS", code: 3, data: emptyData(request.code), message: "key not found in default matrix" };
-  }
-
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  if (rawType !== 0x93) {
-    return {
-      name: "getRS",
-      code: 3,
-      data: emptyData(request.code),
-      message: `key at slot ${keySlot} is not RS (type=0x${rawType.toString(16)})`,
-    };
-  }
-  const rsIdx = rawCurLayerData[keyBase + 1] ?? 0;
-
-  const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-    rawDefaultData[keyBase] ?? 0,
-    rawDefaultData[keyBase + 1] ?? 0,
-    rawDefaultData[keyBase + 2] ?? 0,
-  );
-
+  // ── 0xa4：code × 6 → 功能键数据（keys[0]/keys[1]）─────────────────────
   const entryData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_MT_COMMAND,
-    config * MT_AREA_SIZE + rsIdx * MT_ENTRY_SIZE,
+    config * MT_AREA_SIZE + request.code * MT_ENTRY_SIZE,
     MT_ENTRY_SIZE,
     DATA_LENGTH,
   );
+  if ((entryData[0] ?? 0) === 0) {
+    return { name: "getRS", code: 0, data: emptyData(request.code) };
+  }
   const key0 = parseRSKeyFromTriplet(
-    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
-    KEY_RETURN_ORDER[keySlot] ?? `RS${rsIdx}`,
+    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0, `RS${request.code}`,
   );
   const key1 = parseRSKeyFromTriplet(
-    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
-    `RS${rsIdx}B`,
+    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0, `RS${request.code}B`,
   );
 
   return {
     name: "getRS",
     code: 0,
-    data: { type: ADVANCED_RS_TYPE, code: hidCode, keys: [key0, key1] },
+    data: { type: ADVANCED_RS_TYPE, code: request.code, keys: [key0, key1] },
   };
 }
 
@@ -4591,15 +4879,13 @@ export async function* getRS(
  * 设置指定 RS 高级按键
  *
  * 流程：
- *  1. 验证 type === 11，且 keys[0] / keys[1] 均存在
+ *  1. 验证 type===11，keys[0]（funcKey0，同时作为绑定键）/ keys[1]（funcKey1）均存在
  *  2. 0x04/0x05 读取板载（config）与层（layer）
- *  3. 0x08 读取该板载 4 层，扫描全部共享类型（0x92-0x95），取最大索引
- *  4. 0x07 按 code 找 keySlot；当前层该槽位：
- *     - 已是 0x93 → 复用已有 rsIdx
- *     - 否则 → rsIdx = maxSharedIdx + 1（或 0）
- *  5. 在 0x07 默认矩阵中查找 keys[1].code 对应的槽位索引（key1SlotIdx）
- *  6. 0xa5 写入 keys[0]+keys[1] 共 6 字节到 rsIdx × 6
- *  7. 0x09 将 keySlot 写为 [0x93, rsIdx, key1SlotIdx]
+ *  3. 0x08 全 4 层扫描 0x93，找索引 = code 的已有绑定 → 修改模式
+ *     a. 读 0x07 旧槽位默认值 → 0x09 恢复旧槽位
+ *  4. 0x07 按 keys[0].code 找新 keySlot，按 keys[1].code 找 key2SlotIdx
+ *  5. 0x09 将 keySlot 写为 [0x93, code, key2SlotIdx]
+ *  6. 0xa5 以 code × 6 写入 keys[0]+keys[1] 功能数据
  *
  */
 export async function* setRS(
@@ -4611,86 +4897,93 @@ export async function* setRS(
   const funcKey0 = request.keys[0];
   const funcKey1 = request.keys[1];
   if (!funcKey0 || !Number.isInteger(funcKey0.code)) {
-    return { name: "setRS", code: 3, message: "keys[0] is required" };
+    return { name: "setRS", code: 3, message: "keys[0] (funcKey0 / bind key) is required" };
   }
   if (!funcKey1 || !Number.isInteger(funcKey1.code)) {
-    return { name: "setRS", code: 3, message: "keys[1] is required" };
+    return { name: "setRS", code: 3, message: "keys[1] (funcKey1) is required" };
   }
 
   const { config, layer } = yield* resolveConfigLayerGen(request.layer);
-  const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  // ── 0x08 全板载 4 层 → 扫描共享类型，取最大索引 ─────────────────────────
+  const profileSize     = KEY_LAYER_LENGTH * 4;
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：查找已绑定 code 的旧槽位（0x93 类型）──────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  let maxSharedIdx = -1;
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  let oldKeySlot  = -1;
+  let oldLayerIdx = -1;
+  outer: for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
-      const bt = rawAllLayersData[b] ?? 0;
-      if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        maxSharedIdx = Math.max(maxSharedIdx, rawAllLayersData[b + 1] ?? 0);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x93 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        oldKeySlot  = i;
+        oldLayerIdx = li;
+        break outer;
       }
     }
   }
 
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
+  // ── 修改模式：读 0x07 旧槽位默认值 → 0x09 恢复旧槽位 ──────────────────────
+  if (oldKeySlot >= 0) {
+    const oldLayerOffset = oldLayerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawOldDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, oldLayerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const odb    = oldKeySlot * KEY_ITEM_SIZE;
+    const odType = rawOldDefault[odb]     ?? 0x10;
+    const odExt  = rawOldDefault[odb + 1] ?? 0x00;
+    const odCode = rawOldDefault[odb + 2] ?? 0x00;
+    const rOff   = allLayersOffset + oldLayerIdx * KEY_LAYER_LENGTH + oldKeySlot * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + odType + odExt + odCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      odType, odExt, odCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "setRS", code: wRestoreCode, message: "restore old bind key failed" };
+  }
+
+  // ── 0x07 当前层：按 keys[0].code 找新 keySlot，按 keys[1].code 找 key2SlotIdx ─
+  const layerOffset    = layer * KEY_LAYER_LENGTH + config * profileSize;
   const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  let keySlot = -1;
+  let newKeySlot  = -1;
+  let key2SlotIdx = 0;
   for (let i = 0; i < KEY_COUNT; i++) {
     const base = i * KEY_ITEM_SIZE;
     const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
+      rawDefaultData[base] ?? 0, rawDefaultData[base + 1] ?? 0, rawDefaultData[base + 2] ?? 0,
     );
-    if (hid === request.code) { keySlot = i; break; }
+    if (hid === funcKey0.code && newKeySlot  < 0) newKeySlot  = i;
+    if (hid === funcKey1.code)                    key2SlotIdx = i;
   }
-  if (keySlot < 0) {
-    return { name: "setRS", code: 3, message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 当前层 → 判断已有 / 新建，确定 rsIdx ────────────────────────────
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  const rsIdx = rawType === 0x93
-    ? (rawCurLayerData[keyBase + 1] ?? 0)
-    : (maxSharedIdx < 0 ? 0 : maxSharedIdx + 1);
-
-  // ── 在 0x07 默认矩阵中找 keys[1].code 对应的槽位索引 ─────────────────────
-  // 第3字节存储 keys[1] 对应默认矩阵的槽位索引
-  let key1SlotIdx = 0;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === funcKey1.code) { key1SlotIdx = i; break; }
+  if (newKeySlot < 0) {
+    return { name: "setRS", code: 3, message: "bind key not found in default matrix" };
   }
 
-  // ── 0xa5 写入 keys[0]+keys[1] 共 6 字节 RS 功能定义 ─────────────────────
-  const entryData = [
-    ...encodeRSKeyToTriplet(funcKey0),
-    ...encodeRSKeyToTriplet(funcKey1),
-  ];
+  // ── 0x09：新 keySlot 写 [0x93, code, key2SlotIdx] ────────────────────────
+  const keyWriteOff = layerOffset + newKeySlot * KEY_ITEM_SIZE;
+  const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
+  const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x93 + request.code + key2SlotIdx) & 0xff;
+  const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+    kLo, kHi, 0x00,
+    0x93, request.code, key2SlotIdx,
+  ]);
+  const wKeyCode = parseWriteResponseCode(wKeyIn);
+  if (wKeyCode !== 0) return { name: "setRS", code: wKeyCode, message: "write key RS definition failed" };
+
+  // ── 0xa5：code × 6 写入 keys[0]+keys[1] RS 功能数据 ─────────────────────
+  const entryData     = [...encodeRSKeyToTriplet(funcKey0), ...encodeRSKeyToTriplet(funcKey1)];
   const advAreaOffset = config * MT_AREA_SIZE;
-  const writeOff      = advAreaOffset + rsIdx * MT_ENTRY_SIZE;
+  const writeOff      = advAreaOffset + request.code * MT_ENTRY_SIZE;
   const [wLo, wHi]    = shiftFrom16Bit(writeOff);
   const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
   const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
@@ -4701,21 +4994,6 @@ export async function* setRS(
   const wAdvCode = parseWriteResponseCode(wAdvIn);
   if (wAdvCode !== 0) return { name: "setRS", code: wAdvCode, message: "write RS entry failed" };
 
-  // ── 0x09 将 keySlot 写为 [0x93, rsIdx, key1SlotIdx] ─────────────────────
-  // byte[0]=0x93(RS类型) byte[1]=rsIdx(功能区索引) byte[2]=keys[1]默认矩阵槽位
-  {
-    const keyWriteOff = layerOffset + keySlot * KEY_ITEM_SIZE;
-    const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
-    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x93 + rsIdx + key1SlotIdx) & 0xff;
-    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
-      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
-      kLo, kHi, 0x00,
-      0x93, rsIdx, key1SlotIdx,
-    ]);
-    const wKeyCode = parseWriteResponseCode(wKeyIn);
-    if (wKeyCode !== 0) return { name: "setRS", code: wKeyCode, message: "write key RS definition failed" };
-  }
-
   return { name: "setRS", code: 0 };
 }
 
@@ -4724,96 +5002,77 @@ export async function* setRS(
  * 删除指定 RS 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找到 keySlot
- *  3. 0x08 确认 keySlot 处类型为 0x93，取 rsIdx（第 2 字节）
- *  4. 收集该板载全部 4 层中所有共享类型（0x92-0x95）条目，按索引升序
- *  5. 0x09 将该按键恢复为 0x07 同局部层默认定义
- *  6. 0x09 将全部 4 层中 entryIdx > rsIdx 的共享类型按键索引各减 1（保留原类型字节）
- *  7. 0xa4 读取 rsIdx+1 ~ totalShared-1 条目，依次写到 rsIdx ~ totalShared-2
- *  8. 0xa5 清零末尾条目（totalShared-1）
+ *  1. 0x04 读取板载号（config）
+ *  2. 0x08 全 4 层扫描所有共享类型（0x92-0x95）条目；找类型=0x93 且 entryIdx=code 的目标
+ *  3. 0x09 逐一读取目标槽位的 0x07 默认值并恢复
+ *  4. 0x09 将 entryIdx > code 的所有共享类型条目索引各减 1（保留原类型字节和 byte[2]）
+ *  5. 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2
+ *  6. 0xa5 清零末尾条目
  *
  */
 export async function* delRS(
   request: DelRSParams,
 ): DeviceSession<DelRSResult> {
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "delRS", code: 3, message: "key not found in default matrix" };
-  }
-
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：收集所有共享类型条目 ──────────────────────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  const curLayerBase = layer * KEY_LAYER_LENGTH;
-  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
-  const rawType      = rawAllLayersData[keyBase] ?? 0;
-
-  if (rawType !== 0x93) {
-    return { name: "delRS", code: 3, message: `key at slot ${keySlot} is not RS (type=0x${rawType.toString(16)})` };
-  }
-  const aRsIdx = rawAllLayersData[keyBase + 1] ?? 0;
-
-  // ── 收集该板载全部 4 层中所有共享类型条目 ───────────────────────────────
   type SharedEntry = { layerIdx: number; keyI: number; entryIdx: number; keyType: number };
   const sharedEntries: SharedEntry[] = [];
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
+      const b  = lb + i * KEY_ITEM_SIZE;
       const bt = rawAllLayersData[b] ?? 0;
       if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        sharedEntries.push({ layerIdx, keyI: i, entryIdx: rawAllLayersData[b + 1] ?? 0, keyType: bt });
+        sharedEntries.push({ layerIdx: li, keyI: i, entryIdx: rawAllLayersData[b + 1] ?? 0, keyType: bt });
       }
     }
   }
-  sharedEntries.sort((a, b) => a.entryIdx - b.entryIdx);
+
+  const targets = sharedEntries.filter((e) => e.keyType === 0x93 && e.entryIdx === request.code);
+  if (targets.length === 0) {
+    return { name: "delRS", code: 3, message: `RS index ${request.code} not found in key matrix` };
+  }
   const totalShared = sharedEntries.length > 0
     ? Math.max(...sharedEntries.map((e) => e.entryIdx)) + 1
     : 0;
 
-  // ── 0x09 恢复为 0x07 同局部层默认定义 ───────────────────────────────────
-  const defBase   = keySlot * KEY_ITEM_SIZE;
-  const defType   = rawDefaultData[defBase]     ?? 0x10;
-  const defExt    = rawDefaultData[defBase + 1] ?? 0x00;
-  const defCode   = rawDefaultData[defBase + 2] ?? 0x00;
-  const [r1Lo, r1Hi] = shiftFrom16Bit(layerOffset + keySlot * KEY_ITEM_SIZE);
-  const r1Chk = (r1Lo + r1Hi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
-  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
-    SET_KEY_CURRENT_COMMAND, 0x00, r1Chk, KEY_ITEM_SIZE,
-    r1Lo, r1Hi, 0x00,
-    defType, defExt, defCode,
-  ]);
-  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
-  if (wRestoreCode !== 0) return { name: "delRS", code: wRestoreCode, message: "restore key def failed" };
+  // ── 0x09 恢复所有绑定该 code 的 RS 按键为 0x07 默认值 ────────────────────
+  for (const entry of targets) {
+    const lOff = entry.layerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, lOff, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const db    = entry.keyI * KEY_ITEM_SIZE;
+    const dType = rawDefault[db]     ?? 0x10;
+    const dExt  = rawDefault[db + 1] ?? 0x00;
+    const dCode = rawDefault[db + 2] ?? 0x00;
+    const rOff  = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + dType + dExt + dCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      dType, dExt, dCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "delRS", code: wRestoreCode, message: "restore key def failed" };
+  }
 
-  // ── 0x09 全部 4 层中 entryIdx > aRsIdx 的共享类型按键索引各减 1 ──────────
+  // ── 0x09 将 entryIdx > code 的所有共享类型按键索引各减 1 ──────────────────
   for (const entry of sharedEntries) {
-    if (entry.layerIdx === layer && entry.keyI === keySlot) continue;
-    if (entry.entryIdx <= aRsIdx)                          continue;
-    const newIdx     = entry.entryIdx - 1;
-    const rawOff     = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
-    const writeOff   = allLayersOffset + rawOff;
-    const [sLo, sHi] = shiftFrom16Bit(writeOff);
+    if (entry.entryIdx <= request.code) continue;
+    const newIdx  = entry.entryIdx - 1;
+    const rawOff  = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const sOff    = allLayersOffset + rawOff;
+    const [sLo, sHi] = shiftFrom16Bit(sOff);
     const origByte2  = rawAllLayersData[rawOff + 2] ?? 0;
     const sChk = (sLo + sHi + KEY_ITEM_SIZE + entry.keyType + newIdx + origByte2) & 0xff;
     const wShiftIn: InPacket = yield buildOutPacket(FLAG, [
@@ -4825,26 +5084,26 @@ export async function* delRS(
     if (wShiftCode !== 0) return { name: "delRS", code: wShiftCode, message: "shift key index failed" };
   }
 
-  // ── 0xa4 平移共享区条目：aRsIdx+1 ~ totalShared-1 → aRsIdx ~ totalShared-2 ─
+  // ── 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2 ─────────────
   const advAreaOffset = config * MT_AREA_SIZE;
-  const moveCount     = totalShared - 1 - aRsIdx;
+  const moveCount     = totalShared - 1 - request.code;
 
   if (moveCount > 0) {
     const partialData: number[] = yield* readChunkedDataByCommandGen(
       FLAG, GET_MT_COMMAND,
-      advAreaOffset + (aRsIdx + 1) * MT_ENTRY_SIZE,
+      advAreaOffset + (request.code + 1) * MT_ENTRY_SIZE,
       moveCount * MT_ENTRY_SIZE,
       DATA_LENGTH,
     );
     for (let i = 0; i < moveCount; i++) {
-      const entryData = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
-      const writeOff  = advAreaOffset + (aRsIdx + i) * MT_ENTRY_SIZE;
-      const [wLo, wHi] = shiftFrom16Bit(writeOff);
-      const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+      const eData  = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
+      const wOff   = advAreaOffset + (request.code + i) * MT_ENTRY_SIZE;
+      const [wLo, wHi] = shiftFrom16Bit(wOff);
+      const wChk = (wLo + wHi + MT_ENTRY_SIZE + eData.reduce((s, v) => s + v, 0)) & 0xff;
       const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
         SET_MT_COMMAND, 0x00, wChk, MT_ENTRY_SIZE,
         wLo, wHi, 0x00,
-        ...entryData,
+        ...eData,
       ]);
       const wAdvCode = parseWriteResponseCode(wAdvIn);
       if (wAdvCode !== 0) return { name: "delRS", code: wAdvCode, message: `shift shared entry ${i} failed` };
@@ -4882,22 +5141,24 @@ export async function* delRS(
 export async function* getSOCDList(
   _request?: GetSOCDListParams,
 ): DeviceSession<GetSOCDListResult> {
-  const { config, layer } = yield* resolveConfigLayerGen();
+  // 步骤一：读取当前板载号
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
 
+  // 步骤二：读取 0x08 全 4 层，建立 socdIdx → 首次出现的 { layerIdx, keySlot } 映射
   const allLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
   );
 
-  // socdIdx → 首次出现的 keySlot
-  const socdMap = new Map<number, number>();
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  const socdMap = new Map<number, { layerIdx: number; keySlot: number }>();
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const base = layerBase + i * KEY_ITEM_SIZE;
-      if ((allLayersData[base] ?? 0) !== 0x94) continue;
-      const socdIdx = allLayersData[base + 1] ?? 0;
-      if (!socdMap.has(socdIdx)) socdMap.set(socdIdx, i);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((allLayersData[b] ?? 0) !== 0x94) continue;
+      const socdIdx = allLayersData[b + 1] ?? 0;
+      if (!socdMap.has(socdIdx)) socdMap.set(socdIdx, { layerIdx: li, keySlot: i });
     }
   }
 
@@ -4905,52 +5166,46 @@ export async function* getSOCDList(
     return { name: "getSOCDList", code: 0, data: { len: 0, socd: [] } };
   }
 
-  // 0x07 默认矩阵（第 0 层）→ code 查找
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  // 0xa0 当前层触发参数 → trigger（byte[1] 高 4 位）
-  const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
-  const keyTaryOffset    = layer * keyTaryLayerSize + config * (keyTaryLayerSize * 4);
-  const rawTaryData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_TARY_COMMAND, keyTaryOffset, keyTaryLayerSize, DATA_LENGTH,
-  );
-
-  // 0xa4 功能区数据
-  const socdAreaOffset = config * MT_AREA_SIZE;
-  const socdData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_MT_COMMAND, socdAreaOffset, MT_AREA_SIZE, DATA_LENGTH,
-  );
+  // 步骤三：对每个 socdIdx 逐条读取 0xa4 功能键 + 0xa0 触发参数（带层缓存）
+  const taryLayerCache = new Map<number, number[]>();
+  const getTaryLayer   = async function* (li: number): AsyncGenerator<OutPacket, number[], InPacket> {
+    if (!taryLayerCache.has(li)) {
+      const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
+      const off = li * keyTaryLayerSize + config * (keyTaryLayerSize * 4);
+      const data: number[] = yield* readChunkedDataByCommandGen(
+        FLAG, GET_KEY_TARY_COMMAND, off, keyTaryLayerSize, DATA_LENGTH,
+      );
+      taryLayerCache.set(li, data);
+    }
+    return taryLayerCache.get(li)!;
+  };
 
   const socd: SOCDEntry[] = [];
-  const sortedEntries = [...socdMap.entries()].sort((a, b) => a[0] - b[0]);
+  for (const socdIdx of [...socdMap.keys()].sort((a, b) => a - b)) {
+    const slot = socdMap.get(socdIdx)!;
 
-  for (const [socdIdx, keySlot] of sortedEntries) {
-    // code
-    const defBase = keySlot * KEY_ITEM_SIZE;
-    const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[defBase] ?? 0,
-      rawDefaultData[defBase + 1] ?? 0,
-      rawDefaultData[defBase + 2] ?? 0,
+    // 读取 0xa4 该索引的 6 字节
+    const entryData: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_MT_COMMAND,
+      config * MT_AREA_SIZE + socdIdx * MT_ENTRY_SIZE,
+      MT_ENTRY_SIZE,
+      DATA_LENGTH,
     );
-
-    // trigger = 0xa0 byte[1] 高 4 位（SOCD 优先级策略）
-    const taryByte1 = rawTaryData[keySlot * KEY_TARY_ITEM_SIZE + 1] ?? 0;
-    const trigger   = (taryByte1 >> 4) & 0x0F;
-
-    // keys
-    const entryBase = socdIdx * MT_ENTRY_SIZE;
     const key0 = parseSOCDKeyFromTriplet(
-      socdData[entryBase] ?? 0, socdData[entryBase + 1] ?? 0, socdData[entryBase + 2] ?? 0,
-      KEY_RETURN_ORDER[keySlot] ?? `SOCD${socdIdx}`,
+      entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
+      KEY_RETURN_ORDER[slot.keySlot] ?? `SOCD${socdIdx}`,
     );
     const key1 = parseSOCDKeyFromTriplet(
-      socdData[entryBase + 3] ?? 0, socdData[entryBase + 4] ?? 0, socdData[entryBase + 5] ?? 0,
+      entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
       `SOCD${socdIdx}B`,
     );
 
-    socd.push({ type: ADVANCED_SOCD_TYPE, code: hidCode, trigger, keys: [key0, key1] });
+    // 读取 0xa0 触发参数 byte[1] 高 4 位 → trigger
+    const rawTary   = yield* getTaryLayer(slot.layerIdx);
+    const taryByte1 = rawTary[slot.keySlot * KEY_TARY_ITEM_SIZE + 1] ?? 0;
+    const trigger   = (taryByte1 >> 4) & 0x0F;
+
+    socd.push({ type: ADVANCED_SOCD_TYPE, code: socdIdx, trigger, keys: [key0, key1] });
   }
 
   return { name: "getSOCDList", code: 0, data: { len: socd.length, socd } };
@@ -4961,98 +5216,78 @@ export async function* getSOCDList(
  * 读取指定 SOCD 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 当前局部层默认矩阵，按 HID code 找 keySlot
- *  3. 0x08 确认 0x94 类型，取 socdIdx（第 2 字节）
+ *  1. 0x04 读取板载号（config）
+ *  2. 0xa4 以 code × 6 读取 6 字节 → keys[0]/keys[1]
+ *     首字节为 0 表示该索引不存在，返回空 keys
+ *  3. 0x08 全 4 层扫描 0x94 且索引 = code 的槽位（用于读取 trigger）
+ *     未找到则返回空 keys
  *  4. 0xa0 读取 keySlot 触发参数，byte[1] 高 4 位 → trigger
- *  5. 0xa4 读取 socdIdx × 6 字节 → keys[0/1]
  *
  */
 export async function* getSOCD(
   request: GetSOCDParams,
 ): DeviceSession<GetSOCDResult> {
-  const emptyData = (code: number): SOCDEntry => ({
-    type: ADVANCED_SOCD_TYPE, code, trigger: 0, keys: [],
-  });
+  const emptyData = (code: number): SOCDEntry => ({ type: ADVANCED_SOCD_TYPE, code, trigger: 0, keys: [] });
 
   if (request.type !== ADVANCED_SOCD_TYPE) {
     return { name: "getSOCD", code: 3, data: emptyData(request.code), message: "type must be 8 (SOCD)" };
   }
 
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+  // ── 0xa4：code × 6 → 功能键数据（keys[0]/keys[1]）─────────────────────
+  const entryData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_MT_COMMAND,
+    config * MT_AREA_SIZE + request.code * MT_ENTRY_SIZE,
+    MT_ENTRY_SIZE,
+    DATA_LENGTH,
+  );
+  if ((entryData[0] ?? 0) === 0) {
+    return { name: "getSOCD", code: 0, data: emptyData(request.code) };
+  }
+  const key0 = parseSOCDKeyFromTriplet(
+    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0, `SOCD${request.code}`,
+  );
+  const key1 = parseSOCDKeyFromTriplet(
+    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0, `SOCD${request.code}B`,
   );
 
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "getSOCD", code: 3, data: emptyData(request.code), message: "key not found in default matrix" };
-  }
-
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
+  // ── 0x08：全 4 层扫描 0x94，找索引 = code 的绑定槽位（用于读 trigger）──
+  const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
+    FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
   );
 
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  if (rawType !== 0x94) {
-    return {
-      name: "getSOCD",
-      code: 3,
-      data: emptyData(request.code),
-      message: `key at slot ${keySlot} is not SOCD (type=0x${rawType.toString(16)})`,
-    };
+  let boundKeySlot  = -1;
+  let boundLayerIdx = -1;
+  outer: for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
+    for (let i = 0; i < KEY_COUNT; i++) {
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x94 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        boundKeySlot  = i;
+        boundLayerIdx = li;
+        break outer;
+      }
+    }
   }
-  const socdIdx = rawCurLayerData[keyBase + 1] ?? 0;
+  if (boundKeySlot < 0) {
+    return { name: "getSOCD", code: 0, data: emptyData(request.code) };
+  }
 
-  const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-    rawDefaultData[keyBase] ?? 0,
-    rawDefaultData[keyBase + 1] ?? 0,
-    rawDefaultData[keyBase + 2] ?? 0,
-  );
-
-  // 0xa0 读取单个 keySlot 的触发参数（8 字节），取 byte[1] 高 4 位
+  // ── 0xa0：绑定槽位触发参数，byte[1] 高 4 位 → trigger ────────────────
   const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
-  const keyTaryOffset    = layer * keyTaryLayerSize + config * (keyTaryLayerSize * 4);
-  const slotTaryOffset   = keyTaryOffset + keySlot * KEY_TARY_ITEM_SIZE;
+  const slotTaryOffset   = boundLayerIdx * keyTaryLayerSize + config * (keyTaryLayerSize * 4) + boundKeySlot * KEY_TARY_ITEM_SIZE;
   const taryEntry: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_TARY_COMMAND, slotTaryOffset, KEY_TARY_ITEM_SIZE, DATA_LENGTH,
   );
   const trigger = ((taryEntry[1] ?? 0) >> 4) & 0x0F;
 
-  const entryData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_MT_COMMAND,
-    config * MT_AREA_SIZE + socdIdx * MT_ENTRY_SIZE,
-    MT_ENTRY_SIZE,
-    DATA_LENGTH,
-  );
-  const key0 = parseSOCDKeyFromTriplet(
-    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
-    KEY_RETURN_ORDER[keySlot] ?? `SOCD${socdIdx}`,
-  );
-  const key1 = parseSOCDKeyFromTriplet(
-    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
-    `SOCD${socdIdx}B`,
-  );
-
   return {
     name: "getSOCD",
     code: 0,
-    data: { type: ADVANCED_SOCD_TYPE, code: hidCode, trigger, keys: [key0, key1] },
+    data: { type: ADVANCED_SOCD_TYPE, code: request.code, trigger, keys: [key0, key1] },
   };
 }
 
@@ -5061,16 +5296,14 @@ export async function* getSOCD(
  * 设置指定 SOCD 高级按键
  *
  * 流程：
- *  1. 验证 type === 8，且 keys[0] / keys[1] 均存在，trigger 为 0/1/2
+ *  1. 验证 type===8，keys[0]（funcKey0，同时作为绑定键）/keys[1]（funcKey1）均存在，trigger 为 0/1/2
  *  2. 0x04/0x05 读取板载（config）与层（layer）
- *  3. 0x08 全板载 4 层扫描共享类型（0x92-0x95），取最大索引
- *  4. 0x07 按 code 找 keySlot；当前层该槽位：
- *     - 已是 0x94 → 复用已有 socdIdx
- *     - 否则 → socdIdx = maxSharedIdx + 1（或 0）
- *  5. 在 0x07 默认矩阵中找 keys[1].code 对应的槽位索引（key1SlotIdx）
- *  6. 0xa5 写入 keys[0]+keys[1] 共 6 字节到 socdIdx × 6
- *  7. 0x09 将 keySlot 写为 [0x94, socdIdx, key1SlotIdx]
- *  8. 0xa0 读取 keySlot 触发参数 byte[1]，改写高 4 位为 trigger，0xa1 写回
+ *  3. 0x08 全 4 层扫描 0x94，找索引 = code 的已有绑定 → 修改模式
+ *     a. 读 0x07 旧槽位默认值 → 0x09 恢复旧槽位
+ *  4. 0x07 按 keys[0].code 找新 keySlot，按 keys[1].code 找 key2SlotIdx
+ *  5. 0x09 将 keySlot 写为 [0x94, code, key2SlotIdx]
+ *  6. 0xa5 以 code × 6 写入 keys[0]+keys[1] 功能数据
+ *  7. 0xa0 读取 keySlot tary byte[1]，改写高 4 位为 trigger，0xa1 写回
  *
  */
 export async function* setSOCD(
@@ -5082,77 +5315,96 @@ export async function* setSOCD(
   const funcKey0 = request.keys[0];
   const funcKey1 = request.keys[1];
   if (!funcKey0 || !Number.isInteger(funcKey0.code)) {
-    return { name: "setSOCD", code: 3, message: "keys[0] is required" };
+    return { name: "setSOCD", code: 3, message: "keys[0] (funcKey0 / bind key) is required" };
   }
   if (!funcKey1 || !Number.isInteger(funcKey1.code)) {
-    return { name: "setSOCD", code: 3, message: "keys[1] is required" };
+    return { name: "setSOCD", code: 3, message: "keys[1] (funcKey1) is required" };
   }
   if (![0, 1, 2].includes(request.trigger)) {
     return { name: "setSOCD", code: 3, message: "trigger must be 0, 1 or 2" };
   }
 
   const { config, layer } = yield* resolveConfigLayerGen(request.layer);
-  const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  // ── 0x08 全板载 4 层 → 扫描共享类型，取最大索引 ─────────────────────────
+  const profileSize     = KEY_LAYER_LENGTH * 4;
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：查找已绑定 code 的旧槽位（0x94 类型）──────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  let maxSharedIdx = -1;
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  let oldKeySlot  = -1;
+  let oldLayerIdx = -1;
+  outer: for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
-      const bt = rawAllLayersData[b] ?? 0;
-      if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        maxSharedIdx = Math.max(maxSharedIdx, rawAllLayersData[b + 1] ?? 0);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x94 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        oldKeySlot  = i;
+        oldLayerIdx = li;
+        break outer;
       }
     }
   }
 
-  // ── 0x07 当前局部层默认矩阵 → keySlot + key1SlotIdx ──────────────────────
+  // ── 修改模式：读 0x07 旧槽位默认值 → 0x09 恢复旧槽位 ──────────────────────
+  if (oldKeySlot >= 0) {
+    const oldLayerOffset = oldLayerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawOldDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, oldLayerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const odb    = oldKeySlot * KEY_ITEM_SIZE;
+    const odType = rawOldDefault[odb]     ?? 0x10;
+    const odExt  = rawOldDefault[odb + 1] ?? 0x00;
+    const odCode = rawOldDefault[odb + 2] ?? 0x00;
+    const rOff   = allLayersOffset + oldLayerIdx * KEY_LAYER_LENGTH + oldKeySlot * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + odType + odExt + odCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      odType, odExt, odCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "setSOCD", code: wRestoreCode, message: "restore old bind key failed" };
+  }
+
+  // ── 0x07 当前层：按 keys[0].code 找新 keySlot，按 keys[1].code 找 key2SlotIdx ─
+  const layerOffset    = layer * KEY_LAYER_LENGTH + config * profileSize;
   const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  let keySlot    = -1;
-  let key1SlotIdx = 0;
+  let newKeySlot  = -1;
+  let key2SlotIdx = 0;
   for (let i = 0; i < KEY_COUNT; i++) {
     const base = i * KEY_ITEM_SIZE;
     const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
+      rawDefaultData[base] ?? 0, rawDefaultData[base + 1] ?? 0, rawDefaultData[base + 2] ?? 0,
     );
-    if (hid === request.code && keySlot < 0)   keySlot = i;
-    if (hid === funcKey1.code)                 key1SlotIdx = i;
+    if (hid === funcKey0.code && newKeySlot  < 0) newKeySlot  = i;
+    if (hid === funcKey1.code)                    key2SlotIdx = i;
   }
-  if (keySlot < 0) {
-    return { name: "setSOCD", code: 3, message: "key not found in default matrix" };
+  if (newKeySlot < 0) {
+    return { name: "setSOCD", code: 3, message: "bind key not found in default matrix" };
   }
 
-  // ── 0x08 当前层 → 判断已有 / 新建，确定 socdIdx ──────────────────────────
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
+  // ── 0x09：新 keySlot 写 [0x94, code, key2SlotIdx] ────────────────────────
+  const keyWriteOff = layerOffset + newKeySlot * KEY_ITEM_SIZE;
+  const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
+  const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x94 + request.code + key2SlotIdx) & 0xff;
+  const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+    kLo, kHi, 0x00,
+    0x94, request.code, key2SlotIdx,
+  ]);
+  const wKeyCode = parseWriteResponseCode(wKeyIn);
+  if (wKeyCode !== 0) return { name: "setSOCD", code: wKeyCode, message: "write key SOCD definition failed" };
 
-  const keyBase  = keySlot * KEY_ITEM_SIZE;
-  const rawType  = rawCurLayerData[keyBase] ?? 0;
-  const socdIdx  = rawType === 0x94
-    ? (rawCurLayerData[keyBase + 1] ?? 0)
-    : (maxSharedIdx < 0 ? 0 : maxSharedIdx + 1);
-
-  // ── 0xa5 写入 keys[0]+keys[1] 共 6 字节 SOCD 功能定义 ───────────────────
-  const entryData = [
-    ...encodeSOCDKeyToTriplet(funcKey0),
-    ...encodeSOCDKeyToTriplet(funcKey1),
-  ];
+  // ── 0xa5：code × 6 写入 keys[0]+keys[1] SOCD 功能数据 ───────────────────
+  const entryData     = [...encodeSOCDKeyToTriplet(funcKey0), ...encodeSOCDKeyToTriplet(funcKey1)];
   const advAreaOffset = config * MT_AREA_SIZE;
-  const writeOff      = advAreaOffset + socdIdx * MT_ENTRY_SIZE;
+  const writeOff      = advAreaOffset + request.code * MT_ENTRY_SIZE;
   const [wLo, wHi]    = shiftFrom16Bit(writeOff);
   const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
   const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
@@ -5163,34 +5415,16 @@ export async function* setSOCD(
   const wAdvCode = parseWriteResponseCode(wAdvIn);
   if (wAdvCode !== 0) return { name: "setSOCD", code: wAdvCode, message: "write SOCD entry failed" };
 
-  // ── 0x09 将 keySlot 写为 [0x94, socdIdx, key1SlotIdx] ───────────────────
-  // byte[0]=0x94(SOCD类型) byte[1]=socdIdx(功能区索引) byte[2]=keys[1]默认矩阵槽位
-  {
-    const keyWriteOff = layerOffset + keySlot * KEY_ITEM_SIZE;
-    const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
-    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x94 + socdIdx + key1SlotIdx) & 0xff;
-    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
-      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
-      kLo, kHi, 0x00,
-      0x94, socdIdx, key1SlotIdx,
-    ]);
-    const wKeyCode = parseWriteResponseCode(wKeyIn);
-    if (wKeyCode !== 0) return { name: "setSOCD", code: wKeyCode, message: "write key SOCD definition failed" };
-  }
-
-  // ── 0xa0 读取 keySlot tary byte[1]，改写高 4 位为 trigger，0xa1 写回 ─────
-  // byte[1] 布局：[高4位=SOCD优先级][低4位=快速触发开关]
+  // ── 0xa0 读取 newKeySlot tary byte[1]，改写高 4 位为 trigger，0xa1 写回 ──
   {
     const keyTaryLayerSize = KEY_COUNT * KEY_TARY_ITEM_SIZE;
-    const keyTaryOffset    = layer * keyTaryLayerSize + config * (keyTaryLayerSize * 4);
-    const slotTaryOffset   = keyTaryOffset + keySlot * KEY_TARY_ITEM_SIZE;
+    const slotTaryOffset   = layer * keyTaryLayerSize + config * (keyTaryLayerSize * 4) + newKeySlot * KEY_TARY_ITEM_SIZE;
     const taryEntry: number[] = yield* readChunkedDataByCommandGen(
       FLAG, GET_KEY_TARY_COMMAND, slotTaryOffset, KEY_TARY_ITEM_SIZE, DATA_LENGTH,
     );
     const currentByte1 = taryEntry[1] ?? 0;
     const newByte1     = (currentByte1 & 0x0F) | ((request.trigger & 0x0F) << 4);
-
-    const [tLo, tHi] = shiftFrom16Bit(slotTaryOffset + 1);
+    const [tLo, tHi]   = shiftFrom16Bit(slotTaryOffset + 1);
     const tChk = (tLo + tHi + 1 + newByte1) & 0xff;
     const wTaryIn: InPacket = yield buildOutPacket(FLAG, [
       SET_KEY_TARY_COMMAND, 0x00, tChk, 1,
@@ -5209,96 +5443,77 @@ export async function* setSOCD(
  * 删除指定 SOCD 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 按 HID code 找到 keySlot
- *  3. 0x08 确认 0x94 类型，取 socdIdx（第 2 字节）
- *  4. 收集全部 4 层中共享类型（0x92-0x95）条目，按索引升序
- *  5. 0x09 恢复 keySlot 为 0x07 默认定义
- *  6. 0x09 将 entryIdx > socdIdx 的所有共享类型条目索引各减 1
- *  7. 0xa4 平移共享区 socdIdx+1 ~ totalShared-1 → socdIdx ~ totalShared-2
- *  8. 0xa5 清零末尾条目
+ *  1. 0x04 读取板载号（config）
+ *  2. 0x08 全 4 层扫描所有共享类型（0x92-0x95）条目；找类型=0x94 且 entryIdx=code 的目标
+ *  3. 0x09 逐一读取目标槽位的 0x07 默认值并恢复
+ *  4. 0x09 将 entryIdx > code 的所有共享类型条目索引各减 1（保留原类型字节和 byte[2]）
+ *  5. 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2
+ *  6. 0xa5 清零末尾条目
  *
  */
 export async function* delSOCD(
   request: DelSOCDParams,
 ): DeviceSession<DelSOCDResult> {
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "delSOCD", code: 3, message: "key not found in default matrix" };
-  }
-
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：收集所有共享类型条目 ──────────────────────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  const curLayerBase = layer * KEY_LAYER_LENGTH;
-  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
-  const rawType      = rawAllLayersData[keyBase] ?? 0;
-
-  if (rawType !== 0x94) {
-    return { name: "delSOCD", code: 3, message: `key at slot ${keySlot} is not SOCD (type=0x${rawType.toString(16)})` };
-  }
-  const aSocdIdx = rawAllLayersData[keyBase + 1] ?? 0;
-
-  // ── 收集全部 4 层中所有共享类型条目 ─────────────────────────────────────
   type SharedEntry = { layerIdx: number; keyI: number; entryIdx: number; keyType: number };
   const sharedEntries: SharedEntry[] = [];
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
+      const b  = lb + i * KEY_ITEM_SIZE;
       const bt = rawAllLayersData[b] ?? 0;
       if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        sharedEntries.push({ layerIdx, keyI: i, entryIdx: rawAllLayersData[b + 1] ?? 0, keyType: bt });
+        sharedEntries.push({ layerIdx: li, keyI: i, entryIdx: rawAllLayersData[b + 1] ?? 0, keyType: bt });
       }
     }
   }
-  sharedEntries.sort((a, b) => a.entryIdx - b.entryIdx);
+
+  const targets = sharedEntries.filter((e) => e.keyType === 0x94 && e.entryIdx === request.code);
+  if (targets.length === 0) {
+    return { name: "delSOCD", code: 3, message: `SOCD index ${request.code} not found in key matrix` };
+  }
   const totalShared = sharedEntries.length > 0
     ? Math.max(...sharedEntries.map((e) => e.entryIdx)) + 1
     : 0;
 
-  // ── 0x09 恢复为 0x07 同局部层默认定义 ───────────────────────────────────
-  const defBase   = keySlot * KEY_ITEM_SIZE;
-  const defType   = rawDefaultData[defBase]     ?? 0x10;
-  const defExt    = rawDefaultData[defBase + 1] ?? 0x00;
-  const defCode   = rawDefaultData[defBase + 2] ?? 0x00;
-  const [r1Lo, r1Hi] = shiftFrom16Bit(layerOffset + keySlot * KEY_ITEM_SIZE);
-  const r1Chk = (r1Lo + r1Hi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
-  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
-    SET_KEY_CURRENT_COMMAND, 0x00, r1Chk, KEY_ITEM_SIZE,
-    r1Lo, r1Hi, 0x00,
-    defType, defExt, defCode,
-  ]);
-  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
-  if (wRestoreCode !== 0) return { name: "delSOCD", code: wRestoreCode, message: "restore key def failed" };
+  // ── 0x09 恢复所有绑定该 code 的 SOCD 按键为 0x07 默认值 ──────────────────
+  for (const entry of targets) {
+    const lOff = entry.layerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, lOff, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const db    = entry.keyI * KEY_ITEM_SIZE;
+    const dType = rawDefault[db]     ?? 0x10;
+    const dExt  = rawDefault[db + 1] ?? 0x00;
+    const dCode = rawDefault[db + 2] ?? 0x00;
+    const rOff  = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + dType + dExt + dCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      dType, dExt, dCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "delSOCD", code: wRestoreCode, message: "restore key def failed" };
+  }
 
-  // ── 0x09 全部 4 层中 entryIdx > aSocdIdx 的共享类型按键索引各减 1 ─────────
+  // ── 0x09 将 entryIdx > code 的所有共享类型按键索引各减 1 ──────────────────
   for (const entry of sharedEntries) {
-    if (entry.layerIdx === layer && entry.keyI === keySlot) continue;
-    if (entry.entryIdx <= aSocdIdx)                        continue;
-    const newIdx     = entry.entryIdx - 1;
-    const rawOff     = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
-    const writeOff   = allLayersOffset + rawOff;
-    const [sLo, sHi] = shiftFrom16Bit(writeOff);
+    if (entry.entryIdx <= request.code) continue;
+    const newIdx  = entry.entryIdx - 1;
+    const rawOff  = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const sOff    = allLayersOffset + rawOff;
+    const [sLo, sHi] = shiftFrom16Bit(sOff);
     const origByte2  = rawAllLayersData[rawOff + 2] ?? 0;
     const sChk = (sLo + sHi + KEY_ITEM_SIZE + entry.keyType + newIdx + origByte2) & 0xff;
     const wShiftIn: InPacket = yield buildOutPacket(FLAG, [
@@ -5310,26 +5525,26 @@ export async function* delSOCD(
     if (wShiftCode !== 0) return { name: "delSOCD", code: wShiftCode, message: "shift key index failed" };
   }
 
-  // ── 0xa4 平移共享区条目：aSocdIdx+1 ~ totalShared-1 → aSocdIdx ~ totalShared-2 ─
+  // ── 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2 ─────────────
   const advAreaOffset = config * MT_AREA_SIZE;
-  const moveCount     = totalShared - 1 - aSocdIdx;
+  const moveCount     = totalShared - 1 - request.code;
 
   if (moveCount > 0) {
     const partialData: number[] = yield* readChunkedDataByCommandGen(
       FLAG, GET_MT_COMMAND,
-      advAreaOffset + (aSocdIdx + 1) * MT_ENTRY_SIZE,
+      advAreaOffset + (request.code + 1) * MT_ENTRY_SIZE,
       moveCount * MT_ENTRY_SIZE,
       DATA_LENGTH,
     );
     for (let i = 0; i < moveCount; i++) {
-      const entryData = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
-      const wOff      = advAreaOffset + (aSocdIdx + i) * MT_ENTRY_SIZE;
+      const eData  = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
+      const wOff   = advAreaOffset + (request.code + i) * MT_ENTRY_SIZE;
       const [wLo, wHi] = shiftFrom16Bit(wOff);
-      const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+      const wChk = (wLo + wHi + MT_ENTRY_SIZE + eData.reduce((s, v) => s + v, 0)) & 0xff;
       const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
         SET_MT_COMMAND, 0x00, wChk, MT_ENTRY_SIZE,
         wLo, wHi, 0x00,
-        ...entryData,
+        ...eData,
       ]);
       const wAdvCode = parseWriteResponseCode(wAdvIn);
       if (wAdvCode !== 0) return { name: "delSOCD", code: wAdvCode, message: `shift shared entry ${i} failed` };
@@ -5367,23 +5582,24 @@ export async function* delSOCD(
 export async function* getOKSList(
   _request: GetOKSListParams,
 ): DeviceSession<GetOKSListResult> {
+  // 步骤一：读取当前板载号
   const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
-  const config = baseIn[8] ?? 0;
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
 
+  // 步骤二：读取 0x08 全 4 层，建立 oksIdx → 首次出现的 { layerIdx, keySlot } 映射
   const allLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, config * profileSize, profileSize, DATA_LENGTH,
   );
 
-  // oksIdx → 首次出现的 keySlot
-  const oksMap = new Map<number, number>();
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  const oksMap = new Map<number, { layerIdx: number; keySlot: number }>();
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const base = layerBase + i * KEY_ITEM_SIZE;
-      if ((allLayersData[base] ?? 0) !== 0x95) continue;
-      const oksIdx = allLayersData[base + 1] ?? 0;
-      if (!oksMap.has(oksIdx)) oksMap.set(oksIdx, i);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((allLayersData[b] ?? 0) !== 0x95) continue;
+      const oksIdx = allLayersData[b + 1] ?? 0;
+      if (!oksMap.has(oksIdx)) oksMap.set(oksIdx, { layerIdx: li, keySlot: i });
     }
   }
 
@@ -5391,41 +5607,28 @@ export async function* getOKSList(
     return { name: "getOKSList", code: 0, data: { len: 0, oks: [] } };
   }
 
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, config * profileSize, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const oksAreaOffset = config * MT_AREA_SIZE;
-  const oksData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_MT_COMMAND, oksAreaOffset, MT_AREA_SIZE, DATA_LENGTH,
-  );
-
+  // 步骤三：对每个 oksIdx 逐条读取 0xa4 功能键
   const oks: OKSEntry[] = [];
-  const sortedEntries = [...oksMap.entries()].sort((a, b) => a[0] - b[0]);
+  for (const oksIdx of [...oksMap.keys()].sort((a, b) => a - b)) {
+    const slot = oksMap.get(oksIdx)!;
 
-  for (const [oksIdx, keySlot] of sortedEntries) {
-    const defBase = keySlot * KEY_ITEM_SIZE;
-    const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[defBase] ?? 0,
-      rawDefaultData[defBase + 1] ?? 0,
-      rawDefaultData[defBase + 2] ?? 0,
+    // 读取 0xa4 该索引的 6 字节
+    const entryData: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_MT_COMMAND,
+      config * MT_AREA_SIZE + oksIdx * MT_ENTRY_SIZE,
+      MT_ENTRY_SIZE,
+      DATA_LENGTH,
     );
-
-    const entryBase = oksIdx * MT_ENTRY_SIZE;
     const key0 = parseOKSKeyFromTriplet(
-      oksData[entryBase] ?? 0,
-      oksData[entryBase + 1] ?? 0,
-      oksData[entryBase + 2] ?? 0,
-      KEY_RETURN_ORDER[keySlot] ?? `OKS${oksIdx}`,
+      entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
+      KEY_RETURN_ORDER[slot.keySlot] ?? `OKS${oksIdx}`,
     );
     const key1 = parseOKSKeyFromTriplet(
-      oksData[entryBase + 3] ?? 0,
-      oksData[entryBase + 4] ?? 0,
-      oksData[entryBase + 5] ?? 0,
+      entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
       `OKS${oksIdx}B`,
     );
 
-    oks.push({ type: ADVANCED_OKS_TYPE, code: hidCode, keys: [key0, key1] });
+    oks.push({ type: ADVANCED_OKS_TYPE, code: oksIdx, keys: [key0, key1] });
   }
 
   return { name: "getOKSList", code: 0, data: { len: oks.length, oks } };
@@ -5436,89 +5639,45 @@ export async function* getOKSList(
  * 读取指定 OKS 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找 keySlot
- *  3. 0x08 确认该槽位为 0x95 类型，取 oksIdx（第 2 字节）
- *  4. 0xa4 以 config × MT_AREA_SIZE + oksIdx × 6 读取 6 字节
- *  5. code = 0x07 同槽位 HID code；keys[0/1] = 0xa4 前/后 3 字节
+ *  1. 0x04 读取板载号（config）
+ *  2. 0xa4 以 code × 6 读取 6 字节 → keys[0]/keys[1]
+ *     首字节为 0 表示该索引不存在，返回空 keys
  *
  */
 export async function* getOKS(
   request: GetOKSParams,
 ): DeviceSession<GetOKSResult> {
-  const emptyData = (code: number): OKSEntry => ({
-    type: ADVANCED_OKS_TYPE, code, keys: [],
-  });
+  const emptyData = (code: number): OKSEntry => ({ type: ADVANCED_OKS_TYPE, code, keys: [] });
 
   if (request.type !== ADVANCED_OKS_TYPE) {
     return { name: "getOKS", code: 3, data: emptyData(request.code), message: "type must be 7 (OKS)" };
   }
 
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
 
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "getOKS", code: 3, data: emptyData(request.code), message: "key not found in default matrix" };
-  }
-
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  if (rawType !== 0x95) {
-    return {
-      name: "getOKS",
-      code: 3,
-      data: emptyData(request.code),
-      message: `key at slot ${keySlot} is not OKS (type=0x${rawType.toString(16)})`,
-    };
-  }
-  const oksIdx = rawCurLayerData[keyBase + 1] ?? 0;
-
-  const hidCode = resolveHidCodeFromDefaultKeyTriplet(
-    rawDefaultData[keyBase] ?? 0,
-    rawDefaultData[keyBase + 1] ?? 0,
-    rawDefaultData[keyBase + 2] ?? 0,
-  );
-
+  // ── 0xa4：code × 6 → 功能键数据（keys[0]/keys[1]）─────────────────────
   const entryData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_MT_COMMAND,
-    config * MT_AREA_SIZE + oksIdx * MT_ENTRY_SIZE,
+    config * MT_AREA_SIZE + request.code * MT_ENTRY_SIZE,
     MT_ENTRY_SIZE,
     DATA_LENGTH,
   );
+  if ((entryData[0] ?? 0) === 0) {
+    return { name: "getOKS", code: 0, data: emptyData(request.code) };
+  }
   const key0 = parseOKSKeyFromTriplet(
-    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0,
-    KEY_RETURN_ORDER[keySlot] ?? `OKS${oksIdx}`,
+    entryData[0] ?? 0, entryData[1] ?? 0, entryData[2] ?? 0, `OKS${request.code}`,
   );
   const key1 = parseOKSKeyFromTriplet(
-    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0,
-    `OKS${oksIdx}B`,
+    entryData[3] ?? 0, entryData[4] ?? 0, entryData[5] ?? 0, `OKS${request.code}B`,
   );
 
   return {
     name: "getOKS",
     code: 0,
-    data: { type: ADVANCED_OKS_TYPE, code: hidCode, keys: [key0, key1] },
+    data: { type: ADVANCED_OKS_TYPE, code: request.code, keys: [key0, key1] },
   };
 }
 
@@ -5527,15 +5686,13 @@ export async function* getOKS(
  * 设置指定 OKS 高级按键
  *
  * 流程：
- *  1. 验证 type === 7，且 keys[0] / keys[1] 均存在
+ *  1. 验证 type===7，keys[0]（funcKey0，同时作为绑定键）/keys[1]（funcKey1）均存在
  *  2. 0x04/0x05 读取板载（config）与层（layer）
- *  3. 0x08 读取该板载 4 层，扫描全部共享类型（0x92-0x95），取最大索引
- *  4. 0x07 按 code 找 keySlot；当前层该槽位：
- *     - 已是 0x95 → 复用已有 oksIdx
- *     - 否则 → oksIdx = maxSharedIdx + 1（或 0）
- *  5. 在 0x07 默认矩阵中查找 keys[1].code 对应的槽位索引（key1SlotIdx）
- *  6. 0xa5 写入 keys[0]+keys[1] 共 6 字节到 oksIdx × 6
- *  7. 0x09 将 keySlot 写为 [0x95, oksIdx, key1SlotIdx]
+ *  3. 0x08 全 4 层扫描 0x95，找索引 = code 的已有绑定 → 修改模式
+ *     a. 读 0x07 旧槽位默认值 → 0x09 恢复旧槽位
+ *  4. 0x07 按 keys[0].code 找新 keySlot，按 keys[1].code 找 key2SlotIdx
+ *  5. 0x09 将 keySlot 写为 [0x95, code, key2SlotIdx]
+ *  6. 0xa5 以 code × 6 写入 keys[0]+keys[1] 功能数据
  *
  */
 export async function* setOKS(
@@ -5547,85 +5704,93 @@ export async function* setOKS(
   const funcKey0 = request.keys[0];
   const funcKey1 = request.keys[1];
   if (!funcKey0 || !Number.isInteger(funcKey0.code)) {
-    return { name: "setOKS", code: 3, message: "keys[0] is required" };
+    return { name: "setOKS", code: 3, message: "keys[0] (funcKey0 / bind key) is required" };
   }
   if (!funcKey1 || !Number.isInteger(funcKey1.code)) {
-    return { name: "setOKS", code: 3, message: "keys[1] is required" };
+    return { name: "setOKS", code: 3, message: "keys[1] (funcKey1) is required" };
   }
 
   const { config, layer } = yield* resolveConfigLayerGen(request.layer);
-  const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  // ── 0x08 全板载 4 层 → 扫描共享类型，取最大索引 ─────────────────────────
+  const profileSize     = KEY_LAYER_LENGTH * 4;
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：查找已绑定 code 的旧槽位（0x95 类型）──────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  let maxSharedIdx = -1;
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  let oldKeySlot  = -1;
+  let oldLayerIdx = -1;
+  outer: for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
-      const bt = rawAllLayersData[b] ?? 0;
-      if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        maxSharedIdx = Math.max(maxSharedIdx, rawAllLayersData[b + 1] ?? 0);
+      const b = lb + i * KEY_ITEM_SIZE;
+      if ((rawAllLayersData[b] ?? 0) === 0x95 && (rawAllLayersData[b + 1] ?? 0) === request.code) {
+        oldKeySlot  = i;
+        oldLayerIdx = li;
+        break outer;
       }
     }
   }
 
-  // ── 0x07 当前局部层默认矩阵 → keySlot（按 HID code 匹配）────────────────
+  // ── 修改模式：读 0x07 旧槽位默认值 → 0x09 恢复旧槽位 ──────────────────────
+  if (oldKeySlot >= 0) {
+    const oldLayerOffset = oldLayerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawOldDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, oldLayerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const odb    = oldKeySlot * KEY_ITEM_SIZE;
+    const odType = rawOldDefault[odb]     ?? 0x10;
+    const odExt  = rawOldDefault[odb + 1] ?? 0x00;
+    const odCode = rawOldDefault[odb + 2] ?? 0x00;
+    const rOff   = allLayersOffset + oldLayerIdx * KEY_LAYER_LENGTH + oldKeySlot * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + odType + odExt + odCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      odType, odExt, odCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "setOKS", code: wRestoreCode, message: "restore old bind key failed" };
+  }
+
+  // ── 0x07 当前层：按 keys[0].code 找新 keySlot，按 keys[1].code 找 key2SlotIdx ─
+  const layerOffset    = layer * KEY_LAYER_LENGTH + config * profileSize;
   const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
   );
 
-  let keySlot = -1;
+  let newKeySlot  = -1;
+  let key2SlotIdx = 0;
   for (let i = 0; i < KEY_COUNT; i++) {
     const base = i * KEY_ITEM_SIZE;
     const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
+      rawDefaultData[base] ?? 0, rawDefaultData[base + 1] ?? 0, rawDefaultData[base + 2] ?? 0,
     );
-    if (hid === request.code) { keySlot = i; break; }
+    if (hid === funcKey0.code && newKeySlot  < 0) newKeySlot  = i;
+    if (hid === funcKey1.code)                    key2SlotIdx = i;
   }
-  if (keySlot < 0) {
-    return { name: "setOKS", code: 3, message: "key not found in default matrix" };
-  }
-
-  // ── 0x08 当前层 → 判断已有 / 新建，确定 oksIdx ────────────────────────────
-  const curLayerReadOff = config * profileSize + layer * KEY_LAYER_LENGTH;
-  const rawCurLayerData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_CURRENT_COMMAND, curLayerReadOff, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  const keyBase = keySlot * KEY_ITEM_SIZE;
-  const rawType = rawCurLayerData[keyBase] ?? 0;
-
-  const oksIdx = rawType === 0x95
-    ? (rawCurLayerData[keyBase + 1] ?? 0)
-    : (maxSharedIdx < 0 ? 0 : maxSharedIdx + 1);
-
-  // ── 在 0x07 默认矩阵中找 keys[1].code 对应的槽位索引 ─────────────────────
-  let key1SlotIdx = 0;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === funcKey1.code) { key1SlotIdx = i; break; }
+  if (newKeySlot < 0) {
+    return { name: "setOKS", code: 3, message: "bind key not found in default matrix" };
   }
 
-  // ── 0xa5 写入 keys[0]+keys[1] 共 6 字节 OKS 功能定义 ─────────────────────
-  const entryData = [
-    ...encodeOKSKeyToTriplet(funcKey0),
-    ...encodeOKSKeyToTriplet(funcKey1),
-  ];
+  // ── 0x09：新 keySlot 写 [0x95, code, key2SlotIdx] ────────────────────────
+  const keyWriteOff = layerOffset + newKeySlot * KEY_ITEM_SIZE;
+  const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
+  const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x95 + request.code + key2SlotIdx) & 0xff;
+  const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
+    SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
+    kLo, kHi, 0x00,
+    0x95, request.code, key2SlotIdx,
+  ]);
+  const wKeyCode = parseWriteResponseCode(wKeyIn);
+  if (wKeyCode !== 0) return { name: "setOKS", code: wKeyCode, message: "write key OKS definition failed" };
+
+  // ── 0xa5：code × 6 写入 keys[0]+keys[1] OKS 功能数据 ─────────────────────
+  const entryData     = [...encodeOKSKeyToTriplet(funcKey0), ...encodeOKSKeyToTriplet(funcKey1)];
   const advAreaOffset = config * MT_AREA_SIZE;
-  const writeOff      = advAreaOffset + oksIdx * MT_ENTRY_SIZE;
+  const writeOff      = advAreaOffset + request.code * MT_ENTRY_SIZE;
   const [wLo, wHi]    = shiftFrom16Bit(writeOff);
   const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
   const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
@@ -5636,20 +5801,6 @@ export async function* setOKS(
   const wAdvCode = parseWriteResponseCode(wAdvIn);
   if (wAdvCode !== 0) return { name: "setOKS", code: wAdvCode, message: "write OKS entry failed" };
 
-  // ── 0x09 将 keySlot 写为 [0x95, oksIdx, key1SlotIdx] ─────────────────────
-  {
-    const keyWriteOff = layerOffset + keySlot * KEY_ITEM_SIZE;
-    const [kLo, kHi]  = shiftFrom16Bit(keyWriteOff);
-    const kChk = (kLo + kHi + KEY_ITEM_SIZE + 0x95 + oksIdx + key1SlotIdx) & 0xff;
-    const wKeyIn: InPacket = yield buildOutPacket(FLAG, [
-      SET_KEY_CURRENT_COMMAND, 0x00, kChk, KEY_ITEM_SIZE,
-      kLo, kHi, 0x00,
-      0x95, oksIdx, key1SlotIdx,
-    ]);
-    const wKeyCode = parseWriteResponseCode(wKeyIn);
-    if (wKeyCode !== 0) return { name: "setOKS", code: wKeyCode, message: "write key OKS definition failed" };
-  }
-
   return { name: "setOKS", code: 0 };
 }
 
@@ -5658,96 +5809,77 @@ export async function* setOKS(
  * 删除指定 OKS 高级按键
  *
  * 流程：
- *  1. 0x04/0x05 读取板载（config）与层（layer）
- *  2. 0x07 读取当前局部层默认矩阵，按 HID code 找到 keySlot
- *  3. 0x08 确认 keySlot 处类型为 0x95，取 oksIdx（第 2 字节）
- *  4. 收集该板载全部 4 层中所有共享类型（0x92-0x95）条目，按索引升序
- *  5. 0x09 将该按键恢复为 0x07 同局部层默认定义
- *  6. 0x09 将全部 4 层中 entryIdx > oksIdx 的共享类型按键索引各减 1（保留原类型字节）
- *  7. 0xa4 读取 oksIdx+1 ~ totalShared-1 条目，依次写到 oksIdx ~ totalShared-2
- *  8. 0xa5 清零末尾条目（totalShared-1）
+ *  1. 0x04 读取板载号（config）
+ *  2. 0x08 全 4 层扫描所有共享类型（0x92-0x95）条目；找类型=0x95 且 entryIdx=code 的目标
+ *  3. 0x09 逐一读取目标槽位的 0x07 默认值并恢复
+ *  4. 0x09 将 entryIdx > code 的所有共享类型条目索引各减 1（保留原类型字节和 byte[2]）
+ *  5. 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2
+ *  6. 0xa5 清零末尾条目
  *
  */
 export async function* delOKS(
   request: DelOKSParams,
 ): DeviceSession<DelOKSResult> {
-  const { config, layer } = yield* resolveConfigLayerGen(request.layer);
+  const baseIn: InPacket = yield buildOutPacket(FLAG, [...GET_Base]);
+  const config      = baseIn[8] ?? 0;
   const profileSize = KEY_LAYER_LENGTH * 4;
-  const layerOffset = layer * KEY_LAYER_LENGTH + config * profileSize;
-
-  const rawDefaultData: number[] = yield* readChunkedDataByCommandGen(
-    FLAG, GET_KEY_DEFAULT_COMMAND, layerOffset, KEY_LAYER_LENGTH, DATA_LENGTH,
-  );
-
-  let keySlot = -1;
-  for (let i = 0; i < KEY_COUNT; i++) {
-    const base = i * KEY_ITEM_SIZE;
-    const hid  = resolveHidCodeFromDefaultKeyTriplet(
-      rawDefaultData[base] ?? 0,
-      rawDefaultData[base + 1] ?? 0,
-      rawDefaultData[base + 2] ?? 0,
-    );
-    if (hid === request.code) { keySlot = i; break; }
-  }
-  if (keySlot < 0) {
-    return { name: "delOKS", code: 3, message: "key not found in default matrix" };
-  }
-
   const allLayersOffset = config * profileSize;
+
+  // ── 0x08 全 4 层：收集所有共享类型条目 ──────────────────────────────────
   const rawAllLayersData: number[] = yield* readChunkedDataByCommandGen(
     FLAG, GET_KEY_CURRENT_COMMAND, allLayersOffset, profileSize, DATA_LENGTH,
   );
 
-  const curLayerBase = layer * KEY_LAYER_LENGTH;
-  const keyBase      = curLayerBase + keySlot * KEY_ITEM_SIZE;
-  const rawType      = rawAllLayersData[keyBase] ?? 0;
-
-  if (rawType !== 0x95) {
-    return { name: "delOKS", code: 3, message: `key at slot ${keySlot} is not OKS (type=0x${rawType.toString(16)})` };
-  }
-  const aOksIdx = rawAllLayersData[keyBase + 1] ?? 0;
-
-  // ── 收集全部 4 层中所有共享类型条目 ─────────────────────────────────────
   type SharedEntry = { layerIdx: number; keyI: number; entryIdx: number; keyType: number };
   const sharedEntries: SharedEntry[] = [];
-  for (let layerIdx = 0; layerIdx < 4; layerIdx++) {
-    const layerBase = layerIdx * KEY_LAYER_LENGTH;
+  for (let li = 0; li < 4; li++) {
+    const lb = li * KEY_LAYER_LENGTH;
     for (let i = 0; i < KEY_COUNT; i++) {
-      const b  = layerBase + i * KEY_ITEM_SIZE;
+      const b  = lb + i * KEY_ITEM_SIZE;
       const bt = rawAllLayersData[b] ?? 0;
       if (SHARED_ADV_AREA_TYPES.has(bt)) {
-        sharedEntries.push({ layerIdx, keyI: i, entryIdx: rawAllLayersData[b + 1] ?? 0, keyType: bt });
+        sharedEntries.push({ layerIdx: li, keyI: i, entryIdx: rawAllLayersData[b + 1] ?? 0, keyType: bt });
       }
     }
   }
-  sharedEntries.sort((a, b) => a.entryIdx - b.entryIdx);
+
+  const targets = sharedEntries.filter((e) => e.keyType === 0x95 && e.entryIdx === request.code);
+  if (targets.length === 0) {
+    return { name: "delOKS", code: 3, message: `OKS index ${request.code} not found in key matrix` };
+  }
   const totalShared = sharedEntries.length > 0
     ? Math.max(...sharedEntries.map((e) => e.entryIdx)) + 1
     : 0;
 
-  // ── 0x09 恢复为 0x07 同局部层默认定义 ───────────────────────────────────
-  const defBase   = keySlot * KEY_ITEM_SIZE;
-  const defType   = rawDefaultData[defBase]     ?? 0x10;
-  const defExt    = rawDefaultData[defBase + 1] ?? 0x00;
-  const defCode   = rawDefaultData[defBase + 2] ?? 0x00;
-  const [r1Lo, r1Hi] = shiftFrom16Bit(layerOffset + keySlot * KEY_ITEM_SIZE);
-  const r1Chk = (r1Lo + r1Hi + KEY_ITEM_SIZE + defType + defExt + defCode) & 0xff;
-  const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
-    SET_KEY_CURRENT_COMMAND, 0x00, r1Chk, KEY_ITEM_SIZE,
-    r1Lo, r1Hi, 0x00,
-    defType, defExt, defCode,
-  ]);
-  const wRestoreCode = parseWriteResponseCode(wRestoreIn);
-  if (wRestoreCode !== 0) return { name: "delOKS", code: wRestoreCode, message: "restore key def failed" };
+  // ── 0x09 恢复所有绑定该 code 的 OKS 按键为 0x07 默认值 ──────────────────
+  for (const entry of targets) {
+    const lOff = entry.layerIdx * KEY_LAYER_LENGTH + config * profileSize;
+    const rawDefault: number[] = yield* readChunkedDataByCommandGen(
+      FLAG, GET_KEY_DEFAULT_COMMAND, lOff, KEY_LAYER_LENGTH, DATA_LENGTH,
+    );
+    const db    = entry.keyI * KEY_ITEM_SIZE;
+    const dType = rawDefault[db]     ?? 0x10;
+    const dExt  = rawDefault[db + 1] ?? 0x00;
+    const dCode = rawDefault[db + 2] ?? 0x00;
+    const rOff  = allLayersOffset + entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const [rLo, rHi] = shiftFrom16Bit(rOff);
+    const rChk = (rLo + rHi + KEY_ITEM_SIZE + dType + dExt + dCode) & 0xff;
+    const wRestoreIn: InPacket = yield buildOutPacket(FLAG, [
+      SET_KEY_CURRENT_COMMAND, 0x00, rChk, KEY_ITEM_SIZE,
+      rLo, rHi, 0x00,
+      dType, dExt, dCode,
+    ]);
+    const wRestoreCode = parseWriteResponseCode(wRestoreIn);
+    if (wRestoreCode !== 0) return { name: "delOKS", code: wRestoreCode, message: "restore key def failed" };
+  }
 
-  // ── 0x09 全部 4 层中 entryIdx > aOksIdx 的共享类型按键索引各减 1 ─────────
+  // ── 0x09 将 entryIdx > code 的所有共享类型按键索引各减 1 ──────────────────
   for (const entry of sharedEntries) {
-    if (entry.layerIdx === layer && entry.keyI === keySlot) continue;
-    if (entry.entryIdx <= aOksIdx)                        continue;
-    const newIdx     = entry.entryIdx - 1;
-    const rawOff     = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
-    const writeOff   = allLayersOffset + rawOff;
-    const [sLo, sHi] = shiftFrom16Bit(writeOff);
+    if (entry.entryIdx <= request.code) continue;
+    const newIdx  = entry.entryIdx - 1;
+    const rawOff  = entry.layerIdx * KEY_LAYER_LENGTH + entry.keyI * KEY_ITEM_SIZE;
+    const sOff    = allLayersOffset + rawOff;
+    const [sLo, sHi] = shiftFrom16Bit(sOff);
     const origByte2  = rawAllLayersData[rawOff + 2] ?? 0;
     const sChk = (sLo + sHi + KEY_ITEM_SIZE + entry.keyType + newIdx + origByte2) & 0xff;
     const wShiftIn: InPacket = yield buildOutPacket(FLAG, [
@@ -5759,26 +5891,26 @@ export async function* delOKS(
     if (wShiftCode !== 0) return { name: "delOKS", code: wShiftCode, message: "shift key index failed" };
   }
 
-  // ── 0xa4 平移共享区条目：aOksIdx+1 ~ totalShared-1 → aOksIdx ~ totalShared-2 ─
+  // ── 0xa4 平移：code+1 ~ totalShared-1 → code ~ totalShared-2 ─────────────
   const advAreaOffset = config * MT_AREA_SIZE;
-  const moveCount     = totalShared - 1 - aOksIdx;
+  const moveCount     = totalShared - 1 - request.code;
 
   if (moveCount > 0) {
     const partialData: number[] = yield* readChunkedDataByCommandGen(
       FLAG, GET_MT_COMMAND,
-      advAreaOffset + (aOksIdx + 1) * MT_ENTRY_SIZE,
+      advAreaOffset + (request.code + 1) * MT_ENTRY_SIZE,
       moveCount * MT_ENTRY_SIZE,
       DATA_LENGTH,
     );
     for (let i = 0; i < moveCount; i++) {
-      const entryData = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
-      const wOff      = advAreaOffset + (aOksIdx + i) * MT_ENTRY_SIZE;
+      const eData  = partialData.slice(i * MT_ENTRY_SIZE, (i + 1) * MT_ENTRY_SIZE);
+      const wOff   = advAreaOffset + (request.code + i) * MT_ENTRY_SIZE;
       const [wLo, wHi] = shiftFrom16Bit(wOff);
-      const wChk = (wLo + wHi + MT_ENTRY_SIZE + entryData.reduce((s, v) => s + v, 0)) & 0xff;
+      const wChk = (wLo + wHi + MT_ENTRY_SIZE + eData.reduce((s, v) => s + v, 0)) & 0xff;
       const wAdvIn: InPacket = yield buildOutPacket(FLAG, [
         SET_MT_COMMAND, 0x00, wChk, MT_ENTRY_SIZE,
         wLo, wHi, 0x00,
-        ...entryData,
+        ...eData,
       ]);
       const wAdvCode = parseWriteResponseCode(wAdvIn);
       if (wAdvCode !== 0) return { name: "delOKS", code: wAdvCode, message: `shift shared entry ${i} failed` };
@@ -6272,6 +6404,8 @@ export type SessionRequest =
   | { name: "getLockShortcuts"; data?: GetLockShortcutsParams }
   | { name: "setLockShortcuts"; data: SetLockShortcutsParams }
   | { name: "getMacros";        data?: GetMacrosParams }
+  | { name: "getMacro";         data: GetMacroParams }
+  | { name: "setMacro";         data: SetMacroParams }
   | { name: "delMacro";         data: DelMacroParams };
 
 // ========== 推导核心 ========== start
@@ -6331,6 +6465,8 @@ export function createSession(request: SessionRequest): DeviceSession<unknown> {
     case "getLockShortcuts":   return getLockShortcuts(request.data ?? {});
     case "setLockShortcuts":   return setLockShortcuts(request.data);
     case "getMacros":          return getMacros(request.data ?? {});
+    case "getMacro":           return getMacro(request.data);
+    case "setMacro":           return setMacro(request.data);
     case "delMacro":           return delMacro(request.data);
   }
 }
